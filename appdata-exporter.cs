@@ -1,11 +1,11 @@
-﻿using Bookmark_dlp;
+﻿using bookmark_extract_youtube_links;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Runtime.InteropServices;
 
-internal class Program
+internal class AppdataExporter
 {
-    private static void Main(string[] args)
+    private static void getAppdataFolders(string[] args)
     {
         //use default location for chrome bookmarks file
         string filePath = "";
