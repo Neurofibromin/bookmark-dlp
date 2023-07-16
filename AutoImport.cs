@@ -52,7 +52,7 @@ internal class AutoImport
         string text = File.ReadAllText(filePath);
 
         //Deserialize using JSON.NET, may need separate install
-        List<Bookmark> bookmarks = JObject.Parse(text)["roots"]["bookmark_bar"]["children"].ToObject<List<Bookmark>>();
+        Bookmark bookmarks = JObject.Parse(text)["roots"]["bookmark_bar"].ToObject<Bookmark>();
 
         //convert to list of folders with set depth and name
         List<Folderclass> folders = bookmarksToFolderclass(bookmarks, 0, Directory.GetCurrentDirectory());
@@ -64,45 +64,24 @@ internal class AutoImport
         return folders;
     }
 
-    public static List<Folderclass> bookmarksToFolderclass(List<Bookmark> bookmarks, int depth, string path)
+    public static List<Folderclass> bookmarksToFolderclass(Bookmark bookmark, int depth, string path)
     {
-        List<Folderclass> folders = new List<Folderclass>();
-        //recursively go through children and collect into one big list
-        foreach (Bookmark bookmark in bookmarks)
+        List<Folderclass> folderclasses = new List<Folderclass>();
+        Folderclass thisBookmark = new Folderclass();
+        
+        foreach (Bookmark child in bookmark.children)
         {
-            if (bookmark.type == "url")
+            if (child.type == "url")
             {
-                /*folders.Add(new Folderclass()
-                {
-                    name = bookmark.name,
-                    depth = depth
-                });*/
-                //TODO export bookmark.url
+                thisBookmark.urls.Add(child.url);
             }
-            else if (bookmark.type == "folder")
+            else if (child.type == "folder")
             {
-                Console.WriteLine("Extracting bookmarks from folder: " + bookmark.name);
-                //some recursion to traverse tree of bookmarks
-                List<Folderclass> childFolders = bookmarksToFolderclass(bookmark.children, depth + 1, Path.Combine(path, bookmark.name));
-                //concatentate to current bookmark's list of children
-                folders = folders.Concat(childFolders).ToList();
-                foreach (Bookmark bookmarkchild in bookmark.children)
-                {
-                    /*folders.Add(new Folderclass()
-                    {
-                        name = bookmark.name,
-                        urls = bookmarkchild.name
-                        
-                    });*/
-                }
-            }
-
-            else
-            {
-                throw new InvalidDataException("Unknown bookmark of type: " + bookmark.type);
+                folderclasses.Concat(bookmarksToFolderclass(child, depth + 1, path + "\\" + child.name));
             }
         }
-        return folders;
+        folderclasses.Add(thisBookmark);
+        return folderclasses;
     }
 }
 
