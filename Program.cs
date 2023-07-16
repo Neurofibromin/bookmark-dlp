@@ -1,8 +1,12 @@
-using System;
+﻿using System;
 using System.IO;
 using System.Linq;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Collections.Generic;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using MintPlayer.PlatformBrowser;
 
 namespace bookmark_extract_youtube_links
 {
@@ -15,6 +19,15 @@ namespace bookmark_extract_youtube_links
             //maintain folder structure (download all videos into the folder they were bookmarked in
 
             Console.OutputEncoding = System.Text.Encoding.UTF8;
+
+            var InstalledBrowsers = new List<string>();
+            InstalledBrowsers = AutoImport.getinstalledbrowsers();
+
+
+
+
+
+
             string rootdir = Directory.GetCurrentDirectory(); //current directory
             StreamReader reader = new StreamReader("Bookmarks.html"); //read the file containing all the bookmarks - a single file using chrome export
             var lineCount = File.ReadLines("Bookmarks.html").Count(); //how many lines are there in the file - max number of bookmarks
@@ -386,6 +399,7 @@ namespace bookmark_extract_youtube_links
 
 
             }
+
             Console.WriteLine("Running the scripts");
             Console.Read();
             //running the script files one after another, in the order of folders[].startline
@@ -505,5 +519,6 @@ namespace bookmark_extract_youtube_links
         public int endingline;
         public string folderpath;
         public int numberoflinks;
+        public List<string> urls;
     }
 }
