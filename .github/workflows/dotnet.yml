@@ -26,7 +26,7 @@ jobs:
     - name: Install Newtonsoft
       run: dotnet add package Newtonsoft.Json --version 13.0.3
     - name: Install Platformbrowser
-      run: dotnet add package MintPlayer.PlatformBrowser --version 7.0.1
+      run: dotnet add package MintPlayer.PlatformBrowser --version 3.1.1
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
