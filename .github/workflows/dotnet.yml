@@ -23,8 +23,10 @@ jobs:
       uses: actions/setup-dotnet@v3
       with:
         dotnet-version: ${{ matrix.dotnet-version }}  
-    - name: Install dependencies
-      run: dotnet add package Newtonsoft.Json --version 13.0.3 MintPlayer.PlatformBrowser --version 7.0.1
+    - name: Install Newtonsoft
+      run: dotnet add package Newtonsoft.Json --version 13.0.3
+    - name: Install Platformbrowser
+      run: dotnet add package MintPlayer.PlatformBrowser --version 7.0.1
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
