@@ -37,16 +37,7 @@ jobs:
       run: dotnet --version
     - name: "List all files"
       run: ls -R
-    - name: "Release"
-      uses: "marvinpinto/action-automatic-releases@latest"
-      with:
-          repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          automatic_release_tag: "latest"
-          prerelease: true
-          title: "Development Build"
-          files: |
-            *.exe
-    
+  
     
   release:
       runs-on: windows-2022
@@ -62,7 +53,6 @@ jobs:
       - name: Publish
         run: |
           dotnet publish bookmark-dlp.sln --configuration Release --runtime win-x64 -p:PublishSingleFile=true
-          
       - name: "List all files"
         run: ls -R
       - name: Upload
@@ -70,16 +60,6 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh release upload latest D:\a\bookmark-dlp\bookmark-dlp\bin\Release\netcoreapp3.1\win-x64\publish\bookmark-dlp.exe
-
-
-    
-    
-    
-    
-    
-    
-    
-    
             
   
     
