@@ -58,9 +58,9 @@ internal class AutoImport
         List<Folderclass> folders = bookmarksToFolderclass(bookmarks, 0, Directory.GetCurrentDirectory());
 
         //print all that with indentations
-        foreach (Bookmark bookmark in bookmarks) { 
+        /*foreach (Bookmark bookmark in bookmarks) { 
             //Console.WriteLine(new string('-',bookmark.depth) + " " + bookmark.name); 
-        }
+        }*/
         return folders;
     }
 
