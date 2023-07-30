@@ -37,6 +37,15 @@ jobs:
       run: dotnet --version
     - name: "List all files"
       run: ls -R
+    - name: "Release"
+      uses: "marvinpinto/action-automatic-releases@latest"
+      with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          automatic_release_tag: "latest"
+          prerelease: false
+          title: "Current Build"
+          files: |
+            *.exe
   
     
   release:
