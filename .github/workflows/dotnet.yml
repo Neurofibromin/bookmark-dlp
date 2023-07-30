@@ -35,7 +35,9 @@ jobs:
       run: dotnet test --no-build --verbosity normal
     - name: Display dotnet version
       run: dotnet --version
-      
+    - name: "Build & test"
+      run: |
+          echo "done!"
       
   release:
 
@@ -45,7 +47,7 @@ jobs:
         dotnet-version: [ '3.1.x', '6.0.x' ]
     steps:
     - uses: "marvinpinto/action-automatic-releases@latest"
-        with:
+      with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           automatic_release_tag: "latest"
           prerelease: true
