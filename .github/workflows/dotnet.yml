@@ -35,15 +35,13 @@ jobs:
       run: dotnet test --no-build --verbosity normal
     - name: Display dotnet version
       run: dotnet --version
-    - name: "Release"
-      uses: "marvinpinto/action-automatic-releases@latest"
+    - name: Create a Release
+      uses: elgohr/Github-Release-Action@v4
+      env:
+        GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
       with:
-          repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          automatic_release_tag: "latest"
-          prerelease: true
-          title: "Development Build"
-          files: |
-            *.exe
+        title: MyReleaseMessage
+    
             
   
     
