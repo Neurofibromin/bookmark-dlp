@@ -55,6 +55,8 @@ jobs:
           dotnet publish bookmark-dlp.sln --configuration Release --runtime win-x64 -p:PublishSingleFile=true
       - name: "List all files"
         run: ls -R
+      - name: "Rename based on architecture"
+        run: mv " D:\a\bookmark-dlp\bookmark-dlp\bin\Release\netcoreapp3.1\win-x64\publish\bookmark-dlp.exe" " D:\a\bookmark-dlp\bookmark-dlp\bin\Release\netcoreapp3.1\win-x64\publish\bookmark-dlp-${{ matrix.dotnet-version }}.exe"
       - name: Upload
         env:
           GH_TOKEN: ${{ github.token }}
