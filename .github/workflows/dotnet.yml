@@ -51,7 +51,7 @@ jobs:
   release:
       strategy:
         matrix:
-          os: [ubuntu-20.04, windows-latest]
+          os: [windows-latest]
           dotnet-version: [ '3.1.x', '6.0.x' ]
         fail-fast: false
       runs-on: ${{ matrix.os }}
@@ -67,12 +67,12 @@ jobs:
       - name: "List all files"
         run: ls -R
       - name: "Rename based on architecture"
-        run: cp "D:\a\bookmark-dlp\bookmark-dlp\bin\Release\netcoreapp3.1\win-x64\publish\bookmark-dlp.exe" "D:\a\bookmark-dlp\bookmark-dlp\bin\Release\netcoreapp3.1\win-x64\publish\bookmark-dlp- ${{ matrix.os }}-${{ matrix.dotnet-version }}.exe"
+        run: cp "D:\a\bookmark-dlp\bookmark-dlp\bin\Release\netcoreapp3.1\win-x64\publish\bookmark-dlp.exe" "D:\a\bookmark-dlp\bookmark-dlp\bin\Release\netcoreapp3.1\win-x64\publish\bookmark-dlp-${{ matrix.dotnet-version }}.exe"
       - name: Upload
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release upload latest "D:\a\bookmark-dlp\bookmark-dlp\bin\Release\netcoreapp3.1\win-x64\publish\bookmark-dlp- ${{ matrix.os }}-${{ matrix.dotnet-version }}.exe" --clobber
+          gh release upload latest "D:\a\bookmark-dlp\bookmark-dlp\bin\Release\netcoreapp3.1\win-x64\publish\bookmark-dlp-${{ matrix.dotnet-version }}.exe" --clobber
             
   
     
