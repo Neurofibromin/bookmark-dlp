@@ -81,6 +81,8 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh release upload latest "D:\a\bookmark-dlp\bookmark-dlp\bin\Release\netcoreapp3.1\win-x64\publish\bookmark-dlp-${{ matrix.dotnet-version }}.exe" --clobber
+          gh release upload latest "D:\a\bookmark-dlp\bookmark-dlp\bin\Release\netcoreapp3.1\win-x32\publish\bookmark-dlp-${{ matrix.dotnet-version }}.exe" --clobber
+          gh release upload latest "D:\a\bookmark-dlp\bookmark-dlp\bin\Release\netcoreapp3.1\win-arm64\publish\bookmark-dlp-${{ matrix.dotnet-version }}.exe" --clobber
             
   
     
