@@ -35,17 +35,9 @@ jobs:
       run: dotnet test --no-build --verbosity normal
     - name: Display dotnet version
       run: dotnet --version
-    - name: "Build & test"
+    - name: "Release"
       run: |
           echo "done!"
-      
-  release:
-
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        dotnet-version: [ '3.1.x', '6.0.x' ]
-    steps:
     - uses: "marvinpinto/action-automatic-releases@latest"
       with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
@@ -55,6 +47,8 @@ jobs:
           files: |
             LICENSE.txt
             *.exe
+  
+    
     #comments  
     # Optional global.json location, if your global.json isn't located in the root of the repo.
     #global-json-file:
