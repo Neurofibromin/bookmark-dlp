@@ -62,13 +62,20 @@ jobs:
       - name: Publish
         run: |
           dotnet publish bookmark-dlp.sln --configuration Release --runtime win-x64 -p:PublishSingleFile=true
+          dotnet publish bookmark-dlp.sln --configuration Release --runtime win-x32 -p:PublishSingleFile=true
           dotnet publish bookmark-dlp.sln --configuration Release --runtime win-arm64 --self-contained
           dotnet publish bookmark-dlp.sln --configuration Release $MSBUILD_PROPS --runtime linux-x64 --self-contained
+          dotnet publish bookmark-dlp.sln --configuration Release $MSBUILD_PROPS --runtime linux-x32 --self-contained
+          dotnet publish bookmark-dlp.sln --configuration Release $MSBUILD_PROPS --runtime linux-arm64 --self-contained
           
       - name: "List all files"
         run: ls -R
       - name: "Rename based on architecture"
-        run: cp "D:\a\bookmark-dlp\bookmark-dlp\bin\Release\netcoreapp3.1\win-x64\publish\bookmark-dlp.exe" "D:\a\bookmark-dlp\bookmark-dlp\bin\Release\netcoreapp3.1\win-x64\publish\bookmark-dlp-${{ matrix.dotnet-version }}.exe"
+        run: |
+          cp "D:\a\bookmark-dlp\bookmark-dlp\bin\Release\netcoreapp3.1\win-x64\publish\bookmark-dlp.exe" "D:\a\bookmark-dlp\bookmark-dlp\bin\Release\netcoreapp3.1\win-x64\publish\bookmark-dlp-${{ matrix.dotnet-version }}.exe"
+          cp "D:\a\bookmark-dlp\bookmark-dlp\bin\Release\netcoreapp3.1\win-x32\publish\bookmark-dlp.exe" "D:\a\bookmark-dlp\bookmark-dlp\bin\Release\netcoreapp3.1\win-x32\publish\bookmark-dlp-${{ matrix.dotnet-version }}.exe"
+          cp "D:\a\bookmark-dlp\bookmark-dlp\bin\Release\netcoreapp3.1\win-arm64\publish\bookmark-dlp.exe" "D:\a\bookmark-dlp\bookmark-dlp\bin\Release\netcoreapp3.1\win-arm64\publish\bookmark-dlp-${{ matrix.dotnet-version }}.exe"
+          
       - name: Upload
         env:
           GH_TOKEN: ${{ github.token }}
