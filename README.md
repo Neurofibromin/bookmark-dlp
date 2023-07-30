@@ -11,3 +11,4 @@ Windows and linux compatible, written in C#, builds for x86 and ARM available. <
 Build your own: this project is open source
 | Windows  | Linux |
 | ------------- | ------------- |
+| [x64](https://github.com/Neurofibromin/bookmark-dlp/releases/download/latest/bookmark-dlp.exe) | wip |
