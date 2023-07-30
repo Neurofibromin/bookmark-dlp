@@ -63,6 +63,8 @@ jobs:
         run: |
           dotnet publish bookmark-dlp.sln --configuration Release --runtime win-x64 -p:PublishSingleFile=true --no-self-contained
           
+      - name: "List all files"
+        run: ls -R
       - name: Upload
         env:
           GH_TOKEN: ${{ github.token }}
