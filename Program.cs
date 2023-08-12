@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using MintPlayer.PlatformBrowser;
+using System.ComponentModel;
 
 namespace bookmark_extract_youtube_links
 {
@@ -303,6 +304,89 @@ namespace bookmark_extract_youtube_links
             Console.WriteLine("Waiting for enter to confirm findings");
             Console.ReadKey();
 
+            //check if yt-dlp is in the root folder, on the path or not available
+            string ytdlp_path = "";
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            { 
+                if (File.Exists(Path.Combine(rootdir, "yt-dlp.exe")))
+                {
+                    Console.WriteLine(Path.Combine(rootdir, "yt-dlp.exe") + " found");
+                    ytdlp_path = Path.Combine(rootdir, "yt-dlp.exe");
+                }
+                else
+                {
+                    Console.WriteLine(Path.Combine(rootdir, "yt-dlp.exe") + " not found, searching PATH.");
+                    try
+                    {
+                        Process proc = new Process();
+                        proc.StartInfo.FileName = "yt-dlp.exe";
+                        proc.Start();
+                        proc.WaitForExit();
+                        ytdlp_path = "yt-dlp.exe";
+                    }
+                    // check into Win32Exceptions and their error codes!
+                    catch (Win32Exception winEx)
+                    {
+                        if (winEx.NativeErrorCode == 2 || winEx.NativeErrorCode == 3)
+                        {
+                            // 2 => "The system cannot find the FILE specified."
+                            // 3 => "The system cannot find the PATH specified."
+                            throw new Exception($"yt-dlp not found in path or in rootdir, install it before continuing.");
+                        }
+                        else
+                        {
+                            // unknown Win32Exception, re-throw to show the raw error msg
+                            throw;
+                        }
+                    }
+                }
+            }
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                if (File.Exists(Path.Combine(rootdir, "yt-dlp.exe")))
+                {
+                    Console.WriteLine(Path.Combine(rootdir, "yt-dlp.exe") + " found");
+                    ytdlp_path = Path.Combine(rootdir, "yt-dlp.exe");
+                }
+                else
+                {
+                    Console.WriteLine(Path.Combine(rootdir, "yt-dlp.exe") + " not found, searching PATH.");
+                    Process process;
+                    string command = "if (which grep); then echo \"true\"; else echo \"false\"; fi";
+                    process = new Process
+                    {
+                        StartInfo = new ProcessStartInfo("bash", command)
+                        {
+                            WorkingDirectory = rootdir,
+                            CreateNoWindow = true,
+                            UseShellExecute = false,
+                            RedirectStandardError = true,
+                            RedirectStandardOutput = true
+                        }
+                    };
+                    process.OutputDataReceived += new DataReceivedEventHandler((sender, e) =>
+                    {
+                        Console.WriteLine("output :: " + e.Data);
+                        if (e.Data != null && e.Data.Contains("true"))
+                        {
+                            ytdlp_path = "yt-dlp"; //yt-dlp is on the path
+                        }
+                        else
+                        {
+                            throw new Exception($"yt-dlp not found in path or in rootdir, install it before continuing.");
+                        }
+                    });
+                    process.ErrorDataReceived += (object sender, DataReceivedEventArgs e) => Console.WriteLine("error :: " + e.Data);
+                    process.Start();
+                    process.BeginOutputReadLine();
+                    process.BeginErrorReadLine();
+                    process.WaitForExit();
+                    Console.WriteLine("ExitCode: {0}", process.ExitCode);
+                    process.Close();
+                    ytdlp_path = "yt-dlp.exe";
+                }
+            }
+
             string extensionforscript = ""; //writing scripts
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
@@ -313,7 +397,7 @@ namespace bookmark_extract_youtube_links
                     {
                         StreamWriter writer1 = new StreamWriter(Path.Combine(folders[q].folderpath, folders[q].name + extensionforscript), append: true);
                         writer1.WriteLine("chcp 65001"); //uft8 charset in commandline - it will not work without this if there are special characters in access path
-                        writer1.WriteLine("\"" + Path.Combine(rootdir, "yt-dlp.exe") + "\" -a \"" + Path.Combine(folders[q].folderpath, folders[q].name + ".txt") + "\"");
+                        writer1.WriteLine("\"" + ytdlp_path + "\" -a \"" + Path.Combine(folders[q].folderpath, folders[q].name + ".txt") + "\"");
                         //writer1.WriteLine("pause");
                         writer1.Flush();
                         writer1.Close();
@@ -331,7 +415,7 @@ namespace bookmark_extract_youtube_links
                     {
                         StreamWriter writer1 = new StreamWriter(Path.Combine(folders[q].folderpath, folders[q].name + extensionforscript), append: true);
                         writer1.WriteLine("#! /bin/bash");
-                        writer1.WriteLine("\"" + Path.Combine(rootdir, "yt-dlp") + "\" -a \"" + Path.Combine(folders[q].folderpath, folders[q].name + ".txt") + "\"");
+                        writer1.WriteLine("\"" + ytdlp_path + "\" -a \"" + Path.Combine(folders[q].folderpath, folders[q].name + ".txt") + "\"");
                         //writer1.WriteLine("pause");
                         writer1.Flush();
                         writer1.Close();
