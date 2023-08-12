@@ -12,6 +12,7 @@ namespace bookmark_extract_youtube_links
 {
     class Program
     {
+        
         static void Main(string[] args)
         {
             //aim: reformat google chrome bookmars.html from google takeouts and browser bookmark exports
@@ -22,12 +23,9 @@ namespace bookmark_extract_youtube_links
 
             var InstalledBrowsers = new List<string>();
             InstalledBrowsers = AutoImport.getinstalledbrowsers();
+            Console.WriteLine(InstalledBrowsers);
 
-
-
-
-
-
+            //read .html
             string rootdir = Directory.GetCurrentDirectory(); //current directory
             StreamReader reader = new StreamReader("Bookmarks.html"); //read the file containing all the bookmarks - a single file using chrome export
             var lineCount = File.ReadLines("Bookmarks.html").Count(); //how many lines are there in the file - max number of bookmarks
@@ -92,7 +90,6 @@ namespace bookmark_extract_youtube_links
             }
 
             //Finding the folder names and adding them to the object array (folders[].name)
-
             int whereisthechar;
             for (int m = 1; m < numberoffolders + 1; m++)
             {
@@ -117,7 +114,6 @@ namespace bookmark_extract_youtube_links
             Directory.SetCurrentDirectory("Bookmarks");
             for (int m = 1; m < numberoffolders + 1; m++)
             {
-
                 if (m > 1)
                 {
 
@@ -125,7 +121,6 @@ namespace bookmark_extract_youtube_links
                     {
                         Directory.SetCurrentDirectory(folders[m - 1].name);
                         System.IO.Directory.CreateDirectory(folders[m].name);
-
                         Directory.SetCurrentDirectory(folders[m].name); //going into the folder
                         folders[m].folderpath = Directory.GetCurrentDirectory(); //path
                         Directory.SetCurrentDirectory(Path.Combine(Directory.GetCurrentDirectory(), "..")); //coming out of the folder
@@ -133,25 +128,19 @@ namespace bookmark_extract_youtube_links
 
                     if (folders[m].depth < folders[m - 1].depth) //less depth than the previous folder
                     {
-
                         for (int q = 0; q < (folders[m - 1].depth - folders[m].depth); q++) //the depth may have decreased by more than 1
                         {
                             Directory.SetCurrentDirectory(Path.Combine(Directory.GetCurrentDirectory(), ".."));
                         }
                         System.IO.Directory.CreateDirectory(folders[m].name);
-
                         Directory.SetCurrentDirectory(folders[m].name); //going into the folder
                         folders[m].folderpath = Directory.GetCurrentDirectory(); //path
                         Directory.SetCurrentDirectory(Path.Combine(Directory.GetCurrentDirectory(), "..")); //coming out of the folder
-
-
-
                     }
 
                     if (folders[m].depth == folders[m - 1].depth) //the same depth as the previous folder
                     {
                         System.IO.Directory.CreateDirectory(folders[m].name);
-
                         Directory.SetCurrentDirectory(folders[m].name); //going into the folder
                         folders[m].folderpath = Directory.GetCurrentDirectory(); //path
                         Directory.SetCurrentDirectory(Path.Combine(Directory.GetCurrentDirectory(), "..")); //coming out of the folder
@@ -162,7 +151,6 @@ namespace bookmark_extract_youtube_links
                 {
                     System.IO.Directory.CreateDirectory(folders[m].name);
                     folders[m].folderpath = Directory.GetCurrentDirectory(); //path
-
                 }
             }
 
@@ -175,118 +163,116 @@ namespace bookmark_extract_youtube_links
                 }
             }
 
-            StreamWriter temp = new StreamWriter(Path.Combine(rootdir, "temp.txt")); //writing into temp.txt all the youtube links that are not for videos (but for channels, playlists, etc.)
+            StreamWriter temp = new StreamWriter(Path.Combine(rootdir, "temp.txt"), append: true); //writing into temp.txt all the youtube links that are not for videos (but for channels, playlists, etc.)
 
-            i = 0;
+            i = 0; //writing the content of the deepest folders first, and deleting the lines from inputarray[] that were written
             for (int q = deepestdepth; q > 0; q--) //writing the content of the deepest folders first, and deleting the lines from inputarray[] that were written
             {
-
                 for (int j = 0; j < numberoffolders; j++) //going through all the folders
                 {
-
                     if (folders[j].depth == q) //choosing only folders with the same depth: they cannot overlap with each other
                     {
-                        StreamWriter writer = new StreamWriter(Path.Combine(folders[j].folderpath, folders[j].name + ".txt"));
-                        StreamWriter complexnotsimple = new StreamWriter(Path.Combine(folders[j].folderpath, folders[j].name + "complexnotsimple.txt")); //writing all the youtube links that are not for videos (but for channels, playlists, etc.) in the given folder
-                        int linknumbercounter = 0;
-                        for (int qq = folders[j].startline; qq < folders[j].endingline + 1; qq++) //going through all the lines that are in the given folder
+                        if (folders[j].endingline - folders[j].startline > 2)
                         {
-
-                            if (inputarray[qq] != null)
+                            //google side bug of duplicating all folders and bookmarks, resulting in 3 line long empty folders as well as not empty folders, which contain two copies of every bookmark.
+                            //shouldn't have too much of an effect on the end results,
+                            //just divide most numbers by 2. yt-dlp already uses archive.txt, so only lookup time is wasted, not downloads
+                            Console.WriteLine(folders[j].name + " " + folders[j].endingline + " " + folders[j].startline + " " + (folders[j].endingline - folders[j].startline));
+                            StreamWriter writer = new StreamWriter(Path.Combine(folders[j].folderpath, folders[j].name + ".txt"), append: false);
+                            StreamWriter complexnotsimple = new StreamWriter(Path.Combine(folders[j].folderpath, folders[j].name + "complexnotsimple.txt"), append: true); //writing all the youtube links that are not for videos (but for channels, playlists, etc.) in the given folder
+                            int linknumbercounter = 0;
+                            for (int qq = folders[j].startline; qq < folders[j].endingline + 1; qq++) //going through all the lines that are in the given folder
                             {
-                                line = inputarray[qq].Trim().Split(' ');
-                                if (line[0].Trim() == "<DT><A")
+                                if (inputarray[qq] != null)
                                 {
-                                    if (line[1].Contains("www.youtube.com")) //only write linkes that are youtube links
+                                    line = inputarray[qq].Trim().Split(' ');
+                                    if (line[0].Trim() == "<DT><A")
                                     {
-
-                                        string linkthatisbeingexamined = line[1].Trim().Substring(6, line[1].Trim().Length - 7);
-                                        bool iscomplicated = false;
-                                        if (linkthatisbeingexamined.Substring(24, 8) == "playlist") //filtering the links with the consecutive ifs to find if they are for videos or else (channels, playlists, etc.)
+                                        if (line[1].Contains("www.youtube.com")) //only write lines that are youtube links
                                         {
-                                            complexnotsimple.WriteLine(linkthatisbeingexamined);
-                                            temp.WriteLine(linkthatisbeingexamined);
-                                            iscomplicated = true;
+                                            string linkthatisbeingexamined = line[1].Trim().Substring(6, line[1].Trim().Length - 7);
+                                            bool iscomplicated = false;
+                                            if (linkthatisbeingexamined.Substring(24, 8) == "playlist") //filtering the links with the consecutive ifs to find if they are for videos or else (channels, playlists, etc.)
+                                            {
+                                                complexnotsimple.WriteLine(linkthatisbeingexamined);
+                                                temp.WriteLine(linkthatisbeingexamined);
+                                                iscomplicated = true;
+                                            }
+                                            if (linkthatisbeingexamined.Substring(24, 4) == "user")
+                                            {
+                                                complexnotsimple.WriteLine(linkthatisbeingexamined);
+                                                temp.WriteLine(linkthatisbeingexamined);
+                                                iscomplicated = true;
+                                            }
+                                            if (linkthatisbeingexamined.Substring(24, 7) == "channel")
+                                            {
+                                                complexnotsimple.WriteLine(linkthatisbeingexamined);
+                                                temp.WriteLine(linkthatisbeingexamined);
+                                                iscomplicated = true;
+                                            }
+                                            if (linkthatisbeingexamined.Substring(24, 7) == "results") //youtube search result was bookmarked
+                                            {
+                                                //not saving search results to complexnotsimple
+                                                temp.WriteLine(linkthatisbeingexamined);
+                                                iscomplicated = true;
+                                            }
+                                            if (linkthatisbeingexamined.Substring(24, 1) == "@")
+                                            {
+                                                complexnotsimple.WriteLine(linkthatisbeingexamined);
+                                                temp.WriteLine(linkthatisbeingexamined);
+                                                iscomplicated = true;
+                                            }
+                                            if (linkthatisbeingexamined.Substring(24, 2) == "c/")
+                                            {
+                                                complexnotsimple.WriteLine(linkthatisbeingexamined);
+                                                temp.WriteLine(linkthatisbeingexamined);
+                                                iscomplicated = true;
+                                            }
+                                            if (iscomplicated == false)
+                                            {
+                                                writer.WriteLine(linkthatisbeingexamined);
+                                            }
+                                            i++;
+                                            linknumbercounter++;
                                         }
-                                        if (linkthatisbeingexamined.Substring(24, 4) == "user")
-                                        {
-                                            complexnotsimple.WriteLine(linkthatisbeingexamined);
-                                            temp.WriteLine(linkthatisbeingexamined);
-                                            iscomplicated = true;
-                                        }
-                                        if (linkthatisbeingexamined.Substring(24, 7) == "channel")
-                                        {
-                                            complexnotsimple.WriteLine(linkthatisbeingexamined);
-                                            temp.WriteLine(linkthatisbeingexamined);
-                                            iscomplicated = true;
-                                        }
-                                        if (linkthatisbeingexamined.Substring(24, 7) == "results") //youtube search result was bookmarked
-                                        {
-                                            //not saving search results to complexnotsimple
-                                            temp.WriteLine(linkthatisbeingexamined);
-                                            iscomplicated = true;
-                                        }
-                                        if (linkthatisbeingexamined.Substring(24, 1) == "@")
-                                        {
-                                            complexnotsimple.WriteLine(linkthatisbeingexamined);
-                                            temp.WriteLine(linkthatisbeingexamined);
-                                            iscomplicated = true;
-                                        }
-                                        if (linkthatisbeingexamined.Substring(24, 2) == "c/")
-                                        {
-                                            complexnotsimple.WriteLine(linkthatisbeingexamined);
-                                            temp.WriteLine(linkthatisbeingexamined);
-                                            iscomplicated = true;
-                                        }
-                                        if (iscomplicated == false)
-                                        {
-                                            writer.WriteLine(linkthatisbeingexamined);
-                                        }
-                                        
-
-                                        i++;
-                                        linknumbercounter++;
+                                        line = inputarray[qq].Trim().Split('>');
+                                        //writer.WriteLine(line[2].Substring(0,line[2].Length-3)); //writes the name of the bookmark //to write into same line use writer.Write()
+                                        inputarray[qq] = null;
                                     }
-
-                                    line = inputarray[qq].Trim().Split('>');
-                                    //writer.WriteLine(line[2].Substring(0,line[2].Length-3)); //writes the name of the bookmark //to write into same line use writer.Write()
-                                    inputarray[qq] = null;
-                                }
-                                else
-                                {
-
-                                    if (folders[j].startline != qq && folders[j].endingline != qq) //in this line there is no link (eg. its not a bookmark, but juts folder ending line)
+                                    else
                                     {
-                                        //Console.WriteLine("no hit: " + qq);
+                                        if (folders[j].startline != qq && folders[j].endingline != qq) //in this line there is no link (eg. its not a bookmark, but juts folder ending line)
+                                        {
+                                            //Console.WriteLine("no hit: " + qq);
+                                        }
                                     }
                                 }
                             }
+                            writer.Flush();
+                            writer.Close();
+                            complexnotsimple.Flush();
+                            complexnotsimple.Close();
+                            folders[j].numberoflinks = linknumbercounter; //gives count of how many youtube links were found - also contains complex links (not videos, but channels, playlists, etc.)
+                            if (new FileInfo(Path.Combine(folders[j].folderpath, folders[j].name + "complexnotsimple.txt")).Length == 0) //if the txt reamined empty it is deleted
+                            {
+                                File.Delete(Path.Combine(folders[j].folderpath, folders[j].name + "complexnotsimple.txt"));
+                            }
+                            if (new FileInfo(Path.Combine(folders[j].folderpath, folders[j].name + ".txt")).Length == 0) //if the txt reamined empty it is deleted
+                            {
+                                File.Delete(Path.Combine(folders[j].folderpath, folders[j].name + ".txt"));
+                                Console.WriteLine("Deleted txt of " + folders[j].name);
+                            }
                         }
-                        writer.Flush();
-                        writer.Close();
-                        complexnotsimple.Flush();
-                        complexnotsimple.Close();
-                        folders[j].numberoflinks = linknumbercounter; //gives count of how many youtube links were found - also contains complex links (not videos, but channels, playlists, etc.)
-                        if (new FileInfo(Path.Combine(folders[j].folderpath, folders[j].name + "complexnotsimple.txt")).Length == 0) //if the txt reamined empty it is deleted
-                        {
-                            File.Delete(Path.Combine(folders[j].folderpath, folders[j].name + "complexnotsimple.txt"));
-                        }
-                        if (new FileInfo(Path.Combine(folders[j].folderpath, folders[j].name + ".txt")).Length == 0) //if the txt reamined empty it is deleted
-                        {
-                            File.Delete(Path.Combine(folders[j].folderpath, folders[j].name + ".txt"));
-                        }
-
                     }
                 }
                 Console.WriteLine("Finished writing depth: " + q);
-
             }
             temp.Flush();
             temp.Close();
 
             Console.WriteLine("\n\n");
             Console.WriteLine("The following folders were found");
-            int depthsymbolcounter = 0;
+            int depthsymbolcounter = 0; //dump all the folder info to console
             for (int m = 1; m < numberoffolders + 1; m++) //writing the depth, the starting line, the ending line, name, and number of links of all the folders
             {
                 if (folders[m].depth > folders[m - 1].depth) //greater depth than before
@@ -310,14 +296,12 @@ namespace bookmark_extract_youtube_links
                 Console.Write(folders[m].numberoflinks);
                 Console.ResetColor();
                 Console.WriteLine(" youtube links." + m);
-
             }
             Console.WriteLine(i + " youtube links were found, written into " + numberoffolders + " folders.");
-
             Console.WriteLine("Waiting for enter to confirm findings");
             Console.ReadKey();
 
-            string extensionforscript = "";
+            string extensionforscript = ""; //writing scripts
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 extensionforscript = ".bat";
@@ -325,17 +309,16 @@ namespace bookmark_extract_youtube_links
                 {
                     if (folders[q].numberoflinks > 0)
                     {
-                        StreamWriter writer1 = new StreamWriter(Path.Combine(folders[q].folderpath, folders[q].name + extensionforscript));
-                        writer1.WriteLine("chcp 65001"); //uft8 charset in commandline - it will not work without this is there are special characters in access path
+                        StreamWriter writer1 = new StreamWriter(Path.Combine(folders[q].folderpath, folders[q].name + extensionforscript), append: true);
+                        writer1.WriteLine("chcp 65001"); //uft8 charset in commandline - it will not work without this if there are special characters in access path
                         writer1.WriteLine("\"" + Path.Combine(rootdir, "yt-dlp.exe") + "\" -a \"" + Path.Combine(folders[q].folderpath, folders[q].name + ".txt") + "\"");
                         //writer1.WriteLine("pause");
                         writer1.Flush();
                         writer1.Close();
-                        
-
                     }
-                    Console.WriteLine(q + "/" + numberoffolders + " folder bat file writing finished.");
+                    //Console.WriteLine(q + "/" + numberoffolders + " folder bat file writing finished.");
                 }
+                Console.WriteLine(numberoffolders + " folder bat file writing finished.");
             }
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
@@ -344,17 +327,16 @@ namespace bookmark_extract_youtube_links
                 {
                     if (folders[q].numberoflinks > 0)
                     {
-                        StreamWriter writer1 = new StreamWriter(Path.Combine(folders[q].folderpath, folders[q].name + extensionforscript));
+                        StreamWriter writer1 = new StreamWriter(Path.Combine(folders[q].folderpath, folders[q].name + extensionforscript), append: true);
                         writer1.WriteLine("#! /bin/bash");
                         writer1.WriteLine("\"" + Path.Combine(rootdir, "yt-dlp") + "\" -a \"" + Path.Combine(folders[q].folderpath, folders[q].name + ".txt") + "\"");
                         //writer1.WriteLine("pause");
                         writer1.Flush();
                         writer1.Close();
-                        
-
                     }
-                    Console.WriteLine(q + "/" + numberoffolders + " folder sh file writing finished");
+                    //Console.WriteLine(q + "/" + numberoffolders + " folder sh file writing finished");
                 }
+                Console.WriteLine(numberoffolders + " folder sh file writing finished");
             }
             if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
@@ -362,18 +344,12 @@ namespace bookmark_extract_youtube_links
                 System.Environment.Exit(1);
             }
 
-
-
-
-
-
+            //Deleting empty folders
             Directory.SetCurrentDirectory(rootdir);
             for (int q = deepestdepth; q > 0; q--) //deleting empty folders from the deepest layer upwards
             {
-
                 for (int j = 0; j < numberoffolders; j++)
                 {
-
                     if (folders[j].depth == q) //only check folders with the given depth
                     {
                         bool thisfolderisempty = true;
@@ -393,13 +369,11 @@ namespace bookmark_extract_youtube_links
                                 Directory.Delete(folders[j].folderpath);
                             }
                         }
-
                     }
                 }
-
-
             }
-
+            Console.WriteLine("Empty folders deleted");
+            /*
             Console.WriteLine("Running the scripts");
             Console.Read();
             //running the script files one after another, in the order of folders[].startline
@@ -409,7 +383,6 @@ namespace bookmark_extract_youtube_links
                 {
                     int downloadserialnumber = 1;
                     string targetDir = string.Format(@folders[j].folderpath);
-
                     Process process;
                     if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                     {
@@ -452,22 +425,9 @@ namespace bookmark_extract_youtube_links
                         Console.WriteLine("Error");
                         System.Environment.Exit(1);
                     }
-
-
-
-
-
-
-
-
-
-
-
                     //processInfo.FileName = path.extension;
                     //processInfo.WindowStyle = ProcessWindowStyle.Normal;
                     //process.OutputDataReceived += (object sender, DataReceivedEventArgs e) => Console.WriteLine("output :: " + e.Data);
-
-
                     process.OutputDataReceived += new DataReceivedEventHandler((sender, e) =>
                     {
                         Console.WriteLine("output :: " + e.Data);
@@ -480,17 +440,13 @@ namespace bookmark_extract_youtube_links
                             Console.ResetColor();
                         }
                     });
-
                     process.ErrorDataReceived += (object sender, DataReceivedEventArgs e) => Console.WriteLine("error :: " + e.Data);
-
                     process.Start();
                     process.BeginOutputReadLine();
                     process.BeginErrorReadLine();
                     process.WaitForExit();
-
                     Console.WriteLine("ExitCode: {0}", process.ExitCode);
                     process.Close();
-
                     File.Delete(Path.Combine(folders[j].folderpath, folders[j].name + extensionforscript));
                 }
                 Console.Write("{0} Folder was downloaded. ", folders[j].name);
@@ -500,7 +456,7 @@ namespace bookmark_extract_youtube_links
                 Console.Write(" folders are finished\n");
             }
 
-
+            */
 
 
 
