@@ -20,10 +20,12 @@ namespace bookmark_extract_youtube_links
             //maintain folder structure (download all videos into the folder they were bookmarked in
 
             Console.OutputEncoding = System.Text.Encoding.UTF8;
-
-            var InstalledBrowsers = new List<string>();
-            InstalledBrowsers = AutoImport.getinstalledbrowsers();
-            Console.WriteLine(InstalledBrowsers);
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                var InstalledBrowsers = new List<string>();
+                InstalledBrowsers = AutoImport.getinstalledbrowsers();
+                Console.WriteLine(InstalledBrowsers);
+            }
 
             //read .html
             string rootdir = Directory.GetCurrentDirectory(); //current directory
