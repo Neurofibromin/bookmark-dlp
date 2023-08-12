@@ -40,6 +40,8 @@ internal class AutoImport
             string windir = Environment.SystemDirectory; // C:\windows\system32
             string windrive = Path.GetPathRoot(Environment.SystemDirectory); // C:\
             filePath = windrive + "\\Users\\" + Environment.UserName + "\\AppData\\Local\\Google\\Chrome\\User Data\\Default\\Bookmarks";
+            if (File.Exists(filePath)) { Console.WriteLine("true"); }
+            Console.WriteLine("Filepath in appdata: " + filePath);
         }
         else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
         {
@@ -74,10 +76,12 @@ internal class AutoImport
             if (child.type == "url")
             {
                 thisBookmark.urls.Add(child.url);
+                Console.WriteLine(child.url);
             }
             else if (child.type == "folder")
             {
                 folderclasses.Concat(bookmarksToFolderclass(child, depth + 1, path + "\\" + child.name));
+                Console.WriteLine(bookmarksToFolderclass(child, depth + 1, path + "\\" + child.name));
             }
         }
         folderclasses.Add(thisBookmark);

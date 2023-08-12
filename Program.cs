@@ -29,10 +29,22 @@ namespace bookmark_extract_youtube_links
             }
 
             //read .html
+            
             string rootdir = Directory.GetCurrentDirectory(); //current directory
+            if (File.Exists(Path.Combine(rootdir, "Bookmarks.html"))){ }
+            else
+            {
+                Console.WriteLine("No Bookmarks.html found in root directory, proceeding with search in installed browser default locations");
+                List<Folderclass> foldersfrombrowsers = AutoImport.getAppdataFolders();
+                foreach (Folderclass folderss in foldersfrombrowsers)
+                {
+                    Console.WriteLine(folderss.name + " name linknumber: " + folderss.numberoflinks);
+                }
+            }
+
             StreamReader reader = new StreamReader("Bookmarks.html"); //read the file containing all the bookmarks - a single file using chrome export
             var lineCount = File.ReadLines("Bookmarks.html").Count(); //how many lines are there in the file - max number of bookmarks
-            //read whole file into inputarray[] array line by line
+                                                                      //read whole file into inputarray[] array line by line
             string oneline;
             oneline = reader.ReadLine();
             string[] inputarray = new string[lineCount + 100];
