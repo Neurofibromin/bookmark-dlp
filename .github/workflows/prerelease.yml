@@ -37,7 +37,9 @@ jobs:
     - name: Display dotnet version
       run: dotnet --version
     - name: "List all files"
-      run: ls -R
+      run: |
+        ls -R
+        echo $PWD
     
   release:
       strategy:
