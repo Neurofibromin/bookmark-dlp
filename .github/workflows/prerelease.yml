@@ -36,8 +36,6 @@ jobs:
       run: dotnet test --no-build --verbosity normal
     - name: Display dotnet version
       run: dotnet --version
-    - name: "echo dir"
-      run: echo $PWD
     - name: "List all files"
       run: ls -R
       
@@ -65,15 +63,17 @@ jobs:
           dotnet publish bookmark-dlp.sln --configuration Release --runtime osx-x64 -p:PublishSingleFile=true
           dotnet publish bookmark-dlp.sln --configuration Release --runtime linux-arm64 -p:PublishSingleFile=true
       - name: "List all files"
-        run: ls -R
+        run: |
+          echo $PWD
+          ls -R
       - name: "Rename based on architecture"
         run: |
-          mv "./bin/Release/netcoreapp6.0/win-x64/publish/bookmark-dlp.exe" "./bin/Release/netcoreapp6.0/win-x64/publish/bookmark-dlp-win-x64-${{ matrix.dotnet-version }}.exe"
-          mv "./bin/Release/netcoreapp6.0/win-x86/publish/bookmark-dlp.exe" "./bin/Release/netcoreapp6.0/win-x86/publish/bookmark-dlp-win-x86-${{ matrix.dotnet-version }}.exe"
-          mv "./bin/Release/netcoreapp6.0/linux-arm64/publish/bookmark-dlp" "./bin/Release/netcoreapp6.0/linux-arm64/publish/bookmark-dlp-linux-arm64-${{ matrix.dotnet-version }}"
-          mv "./bin/Release/netcoreapp6.0/linux-x64/publish/bookmark-dlp" "./bin/Release/netcoreapp6.0/linux-x64/publish/bookmark-dlp-linux-x64-${{ matrix.dotnet-version }}"
-          mv "./bin/Release/netcoreapp6.0/osx-x64/publish/bookmark-dlp" "./bin/Release/netcoreapp6.0/osx-x64/publish/bookmark-dlp-osx-x64-${{ matrix.dotnet-version }}"
-          mv "./bin/Release/netcoreapp6.0/win-arm64/publish/bookmark-dlp" "./bin/Release/netcoreapp6.0/win-arm64/publish/bookmark-dlp-win-arm64-${{ matrix.dotnet-version }}.exe"
+          mv "/home/runner/work/bookmark-dlp/bookmark-dlp/bin/Release/netcoreapp6.0/win-x64/publish/bookmark-dlp.exe" "/home/runner/work/bookmark-dlp/bookmark-dlp/bin/Release/netcoreapp6.0/win-x64/publish/bookmark-dlp-win-x64-${{ matrix.dotnet-version }}.exe"
+          mv "/home/runner/work/bookmark-dlp/bookmark-dlp/bin/Release/netcoreapp6.0/win-x86/publish/bookmark-dlp.exe" "/home/runner/work/bookmark-dlp/bookmark-dlp/bin/Release/netcoreapp6.0/win-x86/publish/bookmark-dlp-win-x86-${{ matrix.dotnet-version }}.exe"
+          mv "/home/runner/work/bookmark-dlp/bookmark-dlp/bin/Release/netcoreapp6.0/linux-arm64/publish/bookmark-dlp" "/home/runner/work/bookmark-dlp/bookmark-dlp/bin/Release/netcoreapp6.0/linux-arm64/publish/bookmark-dlp-linux-arm64-${{ matrix.dotnet-version }}"
+          mv "/home/runner/work/bookmark-dlp/bookmark-dlp/bin/Release/netcoreapp6.0/linux-x64/publish/bookmark-dlp" "/home/runner/work/bookmark-dlp/bookmark-dlp/bin/Release/netcoreapp6.0/linux-x64/publish/bookmark-dlp-linux-x64-${{ matrix.dotnet-version }}"
+          mv "/home/runner/work/bookmark-dlp/bookmark-dlp/bin/Release/netcoreapp6.0/osx-x64/publish/bookmark-dlp" "/home/runner/work/bookmark-dlp/bookmark-dlp/bin/Release/netcoreapp6.0/osx-x64/publish/bookmark-dlp-osx-x64-${{ matrix.dotnet-version }}"
+          mv "/home/runner/work/bookmark-dlp/bookmark-dlp/bin/Release/netcoreapp6.0/win-arm64/publish/bookmark-dlp" "/home/runner/work/bookmark-dlp/bookmark-dlp/bin/Release/netcoreapp6.0/win-arm64/publish/bookmark-dlp-win-arm64-${{ matrix.dotnet-version }}.exe"
       - name: "Create new prerelease"
         env:
           GH_TOKEN: ${{ github.token }}
