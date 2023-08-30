@@ -1,0 +1,101 @@
+# This workflow will build a .NET project
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
+
+name: .NET
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        dotnet-version: [ '6.0.x' ]
+    steps:
+    - uses: actions/checkout@v3
+    - name: Setup .NET Core SDK ${{ matrix.dotnet-version }}
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: ${{ matrix.dotnet-version }}  
+    - name: Install Newtonsoft
+      run: dotnet add package Newtonsoft.Json --version 13.0.3
+    - name: Install Platformbrowser
+      run: dotnet add package MintPlayer.PlatformBrowser --version 6.0.1
+    - name: Install SQlite
+      run: dotnet add package Microsoft.Data.Sqlite --version 7.0.10
+    - name: Restore dependencies
+      run: dotnet restore
+    - name: Build
+      run: dotnet build --configuration Release --no-restore
+    - name: Test
+      run: dotnet test --no-build --verbosity normal
+    - name: Display dotnet version
+      run: dotnet --version
+    - name: "List all files"
+      run: ls -R
+    - name: "Release"
+      uses: "marvinpinto/action-automatic-releases@latest"
+      with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          automatic_release_tag: "latest"
+          prerelease: false
+          title: "${{ github.event.head_commit.message }}"
+  
+    
+  release:
+      strategy:
+        matrix:
+          os: [ windows-latest ]
+          dotnet-version: [ '6.0.x' ]
+        fail-fast: false
+      runs-on: ${{ matrix.os }}
+      steps:
+      - uses: actions/checkout@v3
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: ${{ matrix.dotnet-version }}  
+      - name: Publish
+        run: |
+          dotnet publish bookmark-dlp.sln --configuration Release --runtime win-x64 -p:PublishSingleFile=true
+          dotnet publish bookmark-dlp.sln --configuration Release --runtime win-x86 -p:PublishSingleFile=true
+          dotnet publish bookmark-dlp.sln --configuration Release --runtime win-arm64 -p:PublishSingleFile=true
+          dotnet publish bookmark-dlp.sln --configuration Release $MSBUILD_PROPS --runtime linux-x64 -p:PublishSingleFile=true
+          dotnet publish bookmark-dlp.sln --configuration Release $MSBUILD_PROPS --runtime osx-x64 -p:PublishSingleFile=true
+          dotnet publish bookmark-dlp.sln --configuration Release $MSBUILD_PROPS --runtime linux-arm64 -p:PublishSingleFile=true
+          
+      - name: "List all files"
+        run: ls -R
+      - name: "Rename based on architecture"
+        run: |
+          cp "D:\a\bookmark-dlp\bookmark-dlp\bin\Release\netcoreapp6.0\win-x64\publish\bookmark-dlp.exe" "D:\a\bookmark-dlp\bookmark-dlp\bin\Release\netcoreapp6.0\win-x64\publish\bookmark-dlp-win-x64-${{ matrix.dotnet-version }}.exe"
+          cp "D:\a\bookmark-dlp\bookmark-dlp\bin\Release\netcoreapp6.0\win-x86\publish\bookmark-dlp.exe" "D:\a\bookmark-dlp\bookmark-dlp\bin\Release\netcoreapp6.0\win-x86\publish\bookmark-dlp-win-x86-${{ matrix.dotnet-version }}.exe"
+          cp "D:\a\bookmark-dlp\bookmark-dlp\bin\Release\netcoreapp6.0\linux-arm64\publish\bookmark-dlp" "D:\a\bookmark-dlp\bookmark-dlp\bin\Release\netcoreapp6.0\linux-arm64\publish\bookmark-dlp-linux-arm64-${{ matrix.dotnet-version }}"
+          cp "D:\a\bookmark-dlp\bookmark-dlp\bin\Release\netcoreapp6.0\linux-x64\publish\bookmark-dlp" "D:\a\bookmark-dlp\bookmark-dlp\bin\Release\netcoreapp6.0\linux-x64\publish\bookmark-dlp-linux-x64-${{ matrix.dotnet-version }}"
+          cp "D:\a\bookmark-dlp\bookmark-dlp\bin\Release\netcoreapp6.0\osx-x64\publish\bookmark-dlp" "D:\a\bookmark-dlp\bookmark-dlp\bin\Release\netcoreapp6.0\osx-x64\publish\bookmark-dlp-osx-x64-${{ matrix.dotnet-version }}"
+          cp "D:\a\bookmark-dlp\bookmark-dlp\bin\Release\netcoreapp6.0\win-arm64\publish\bookmark-dlp.exe" "D:\a\bookmark-dlp\bookmark-dlp\bin\Release\netcoreapp6.0\win-arm64\publish\bookmark-dlp-win-arm64-${{ matrix.dotnet-version }}.exe"
+          
+      - name: Upload
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release upload latest "D:\a\bookmark-dlp\bookmark-dlp\bin\Release\netcoreapp6.0\win-x64\publish\bookmark-dlp-win-x64-${{ matrix.dotnet-version }}.exe" --clobber
+          gh release upload latest "D:\a\bookmark-dlp\bookmark-dlp\bin\Release\netcoreapp6.0\win-x86\publish\bookmark-dlp-win-x86-${{ matrix.dotnet-version }}.exe" --clobber
+          gh release upload latest "D:\a\bookmark-dlp\bookmark-dlp\bin\Release\netcoreapp6.0\win-arm64\publish\bookmark-dlp-win-arm64-${{ matrix.dotnet-version }}.exe" --clobber
+          gh release upload latest "D:\a\bookmark-dlp\bookmark-dlp\bin\Release\netcoreapp6.0\linux-arm64\publish\bookmark-dlp-linux-arm64-${{ matrix.dotnet-version }}" --clobber
+          gh release upload latest "D:\a\bookmark-dlp\bookmark-dlp\bin\Release\netcoreapp6.0\linux-x64\publish\bookmark-dlp-linux-x64-${{ matrix.dotnet-version }}" --clobber
+          gh release upload latest "D:\a\bookmark-dlp\bookmark-dlp\bin\Release\netcoreapp6.0\osx-x64\publish\bookmark-dlp-osx-x64-${{ matrix.dotnet-version }}" --clobber
+            
+  
+    
+    #comments  https://github.com/seerge/g-helper/blob/main/.github/workflows/release.yml
+    # Optional global.json location, if your global.json isn't located in the root of the repo.
+    #global-json-file:
+    # Optional package source for which to set up authentication. Will consult any existing NuGet.config in the root of the repo and provide a temporary NuGet.config using the NUGET_AUTH_TOKEN environment variable as a ClearTextPassword
+    #source-url:
+    # Optional NuGet.config location, if your NuGet.config isn't located in the root of the repo.
+    #config-file: # optional
