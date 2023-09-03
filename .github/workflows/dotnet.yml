@@ -72,6 +72,11 @@ jobs:
           mv "/home/runner/work/bookmark-dlp/bookmark-dlp/bin/Release/netcoreapp6.0/linux-x64/publish/bookmark-dlp" "/home/runner/work/bookmark-dlp/bookmark-dlp/bin/Release/netcoreapp6.0/linux-x64/publish/bookmark-dlp-linux-x64-${{ matrix.dotnet-version }}"
           mv "/home/runner/work/bookmark-dlp/bookmark-dlp/bin/Release/netcoreapp6.0/osx-x64/publish/bookmark-dlp" "/home/runner/work/bookmark-dlp/bookmark-dlp/bin/Release/netcoreapp6.0/osx-x64/publish/bookmark-dlp-osx-x64-${{ matrix.dotnet-version }}"
           mv "/home/runner/work/bookmark-dlp/bookmark-dlp/bin/Release/netcoreapp6.0/win-arm64/publish/bookmark-dlp.exe" "/home/runner/work/bookmark-dlp/bookmark-dlp/bin/Release/netcoreapp6.0/win-arm64/publish/bookmark-dlp-win-arm64-${{ matrix.dotnet-version }}.exe"
+      - name: "Delete old release"
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete ${{ matrix.tag }}
       - name: "Create new release"
         env:
           GH_TOKEN: ${{ github.token }}
