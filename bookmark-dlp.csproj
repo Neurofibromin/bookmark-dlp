@@ -2,13 +2,14 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>netcoreapp6.0</TargetFramework>
     <RootNamespace>bookmark_dlp</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="MintPlayer.PlatformBrowser" Version="1.1.2" />
+    <PackageReference Include="MintPlayer.PlatformBrowser" Version="6.0.1" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="7.0.10" />
   </ItemGroup>
 
 </Project>
