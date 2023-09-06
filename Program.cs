@@ -16,9 +16,9 @@ namespace bookmark_dlp
     {
         static void Main()
         {
-            //aim: reformat google chrome bookmars.html from google takeouts and browser bookmark exports
-            //download all the youtube videos listed with yt-dlp
-            //maintain folder structure (download all videos into the folder they were bookmarked in
+            ///aim: reformat google chrome bookmars.html from google takeouts and browser bookmark exports
+            ///download all the youtube videos listed with yt-dlp
+            ///maintain folder structure (download all videos into the folder they were bookmarked in
 
             Console.OutputEncoding = System.Text.Encoding.UTF8;
             
@@ -36,6 +36,7 @@ namespace bookmark_dlp
             var lineCount = File.ReadLines("Bookmarks.html").Count(); //how many lines are there in the file - max number of bookmarks
                                                                       //read whole file into inputarray[] array line by line
             string oneline;
+            bool wantcomplex = Methods.Wantcomplex();
             oneline = reader.ReadLine();
             string[] inputarray = new string[lineCount + 100];
             int i = 1;
@@ -265,6 +266,10 @@ namespace bookmark_dlp
                                 File.Delete(Path.Combine(folders[j].folderpath, folders[j].name + ".txt"));
                                 Console.WriteLine("Deleted txt of " + folders[j].name);
                             }
+                            if (!wantcomplex)
+                            {
+                                File.Delete(Path.Combine(folders[j].folderpath, folders[j].name + ".complex.txt"));
+                            }
                         }
                     }
                 }
@@ -308,10 +313,7 @@ namespace bookmark_dlp
             string ytdlp_path = Methods.Yt_dlp_pathfinder(rootdir); //check if yt-dlp is in the root folder, on the path or not available
             Methods.Scriptwriter(folders, numberoffolders, ytdlp_path);
             Methods.Deleteemptyfolders(folders, rootdir, numberoffolders, deepestdepth);
-
-            /*
-            Methods.runningthescripts(folders, numberoffolders);
-            */
+            Methods.Runningthescripts(folders, numberoffolders);
             Methods.Checkformissing(rootdir, folders, numberoffolders); //checking if all the desired links have indeed been downloaded, archive.txt integrity as well
             Methods.Dumptoconsole(folders, numberoffolders, i);
             Console.WriteLine("Press enter to exit");

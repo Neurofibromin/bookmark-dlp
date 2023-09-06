@@ -12,6 +12,18 @@ using Microsoft.Data.Sqlite;
 
 internal class AutoImport
 {
+    /// <summary>
+    /// todo:
+    /// handle complexnotsimple and temp streamwriters better
+    /// the linknumbercounters are increased for complex links as well
+    /// handle youtube shorts in both download and check
+    /// check if folders.linknumber refers to all links or youtube links in autoimport
+    /// there is some bug with checkformissing, out of range maybe?
+    /// chrome export bookmarks uses different layout html than google takeout
+    /// running the scripts doesn't work for some reason
+    /// </summary>
+
+
     public static void AutoMain()
     {
         Console.OutputEncoding = System.Text.Encoding.UTF8;
@@ -22,6 +34,7 @@ internal class AutoImport
             List<string> InstalledBrowsers = AutoImport.Getinstalledbrowsers();
             Console.WriteLine(InstalledBrowsers);
         }
+        bool wantcomplex = Methods.Wantcomplex();
         string filePath = FindfilePath();
         Folderclass[] folders = Intake(filePath);
         int numberoffolders = Globals.folderid;
@@ -35,7 +48,7 @@ internal class AutoImport
                 deepestdepth = folders[q].depth;
             }
         }
-        Writelinkstotxt(folders, numberoffolders, rootdir);
+        Writelinkstotxt(folders, numberoffolders, rootdir, wantcomplex);
         Methods.Dumptoconsole(folders, numberoffolders, Globals.totalyoutubelinknumber);
         string ytdlp_path = Methods.Yt_dlp_pathfinder(rootdir); //finding path to yt-dlp binary
         Methods.Scriptwriter(folders, numberoffolders, ytdlp_path); //writing the scripts that call yt-dlp and add .txt with the links in the arguments //NOT the method that creates the .txt files
@@ -48,7 +61,7 @@ internal class AutoImport
         System.Environment.Exit(1); //leaving the program, so it does not contiue running according to Program.cs
     }
 
-    public static void Writelinkstotxt(Folderclass[] folders, int numberoffolders, string rootdir)
+    public static void Writelinkstotxt(Folderclass[] folders, int numberoffolders, string rootdir, bool wantcomplex)
     {
         StreamWriter temp = new StreamWriter(Path.Combine(rootdir, "temp.txt"), append: true); //writing into temp.txt all the youtube links that are not for videos (but for channels, playlists, etc.)
         int i = 0;
@@ -121,6 +134,10 @@ internal class AutoImport
                 File.Delete(Path.Combine(folders[j].folderpath, folders[j].name + ".txt"));
                 Console.WriteLine("Deleted txt of " + folders[j].name);
             }
+            if (!wantcomplex) 
+            { 
+                File.Delete(Path.Combine(folders[j].folderpath, folders[j].name + ".complex.txt")); 
+            }
         }
         temp.Flush();
         temp.Close();
@@ -141,7 +158,7 @@ internal class AutoImport
                 if (folders[m].depth > folders[m - 1].depth) //more depth than previous folder
                 {
                     Directory.SetCurrentDirectory(folders[m - 1].name);
-                    System.IO.Directory.CreateDirectory(folders[m].name);
+                    Directory.CreateDirectory(folders[m].name);
                     Directory.SetCurrentDirectory(folders[m].name); //going into the folder
                     folders[m].folderpath = Directory.GetCurrentDirectory(); //path
                     Directory.SetCurrentDirectory(Path.Combine(Directory.GetCurrentDirectory(), "..")); //coming out of the folder
@@ -153,7 +170,7 @@ internal class AutoImport
                     {
                         Directory.SetCurrentDirectory(Path.Combine(Directory.GetCurrentDirectory(), ".."));
                     }
-                    System.IO.Directory.CreateDirectory(folders[m].name);
+                    Directory.CreateDirectory(folders[m].name);
                     Directory.SetCurrentDirectory(folders[m].name); //going into the folder
                     folders[m].folderpath = Directory.GetCurrentDirectory(); //path
                     Directory.SetCurrentDirectory(Path.Combine(Directory.GetCurrentDirectory(), "..")); //coming out of the folder
@@ -161,7 +178,7 @@ internal class AutoImport
 
                 if (folders[m].depth == folders[m - 1].depth) //the same depth as the previous folder
                 {
-                    System.IO.Directory.CreateDirectory(folders[m].name);
+                    Directory.CreateDirectory(folders[m].name);
                     Directory.SetCurrentDirectory(folders[m].name); //going into the folder
                     folders[m].folderpath = Directory.GetCurrentDirectory(); //path
                     Directory.SetCurrentDirectory(Path.Combine(Directory.GetCurrentDirectory(), "..")); //coming out of the folder
@@ -310,8 +327,6 @@ internal class AutoImport
             }
             if (n == 0) { Console.WriteLine(($"Bookmarks file not found in Brave")); }
         }
-
-
 
         if (filepaths.Count == 0)
         {

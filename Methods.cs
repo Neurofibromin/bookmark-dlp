@@ -534,4 +534,18 @@ internal class Methods
             Console.Write(" folders are finished\n");
         }
     }
+
+    public static bool Wantcomplex()
+    {
+        Console.WriteLine("Do you want to write and download not video links? (eg. playlists and channels. by default: no)");
+        Console.WriteLine("Depending on the yt-dlp conf settings this can result in very large downloads, a single bookmark can lead to hundreds of videos being downloaded.");
+        Console.WriteLine("Y/N");
+        bool wantcomplex = false;
+        if (Console.ReadKey().Equals('y'))
+        {
+            wantcomplex = true;
+            Console.WriteLine("You chose to write all youtube links.");
+        }
+        return wantcomplex;
+    }
 }
