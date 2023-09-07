@@ -279,42 +279,11 @@ namespace bookmark_dlp
             temp.Close();
 
             Methods.Dumptoconsole(folders, numberoffolders, i); //dump all the folder info to console
-            /*Console.WriteLine("\n\n");
-            Console.WriteLine("The following folders were found");
-            int depthsymbolcounter = 0;
-            for (int m = 1; m < numberoffolders + 1; m++) //writing the depth, the starting line, the ending line, name, and number of links of all the folders
-            {
-                if (folders[m].depth > folders[m - 1].depth) //greater depth than before
-                {
-                    depthsymbolcounter = depthsymbolcounter + (folders[m].depth - folders[m - 1].depth);
-                }
-                if (folders[m].depth < folders[m - 1].depth) //lesser depth than before
-                {
-                    depthsymbolcounter = depthsymbolcounter - (folders[m - 1].depth - folders[m].depth);
-                }
-                if (folders[m].depth == folders[m - 1].depth) //same depth as before
-                {
-                    //depthsymbolcounter does not change
-                }
-                Console.Write(string.Concat(Enumerable.Repeat("-", depthsymbolcounter)) + folders[m].depth + " is the depth of " + folders[m].startline + "/" + folders[m].endingline + " ");
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.Write(folders[m].name);
-                Console.ResetColor();
-                Console.Write(" folder, which contains ");
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.Write(folders[m].numberoflinks);
-                Console.ResetColor();
-                Console.WriteLine(" youtube links." + m);
-            }
-            Console.WriteLine(i + " youtube links were found, written into " + numberoffolders + " folders.");
-            Console.WriteLine("Waiting for enter to confirm findings");
-            Console.ReadKey();*/
-
             string ytdlp_path = Methods.Yt_dlp_pathfinder(rootdir); //check if yt-dlp is in the root folder, on the path or not available
             Methods.Scriptwriter(folders, numberoffolders, ytdlp_path);
             Methods.Deleteemptyfolders(folders, rootdir, numberoffolders, deepestdepth);
             Methods.Runningthescripts(folders, numberoffolders);
-            Methods.Checkformissing(rootdir, folders, numberoffolders); //checking if all the desired links have indeed been downloaded, archive.txt integrity as well
+            //Methods.Checkformissing(rootdir, folders, numberoffolders); //checking if all the desired links have indeed been downloaded, archive.txt integrity as well
             Methods.Dumptoconsole(folders, numberoffolders, i);
             Console.WriteLine("Press enter to exit");
             Console.Read();

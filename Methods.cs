@@ -395,6 +395,8 @@ internal class Methods
             }
             Console.WriteLine(numberoffolders + " folder sh file writing finished");
         }
+        Console.WriteLine("Waiting for enter to confirm");
+        Console.Read();
     }
 
     public static void Deleteemptyfolders(Folderclass[] folders, string rootdir, int numberoffolders, int deepestdepth)
@@ -428,6 +430,8 @@ internal class Methods
             }
         }
         Console.WriteLine("Empty folders deleted");
+        Console.WriteLine("Waiting for enter to confirm");
+        Console.Read();
     }
 
     public static void Runningthescripts(Folderclass[] folders, int numberoffolders)
@@ -461,6 +465,7 @@ internal class Methods
                             RedirectStandardOutput = true
                         }
                     };
+                    Console.WriteLine($"cmd.exe /c {command}");
                 }
                 else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                 {

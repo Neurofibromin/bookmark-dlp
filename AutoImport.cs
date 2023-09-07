@@ -14,13 +14,21 @@ internal class AutoImport
 {
     /// <summary>
     /// todo:
+    /// 
     /// handle complexnotsimple and temp streamwriters better
+    /// 
     /// the linknumbercounters are increased for complex links as well
+    /// 
     /// handle youtube shorts in both download and check
+    /// 
     /// check if folders.linknumber refers to all links or youtube links in autoimport
+    /// 
     /// there is some bug with checkformissing, out of range maybe?
+    /// 
     /// chrome export bookmarks uses different layout html than google takeout
-    /// running the scripts doesn't work for some reason
+    ///
+    /// a z allfailed.txt rossze helyre és néven generálódik
+    /// 
     /// </summary>
 
 
