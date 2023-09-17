@@ -80,26 +80,26 @@ jobs:
         run: |
           #gh release delete alpha
           echo delete
-      - name: "Get Versioning Data"
-        id: versioning
-        uses: Soumeh/Auto-Versioning@main
-        #tag: ${{ steps.versioning.outputs.tag }}
-        #body: "${{ steps.versioning.outputs.changelog }}"
+      - name: Increment version from repository's tags
+        id: tages_versioning
+        uses: georgeneto/tags-versioning@v1
+        with:
+          repo-token: ${{secrets.GITHUB_TOKEN}}
       - name: "Create new prerelease"
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create "${{ steps.versioning.outputs.tag }}" --target unstable --prerelease --title "Development build ${{ steps.versioning.outputs.tag }}" --notes "${{ steps.versioning.outputs.changelog }}"
+          gh release create "${{ steps.version.outputs.next }}" --target unstable --prerelease --title "Development build ${{ steps.version.outputs.next }}" --notes "Autogen"
       - name: Upload
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release upload "${{ steps.versioning.outputs.tag }}" "./bin/Release/netcoreapp6.0/win-x64/publish/bookmark-dlp-win-x64-${{ matrix.dotnet-version }}.exe" --clobber
-          gh release upload "${{ steps.versioning.outputs.tag }}" "./bin/Release/netcoreapp6.0/win-x86/publish/bookmark-dlp-win-x86-${{ matrix.dotnet-version }}.exe" --clobber
-          gh release upload "${{ steps.versioning.outputs.tag }}" "./bin/Release/netcoreapp6.0/linux-arm64/publish/bookmark-dlp-linux-arm64-${{ matrix.dotnet-version }}" --clobber
-          gh release upload "${{ steps.versioning.outputs.tag }}" "./bin/Release/netcoreapp6.0/linux-x64/publish/bookmark-dlp-linux-x64-${{ matrix.dotnet-version }}" --clobber
-          gh release upload "${{ steps.versioning.outputs.tag }}" "./bin/Release/netcoreapp6.0/osx-x64/publish/bookmark-dlp-osx-x64-${{ matrix.dotnet-version }}" --clobber
-          gh release upload "${{ steps.versioning.outputs.tag }}" "./bin/Release/netcoreapp6.0/win-arm64/publish/bookmark-dlp-win-arm64-${{ matrix.dotnet-version }}.exe" --clobber
+          gh release upload "${{ steps.version.outputs.next }}" "./bin/Release/netcoreapp6.0/win-x64/publish/bookmark-dlp-win-x64-${{ matrix.dotnet-version }}.exe" --clobber
+          gh release upload "${{ steps.version.outputs.next }}" "./bin/Release/netcoreapp6.0/win-x86/publish/bookmark-dlp-win-x86-${{ matrix.dotnet-version }}.exe" --clobber
+          gh release upload "${{ steps.version.outputs.next }}" "./bin/Release/netcoreapp6.0/linux-arm64/publish/bookmark-dlp-linux-arm64-${{ matrix.dotnet-version }}" --clobber
+          gh release upload "${{ steps.version.outputs.next }}" "./bin/Release/netcoreapp6.0/linux-x64/publish/bookmark-dlp-linux-x64-${{ matrix.dotnet-version }}" --clobber
+          gh release upload "${{ steps.version.outputs.next }}" "./bin/Release/netcoreapp6.0/osx-x64/publish/bookmark-dlp-osx-x64-${{ matrix.dotnet-version }}" --clobber
+          gh release upload "${{ steps.version.outputs.next }}" "./bin/Release/netcoreapp6.0/win-arm64/publish/bookmark-dlp-win-arm64-${{ matrix.dotnet-version }}.exe" --clobber
             
   
     
