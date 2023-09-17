@@ -44,7 +44,7 @@ jobs:
         matrix:
           os: [ ubuntu-latest ]
           dotnet-version: [ '6.0.x' ]
-          tag: [ '0.2' ]
+          tag: [ '0.2.1' ]
         fail-fast: false
       runs-on: ${{ matrix.os }}
       steps:
