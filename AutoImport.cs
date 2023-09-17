@@ -27,7 +27,7 @@ internal class AutoImport
     /// 
     /// chrome export bookmarks uses different layout html than google takeout
     ///
-    /// a z allfailed.txt rossze helyre és néven generálódik
+    /// allfailed.txt wrong place and name
     /// 
     /// </summary>
 

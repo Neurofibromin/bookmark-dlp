@@ -18,6 +18,8 @@ internal class Methods
     public static void FirefoxExperimental()
     {
         //Finding the sqlite databases
+        ///docs: https://kb.mozillazine.org/Places.sqlite
+        ///https://stackoverflow.com/questions/11769524/how-can-i-restore-firefox-bookmark-files-from-sqlite-files
         string profilespath = "";
         List<string> filepaths = new List<string>();
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
