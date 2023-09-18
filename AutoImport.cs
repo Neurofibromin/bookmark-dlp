@@ -29,6 +29,14 @@ internal class AutoImport
     ///
     /// allfailed.txt wrong place and name
     /// 
+    /// check every path.combine for absolute path in path2
+    /// 
+    /// create archive.shouldbe.txt and compare to archive that way
+    /// 
+    /// check if folders/files already existing is a problem
+    /// 
+    /// change the data types in the objects to long instead of string
+    /// 
     /// </summary>
 
 
@@ -39,8 +47,8 @@ internal class AutoImport
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
             //var InstalledBrowsers = new List<string>();
-            List<string> InstalledBrowsers = AutoImport.Getinstalledbrowsers();
-            Console.WriteLine(InstalledBrowsers);
+            //List<string> InstalledBrowsers = AutoImport.Getinstalledbrowsers();
+            //Console.WriteLine(InstalledBrowsers);
         }
         bool wantcomplex = Methods.Wantcomplex();
         string filePath = FindfilePath();
@@ -126,7 +134,7 @@ internal class AutoImport
                     }
                     i++;
                     linknumbercounter++;
-                }               
+                }
             }
             writer.Flush();
             writer.Close();
@@ -142,9 +150,9 @@ internal class AutoImport
                 File.Delete(Path.Combine(folders[j].folderpath, folders[j].name + ".txt"));
                 Console.WriteLine("Deleted txt of " + folders[j].name);
             }
-            if (!wantcomplex) 
-            { 
-                File.Delete(Path.Combine(folders[j].folderpath, folders[j].name + ".complex.txt")); 
+            if (!wantcomplex)
+            {
+                File.Delete(Path.Combine(folders[j].folderpath, folders[j].name + ".complex.txt"));
             }
         }
         temp.Flush();
@@ -152,7 +160,7 @@ internal class AutoImport
         Globals.totalyoutubelinknumber = i;
         Console.WriteLine("Total number of youtube links found: " + i);
     }
- 
+
     public static Folderclass[] Createfolderstructure(Folderclass[] folders, string rootdir)
     {
         //creating the folder structure and storing the access paths to the folders[].folderpath object array
@@ -222,21 +230,31 @@ internal class AutoImport
                 filepaths.Add(filePath);
             }
             else { Console.WriteLine(($"Bookmarks file not found at " + filePath)); } */
-            profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "\\Google\\Chrome\\User Data\\");
+            profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Google\\Chrome\\User Data\\");
+            //Console.WriteLine("appdata: " + System.Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData));
+            //Console.WriteLine("profilespath: " + profilespath);
             int n = 0;
-            foreach (string profile in Directory.GetDirectories(profilespath))
+            if (Directory.Exists(profilespath))
             {
-                if (File.Exists(Path.Combine(profile, "Bookmarks")))
+                foreach (string profile in Directory.GetDirectories(profilespath))
                 {
-                    //For every chrome profile that has bookmarks
-                    filepaths.Add(Convert.ToString(Path.Combine(profile, "Bookmarks")));
-                    Console.WriteLine("File found! " + "Filepath in Chrome: " + Convert.ToString(Path.Combine(profile, "Bookmarks")));
-                    n++;
+                    //Console.WriteLine("profile: " + profile);
+                    if (File.Exists(Path.Combine(profile, "Bookmarks")))
+                    {
+                        //For every chrome profile that has bookmarks
+                        filepaths.Add(Convert.ToString(Path.Combine(profile, "Bookmarks")));
+                        Console.WriteLine("File found! " + "Filepath in Chrome: " + Convert.ToString(Path.Combine(profile, "Bookmarks")));
+                        n++;
+                    }
+                }
+                if (n == 0)
+                {
+                    Console.WriteLine(($"No Bookmarks file found in Chrome"));
                 }
             }
-            if (n == 0)
+            else
             {
-                Console.WriteLine(($"No Bookmarks file found in Chrome"));
+                Console.WriteLine("Chrome install folder not found");
             }
         }
         else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
@@ -250,55 +268,76 @@ internal class AutoImport
             else { Console.WriteLine(($"Bookmarks file not found at " + filePath)); }*/
             int n = 0;
             profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "google-chrome");
-            foreach (string profile in Directory.GetDirectories(profilespath))
+            if (Directory.Exists(profilespath))
             {
-                if (File.Exists(Path.Combine(profile, "Bookmarks")))
+                foreach (string profile in Directory.GetDirectories(profilespath))
                 {
-                    //For every chrome profile that has bookmarks
-                    filepaths.Add(Convert.ToString(Path.Combine(profile, "Bookmarks")));
-                    Console.WriteLine("File found! " + "Filepath in Chrome: " + Convert.ToString(Path.Combine(profile, "Bookmarks")));
-                    n++;
+                    if (File.Exists(Path.Combine(profile, "Bookmarks")))
+                    {
+                        //For every chrome profile that has bookmarks
+                        filepaths.Add(Convert.ToString(Path.Combine(profile, "Bookmarks")));
+                        Console.WriteLine("File found! " + "Filepath in Chrome: " + Convert.ToString(Path.Combine(profile, "Bookmarks")));
+                        n++;
+                    }
                 }
+                if (n == 0) { Console.WriteLine(($"Bookmarks file not found in Chrome")); }
             }
-            if (n == 0) { Console.WriteLine(($"Bookmarks file not found in Chrome")); }
+            else
+            {
+                Console.WriteLine("Chrome install folder not found");
+            }
         }
         else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
         {
             ///Users/$User/Library/Application Support/Google/Chrome/Default
             int n = 0;
             profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.Personal), "Library/Application Support/Google/Chrome");
-            foreach (string profile in Directory.GetDirectories(profilespath))
+            if (Directory.Exists(profilespath))
             {
-                if (File.Exists(Path.Combine(profile, "Bookmarks")))
+                foreach (string profile in Directory.GetDirectories(profilespath))
                 {
-                    //For every chrome profile that has bookmarks
-                    filepaths.Add(Convert.ToString(Path.Combine(profile, "Bookmarks")));
-                    Console.WriteLine("File found! " + "Filepath in Chrome: " + Convert.ToString(Path.Combine(profile, "Bookmarks")));
-                    n++;
+                    if (File.Exists(Path.Combine(profile, "Bookmarks")))
+                    {
+                        //For every chrome profile that has bookmarks
+                        filepaths.Add(Convert.ToString(Path.Combine(profile, "Bookmarks")));
+                        Console.WriteLine("File found! " + "Filepath in Chrome: " + Convert.ToString(Path.Combine(profile, "Bookmarks")));
+                        n++;
+                    }
                 }
+                if (n == 0) { Console.WriteLine(($"Bookmarks file not found in Chrome")); }
             }
-            if (n == 0) { Console.WriteLine(($"Bookmarks file not found in Chrome")); }
+            else
+            {
+                Console.WriteLine("Chrome install folder not found");
+            }
         }
 
         //Brave Browser
         //%localappdata%\BraveSoftware\Brave-Browser\User Data\Default\
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
-            profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "\\BraveSoftware\\Brave-Browser\\User Data\\");
+            profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "BraveSoftware\\Brave-Browser\\User Data\\");
             int n = 0;
-            foreach (string profile in Directory.GetDirectories(profilespath))
+            if (Directory.Exists(profilespath))
             {
-                if (File.Exists(Path.Combine(profile, "Bookmarks")))
+                foreach (string profile in Directory.GetDirectories(profilespath))
                 {
-                    //For every Brave profile that has bookmarks
-                    filepaths.Add(Convert.ToString(Path.Combine(profile, "Bookmarks")));
-                    Console.WriteLine("File found! " + "Filepath in Brave: " + Convert.ToString(Path.Combine(profile, "Bookmarks")));
-                    n++;
+                    if (File.Exists(Path.Combine(profile, "Bookmarks")))
+                    {
+                        //For every Brave profile that has bookmarks
+                        filepaths.Add(Convert.ToString(Path.Combine(profile, "Bookmarks")));
+                        Console.WriteLine("File found! " + "Filepath in Brave: " + Convert.ToString(Path.Combine(profile, "Bookmarks")));
+                        n++;
+                    }
+                }
+                if (n == 0)
+                {
+                    Console.WriteLine(($"No Bookmarks file found in Brave browser"));
                 }
             }
-            if (n == 0)
+            else
             {
-                Console.WriteLine(($"No Bookmarks file found in Brave browser"));
+                Console.WriteLine("Brave-browser install folder not found");
             }
         }
         else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
@@ -306,34 +345,48 @@ internal class AutoImport
             //$User/.config/BraveSoftware/Brave-Browser/Default/Bookmarks.
             int n = 0;
             profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "BraveSoftware/Brave-Browser/");
-            foreach (string profile in Directory.GetDirectories(profilespath))
+            if (Directory.Exists(profilespath))
             {
-                if (File.Exists(Path.Combine(profile, "Bookmarks")))
+                foreach (string profile in Directory.GetDirectories(profilespath))
                 {
-                    //For every chrome profile that has bookmarks
-                    filepaths.Add(Convert.ToString(Path.Combine(profile, "Bookmarks")));
-                    Console.WriteLine("File found! " + "Filepath in Brave: " + Convert.ToString(Path.Combine(profile, "Bookmarks")));
-                    n++;
+                    if (File.Exists(Path.Combine(profile, "Bookmarks")))
+                    {
+                        //For every chrome profile that has bookmarks
+                        filepaths.Add(Convert.ToString(Path.Combine(profile, "Bookmarks")));
+                        Console.WriteLine("File found! " + "Filepath in Brave: " + Convert.ToString(Path.Combine(profile, "Bookmarks")));
+                        n++;
+                    }
                 }
+                if (n == 0) { Console.WriteLine(($"Bookmarks file not found in Brave")); }
             }
-            if (n == 0) { Console.WriteLine(($"Bookmarks file not found in Brave")); }
+            else
+            {
+                Console.WriteLine("Brave-browser install folder not found");
+            }
         }
         else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
         {
             ///$HOME/Library/Application Support/BraveSoftware/Brave-Browser/Default/Bookmarks
             int n = 0;
             profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.Personal), "Library/Application Support/BraveSoftware/Brave-Browser");
-            foreach (string profile in Directory.GetDirectories(profilespath))
+            if (Directory.Exists(profilespath))
             {
-                if (File.Exists(Path.Combine(profile, "Bookmarks")))
+                foreach (string profile in Directory.GetDirectories(profilespath))
                 {
-                    //For every chrome profile that has bookmarks
-                    filepaths.Add(Convert.ToString(Path.Combine(profile, "Bookmarks")));
-                    Console.WriteLine("File found! " + "Filepath in Brave: " + Convert.ToString(Path.Combine(profile, "Bookmarks")));
-                    n++;
+                    if (File.Exists(Path.Combine(profile, "Bookmarks")))
+                    {
+                        //For every chrome profile that has bookmarks
+                        filepaths.Add(Convert.ToString(Path.Combine(profile, "Bookmarks")));
+                        Console.WriteLine("File found! " + "Filepath in Brave: " + Convert.ToString(Path.Combine(profile, "Bookmarks")));
+                        n++;
+                    }
                 }
+                if (n == 0) { Console.WriteLine(($"Bookmarks file not found in Brave")); }
             }
-            if (n == 0) { Console.WriteLine(($"Bookmarks file not found in Brave")); }
+            else
+            {
+                Console.WriteLine("Brave-browser install folder not found");
+            }
         }
 
         if (filepaths.Count == 0)
@@ -344,10 +397,11 @@ internal class AutoImport
         int m = 0;
         foreach (string path in filepaths)
         {
-            Console.WriteLine(m + " path");
+            Console.WriteLine(m + ". path: " + path);
             m++;
         }
         filePath = filepaths.ElementAt(Convert.ToInt32(Console.ReadLine()));
+        Console.WriteLine("Chosen path: " + filePath);
         return filePath;
     }
 
@@ -355,12 +409,79 @@ internal class AutoImport
     {
         Console.WriteLine("Autoimport intake start");
         string text = File.ReadAllText(filePath);
-        Bookmark bookmarkroot = JObject.Parse(text)["roots"]["bookmark_bar"].ToObject<Bookmark>();
+        Console.WriteLine("readalltext successful");
+        Bookmark bookmark_bar = JObject.Parse(text)["roots"]["bookmark_bar"].ToObject<Bookmark>();
+        Bookmark other = JObject.Parse(text)["roots"]["other"].ToObject<Bookmark>();
+        Bookmark synced = JObject.Parse(text)["roots"]["synced"].ToObject<Bookmark>();
+        synced.name = "Synced Bookmarks"; //has to be renamed, because google puts "Mobile bookmarks" in json and "Synced Bookmarks" in html
+        other.name = "Other Bookmarks"; //has to be renamed, because google puts "Other bookmarks" in json and "Other Bookmarks" in html (diff: capitalisation!)
+        bookmark_bar.name = "Bookmark Bar"; //has to be renamed, because google puts "Bookmarks bar" in json and "Bookmark Bar" in html (diff: capitalisation!, plural)
+        //note: the naming MUST be consistent, so if html and autoimport are both used in the same directory videos will not get downloaded twice
+        Console.WriteLine(bookmark_bar.date_added);
+        Bookmark root = new Bookmark
+        ///the root is not actually a bookmark json object, it just contains the 3 json objects of other, synced and bookmarks_bar
+        ///
+        ///as such here a root json object is created, which will contain those three as children
+        {
+            name = "Bookmarks",
+            guid = Guid.NewGuid().ToString(), //adding new guid to the root
+            id = "0", //id for : bookmark_bar=1, other=2, synced=3
+            type = "folder",
+            date_added = Convert.ToString(Convert.ToInt64(bookmark_bar.date_added) - 2), //just setting a time that was slightly earlier than the bookmark_bar creation
+            date_last_used = "0", //not used by chrome apparently
+            date_modified = "0", //not much used by chrome apparently
+            children = new List<Bookmark> { bookmark_bar, other, synced }
+        };
+        if (false) //just to hide the long comment in the IDE
+        {
+            /* the structure of the file:
+            {
+             "checksum": "12345678912345678912345678912345",
+             "roots": {
+                "bookmark_bar": {
+                        childred:[ ], /////////here are all the bookmarks generally
+                        "date_added": "123456789123456789",
+                        "date_last_used": "0",
+                        "date_modified": "123456789123456789",
+                        "guid": "guid-123456789123456789",
+                        "id": "1",
+                        "name": "Bookmarks bar",
+                        "type": "folder"
+                    },
+                    "other": {
+                        "children": [  ],
+                        "date_added": "123456789123456789",
+                        "date_last_used": "0",
+                        "date_modified": "0",
+                        "guid": "guid-123456789123456789",
+                        "id": "2",
+                        "name": "Other bookmarks",
+                        "type": "folder"
+                    },
+                    "synced": {
+                        "children": [  ],
+                        "date_added": "123456789123456789",
+                        "date_last_used": "0",
+                        "date_modified": "0",
+                        "guid": "guid-123456789123456789",
+                        "id": "3",
+                        "name": "Mobile bookmarks",
+                        "type": "folder"
+                    }
+             },
+             "sync_metadata": "123456789#__4000000_char_long_string",
+             "version": 1
+           }
+            */
+        }
+        Bookmark bookmarkroot = root;
+        Console.WriteLine("jobject successful");
         Folderclass thisBookmark = new Folderclass();
         thisBookmark.startline = Globals.folderid;
         thisBookmark.urls = new List<string>();
         int numberoflinks = 0;
         int depth = 0;
+        Console.WriteLine("point1");
         foreach (Bookmark child in bookmarkroot.children)
         {
             if (child.type == "url")
