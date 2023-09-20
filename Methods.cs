@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using bookmark_dlp;
-using MintPlayer.PlatformBrowser;
 using System.ComponentModel;
 using System.Text;
 using System.Threading;
@@ -15,91 +14,87 @@ using Microsoft.Data.Sqlite;
 
 internal class Methods
 {
-    public static void FirefoxExperimental()
+    public static Folderclass[] Sqlintake(string filePath)
     {
-        //Finding the sqlite databases
         ///docs: https://kb.mozillazine.org/Places.sqlite
         ///https://stackoverflow.com/questions/11769524/how-can-i-restore-firefox-bookmark-files-from-sqlite-files
-        string profilespath = "";
-        List<string> filepaths = new List<string>();
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        //Console.WriteLine("sqlite file: " + path);
+        int[] parentid = new int[File.ReadLines(filePath).Count()]; //parentid[i] = the id of the parent folder of the bookmark with the id i
+        using (var connection = new SqliteConnection("Data Source=" + filePath))
         {
-            ///C:\Windows.old\Users\<UserName>\AppData\Roaming\Mozilla\Firefox\Profiles\<filename.default>\places.sqlite
-            //filePath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "\\Mozilla\\Firefox\\Profiles\\<filename.default>\\places.sqlite");
-            profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "\\Mozilla\\Firefox\\Profiles\\");
-            int n = 0;
-            foreach (string profile in Directory.GetDirectories(profilespath))
-            {
-                if (File.Exists(Path.Combine(profile, "places.sqlite")))
-                {
-                    //For every firefox profile that has bookmarks
-                    filepaths.Add(Convert.ToString(Path.Combine(profile, "places.sqlite")));
-                    Console.WriteLine("File found! " + "Filepath in Firefox: " + Convert.ToString(Path.Combine(profile, "places.sqlite")));
-                    n++;
-                }
-            }
-            if (n == 0) { Console.WriteLine(($"Bookmarks file not found in Firefox")); }
-        }
-        else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-        {
-            ///home/$User/snap/firefox/common/.mozilla/firefox/aaaa.default/places.sqlite/
-            ///home/$User/.mozilla/firefox/aaaa.default/places.sqlite
-            profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.Personal), "/snap/firefox/common/.mozilla/firefox/");
-            int n = 0;
-            foreach (string profile in Directory.GetDirectories(profilespath))
-            {
-                if (File.Exists(Path.Combine(profile, "places.sqlite")))
-                {
-                    //For every firefox profile that has bookmarks
-                    filepaths.Add(Convert.ToString(Path.Combine(profile, "places.sqlite")));
-                    Console.WriteLine("File found! " + "Filepath in snap firefox: " + Convert.ToString(Path.Combine(profile, "places.sqlite")));
-                    n++;
-                }
-            }
-            profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.Personal), "/.mozilla/firefox");
-            foreach (string profile in Directory.GetDirectories(profilespath))
-            {
-                if (File.Exists(Path.Combine(profile, "places.sqlite")))
-                {
-                    //For every firefox profile that has bookmarks
-                    filepaths.Add(Convert.ToString(Path.Combine(profile, "places.sqlite")));
-                    Console.WriteLine("File found! " + "Filepath in Firefox: " + Convert.ToString(Path.Combine(profile, "places.sqlite")));
-                    n++;
-                }
-            }
-            if (n == 0) { Console.WriteLine(($"Bookmarks file not found in Firefox")); }
-        }
-        foreach (string path in filepaths)
-        {
-            Console.WriteLine("sqlite file: " + path);
-        }
-        /*
-        foreach (string path in filepaths)
-        {
-            using (var connection = new SqliteConnection("Data Source=" + path))
-            {
-                connection.Open();
-                var command = connection.CreateCommand();
-                command.CommandText =
-                @"
-                SELECT '<a href=''' || url || '''>' || moz_bookmarks.title || '</a><br/>' as ahref
-                FROM moz_bookmarks left join moz_places on fk=moz_places.id 
+            connection.Open();
+            var command = connection.CreateCommand();
+            command.CommandText =
+            @"
+                SELECT moz_places.url, moz_bookmarks.title, moz_bookmarks.id, moz_bookmarks.parent, moz_bookmarks.type, dateAdded, lastModified
+                FROM moz_bookmarks left join moz_places on moz_bookmarks.fk = moz_places.id
                 WHERE url<>'' and moz_bookmarks.title<>''
                 ";
-                command.Parameters.AddWithValue("$id", id);
 
-                using (var reader = command.ExecuteReader())
+            using (var reader = command.ExecuteReader())
+            {
+                while (reader.Read())
                 {
-                    while (reader.Read())
+                    Bookmark thisone = new Bookmark();
+                    thisone.url = reader.GetString(0); ////////////////////////check to see if folders have urls or if this causes a shift in variables
+                    thisone.name = reader.GetString(1);
+                    thisone.id = Convert.ToInt16(reader.GetString(2));
+                    parentid[thisone.id] = Convert.ToInt32(reader.GetString(3));
+                    string type = reader.GetString(4);
+                    if (type == "2")
                     {
-                        var ahref = reader.GetString(0);
-                        Console.WriteLine($"Hello, {ahref}!");
+                        thisone.type = "folder";
                     }
+                    else if (type == "1")
+                    {
+                        thisone.type = "url";
+                    }
+                    thisone.date_added = Convert.ToInt64(reader.GetString(5));
+                    thisone.date_modified = Convert.ToInt64(reader.GetString(6));
+                    //Console.WriteLine(thisone.url + thisone.title + thisone.parent + thisone.id + thisone.type + thisone.dateadded + thisone.lastmodified);
+                    AutoImport.Globals.sql_Bookmarks.Add(thisone);
                 }
             }
-            //sqlite3 places.sqlite "select '<a href=''' || url || '''>' || moz_bookmarks.title || '</a><br/>' as ahref from moz_bookmarks left join moz_places on fk=moz_places.id where url<>'' and moz_bookmarks.title<>''" > t1.html
         }
-        */
+        //sqlite3 places.sqlite "select '<a href=''' || url || '''>' || moz_bookmarks.title || '</a><br/>' as ahref from moz_bookmarks left join moz_places on fk=moz_places.id where url<>'' and moz_bookmarks.title<>''" > t1.html
+
+        //trying to place the data from the Bookmark object into a Folderclass[] object
+        //in the sql only parent ids are given, not children, so the process has to be reversed compared to the json
+
+        Folderclass[] folders = new Folderclass[AutoImport.Globals.sql_Bookmarks.Count];
+        foreach (Bookmark bookmark in AutoImport.Globals.sql_Bookmarks)
+        {
+            if (bookmark.type == "url") //urls have no children, it is safe to add them to their parent folders (even if they are not at the deepest depth
+            {
+                AutoImport.Globals.sql_Bookmarks.ElementAt(parentid[bookmark.id]).children.Add(bookmark); //bookmark added to their parent's .children list
+                AutoImport.Globals.sql_Bookmarks.Remove(bookmark); //bookmark is removed from the sql_list (as it is already in its parent's list
+            }
+            //only folders remain in the sql_list
+        }
+
+        //now AutoImport.Globals.sql_Bookmarks contains all the Bookmark objects for every folder.
+        //These should now be united into one Bookmarkroot by adding them as each other's children from deepest depth upwards.
+        //but instead they are just converted into folderclasses - this is also fine
+        for (int i = 1; i < AutoImport.Globals.sql_Bookmarks.Count + 1; i++)
+        {
+            if (i == 1) //assumes id 1 is the root parent of all folders - should be checked
+            {
+                folders[i].depth = 0;
+            }
+            else
+            {
+                folders[i].depth = folders[parentid[i]].depth + 1; //the given folders depth is the depth of their parent folder + 1
+            }
+            folders[i].name = AutoImport.Globals.sql_Bookmarks.ElementAt(i).name;
+            folders[i].startline = AutoImport.Globals.sql_Bookmarks.ElementAt(i).id;
+            folders[i].numberoflinks = AutoImport.Globals.sql_Bookmarks.ElementAt(i).children.Count();
+            foreach (Bookmark bookmark in AutoImport.Globals.sql_Bookmarks.ElementAt(i).children)
+            {
+                //adding the url of each child to the url list of their parent
+                folders[i].urls.Add(bookmark.url);
+            }
+        }
+        return folders;
     }
 
     public static void Checkformissing(string rootdir, Folderclass[] folders, int numberoffolders)
@@ -516,7 +511,7 @@ internal class Methods
                 process.OutputDataReceived += new DataReceivedEventHandler((sender, e) =>
                 {
                     Console.WriteLine("output :: " + e.Data);
-                    File.AppendAllText(Path.Combine(folders[j].folderpath, "log.txt"), e.Data + Environment.NewLine);
+                    File.AppendAllText(Path.Combine(folders[j].folderpath, "log" + DateTime.Now.ToString("yyyy’-‘MM’-‘dd’-’HH’h’mm’m’ss") + ".txt"), e.Data + Environment.NewLine);
                     if (e.Data != null && e.Data.Contains("[youtube] Extracting URL:"))
                     {
                         Console.ForegroundColor = ConsoleColor.Red;

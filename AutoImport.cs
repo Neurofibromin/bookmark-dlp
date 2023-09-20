@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using bookmark_dlp;
-using MintPlayer.PlatformBrowser;
 using Microsoft.Data.Sqlite;
 
 internal class AutoImport
@@ -16,26 +15,27 @@ internal class AutoImport
     /// todo:
     /// 
     /// handle complexnotsimple and temp streamwriters better
-    /// 
     /// the linknumbercounters are increased for complex links as well
     /// 
     /// handle youtube shorts in both download and check
     /// 
-    /// check if folders.linknumber refers to all links or youtube links in autoimport
+    /// check if folders.linknumber refers to all links or youtube links in autoimport (to all links probably, as Writelinkstotxt is not returning the changed values
     /// 
     /// there is some bug with checkformissing, out of range maybe?
+    /// allfailed.txt wrong place and name
+    /// create archive.shouldbe.txt and compare to archive that way?
     /// 
     /// chrome export bookmarks uses different layout html than google takeout
     ///
-    /// allfailed.txt wrong place and name
-    /// 
-    /// check every path.combine for absolute path in path2
-    /// 
-    /// create archive.shouldbe.txt and compare to archive that way
+    /// writing something to a log file? maybe try to write everything to dated log files?
     /// 
     /// check if folders/files already existing is a problem
     /// 
-    /// change the data types in the objects to long instead of string
+    /// find mac firefox path
+    /// 
+    /// check browser paths for flatpaks
+    /// 
+    /// add safari and chromium and opera and vivaldi support
     /// 
     /// </summary>
 
@@ -44,15 +44,18 @@ internal class AutoImport
     {
         Console.OutputEncoding = System.Text.Encoding.UTF8;
         string rootdir = Directory.GetCurrentDirectory(); //current directory
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-        {
-            //var InstalledBrowsers = new List<string>();
-            //List<string> InstalledBrowsers = AutoImport.Getinstalledbrowsers();
-            //Console.WriteLine(InstalledBrowsers);
-        }
         bool wantcomplex = Methods.Wantcomplex();
         string filePath = FindfilePath();
-        Folderclass[] folders = Intake(filePath);
+        Folderclass[] folders;
+        if (filePath.Contains("sqlite"))
+        {
+            folders = Methods.Sqlintake(filePath);
+            Environment.Exit(1);
+        }
+        else
+        {
+            folders = Intake(filePath);
+        }
         int numberoffolders = Globals.folderid;
         folders = Createfolderstructure(folders, rootdir); //because the folders[].folderpath is changed, the whole structure must be returned (or made global).
 
@@ -217,6 +220,7 @@ internal class AutoImport
         string filePath = "";
         string profilespath = "";
         List<string> filepaths = new List<string>();
+
         //use default location for bookmarks file
         //Chrome
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -224,7 +228,7 @@ internal class AutoImport
             //string windir = Environment.SystemDirectory; // C:\windows\system32
             //string windrive = Path.GetPathRoot(Environment.SystemDirectory); // C:\
             //filePath = windrive + "\\Users\\" + Environment.UserName + "\\AppData\\Local\\Google\\Chrome\\User Data\\Default\\Bookmarks";
-            /*filePath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "\\Google\\Chrome\\User Data\\Default\\Bookmarks");
+            /*filePath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Google\\Chrome\\User Data\\Default\\Bookmarks");
             if (File.Exists(filePath)) { 
                 Console.WriteLine("File found! " + "Filepath in chrome: " + filePath);
                 filepaths.Add(filePath);
@@ -389,6 +393,102 @@ internal class AutoImport
             }
         }
 
+        //Firefox
+        //Finding the sqlite databases
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            ///C:\Windows.old\Users\<UserName>\AppData\Roaming\Mozilla\Firefox\Profiles\<filename.default>\places.sqlite
+            //filePath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Mozilla\\Firefox\\Profiles\\<filename.default>\\places.sqlite");
+            profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Mozilla\\Firefox\\Profiles\\");
+            int n = 0;
+            //Console.WriteLine("profilespath " + profilespath);
+            if (Directory.Exists(profilespath))
+            {
+                foreach (string profile in Directory.GetDirectories(profilespath))
+                {
+                    if (File.Exists(Path.Combine(profile, "places.sqlite")))
+                    {
+                        //For every firefox profile that has bookmarks
+                        filepaths.Add(Convert.ToString(Path.Combine(profile, "places.sqlite")));
+                        Console.WriteLine("File found! " + "Filepath in Firefox: " + Convert.ToString(Path.Combine(profile, "places.sqlite")));
+                        n++;
+                    }
+                }
+            }
+            else
+            {
+                Console.WriteLine("Firefox install folder not found");
+            }
+            if (n == 0) { Console.WriteLine(($"Bookmarks file not found in Firefox")); }
+        }
+        else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        {
+            ///home/$User/snap/firefox/common/.mozilla/firefox/aaaa.default/places.sqlite/
+            ///home/$User/.mozilla/firefox/aaaa.default/places.sqlite
+            profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.Personal), "snap/firefox/common/.mozilla/firefox/");
+            int n = 0;
+            if (Directory.Exists(profilespath))
+            {
+                foreach (string profile in Directory.GetDirectories(profilespath))
+                {
+                    if (File.Exists(Path.Combine(profile, "places.sqlite")))
+                    {
+                        //For every firefox profile that has bookmarks
+                        filepaths.Add(Convert.ToString(Path.Combine(profile, "places.sqlite")));
+                        Console.WriteLine("File found! " + "Filepath in snap firefox: " + Convert.ToString(Path.Combine(profile, "places.sqlite")));
+                        n++;
+                    }
+                }
+            }
+            else
+            {
+                Console.WriteLine("Firefox snap install not found");
+            }
+            profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.Personal), ".mozilla/firefox");
+            if (Directory.Exists(profilespath))
+            {
+                foreach (string profile in Directory.GetDirectories(profilespath))
+                {
+                    if (File.Exists(Path.Combine(profile, "places.sqlite")))
+                    {
+                        //For every firefox profile that has bookmarks
+                        filepaths.Add(Convert.ToString(Path.Combine(profile, "places.sqlite")));
+                        Console.WriteLine("File found! " + "Filepath in Firefox: " + Convert.ToString(Path.Combine(profile, "places.sqlite")));
+                        n++;
+                    }
+                }
+            }
+            else
+            {
+                Console.WriteLine("Firefox native install not found");
+            }
+            if (n == 0) { Console.WriteLine(($"Bookmarks file not found in Firefox")); }
+        }
+        else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        {
+            //#####################################################################################################################################################################################################################
+            /*profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.Personal), ".mozilla/firefox");
+            if (Directory.Exists(profilespath)
+            {
+                foreach (string profile in Directory.GetDirectories(profilespath))
+                {
+                    if (File.Exists(Path.Combine(profile, "places.sqlite")))
+                    {
+                        //For every firefox profile that has bookmarks
+                        filepaths.Add(Convert.ToString(Path.Combine(profile, "places.sqlite")));
+                        Console.WriteLine("File found! " + "Filepath in Firefox: " + Convert.ToString(Path.Combine(profile, "places.sqlite")));
+                        n++;
+                    }
+                }
+            }
+            else
+            {
+                Console.WriteLine("Firefox install folder not found.");
+            }
+            if (n == 0) { Console.WriteLine(($"Bookmarks file not found in Firefox")); }*/
+            Console.WriteLine("WIP");
+        }
+
         if (filepaths.Count == 0)
         {
             throw new FileNotFoundException($"No bookmarks file was found by autoimport in any of the locations");
@@ -409,7 +509,6 @@ internal class AutoImport
     {
         Console.WriteLine("Autoimport intake start");
         string text = File.ReadAllText(filePath);
-        Console.WriteLine("readalltext successful");
         Bookmark bookmark_bar = JObject.Parse(text)["roots"]["bookmark_bar"].ToObject<Bookmark>();
         Bookmark other = JObject.Parse(text)["roots"]["other"].ToObject<Bookmark>();
         Bookmark synced = JObject.Parse(text)["roots"]["synced"].ToObject<Bookmark>();
@@ -425,11 +524,11 @@ internal class AutoImport
         {
             name = "Bookmarks",
             guid = Guid.NewGuid().ToString(), //adding new guid to the root
-            id = "0", //id for : bookmark_bar=1, other=2, synced=3
+            id = Convert.ToInt16("0"), //id for : bookmark_bar=1, other=2, synced=3
             type = "folder",
-            date_added = Convert.ToString(Convert.ToInt64(bookmark_bar.date_added) - 2), //just setting a time that was slightly earlier than the bookmark_bar creation
-            date_last_used = "0", //not used by chrome apparently
-            date_modified = "0", //not much used by chrome apparently
+            date_added = Convert.ToInt64(bookmark_bar.date_added) - 2, //just setting a time that was slightly earlier than the bookmark_bar creation
+            date_last_used = Convert.ToInt64("0"), //not used by chrome apparently
+            date_modified = Convert.ToInt64("0"), //not much used by chrome apparently
             children = new List<Bookmark> { bookmark_bar, other, synced }
         };
         if (false) //just to hide the long comment in the IDE
@@ -475,13 +574,11 @@ internal class AutoImport
             */
         }
         Bookmark bookmarkroot = root;
-        Console.WriteLine("jobject successful");
         Folderclass thisBookmark = new Folderclass();
         thisBookmark.startline = Globals.folderid;
         thisBookmark.urls = new List<string>();
         int numberoflinks = 0;
         int depth = 0;
-        Console.WriteLine("point1");
         foreach (Bookmark child in bookmarkroot.children)
         {
             if (child.type == "url")
@@ -568,23 +665,6 @@ internal class AutoImport
         return folders;
     }
 
-    public static List<string> Getinstalledbrowsers()
-    {
-        //find which browsers are installed
-        var browsers = PlatformBrowser.GetInstalledBrowsers();
-        var InstalledBrowsers = new List<string>();
-        foreach (var browser in browsers)
-        {
-            Console.WriteLine($"Browser: {browser.Name}");
-            Console.WriteLine($"Executable: {browser.ExecutablePath}");
-            Console.WriteLine($"Icon path: {browser.IconPath}");
-            Console.WriteLine($"Icon index: {browser.IconIndex}");
-            Console.WriteLine();
-            InstalledBrowsers.Add(browser.Name);
-        }
-        return InstalledBrowsers;
-    }
-
     public static class Globals
     {
         public static int folderid = 0; //used a lot instead of numberoffolders, maybe not ideal?
@@ -596,18 +676,30 @@ internal class AutoImport
         public static string folderpath;
         public static int numberoflinks;
         public static List<Folderclass> folderclasses = new List<Folderclass>();
+        public static List<Bookmark> sql_Bookmarks = new List<Bookmark>();
     }
 }
 
 public class Bookmark
 {
-    public string date_added;
-    public string date_last_used;
-    public string date_modified; //only where type = folder
+    public Int64 date_added;
+    public Int64 date_last_used;
+    public Int64 date_modified; //only where type = folder
     public string guid;
-    public string id;
+    public Int16 id;
     public string name;
     public string type;
     public string url; //only where type = url
     public List<Bookmark> children; //only where type = folder
 }
+
+/*public class Sql_bookmark
+{
+    public string url;
+    public string title;
+    public int parent;
+    public Int16 id;
+    public string type;
+    public Int64 dateadded;
+    public Int64 lastmodified;
+}*/
