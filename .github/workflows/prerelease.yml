@@ -24,8 +24,6 @@ jobs:
         dotnet-version: ${{ matrix.dotnet-version }}  
     - name: Install Newtonsoft
       run: dotnet add package Newtonsoft.Json --version 13.0.3
-    - name: Install Platformbrowser
-      run: dotnet add package MintPlayer.PlatformBrowser --version 6.0.1
     - name: Install SQlite
       run: dotnet add package Microsoft.Data.Sqlite --version 7.0.10
     - name: Restore dependencies
