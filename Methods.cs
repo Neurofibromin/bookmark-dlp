@@ -20,6 +20,7 @@ internal class Methods
         ///https://stackoverflow.com/questions/11769524/how-can-i-restore-firefox-bookmark-files-from-sqlite-files
         //Console.WriteLine("sqlite file: " + path);
         int[] parentid = new int[File.ReadLines(filePath).Count()]; //parentid[i] = the id of the parent folder of the bookmark with the id i
+        List<Bookmark> bookmarks = new List<Bookmark>();
         using (var connection = new SqliteConnection("Data Source=" + filePath))
         {
             connection.Open();
@@ -28,31 +29,52 @@ internal class Methods
             @"
                 SELECT moz_places.url, moz_bookmarks.title, moz_bookmarks.id, moz_bookmarks.parent, moz_bookmarks.type, dateAdded, lastModified
                 FROM moz_bookmarks left join moz_places on moz_bookmarks.fk = moz_places.id
-                WHERE url<>'' and moz_bookmarks.title<>''
+                WHERE moz_bookmarks.title<>''
                 ";
 
-            using (var reader = command.ExecuteReader())
+            using (var reader = command.ExecuteReader()) //the order of the variables in SELECT is the same order in which they are returned, coloumn by coloumn
             {
                 while (reader.Read())
                 {
                     Bookmark thisone = new Bookmark();
-                    thisone.url = reader.GetString(0); ////////////////////////check to see if folders have urls or if this causes a shift in variables
+                    string type = "";
+                    if (!reader.IsDBNull(0)) //only try to convert the coloumn value to string with getstring if it is not null - otherwise error
+                    {
+                        thisone.url = reader.GetString(0); ////////////////////////check to see if folders have urls or if this causes a shift in variables
+                    }
                     thisone.name = reader.GetString(1);
                     thisone.id = Convert.ToInt16(reader.GetString(2));
-                    parentid[thisone.id] = Convert.ToInt32(reader.GetString(3));
-                    string type = reader.GetString(4);
-                    if (type == "2")
+                    if (!reader.IsDBNull(3))
+                    {
+                        parentid[thisone.id] = Convert.ToInt32(reader.GetString(3));
+                    }
+                    if (!reader.IsDBNull(4))
+                    {
+                        type = reader.GetString(4);
+                    }
+                    if (!reader.IsDBNull(5))
+                    {
+                        thisone.date_added = Convert.ToInt64(reader.GetString(5));
+                    }
+                    if (!reader.IsDBNull(6))
+                    {
+                        thisone.date_modified = Convert.ToInt64(reader.GetString(6));
+                    }
+                    if (type.Contains("2"))
                     {
                         thisone.type = "folder";
+                        //Console.WriteLine("url:" + thisone.url + " name:" + thisone.name + " pid:" + parentid[thisone.id] + " id:" + thisone.id + " type:" + thisone.type + "|" + thisone.date_added + "|" + thisone.date_modified);
                     }
-                    else if (type == "1")
+                    else if (type.Contains("1"))
                     {
                         thisone.type = "url";
                     }
-                    thisone.date_added = Convert.ToInt64(reader.GetString(5));
-                    thisone.date_modified = Convert.ToInt64(reader.GetString(6));
-                    //Console.WriteLine(thisone.url + thisone.title + thisone.parent + thisone.id + thisone.type + thisone.dateadded + thisone.lastmodified);
-                    AutoImport.Globals.sql_Bookmarks.Add(thisone);
+                    else
+                    {
+                        Console.WriteLine("Error: this bookmark is not of type folder or url - undefined");
+                    }
+                    bookmarks.Add(thisone);
+                    //Console.WriteLine(thisone.id + " added");
                 }
             }
         }
@@ -60,22 +82,30 @@ internal class Methods
 
         //trying to place the data from the Bookmark object into a Folderclass[] object
         //in the sql only parent ids are given, not children, so the process has to be reversed compared to the json
-
-        Folderclass[] folders = new Folderclass[AutoImport.Globals.sql_Bookmarks.Count];
-        foreach (Bookmark bookmark in AutoImport.Globals.sql_Bookmarks)
+        foreach (Bookmark bookmark in bookmarks.ToList<Bookmark>()) //must use tolist<> to avoid "Collection was modified; enumeration operation may not execute" when removing item from bookmarks
         {
+            //Console.WriteLine("evaluating id: " + bookmark.id);
             if (bookmark.type == "url") //urls have no children, it is safe to add them to their parent folders (even if they are not at the deepest depth
             {
-                AutoImport.Globals.sql_Bookmarks.ElementAt(parentid[bookmark.id]).children.Add(bookmark); //bookmark added to their parent's .children list
-                AutoImport.Globals.sql_Bookmarks.Remove(bookmark); //bookmark is removed from the sql_list (as it is already in its parent's list
+                //Console.WriteLine("bookmark id: " + bookmark.id);
+                //Console.WriteLine("parentid[]: " + parentid[bookmark.id]);
+                //Console.WriteLine("parentid oncemore: " + bookmarks.Single(a => a.id == parentid[bookmark.id]).id);
+                bookmarks.Single(a => a.id == parentid[bookmark.id]).children.Add(bookmark); //bookmark added to their parent's .children list
+                bookmarks.Remove(bookmark); //bookmark is removed from the sql_list (as it is already in its parent's list
+                //Environment.Exit(1);
+            }
+            else
+            {
+                //Console.WriteLine("This is a folder: " + bookmark.name);
             }
             //only folders remain in the sql_list
         }
-
+        Console.WriteLine("Finished foreach");
+        Folderclass[] folders = new Folderclass[bookmarks.Count];
         //now AutoImport.Globals.sql_Bookmarks contains all the Bookmark objects for every folder.
         //These should now be united into one Bookmarkroot by adding them as each other's children from deepest depth upwards.
         //but instead they are just converted into folderclasses - this is also fine
-        for (int i = 1; i < AutoImport.Globals.sql_Bookmarks.Count + 1; i++)
+        for (int i = 1; i < bookmarks.Count + 1; i++)
         {
             if (i == 1) //assumes id 1 is the root parent of all folders - should be checked
             {
@@ -85,10 +115,10 @@ internal class Methods
             {
                 folders[i].depth = folders[parentid[i]].depth + 1; //the given folders depth is the depth of their parent folder + 1
             }
-            folders[i].name = AutoImport.Globals.sql_Bookmarks.ElementAt(i).name;
-            folders[i].startline = AutoImport.Globals.sql_Bookmarks.ElementAt(i).id;
-            folders[i].numberoflinks = AutoImport.Globals.sql_Bookmarks.ElementAt(i).children.Count();
-            foreach (Bookmark bookmark in AutoImport.Globals.sql_Bookmarks.ElementAt(i).children)
+            folders[i].name = bookmarks.ElementAt(i).name;
+            folders[i].startline = bookmarks.ElementAt(i).id;
+            folders[i].numberoflinks = bookmarks.ElementAt(i).children.Count();
+            foreach (Bookmark bookmark in bookmarks.ElementAt(i).children)
             {
                 //adding the url of each child to the url list of their parent
                 folders[i].urls.Add(bookmark.url);
@@ -168,8 +198,12 @@ internal class Methods
         Console.WriteLine("Total number of missing links: " + allmissinglinksnumber);
     }
 
-    public static void Dumptoconsole(Folderclass[] folders, int numberoffolders, int totalyoutubelinknumber = 0)
+    public static void Dumptoconsole(Folderclass[] folders, int numberoffolders = 0, int totalyoutubelinknumber = 0)
     {
+        if (numberoffolders == 0)
+        {
+            numberoffolders = folders.Count();
+        }
         Console.WriteLine("\n\n");
         Console.WriteLine("The following folders were found");
         int depthsymbolcounter = 0;

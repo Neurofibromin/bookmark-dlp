@@ -50,6 +50,7 @@ internal class AutoImport
         if (filePath.Contains("sqlite"))
         {
             folders = Methods.Sqlintake(filePath);
+            Methods.Dumptoconsole(folders);
             Environment.Exit(1);
         }
         else
@@ -676,7 +677,7 @@ internal class AutoImport
         public static string folderpath;
         public static int numberoflinks;
         public static List<Folderclass> folderclasses = new List<Folderclass>();
-        public static List<Bookmark> sql_Bookmarks = new List<Bookmark>();
+        //public static List<Bookmark> sql_Bookmarks = new List<Bookmark>();
     }
 }
 
@@ -690,7 +691,7 @@ public class Bookmark
     public string name;
     public string type;
     public string url; //only where type = url
-    public List<Bookmark> children; //only where type = folder
+    public List<Bookmark> children = new List<Bookmark>(); //only where type = folder
 }
 
 /*public class Sql_bookmark
