@@ -18,7 +18,6 @@ internal class Methods
     {
         ///docs: https://kb.mozillazine.org/Places.sqlite
         ///https://stackoverflow.com/questions/11769524/how-can-i-restore-firefox-bookmark-files-from-sqlite-files
-        //Console.WriteLine("sqlite file: " + path);
         int[] parentid = new int[File.ReadLines(filePath).Count()]; //parentid[i] = the id of the parent folder of the bookmark with the id i
         List<Bookmark> bookmarks = new List<Bookmark>();
         using (var connection = new SqliteConnection("Data Source=" + filePath))
@@ -40,7 +39,7 @@ internal class Methods
                     string type = "";
                     if (!reader.IsDBNull(0)) //only try to convert the coloumn value to string with getstring if it is not null - otherwise error
                     {
-                        thisone.url = reader.GetString(0); ////////////////////////check to see if folders have urls or if this causes a shift in variables
+                        thisone.url = reader.GetString(0);
                     }
                     thisone.name = reader.GetString(1);
                     thisone.id = Convert.ToInt16(reader.GetString(2));
@@ -74,7 +73,6 @@ internal class Methods
                         Console.WriteLine("Error: this bookmark is not of type folder or url - undefined");
                     }
                     bookmarks.Add(thisone);
-                    //Console.WriteLine(thisone.id + " added");
                 }
             }
         }
@@ -84,44 +82,58 @@ internal class Methods
         //in the sql only parent ids are given, not children, so the process has to be reversed compared to the json
         foreach (Bookmark bookmark in bookmarks.ToList<Bookmark>()) //must use tolist<> to avoid "Collection was modified; enumeration operation may not execute" when removing item from bookmarks
         {
-            //Console.WriteLine("evaluating id: " + bookmark.id);
             if (bookmark.type == "url") //urls have no children, it is safe to add them to their parent folders (even if they are not at the deepest depth
             {
-                //Console.WriteLine("bookmark id: " + bookmark.id);
-                //Console.WriteLine("parentid[]: " + parentid[bookmark.id]);
-                //Console.WriteLine("parentid oncemore: " + bookmarks.Single(a => a.id == parentid[bookmark.id]).id);
                 bookmarks.Single(a => a.id == parentid[bookmark.id]).children.Add(bookmark); //bookmark added to their parent's .children list
                 bookmarks.Remove(bookmark); //bookmark is removed from the sql_list (as it is already in its parent's list
-                //Environment.Exit(1);
-            }
-            else
-            {
-                //Console.WriteLine("This is a folder: " + bookmark.name);
             }
             //only folders remain in the sql_list
         }
-        Console.WriteLine("Finished foreach");
-        Folderclass[] folders = new Folderclass[bookmarks.Count];
+        Console.WriteLine("DEV Finished foreach");
+        Folderclass[] folders = new Folderclass[bookmarks.Count]; //declare and initialise the folders[]
+        for (int q = 0; q < bookmarks.Count; q++)
+        {
+            folders[q] = new Folderclass();
+        }
         //now AutoImport.Globals.sql_Bookmarks contains all the Bookmark objects for every folder.
         //These should now be united into one Bookmarkroot by adding them as each other's children from deepest depth upwards.
         //but instead they are just converted into folderclasses - this is also fine
-        for (int i = 1; i < bookmarks.Count + 1; i++)
+        int folderid = 1;
+        foreach (Bookmark bookmark in bookmarks)
         {
-            if (i == 1) //assumes id 1 is the root parent of all folders - should be checked
-            {
-                folders[i].depth = 0;
+            int i = bookmark.id;
+            //i refers to the id (from the sql) of the folder that is being examined. folderid will be its new id, so every folderid refers to folders and there is no gap between them:
+            //examples:
+            //folder toolbars id: 2 folderid: 1
+            //folder a id: 7 folderid: 2
+            //folder b id: 15 folderid: 3
+            //folder c id: 43175 folderid: 4
+            //the difference is large because id was also given in the sql db for url bookmarks, while now only folder bookmarks are examined, so large gaps are expected
+            Console.WriteLine("1");
+            Console.WriteLine("parentid: " + parentid[i]);
+            int index = Array.FindIndex(folders, a => a.startline == parentid[i]);
+            Console.WriteLine("Index: " + index);
+            Console.WriteLine("Name: " + folders.SingleOrDefault(a => a.startline == parentid[i]).name);
+            if (folders.SingleOrDefault(a => a.startline == parentid[i]).depth == 0) //if a folder's parent does not have a depth value, the folder probably does not have a parent - as such its depth should be 0
+            { //i - id of the examined folder, parentid[i] - id of the examined folder's parent : we are looking for the folder[] that has this parentid[i] as its startingline (refers to the original id), so "folders.SingleOrDefault(a => a.startline == parentid[i])" refers to the parent of the examined folder
+                folders[folderid].depth = 1;
             }
             else
             {
-                folders[i].depth = folders[parentid[i]].depth + 1; //the given folders depth is the depth of their parent folder + 1
+                folders[folderid].depth = folders.SingleOrDefault(a => a.startline == parentid[i]).depth + 1; //the given folders depth is the depth of their parent folder + 1
             }
-            folders[i].name = bookmarks.ElementAt(i).name;
-            folders[i].startline = bookmarks.ElementAt(i).id;
-            folders[i].numberoflinks = bookmarks.ElementAt(i).children.Count();
-            foreach (Bookmark bookmark in bookmarks.ElementAt(i).children)
+            Console.WriteLine("2");
+            //maybe should discard the above condition? it parent does not exist its 0 anyway, so the value would be set 0+1=1
+
+            //old lookup using for loop instead of foreach: folders[i].name = bookmarks.SingleOrDefault(a => a.id == i).name;
+            folders[folderid].name = bookmark.name;
+            folders[folderid].startline = bookmark.id;
+            folders[folderid].numberoflinks = bookmark.children.Count();
+            Console.WriteLine("Name: {0} ID: {1} Numberoflinks: {2} Depth: {3}", folders[folderid].name, folders[folderid].startline, folders[folderid].numberoflinks, folders[folderid].depth);
+            foreach (Bookmark urlbookmark in bookmark.children)
             {
                 //adding the url of each child to the url list of their parent
-                folders[i].urls.Add(bookmark.url);
+                folders[folderid].urls.Add(urlbookmark.url);
             }
         }
         return folders;

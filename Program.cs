@@ -298,6 +298,6 @@ namespace bookmark_dlp
         public string folderpath;
         public int numberoflinks;
         public int numberofmissinglinks;
-        public List<string> urls;
+        public List<string> urls = new List<string>();
     }
 }

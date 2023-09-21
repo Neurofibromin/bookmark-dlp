@@ -19,7 +19,7 @@ internal class AutoImport
     /// 
     /// handle youtube shorts in both download and check
     /// 
-    /// check if folders.linknumber refers to all links or youtube links in autoimport (to all links probably, as Writelinkstotxt is not returning the changed values
+    /// folders.linknumber refers to all links or youtube links in autoimport (Writelinkstotxt is not returning the changed values)
     /// 
     /// there is some bug with checkformissing, out of range maybe?
     /// allfailed.txt wrong place and name
@@ -29,13 +29,15 @@ internal class AutoImport
     ///
     /// writing something to a log file? maybe try to write everything to dated log files?
     /// 
-    /// check if folders/files already existing is a problem
-    /// 
     /// find mac firefox path
     /// 
-    /// check browser paths for flatpaks
+    /// check browser paths for flatpaks:maybe https://github.com/flatpak/flatpak/issues/1214#issuecomment-347752940
     /// 
-    /// add safari and chromium and opera and vivaldi support
+    /// add safari and opera support
+    /// 
+    /// check vivaldi linux path?
+    /// 
+    /// retest because class object declaration was changed, does it affect the original code?
     /// 
     /// </summary>
 
@@ -222,6 +224,68 @@ internal class AutoImport
         string profilespath = "";
         List<string> filepaths = new List<string>();
 
+        BrowserLocations Chrome = new BrowserLocations
+        {
+            browsername = "Chrome",
+            windows_profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Google\\Chrome\\User Data\\"),
+            //linksfound = "",
+            linux_profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "google-chrome"),
+            osx_profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.Personal), "Library/Application Support/Google/Chrome")
+        };
+        BrowserLocations Chrome_beta = new BrowserLocations
+        {
+            browsername = "Chrome-beta",
+            windows_profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Google\\Chrome Beta\\User Data\\"),
+            //linksfound = "",
+            linux_profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "google-chrome-beta"),
+            osx_profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.Personal), "Library/Application Support/Google/Chrome Beta")
+        };
+        BrowserLocations Chrome_canary = new BrowserLocations
+        {
+            browsername = "Chrome-canary",
+            windows_profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Google\\Chrome SxS\\User Data\\"),
+            //linksfound = "",
+            linux_profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "google-chrome-unstable"), //technically its called chrome unstable on linux, but its the same thing
+            osx_profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.Personal), "Library/Application Support/Google/Chrome Canary")
+        };
+        BrowserLocations Brave = new BrowserLocations
+        {
+            browsername = "Brave-browser",
+            windows_profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "BraveSoftware\\Brave-Browser\\User Data\\"),
+            linux_profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "BraveSoftware/Brave-Browser/"),
+            osx_profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.Personal), "Library/Application Support/BraveSoftware/Brave-Browser")
+        };
+        BrowserLocations Chromium = new BrowserLocations
+        {
+            browsername = "chromium",
+            windows_profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Chromium\\User Data"),
+            linux_profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "chromium"),
+            osx_profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.Personal), "Library/Application Support/Chromium")
+        };
+        BrowserLocations Vivaldi = new BrowserLocations()
+        {
+            browsername = "Vivaldi",
+            windows_profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Vivaldi\\User Data"),
+            linux_profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "vivaldi"),
+            osx_profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.Personal), "Library/Application Support/Vivaldi")
+        };
+        BrowserLocations Opera = new BrowserLocations()
+        {
+            browsername = "Opera",
+            //C:\Users\%username%\AppData\Roaming\Opera Software\Opera Stable\Bookmarks is the Bookmarks file
+            windows_profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Opera Software"),
+            //rest has to be checked manually
+        };
+        List<BrowserLocations> browserLocations = new List<BrowserLocations>
+        {
+            Chrome,
+            Brave,
+            Chromium,
+            Chrome_beta,
+            Chrome_canary,
+            Vivaldi
+        };
+
         //use default location for bookmarks file
         //Chrome
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -318,9 +382,9 @@ internal class AutoImport
         }
 
         //Brave Browser
-        //%localappdata%\BraveSoftware\Brave-Browser\User Data\Default\
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
+            //%localappdata%\BraveSoftware\Brave-Browser\User Data\Default\
             profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "BraveSoftware\\Brave-Browser\\User Data\\");
             int n = 0;
             if (Directory.Exists(profilespath))
@@ -356,7 +420,7 @@ internal class AutoImport
                 {
                     if (File.Exists(Path.Combine(profile, "Bookmarks")))
                     {
-                        //For every chrome profile that has bookmarks
+                        //For every brave profile that has bookmarks
                         filepaths.Add(Convert.ToString(Path.Combine(profile, "Bookmarks")));
                         Console.WriteLine("File found! " + "Filepath in Brave: " + Convert.ToString(Path.Combine(profile, "Bookmarks")));
                         n++;
@@ -380,7 +444,7 @@ internal class AutoImport
                 {
                     if (File.Exists(Path.Combine(profile, "Bookmarks")))
                     {
-                        //For every chrome profile that has bookmarks
+                        //For every brave profile that has bookmarks
                         filepaths.Add(Convert.ToString(Path.Combine(profile, "Bookmarks")));
                         Console.WriteLine("File found! " + "Filepath in Brave: " + Convert.ToString(Path.Combine(profile, "Bookmarks")));
                         n++;
@@ -391,6 +455,153 @@ internal class AutoImport
             else
             {
                 Console.WriteLine("Brave-browser install folder not found");
+            }
+        }
+
+        //Chromium
+        //great docs: https://chromium.googlesource.com/chromium/src/+/master/docs/user_data_dir.md
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            //%LOCALAPPDATA%\Chromium\User Data
+            profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Chromium\\User Data");
+            int n = 0;
+            if (Directory.Exists(profilespath))
+            {
+                foreach (string profile in Directory.GetDirectories(profilespath))
+                {
+                    if (File.Exists(Path.Combine(profile, "Bookmarks")))
+                    {
+                        //For every chromium profile that has bookmarks
+                        filepaths.Add(Convert.ToString(Path.Combine(profile, "Bookmarks")));
+                        Console.WriteLine("File found! " + "Filepath in Chromium: " + Convert.ToString(Path.Combine(profile, "Bookmarks")));
+                        n++;
+                    }
+                }
+                if (n == 0)
+                {
+                    Console.WriteLine(($"No Bookmarks file found in Chromium browser"));
+                }
+            }
+            else
+            {
+                Console.WriteLine("Chromium install folder not found");
+            }
+        }
+        else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        {
+            //[Chromium] ~/.config/chromium
+            int n = 0;
+            profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "chromium");
+            if (Directory.Exists(profilespath))
+            {
+                foreach (string profile in Directory.GetDirectories(profilespath))
+                {
+                    if (File.Exists(Path.Combine(profile, "Bookmarks")))
+                    {
+                        //For every chromium profile that has bookmarks
+                        filepaths.Add(Convert.ToString(Path.Combine(profile, "Bookmarks")));
+                        Console.WriteLine("File found! " + "Filepath in Chromium: " + Convert.ToString(Path.Combine(profile, "Bookmarks")));
+                        n++;
+                    }
+                }
+                if (n == 0) { Console.WriteLine(($"Bookmarks file not found in Chromium")); }
+            }
+            else
+            {
+                Console.WriteLine("Chromium install folder not found");
+            }
+        }
+        else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        {
+            ///[Chromium] ~/Library/Application Support/Chromium
+            int n = 0;
+            profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.Personal), "Library/Application Support/Chromium");
+            if (Directory.Exists(profilespath))
+            {
+                foreach (string profile in Directory.GetDirectories(profilespath))
+                {
+                    if (File.Exists(Path.Combine(profile, "Bookmarks")))
+                    {
+                        //For every chromium profile that has bookmarks
+                        filepaths.Add(Convert.ToString(Path.Combine(profile, "Bookmarks")));
+                        Console.WriteLine("File found! " + "Filepath in Chromium: " + Convert.ToString(Path.Combine(profile, "Bookmarks")));
+                        n++;
+                    }
+                }
+                if (n == 0) { Console.WriteLine(($"Bookmarks file not found in Chromium")); }
+            }
+            else
+            {
+                Console.WriteLine("Chromium install folder not found");
+            }
+        }
+
+        //Generic chrome based:
+        foreach (BrowserLocations browser in browserLocations)
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                if (Directory.Exists(browser.windows_profilespath))
+                {
+                    foreach (string profile in Directory.GetDirectories(browser.windows_profilespath))
+                    {
+                        if (File.Exists(Path.Combine(profile, "Bookmarks")))
+                        {
+                            filepaths.Add(Convert.ToString(Path.Combine(profile, "Bookmarks")));
+                            Console.WriteLine("File found! Filepath in " + browser.browsername + ": " + Convert.ToString(Path.Combine(profile, "Bookmarks")));
+                            browser.linksfound++;
+                        }
+                    }
+                    if (browser.linksfound == 0)
+                    {
+                        Console.WriteLine(($"No Bookmarks file found in " + browser.browsername));
+                    }
+                }
+                else
+                {
+                    Console.WriteLine(browser.browsername + " install folder not found");
+                }
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                if (Directory.Exists(browser.linux_profilespath))
+                {
+                    foreach (string profile in Directory.GetDirectories(browser.linux_profilespath))
+                    {
+                        if (File.Exists(Path.Combine(profile, "Bookmarks")))
+                        {
+                            //For every chrome profile that has bookmarks
+                            filepaths.Add(Convert.ToString(Path.Combine(profile, "Bookmarks")));
+                            Console.WriteLine("File found! Filepath in " + browser.browsername + ": " + Convert.ToString(Path.Combine(profile, "Bookmarks")));
+                            browser.linksfound++;
+                        }
+                    }
+                    if (browser.linksfound == 0) { Console.WriteLine(($"Bookmarks file not found in " + browser.browsername)); }
+                }
+                else
+                {
+                    Console.WriteLine(browser.browsername + " install folder not found");
+                }
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                if (Directory.Exists(browser.osx_profilespath))
+                {
+                    foreach (string profile in Directory.GetDirectories(browser.osx_profilespath))
+                    {
+                        if (File.Exists(Path.Combine(profile, "Bookmarks")))
+                        {
+                            filepaths.Add(Convert.ToString(Path.Combine(profile, "Bookmarks")));
+                            Console.WriteLine("File found! Filepath in " + browser.browsername + ": " + Convert.ToString(Path.Combine(profile, "Bookmarks")));
+                            browser.linksfound++;
+                        }
+                    }
+                    if (browser.linksfound == 0) { Console.WriteLine(($"Bookmarks file not found in " + browser.browsername)); }
+                }
+                else
+                {
+                    Console.WriteLine(browser.browsername + " install folder not found");
+                }
             }
         }
 
@@ -694,13 +905,11 @@ public class Bookmark
     public List<Bookmark> children = new List<Bookmark>(); //only where type = folder
 }
 
-/*public class Sql_bookmark
+public class BrowserLocations
 {
-    public string url;
-    public string title;
-    public int parent;
-    public Int16 id;
-    public string type;
-    public Int64 dateadded;
-    public Int64 lastmodified;
-}*/
+    public string browsername;
+    public string windows_profilespath = "";
+    public string linux_profilespath = "";
+    public string osx_profilespath = "";
+    public Int16 linksfound = 0;
+}
