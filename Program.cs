@@ -291,7 +291,7 @@ namespace bookmark_dlp
 
     public class Folderclass //defining the folderclass class to create an object array from it
     {
-        public int startline;
+        public int startline; //for html: the line number in which the folder starts in the html. json(autoimport intake chrome): the folder id, same as the folder[i] index. firefox-sql: the bookmark id of the folder in the sql db
         public string name;
         public int depth;
         public int endingline;

@@ -29,15 +29,16 @@ internal class AutoImport
     ///
     /// writing something to a log file? maybe try to write everything to dated log files?
     /// 
-    /// find mac firefox path
-    /// 
     /// check browser paths for flatpaks:maybe https://github.com/flatpak/flatpak/issues/1214#issuecomment-347752940
     /// 
-    /// add safari and opera support
+    /// add safari and opera and edge support
     /// 
     /// check vivaldi linux path?
+    /// edge linux, osx?
     /// 
-    /// retest because class object declaration was changed, does it affect the original code?
+    /// handle folders with empty names
+    /// 
+    /// dumptoconsole just writes after one another, if child does not follow parent its problematic
     /// 
     /// </summary>
 
@@ -52,14 +53,13 @@ internal class AutoImport
         if (filePath.Contains("sqlite"))
         {
             folders = Methods.Sqlintake(filePath);
-            Methods.Dumptoconsole(folders);
-            Environment.Exit(1);
         }
         else
         {
             folders = Intake(filePath);
         }
         int numberoffolders = Globals.folderid;
+        Methods.Dumptoconsole(folders, numberoffolders);
         folders = Createfolderstructure(folders, rootdir); //because the folders[].folderpath is changed, the whole structure must be returned (or made global).
 
         int deepestdepth = 0; //Finding the deepest folder depth
@@ -154,7 +154,7 @@ internal class AutoImport
             if (new FileInfo(Path.Combine(folders[j].folderpath, folders[j].name + ".txt")).Length == 0) //if the txt reamined empty it is deleted
             {
                 File.Delete(Path.Combine(folders[j].folderpath, folders[j].name + ".txt"));
-                Console.WriteLine("Deleted txt of " + folders[j].name);
+                //Console.WriteLine("Deleted txt of " + folders[j].name);
             }
             if (!wantcomplex)
             {
@@ -269,6 +269,12 @@ internal class AutoImport
             linux_profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "vivaldi"),
             osx_profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.Personal), "Library/Application Support/Vivaldi")
         };
+        BrowserLocations Edge = new BrowserLocations()
+        {
+            browsername = "Microsoft Edge",
+            windows_profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Microsoft\\Edge\\User Data"),
+            // C:\Users\<Current-user>\AppData\Local\Microsoft\Edge\User Data\Default.
+        };
         BrowserLocations Opera = new BrowserLocations()
         {
             browsername = "Opera",
@@ -285,29 +291,18 @@ internal class AutoImport
             Chrome_canary,
             Vivaldi
         };
-
+        /*
         //use default location for bookmarks file
         //Chrome
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
-            //string windir = Environment.SystemDirectory; // C:\windows\system32
-            //string windrive = Path.GetPathRoot(Environment.SystemDirectory); // C:\
-            //filePath = windrive + "\\Users\\" + Environment.UserName + "\\AppData\\Local\\Google\\Chrome\\User Data\\Default\\Bookmarks";
-            /*filePath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Google\\Chrome\\User Data\\Default\\Bookmarks");
-            if (File.Exists(filePath)) { 
-                Console.WriteLine("File found! " + "Filepath in chrome: " + filePath);
-                filepaths.Add(filePath);
-            }
-            else { Console.WriteLine(($"Bookmarks file not found at " + filePath)); } */
+            ///filePath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Google\\Chrome\\User Data\\Default\\Bookmarks");
             profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Google\\Chrome\\User Data\\");
-            //Console.WriteLine("appdata: " + System.Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData));
-            //Console.WriteLine("profilespath: " + profilespath);
             int n = 0;
             if (Directory.Exists(profilespath))
             {
                 foreach (string profile in Directory.GetDirectories(profilespath))
                 {
-                    //Console.WriteLine("profile: " + profile);
                     if (File.Exists(Path.Combine(profile, "Bookmarks")))
                     {
                         //For every chrome profile that has bookmarks
@@ -328,13 +323,6 @@ internal class AutoImport
         }
         else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
         {
-            /*filePath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "google-chrome/Default/Bookmarks");
-            if (File.Exists(filePath))
-            {
-                Console.WriteLine("File found! " + "Filepath in chrome: " + filePath);
-                filepaths.Add(filePath);
-            }
-            else { Console.WriteLine(($"Bookmarks file not found at " + filePath)); }*/
             int n = 0;
             profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "google-chrome");
             if (Directory.Exists(profilespath))
@@ -535,7 +523,7 @@ internal class AutoImport
                 Console.WriteLine("Chromium install folder not found");
             }
         }
-
+        */
         //Generic chrome based:
         foreach (BrowserLocations browser in browserLocations)
         {
@@ -678,9 +666,10 @@ internal class AutoImport
         }
         else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
         {
-            //#####################################################################################################################################################################################################################
-            /*profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.Personal), ".mozilla/firefox");
-            if (Directory.Exists(profilespath)
+            ///Users/<username>/Library/Application Support/Firefox/Profiles/<profile folder>
+            profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.Personal), "Library/Application Support/Firefox/Profiles");
+            int n = 0;
+            if (Directory.Exists(profilespath))
             {
                 foreach (string profile in Directory.GetDirectories(profilespath))
                 {
@@ -697,8 +686,8 @@ internal class AutoImport
             {
                 Console.WriteLine("Firefox install folder not found.");
             }
-            if (n == 0) { Console.WriteLine(($"Bookmarks file not found in Firefox")); }*/
-            Console.WriteLine("WIP");
+            if (n == 0) { Console.WriteLine(($"Bookmarks file not found in Firefox")); }
+            
         }
 
         if (filepaths.Count == 0)
@@ -728,7 +717,6 @@ internal class AutoImport
         other.name = "Other Bookmarks"; //has to be renamed, because google puts "Other bookmarks" in json and "Other Bookmarks" in html (diff: capitalisation!)
         bookmark_bar.name = "Bookmark Bar"; //has to be renamed, because google puts "Bookmarks bar" in json and "Bookmark Bar" in html (diff: capitalisation!, plural)
         //note: the naming MUST be consistent, so if html and autoimport are both used in the same directory videos will not get downloaded twice
-        Console.WriteLine(bookmark_bar.date_added);
         Bookmark root = new Bookmark
         ///the root is not actually a bookmark json object, it just contains the 3 json objects of other, synced and bookmarks_bar
         ///
@@ -898,7 +886,7 @@ public class Bookmark
     public Int64 date_last_used;
     public Int64 date_modified; //only where type = folder
     public string guid;
-    public Int16 id;
+    public int id;
     public string name;
     public string type;
     public string url; //only where type = url
