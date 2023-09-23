@@ -67,7 +67,7 @@ namespace bookmark_dlp
                 {
                     numberoffolders++;
                     folders[numberoffolders].startline = j;
-
+                    folders[numberoffolders].id = numberoffolders;
                 }
             }
             Console.WriteLine(numberoffolders + " folders were found in the bookmarks");
@@ -234,9 +234,17 @@ namespace bookmark_dlp
                                             if (iscomplicated == false)
                                             {
                                                 writer.WriteLine(linkthatisbeingexamined);
+                                                if (!wantcomplex)
+                                                {
+                                                    i++;
+                                                    linknumbercounter++;
+                                                }
                                             }
-                                            i++;
-                                            linknumbercounter++;
+                                            if (wantcomplex)
+                                            {
+                                                i++;
+                                                linknumbercounter++;
+                                            }
                                         }
                                         line = inputarray[qq].Trim().Split('>');
                                         //writer.WriteLine(line[2].Substring(0,line[2].Length-3)); //writes the name of the bookmark //to write into same line use writer.Write()
@@ -299,5 +307,8 @@ namespace bookmark_dlp
         public int numberoflinks;
         public int numberofmissinglinks;
         public List<string> urls = new List<string>();
+        public int id; //same as array index
+        public int parent;
+        public List<int> children = new List<int>();
     }
 }

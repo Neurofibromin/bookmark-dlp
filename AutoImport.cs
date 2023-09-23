@@ -15,11 +15,8 @@ internal class AutoImport
     /// todo:
     /// 
     /// handle complexnotsimple and temp streamwriters better
-    /// the linknumbercounters are increased for complex links as well
-    /// 
+    ///
     /// handle youtube shorts in both download and check
-    /// 
-    /// folders.linknumber refers to all links or youtube links in autoimport (Writelinkstotxt is not returning the changed values)
     /// 
     /// there is some bug with checkformissing, out of range maybe?
     /// allfailed.txt wrong place and name
@@ -31,10 +28,8 @@ internal class AutoImport
     /// 
     /// check browser paths for flatpaks:maybe https://github.com/flatpak/flatpak/issues/1214#issuecomment-347752940
     /// 
-    /// add safari and opera and edge support
-    /// 
-    /// check vivaldi linux path?
-    /// edge linux, osx?
+    /// add safari support
+    /// opera edge osx path?
     /// 
     /// handle folders with empty names
     /// 
@@ -70,7 +65,7 @@ internal class AutoImport
                 deepestdepth = folders[q].depth;
             }
         }
-        Writelinkstotxt(folders, numberoffolders, rootdir, wantcomplex);
+        folders = Writelinkstotxt(folders, numberoffolders, rootdir, wantcomplex);
         Methods.Dumptoconsole(folders, numberoffolders, Globals.totalyoutubelinknumber);
         string ytdlp_path = Methods.Yt_dlp_pathfinder(rootdir); //finding path to yt-dlp binary
         Methods.Scriptwriter(folders, numberoffolders, ytdlp_path); //writing the scripts that call yt-dlp and add .txt with the links in the arguments //NOT the method that creates the .txt files
@@ -83,10 +78,10 @@ internal class AutoImport
         System.Environment.Exit(1); //leaving the program, so it does not contiue running according to Program.cs
     }
 
-    public static void Writelinkstotxt(Folderclass[] folders, int numberoffolders, string rootdir, bool wantcomplex)
+    public static Folderclass[] Writelinkstotxt(Folderclass[] folders, int numberoffolders, string rootdir, bool wantcomplex)
     {
         StreamWriter temp = new StreamWriter(Path.Combine(rootdir, "temp.txt"), append: true); //writing into temp.txt all the youtube links that are not for videos (but for channels, playlists, etc.)
-        int i = 0;
+        int i = 0; //totalyoutubelinknumber later
         for (int j = 0; j < numberoffolders + 1; j++)
         {
             StreamWriter writer = new StreamWriter(Path.Combine(folders[j].folderpath, folders[j].name + ".txt"), append: false);
@@ -137,9 +132,17 @@ internal class AutoImport
                     if (iscomplicated == false)
                     {
                         writer.WriteLine(linkthatisbeingexamined);
+                        if (!wantcomplex)
+                        {
+                            i++;
+                            linknumbercounter++;
+                        }
                     }
-                    i++;
-                    linknumbercounter++;
+                    if (wantcomplex)
+                    {
+                        i++;
+                        linknumbercounter++;
+                    }
                 }
             }
             writer.Flush();
@@ -165,6 +168,7 @@ internal class AutoImport
         temp.Close();
         Globals.totalyoutubelinknumber = i;
         Console.WriteLine("Total number of youtube links found: " + i);
+        return folders;
     }
 
     public static Folderclass[] Createfolderstructure(Folderclass[] folders, string rootdir)
@@ -273,6 +277,8 @@ internal class AutoImport
         {
             browsername = "Microsoft Edge",
             windows_profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Microsoft\\Edge\\User Data"),
+            linux_profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "microsoft-edge")
+            //.config/microsoft-edge/Default/Bookmarks
             // C:\Users\<Current-user>\AppData\Local\Microsoft\Edge\User Data\Default.
         };
         BrowserLocations Opera = new BrowserLocations()
@@ -280,16 +286,23 @@ internal class AutoImport
             browsername = "Opera",
             //C:\Users\%username%\AppData\Roaming\Opera Software\Opera Stable\Bookmarks is the Bookmarks file
             windows_profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Opera Software"),
-            //rest has to be checked manually
+            //opera: .config/opera/Bookmarks
+            hardcodedpaths = new List<string>()
+            {
+                Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "opera/Bookmarks"),
+            }
+            //osx has to be checked
         };
         List<BrowserLocations> browserLocations = new List<BrowserLocations>
         {
             Chrome,
-            Brave,
-            Chromium,
             Chrome_beta,
             Chrome_canary,
-            Vivaldi
+            Brave,
+            Chromium,
+            Vivaldi,
+            Edge,
+            Opera
         };
         /*
         //use default location for bookmarks file
@@ -545,6 +558,23 @@ internal class AutoImport
                         Console.WriteLine(($"No Bookmarks file found in " + browser.browsername));
                     }
                 }
+                else if (browser.hardcodedpaths.Count != 0)
+                {
+                    foreach (string hardpath in browser.hardcodedpaths)
+                    {
+                        if (File.Exists(hardpath))
+                        {
+                            filepaths.Add(hardpath);
+                            Console.WriteLine("File found! Filepath in " + browser.browsername + ": " + hardpath);
+                            browser.linksfound++;
+                        }
+
+                    }
+                    if (browser.linksfound == 0)
+                    {
+                        Console.WriteLine(($"No Bookmarks file found in " + browser.browsername));
+                    }
+                }
                 else
                 {
                     Console.WriteLine(browser.browsername + " install folder not found");
@@ -566,6 +596,23 @@ internal class AutoImport
                     }
                     if (browser.linksfound == 0) { Console.WriteLine(($"Bookmarks file not found in " + browser.browsername)); }
                 }
+                else if (browser.hardcodedpaths.Count != 0)
+                {
+                    foreach (string hardpath in browser.hardcodedpaths)
+                    {
+                        if (File.Exists(hardpath))
+                        {
+                            filepaths.Add(hardpath);
+                            Console.WriteLine("File found! Filepath in " + browser.browsername + ": " + hardpath);
+                            browser.linksfound++;
+                        }
+
+                    }
+                    if (browser.linksfound == 0)
+                    {
+                        Console.WriteLine(($"No Bookmarks file found in " + browser.browsername));
+                    }
+                }
                 else
                 {
                     Console.WriteLine(browser.browsername + " install folder not found");
@@ -585,6 +632,23 @@ internal class AutoImport
                         }
                     }
                     if (browser.linksfound == 0) { Console.WriteLine(($"Bookmarks file not found in " + browser.browsername)); }
+                }
+                else if (browser.hardcodedpaths.Count != 0)
+                {
+                    foreach (string hardpath in browser.hardcodedpaths)
+                    {
+                        if (File.Exists(hardpath))
+                        {
+                            filepaths.Add(hardpath);
+                            Console.WriteLine("File found! Filepath in " + browser.browsername + ": " + hardpath);
+                            browser.linksfound++;
+                        }
+
+                    }
+                    if (browser.linksfound == 0)
+                    {
+                        Console.WriteLine(($"No Bookmarks file found in " + browser.browsername));
+                    }
                 }
                 else
                 {
@@ -800,6 +864,16 @@ internal class AutoImport
         Globals.endingline++;
         Globals.folderclasses.Add(thisBookmark);
         Folderclass[] folders = Convertlisttoarray(Globals.folderclasses);
+        foreach (Folderclass folder in folders)
+        {
+            foreach (Folderclass ffold in folders)
+            {
+                if (folder.depth == ffold.depth - 1 && folder.startline < ffold.startline && folder.endingline < ffold.endingline)
+                {
+                    folder.parent = ffold.id;
+                }
+            }
+        }
         return folders;
     }
 
@@ -808,6 +882,7 @@ internal class AutoImport
         Folderclass thisBookmark = new Folderclass();
         Globals.folderid++;
         thisBookmark.startline = Globals.folderid;
+        thisBookmark.id = Globals.folderid;
         thisBookmark.urls = new List<string>();
         //Console.WriteLine("Started childfinder with current folder: {1}, id:{0}, depth:{2}", globals.folderid, current.name, depth);
         int numberoflinks = 0;
@@ -848,17 +923,15 @@ internal class AutoImport
             {
                 if (folderclass.startline == i)
                 {
-                    //Console.WriteLine(folderclass.startline + "==" + i);
                     folders[i].name = folderclass.name;
                     folders[i].depth = folderclass.depth;
                     folders[i].startline = folderclass.startline;
                     folders[i].endingline = folderclass.endingline;
                     folders[i].numberoflinks = folderclass.numberoflinks;
                     folders[i].urls = folderclass.urls;
-                    //Console.WriteLine("name " + folders[i].name + "==" + folderclass.name);
-                    //Console.WriteLine("depth " + folders[i].depth + "==" + folderclass.depth);
-                    //Console.WriteLine("startline " + folders[i].startline + "==" + folderclass.startline);
-                    //Console.WriteLine("numberoflinks " + folders[i].numberoflinks + "==" + folderclass.numberoflinks);
+                    folders[i].id = folderclass.id;
+                    folders[i].parent = folderclass.parent;
+                    folders[i].children = folderclass.children;
                 }
             }
         }
@@ -900,4 +973,5 @@ public class BrowserLocations
     public string linux_profilespath = "";
     public string osx_profilespath = "";
     public Int16 linksfound = 0;
+    public List<string> hardcodedpaths = new List<string>();
 }

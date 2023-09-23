@@ -28,6 +28,7 @@ internal class Methods
         foreach (Bookmark bookmark in bookmarks)
         {
             int i = bookmark.id;
+            folders[folderid].id = folderid;
             //i refers to the id (from the sql) of the folder that is being examined. folderid will be its new id, so every folderid refers to folders and there is no gap between them:
             //examples:
             //folder toolbars id: 2 folderid: 1
@@ -39,6 +40,7 @@ internal class Methods
             if (index != -1)
             { //i - id of the examined folder, parentid[i] - id of the examined folder's parent : we are looking for the folder[] that has this parentid[i] as its startingline (refers to the original id), so "folders.SingleOrDefault(a => a.startline == parentid[i])" refers to the parent of the examined folder
                 folders[folderid].depth = folders.SingleOrDefault(a => a.startline == parentid[i]).depth + 1; //the given folders depth is the depth of their parent folder + 1
+                folders[folderid].parent = folders.SingleOrDefault(a => a.startline == parentid[i]).id;
             }
             else //if (index == -1)
             {
@@ -56,6 +58,7 @@ internal class Methods
             folderid++;
         }
         AutoImport.Globals.folderid = folderid - 1; //helps for setting numberoffolders later
+        folders[1].name = "root";
         return folders;
     }
 
@@ -255,7 +258,7 @@ internal class Methods
             Console.ForegroundColor = ConsoleColor.Red;
             Console.Write(folders[m].numberoflinks);
             Console.ResetColor();
-            Console.Write(" youtube links." + m);
+            Console.Write(" youtube links. m:" + m + " id: " + folders[m].id + " parent: " + folders[m].parent);
             if (folders[m].numberofmissinglinks != 0)
             {
                 Console.Write(" (missing: ");
