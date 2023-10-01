@@ -949,7 +949,6 @@ internal class AutoImport
         public static string folderpath;
         public static int numberoflinks;
         public static List<Folderclass> folderclasses = new List<Folderclass>();
-        //public static List<Bookmark> sql_Bookmarks = new List<Bookmark>();
     }
 }
 
