@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.5.002.0
+VisualStudioVersion = 17.7.34221.43
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "bookmark-dlp", "bookmark-dlp.csproj", "{DAD09964-5702-46F6-B863-81FBA36DB6A5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "bookmark-dlp", "bookmark-dlp.csproj", "{B37D24EE-F761-4342-AEBD-2275AC61E54D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,15 +11,15 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{DAD09964-5702-46F6-B863-81FBA36DB6A5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{DAD09964-5702-46F6-B863-81FBA36DB6A5}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{DAD09964-5702-46F6-B863-81FBA36DB6A5}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{DAD09964-5702-46F6-B863-81FBA36DB6A5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B37D24EE-F761-4342-AEBD-2275AC61E54D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B37D24EE-F761-4342-AEBD-2275AC61E54D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B37D24EE-F761-4342-AEBD-2275AC61E54D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B37D24EE-F761-4342-AEBD-2275AC61E54D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {46499CBA-06EA-40E5-A580-3CD108DB2E93}
+		SolutionGuid = {79357DE8-B978-4A19-BFA8-98C26394E94C}
 	EndGlobalSection
 EndGlobal
