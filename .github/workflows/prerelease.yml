@@ -44,6 +44,7 @@ jobs:
         matrix:
           os: [ ubuntu-latest ]
           dotnet-version: [ '7.0.x' ]
+          version: [ '0.1.1' ]
         fail-fast: false
       runs-on: ${{ matrix.os }}
       steps:
@@ -78,26 +79,21 @@ jobs:
         run: |
           #gh release delete alpha
           echo delete
-      - name: Increment version from repository's tags
-        id: tages_versioning
-        uses: georgeneto/tags-versioning@v1
-        with:
-          repo-token: ${{secrets.GITHUB_TOKEN}}
       - name: "Create new prerelease"
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create "${{ steps.version.outputs.next }}" --target unstable --prerelease --title "Development build ${{ steps.version.outputs.next }}" --notes "Autogen"
+          gh release create "${{ matrix.version }}" --target unstable --prerelease --title "Development build ${{ matrix.version }}" --notes "Autogen"
       - name: Upload
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release upload "${{ steps.version.outputs.next }}" "./bin/Release/net7.0/win-x64/publish/bookmark-dlp-win-x64-${{ matrix.dotnet-version }}.exe" --clobber
-          gh release upload "${{ steps.version.outputs.next }}" "./bin/Release/net7.0/win-x86/publish/bookmark-dlp-win-x86-${{ matrix.dotnet-version }}.exe" --clobber
-          gh release upload "${{ steps.version.outputs.next }}" "./bin/Release/net7.0/linux-arm64/publish/bookmark-dlp-linux-arm64-${{ matrix.dotnet-version }}" --clobber
-          gh release upload "${{ steps.version.outputs.next }}" "./bin/Release/net7.0/linux-x64/publish/bookmark-dlp-linux-x64-${{ matrix.dotnet-version }}" --clobber
-          gh release upload "${{ steps.version.outputs.next }}" "./bin/Release/net7.0/osx-x64/publish/bookmark-dlp-osx-x64-${{ matrix.dotnet-version }}" --clobber
-          gh release upload "${{ steps.version.outputs.next }}" "./bin/Release/net7.0/win-arm64/publish/bookmark-dlp-win-arm64-${{ matrix.dotnet-version }}.exe" --clobber
+          gh release upload "${{ matrix.version }}" "./bin/Release/net7.0/win-x64/publish/bookmark-dlp-win-x64-${{ matrix.dotnet-version }}.exe" --clobber
+          gh release upload "${{ matrix.version }}" "./bin/Release/net7.0/win-x86/publish/bookmark-dlp-win-x86-${{ matrix.dotnet-version }}.exe" --clobber
+          gh release upload "${{ matrix.version }}" "./bin/Release/net7.0/linux-arm64/publish/bookmark-dlp-linux-arm64-${{ matrix.dotnet-version }}" --clobber
+          gh release upload "${{ matrix.version }}" "./bin/Release/net7.0/linux-x64/publish/bookmark-dlp-linux-x64-${{ matrix.dotnet-version }}" --clobber
+          gh release upload "${{ matrix.version }}" "./bin/Release/net7.0/osx-x64/publish/bookmark-dlp-osx-x64-${{ matrix.dotnet-version }}" --clobber
+          gh release upload "${{ matrix.version }}" "./bin/Release/net7.0/win-arm64/publish/bookmark-dlp-win-arm64-${{ matrix.dotnet-version }}.exe" --clobber
             
   
     
