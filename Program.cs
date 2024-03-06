@@ -6,7 +6,6 @@ using System.Runtime.InteropServices;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using MintPlayer.PlatformBrowser;
 using System.ComponentModel;
 using Microsoft.Data.Sqlite;
 
@@ -16,9 +15,9 @@ namespace bookmark_dlp
     {
         static void Main()
         {
-            //aim: reformat google chrome bookmars.html from google takeouts and browser bookmark exports
-            //download all the youtube videos listed with yt-dlp
-            //maintain folder structure (download all videos into the folder they were bookmarked in
+            ///aim: reformat google chrome bookmars.html from google takeouts and browser bookmark exports
+            ///download all the youtube videos listed with yt-dlp
+            ///maintain folder structure (download all videos into the folder they were bookmarked in
 
             Console.OutputEncoding = System.Text.Encoding.UTF8;
             
@@ -36,6 +35,7 @@ namespace bookmark_dlp
             var lineCount = File.ReadLines("Bookmarks.html").Count(); //how many lines are there in the file - max number of bookmarks
                                                                       //read whole file into inputarray[] array line by line
             string oneline;
+            bool wantcomplex = Methods.Wantcomplex();
             oneline = reader.ReadLine();
             string[] inputarray = new string[lineCount + 100];
             int i = 1;
@@ -67,7 +67,7 @@ namespace bookmark_dlp
                 {
                     numberoffolders++;
                     folders[numberoffolders].startline = j;
-
+                    folders[numberoffolders].id = numberoffolders;
                 }
             }
             Console.WriteLine(numberoffolders + " folders were found in the bookmarks");
@@ -234,9 +234,17 @@ namespace bookmark_dlp
                                             if (iscomplicated == false)
                                             {
                                                 writer.WriteLine(linkthatisbeingexamined);
+                                                if (!wantcomplex)
+                                                {
+                                                    i++;
+                                                    linknumbercounter++;
+                                                }
                                             }
-                                            i++;
-                                            linknumbercounter++;
+                                            if (wantcomplex)
+                                            {
+                                                i++;
+                                                linknumbercounter++;
+                                            }
                                         }
                                         line = inputarray[qq].Trim().Split('>');
                                         //writer.WriteLine(line[2].Substring(0,line[2].Length-3)); //writes the name of the bookmark //to write into same line use writer.Write()
@@ -265,6 +273,10 @@ namespace bookmark_dlp
                                 File.Delete(Path.Combine(folders[j].folderpath, folders[j].name + ".txt"));
                                 Console.WriteLine("Deleted txt of " + folders[j].name);
                             }
+                            if (!wantcomplex)
+                            {
+                                File.Delete(Path.Combine(folders[j].folderpath, folders[j].name + ".complex.txt"));
+                            }
                         }
                     }
                 }
@@ -274,45 +286,11 @@ namespace bookmark_dlp
             temp.Close();
 
             Methods.Dumptoconsole(folders, numberoffolders, i); //dump all the folder info to console
-            /*Console.WriteLine("\n\n");
-            Console.WriteLine("The following folders were found");
-            int depthsymbolcounter = 0;
-            for (int m = 1; m < numberoffolders + 1; m++) //writing the depth, the starting line, the ending line, name, and number of links of all the folders
-            {
-                if (folders[m].depth > folders[m - 1].depth) //greater depth than before
-                {
-                    depthsymbolcounter = depthsymbolcounter + (folders[m].depth - folders[m - 1].depth);
-                }
-                if (folders[m].depth < folders[m - 1].depth) //lesser depth than before
-                {
-                    depthsymbolcounter = depthsymbolcounter - (folders[m - 1].depth - folders[m].depth);
-                }
-                if (folders[m].depth == folders[m - 1].depth) //same depth as before
-                {
-                    //depthsymbolcounter does not change
-                }
-                Console.Write(string.Concat(Enumerable.Repeat("-", depthsymbolcounter)) + folders[m].depth + " is the depth of " + folders[m].startline + "/" + folders[m].endingline + " ");
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.Write(folders[m].name);
-                Console.ResetColor();
-                Console.Write(" folder, which contains ");
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.Write(folders[m].numberoflinks);
-                Console.ResetColor();
-                Console.WriteLine(" youtube links." + m);
-            }
-            Console.WriteLine(i + " youtube links were found, written into " + numberoffolders + " folders.");
-            Console.WriteLine("Waiting for enter to confirm findings");
-            Console.ReadKey();*/
-
             string ytdlp_path = Methods.Yt_dlp_pathfinder(rootdir); //check if yt-dlp is in the root folder, on the path or not available
             Methods.Scriptwriter(folders, numberoffolders, ytdlp_path);
             Methods.Deleteemptyfolders(folders, rootdir, numberoffolders, deepestdepth);
-
-            /*
-            Methods.runningthescripts(folders, numberoffolders);
-            */
-            Methods.Checkformissing(rootdir, folders, numberoffolders); //checking if all the desired links have indeed been downloaded, archive.txt integrity as well
+            Methods.Runningthescripts(folders, numberoffolders);
+            //Methods.Checkformissing(rootdir, folders, numberoffolders); //checking if all the desired links have indeed been downloaded, archive.txt integrity as well
             Methods.Dumptoconsole(folders, numberoffolders, i);
             Console.WriteLine("Press enter to exit");
             Console.Read();
@@ -321,13 +299,16 @@ namespace bookmark_dlp
 
     public class Folderclass //defining the folderclass class to create an object array from it
     {
-        public int startline;
+        public int startline; //for html: the line number in which the folder starts in the html. json(autoimport intake chrome): the folder id, same as the folder[i] index. firefox-sql: the bookmark id of the folder in the sql db
         public string name;
         public int depth;
         public int endingline;
         public string folderpath;
         public int numberoflinks;
         public int numberofmissinglinks;
-        public List<string> urls;
+        public List<string> urls = new List<string>();
+        public int id; //same as array index
+        public int parent;
+        public List<int> children = new List<int>();
     }
 }
