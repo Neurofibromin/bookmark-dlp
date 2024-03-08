@@ -1,16 +1,38 @@
-<Project Sdk="Microsoft.NET.Sdk">
-
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
     <RootNamespace>bookmark_dlp</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+	<SelfContained>true</SelfContained>
+	<!-- Without native library self extraction the published file will not be singular.-->
+	<IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+	<PublishSingleFile>true</PublishSingleFile>
+	<AnalysisLevel>latest</AnalysisLevel>
+	<PackageProjectUrl>https://github.com/Neurofibromin/bookmark-dlp</PackageProjectUrl>
+	<RepositoryUrl>https://github.com/Neurofibromin/bookmark-dlp</RepositoryUrl>
+	<RepositoryType>git</RepositoryType>
+    <!--	  <PublishTrimmed>true</PublishTrimmed> trimming is currently problematic with Avalonia -->
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageReference Include="Microsoft.Data.Sqlite" Version="7.0.10" />
+    <Folder Include="Models\" />
+    <AvaloniaResource Include="Assets\**" />
   </ItemGroup>
 
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia" Version="11.0.10" />
+    <PackageReference Include="Avalonia.Desktop" Version="11.0.10" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="11.0.10" />
+    <PackageReference Include="Avalonia.Fonts.Inter" Version="11.0.10" />
+    <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
+    <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.0.10" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="8.0.2" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
 </Project>

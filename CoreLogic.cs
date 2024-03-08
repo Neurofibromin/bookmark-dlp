@@ -11,9 +11,9 @@ using Microsoft.Data.Sqlite;
 
 namespace bookmark_dlp
 {
-    class Program
+    internal class CoreLogic
     {
-        static void Main()
+        static void CoreLogicMain()
         {
             ///aim: reformat google chrome bookmars.html from google takeouts and browser bookmark exports
             ///download all the youtube videos listed with yt-dlp

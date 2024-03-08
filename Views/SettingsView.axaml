@@ -1,0 +1,74 @@
+<UserControl
+    x:Class="bookmark_dlp.Views.SettingsView"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    mc:Ignorable="d">
+    <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto">
+        <TextBox
+            Grid.Row="0"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Top"
+            FontWeight="Bold">
+            Settings
+        </TextBox>
+        <CheckBox
+            Grid.Row="1"
+            Margin="4"
+            IsChecked="{Binding DownloadPlaylists}">
+            Playlists
+        </CheckBox>
+        <CheckBox
+            Grid.Row="2"
+            Margin="4"
+            IsChecked="{Binding DownloadShorts}">
+            Shorts
+        </CheckBox>
+        <CheckBox
+            Grid.Row="3"
+            Margin="4"
+            IsChecked="{Binding DownloadChannels}">
+            Channels
+        </CheckBox>
+        <CheckBox
+            Grid.Row="4"
+            Margin="4"
+            IsChecked="{Binding Concurrent_downloads}">
+            Concurrent downloads
+        </CheckBox>
+        <CheckBox
+            Grid.Row="5"
+            Margin="4"
+            IsChecked="{Binding Cookies_autoextract}">
+            Cookies autoextract
+        </CheckBox>
+        <Grid
+            Grid.Row="6"
+            Margin="4"
+            ColumnDefinitions="Auto,*,Auto,Auto">
+            <Label Grid.Column="0" FontSize="9">Current yt-dlp execuatble path:</Label>
+            <Label
+                Grid.Column="1"
+                Background="Red"
+                Content="{Binding Yt_dlp_binary_path}" />
+            <Button
+                Grid.Column="2"
+                VerticalAlignment="Top"
+                Command="{Binding ChooseYtdlpBinaryCommand}"
+                FontSize="9">
+                Select executable file
+            </Button>
+
+        </Grid>
+        <Button
+            Grid.Row="7"
+            Margin="4"
+            Command="{Binding $parent[Window].DataContext.GoBack}"
+            FontSize="9">
+            Save settings
+        </Button>
+    </Grid>
+</UserControl>

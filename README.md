@@ -1,11 +1,15 @@
 # bookmark-dlp
-Small utility program for downloading bookmarked youtube links using yt-dlp. A program to replicate the folder structure of your Chrome bookmarks and call yt-dlp to download all youtube videos amongst the bookmarks.
+Utility program for downloading bookmarked youtube links using yt-dlp. A program to replicate the folder structure of your Chrome/Brave/Firefox/etc. bookmarks and call yt-dlp to download all youtube videos amongst the bookmarks.
+
 ## Usage
-Put the Bookmarks.html and the **yt-dlp(.exe) into the same directory as the executable**. Get the Bookmarks.html from a Google takeout or export it from the browser. The yt-dlp executable can be found [here](https://github.com/yt-dlp/yt-dlp#installation).<br/>
+Download the executable for your system from [releases](https://github.com/Neurofibromin/bookmark-dlp/releases/download/latest). Run it. Select your browser profile to auto import bookmarks or load a Google Takeout Chrome bookmarks html file. Currently "exports" from browsers do not work. Choose an output folder for the downloaded files - this cannot be a network folder on some platforms. If the yt-dlp executable not found automatically, select the location in the settings. If you do not have the newest version you can get it [here](https://github.com/yt-dlp/yt-dlp#installation).
+
+## CLI Usage
+Put the Bookmarks.html and the **yt-dlp(.exe) into the same directory as the executable**. Get the Bookmarks.html from a Google takeout. The yt-dlp executable can be found [here](https://github.com/yt-dlp/yt-dlp#installation).<br/>
 If you do not provide the Bookmarks.html the program will check for default data directories of several browsers. More detail below.<br>
 Run the executable: <br/>
-Windows: double click the bookmark-dlp-6.0.x.exe file <br/>
-Linux: in terminal in the directory: ./bookmark-dlp-linux-x64-6.0.x
+Windows: double click the bookmark-dlp-8.0.x.exe file <br/>
+Linux: in terminal in the directory: ./bookmark-dlp-linux-x64-8.0.x
 
 ## How it works
 The program first checks if a Bookmarks.html exists within its root directory/where it was called from. If yes, that is the input file. If no, default locations for some browsers (Chrome, Brave and Firefox<sup>unstable</sup> currently) are checked, to find any browser profiles with bookmarks.<br/>
@@ -18,8 +22,17 @@ If the same directory is used for different profiles things can get written into
 ## Releases
 Windows and linux compatible, written in C#, builds for x86 and ARM available. <br/>
 Build your own: this project is open source
+
+### Build instructions
+Install dependencies: [dotnet](https://dotnet.microsoft.com/en-us/download)
+```
+git clone -b master https://github.com/Neurofibromin/bookmark-dlp bookmark-dlp
+cd bookmark-dlp
+dotnet restore
+dotnet publish bookmark-dlp.sln --configuration Release
+```
 | Windows  | Linux | OSX (semi-supported) |
 | ------------- | ------------- | ------------- |
-| [x64](https://github.com/Neurofibromin/bookmark-dlp/releases/download/latest/bookmark-dlp-6.0.x.exe) | [x64](https://github.com/Neurofibromin/bookmark-dlp/releases/download/latest/bookmark-dlp-linux-x64-6.0.x) | [x64](https://github.com/Neurofibromin/bookmark-dlp/releases/download/latest/bookmark-dlp-osx-x64-6.0.x)
-| [x32](https://github.com/Neurofibromin/bookmark-dlp/releases/download/latest/bookmark-dlp-win-x86-6.0.x.exe) | N/A | N/A |
-| [arm64](https://github.com/Neurofibromin/bookmark-dlp/releases/download/latest/bookmark-dlp-win-arm64-6.0.x.exe) | [arm64](https://github.com/Neurofibromin/bookmark-dlp/releases/download/latest/bookmark-dlp-linux-arm64-6.0.x) | N/A |
+| [x64](https://github.com/Neurofibromin/bookmark-dlp/releases/download/latest/bookmark-dlp-8.0.x.exe) | [x64](https://github.com/Neurofibromin/bookmark-dlp/releases/download/latest/bookmark-dlp-linux-x64-8.0.x) | [x64](https://github.com/Neurofibromin/bookmark-dlp/releases/download/latest/bookmark-dlp-osx-x64-8.0.x)
+| [x32](https://github.com/Neurofibromin/bookmark-dlp/releases/download/latest/bookmark-dlp-win-x86-8.0.x.exe) | N/A | N/A |
+| [arm64](https://github.com/Neurofibromin/bookmark-dlp/releases/download/latest/bookmark-dlp-win-arm64-8.0.x.exe) | [arm64](https://github.com/Neurofibromin/bookmark-dlp/releases/download/latest/bookmark-dlp-linux-arm64-8.0.x) | [arm64](https://github.com/Neurofibromin/bookmark-dlp/releases/download/latest/bookmark-dlp-osx-arm64-8.0.x) |
