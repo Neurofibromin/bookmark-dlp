@@ -44,6 +44,12 @@ namespace bookmark_dlp.ViewModels
         [ObservableProperty]
         public string? yt_dlp_binary_path = "";
 
+        
+        public SettingsViewModel() {
+            Console.WriteLine("Settings!");
+        
+        }
+
         [RelayCommand]
         public async Task ChooseYtdlpBinary(CancellationToken token)
         {

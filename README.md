@@ -23,6 +23,10 @@ If the same directory is used for different profiles things can get written into
 Windows and linux compatible, written in C#, builds for x86 and ARM available. <br/>
 Build your own: this project is open source
 
+## Status
+[![.NET](https://github.com/Neurofibromin/bookmark-dlp/actions/workflows/prerelease.yml/badge.svg)](https://github.com/Neurofibromin/bookmark-dlp/actions/workflows/prerelease.yml)
+[![.NET](https://github.com/Neurofibromin/bookmark-dlp/actions/workflows/dotnet.yml/badge.svg)](https://github.com/Neurofibromin/bookmark-dlp/actions/workflows/dotnet.yml)
+
 ### Build instructions
 Install dependencies: [dotnet](https://dotnet.microsoft.com/en-us/download)
 ```

@@ -11,16 +11,17 @@ using Microsoft.Data.Sqlite;
 
 namespace bookmark_dlp
 {
-    internal class CoreLogic
+    public class CoreLogic
     {
-        static void CoreLogicMain()
+        public static void CoreLogicMain()
         {
             ///aim: reformat google chrome bookmars.html from google takeouts and browser bookmark exports
             ///download all the youtube videos listed with yt-dlp
             ///maintain folder structure (download all videos into the folder they were bookmarked in
 
             Console.OutputEncoding = System.Text.Encoding.UTF8;
-            
+            Console.WriteLine("Consoleout working");
+            return;
             string rootdir = Directory.GetCurrentDirectory(); //current directory
             if (!File.Exists(Path.Combine(rootdir, "Bookmarks.html"))) //If no .html in rootdir tries autoimporting from known browser directories
             {
@@ -295,6 +296,7 @@ namespace bookmark_dlp
             Console.WriteLine("Press enter to exit");
             Console.Read();
         }
+    
     }
 
     public class Folderclass //defining the folderclass class to create an object array from it

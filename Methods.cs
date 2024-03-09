@@ -11,6 +11,7 @@ using System.ComponentModel;
 using System.Text;
 using System.Threading;
 using Microsoft.Data.Sqlite;
+using Avalonia.Automation.Peers;
 
 internal class Methods
 {
@@ -290,12 +291,12 @@ internal class Methods
         {
             if (File.Exists(Path.Combine(rootdir, "yt-dlp.exe")))
             {
-                Console.WriteLine(Path.Combine(rootdir, "yt-dlp.exe") + " found");
+                //Console.WriteLine(Path.Combine(rootdir, "yt-dlp.exe") + " found");
                 ytdlp_path = Path.Combine(rootdir, "yt-dlp.exe");
             }
             else
             {
-                Console.WriteLine(Path.Combine(rootdir, "yt-dlp.exe") + " not found, searching PATH.");
+                //Console.WriteLine(Path.Combine(rootdir, "yt-dlp.exe") + " not found, searching PATH.");
                 try
                 {
                     Process proc = new Process();
@@ -311,7 +312,8 @@ internal class Methods
                     {
                         // 2 => "The system cannot find the FILE specified."
                         // 3 => "The system cannot find the PATH specified."
-                        throw new Exception($"yt-dlp not found in path or in rootdir, install it before continuing.");
+                        // throw new Exception($"yt-dlp not found in path or in rootdir, install it before continuing.");
+                        return null;
                     }
                     else
                     {
@@ -331,11 +333,13 @@ internal class Methods
                 {
                     Console.WriteLine(Path.Combine(rootdir, filename) + " found");
                     ytdlp_path = Path.Combine(rootdir, filename);
+                    break;
                 }
             }
             if (ytdlp_path == "")
             {
-                Console.WriteLine(Path.Combine(rootdir, "yt-dlp") + " not found, searching PATH.");
+                // TODO
+                //Console.WriteLine(Path.Combine(rootdir, "yt-dlp") + " not found, searching PATH.");
                 /*Process process;
                 string command = "if (which yt-dlp); then echo \"true\"; else echo \"false\"; fi";
                 process = new Process
@@ -363,9 +367,10 @@ internal class Methods
                 }
                 Console.WriteLine("ExitCode: {0}", process.ExitCode);
                 process.Close();*/
-                Console.WriteLine("Is it on the path? Y/N");
-                if(Console.ReadLine().Contains("Y")) { ytdlp_path = "yt-dlp"; }
-                else { throw new Exception($"yt-dlp not found in path or in rootdir, install it before continuing."); }
+                //Console.WriteLine("Is it on the path? Y/N");
+                //if(Console.ReadLine().Contains("Y")) { ytdlp_path = "yt-dlp"; }
+                //else { throw new Exception($"yt-dlp not found in path or in rootdir, install it before continuing."); }
+                return null;
             }
         }
         if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
@@ -381,10 +386,12 @@ internal class Methods
             }
             if (ytdlp_path == "")
             {
-                Console.WriteLine(Path.Combine(rootdir, "yt-dlp") + " not found, searching PATH.");
+                // TODO
+                /*Console.WriteLine(Path.Combine(rootdir, "yt-dlp") + " not found, searching PATH.");
                 Console.WriteLine("Is it on the path? Y/N");
                 if (Console.ReadLine().Contains("Y")) { ytdlp_path = "yt-dlp"; }
-                else { throw new Exception($"yt-dlp not found in path or in rootdir, install it before continuing."); }
+                else { throw new Exception($"yt-dlp not found in path or in rootdir, install it before continuing."); }*/
+                return null;
             }
         }
         return ytdlp_path;

@@ -12,7 +12,7 @@ using Microsoft.Data.Sqlite;
 internal class AutoImport
 {
     /// <summary>
-    /// todo:
+    /// TODO:
     /// 
     /// handle complexnotsimple and temp streamwriters better
     ///

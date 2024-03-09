@@ -24,6 +24,13 @@ jobs:
         dotnet-version: ${{ matrix.dotnet-version }}  
     - name: Restore dependencies
       run: dotnet restore
+    - name: Run .NET Code Analysis
+      uses: dotnet/code-analysis@v1
+      id: code-analysis
+      with:
+        solution: bookmark-dlp.sln
+        build-breaking: true
+        all-categories: all
     - name: Build
       run: dotnet build --configuration Release --no-restore
     - name: Test
@@ -43,6 +50,8 @@ jobs:
           version: [ '0.2.6' ]
         fail-fast: false
       runs-on: ${{ matrix.os }}
+      needs: [build]
+      if: needs.build.result == "success"
       steps:
       - uses: actions/checkout@v3
       - name: Setup dotnet

@@ -33,7 +33,7 @@ namespace bookmark_dlp.ViewModels
     {
 
         [ObservableProperty]
-        public string? htmlfilelocation = "a";
+        public string? htmlfilelocation = "";
         [ObservableProperty]
         public bool htmlImportUsed = false;
         [ObservableProperty]
@@ -43,6 +43,17 @@ namespace bookmark_dlp.ViewModels
         [ObservableProperty]
         public bool ytdlp_executable_not_found = true;
 
+        public StartPageViewModel() { 
+            
+            
+                if (Methods.Yt_dlp_pathfinder(Directory.GetCurrentDirectory()) != null) { Ytdlp_executable_not_found = false; }
+                
+                /*Task.Run(async () =>
+                {
+                    Console.WriteLine("something");
+                });*/
+            
+        }
 
         [ObservableProperty] private string? _fileText;
 
@@ -61,7 +72,15 @@ namespace bookmark_dlp.ViewModels
             try
             {
                 var file = await DoOpenFilePickerAsync();
-                Htmlfilelocation = file.Path.ToString();
+                if (file != null)
+                {
+                    Htmlfilelocation = file.TryGetLocalPath();
+                }
+                else
+                {
+
+                    Htmlfilelocation = Htmlfilelocation;
+                }
             }
             catch (Exception e)
             {
@@ -94,12 +113,17 @@ namespace bookmark_dlp.ViewModels
             try
             {
                 var folder = await DoOpenFolderPickerAsync();
-                Outputfolder = folder.Path.ToString();
+                if (folder != null)
+                {
+                    Outputfolder = folder.TryGetLocalPath();
+                }
+                else { Outputfolder = Outputfolder; }
             }
             catch (Exception e)
             {
                 ErrorMessages?.Add(e.Message);
             }
+            if (Methods.Yt_dlp_pathfinder(Outputfolder) != null) { Ytdlp_executable_not_found = false; }
         }
 
 
@@ -117,7 +141,8 @@ namespace bookmark_dlp.ViewModels
             });
             if (result?.Count >= 1)
             {
-                return result[0];
+                //Console.WriteLine(result[0].TryGetLocalPath());
+                return (IStorageFolder?)result[0];
             }
             else
             {
