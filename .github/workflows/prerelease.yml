@@ -81,9 +81,9 @@ jobs:
         run: |
           gh release list > releases.txt
           cat releases.txt
-          version = $(cat "version.txt")
+          version=$(cat "version.txt")
           echo $version
-          if grep -q SomeString "$File"; then
+          if grep -q $version "releases.txt"; then
             echo wasfound
             gh release delete $version
           fi
