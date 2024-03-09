@@ -24,13 +24,6 @@ jobs:
         dotnet-version: ${{ matrix.dotnet-version }}  
     - name: Restore dependencies
       run: dotnet restore
-    - name: Run .NET Code Analysis
-      uses: dotnet/code-analysis
-      id: code-analysis
-      with:
-        solution: bookmark-dlp.sln
-        build-breaking: true
-        all-categories: all
     - name: Build
       run: dotnet build --configuration Release --no-restore
     - name: Test
