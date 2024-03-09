@@ -79,8 +79,17 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          #gh release delete alpha
-          cat version.txt
+          gh release list > releases.txt
+          cat releases.txt
+          version=$(cat "version.txt")
+          echo $version
+          if grep -Fxq "$version" releases.txt; then
+            echo wasfound
+            gh release delete $version
+          else
+            echo "notfound"
+          fi
+
       - name: "Create new prerelease"
         env:
           GH_TOKEN: ${{ github.token }}
