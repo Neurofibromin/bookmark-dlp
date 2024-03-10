@@ -98,7 +98,7 @@ jobs:
           fi
 
           
-          version=${{ env.VERSION }}
+          version="${{ env.VERSION }}"
           echo "second:"
           echo $version
           if grep -Fxq "$version" releases.txt; then
