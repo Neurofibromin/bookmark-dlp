@@ -8,8 +8,9 @@ Download the executable for your system from [releases](https://github.com/Neuro
 Put the Bookmarks.html and the **yt-dlp(.exe) into the same directory as the executable**. Get the Bookmarks.html from a Google takeout. The yt-dlp executable can be found [here](https://github.com/yt-dlp/yt-dlp#installation).<br/>
 If you do not provide the Bookmarks.html the program will check for default data directories of several browsers. More detail below.<br>
 Run the executable: <br/>
-Windows: double click the bookmark-dlp-8.0.x.exe file <br/>
-Linux: in terminal in the directory: ./bookmark-dlp-linux-x64-8.0.x
+Windows: in CMD or PowerShell: `bookmark-dlp-8.0.x.exe --console` <br/>
+Linux: in terminal in the directory: `./bookmark-dlp-linux-x64-8.0.x --console`
+More flags/usage info: `bookmark-dlp-.. --help`
 
 ## How it works
 The program first checks if a Bookmarks.html exists within its root directory/where it was called from. If yes, that is the input file. If no, default locations for some browsers (Chrome, Brave and Firefox<sup>unstable</sup> currently) are checked, to find any browser profiles with bookmarks.<br/>
@@ -23,9 +24,23 @@ If the same directory is used for different profiles things can get written into
 Windows and linux compatible, written in C#, builds for x86 and ARM available. <br/>
 Build your own: this project is open source
 
-## Status
+### Status
 [![.NET](https://github.com/Neurofibromin/bookmark-dlp/actions/workflows/prerelease.yml/badge.svg)](https://github.com/Neurofibromin/bookmark-dlp/actions/workflows/prerelease.yml)
 [![.NET](https://github.com/Neurofibromin/bookmark-dlp/actions/workflows/dotnet.yml/badge.svg)](https://github.com/Neurofibromin/bookmark-dlp/actions/workflows/dotnet.yml)
+
+### Aims
+<br>CI/CD<br/>
+- [ ] OpenSuse Build Service
+- [ ] Flathub
+- [ ] Debian
+- [ ] Arch/AUR
+- [ ] Fedora
+- [ ] GitLab
+<br>new features<br/>
+- [ ] tray icon
+- [ ] systemd module
+- [ ] dot dekstop file
+- [ ] add manpages
 
 ### Build instructions
 Install dependencies: [dotnet](https://dotnet.microsoft.com/en-us/download)
