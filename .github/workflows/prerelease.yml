@@ -101,7 +101,7 @@ jobs:
           version="${{ env.VERSION }}"
           echo "second:"
           echo $version
-          if grep -Fxq "$version" releases.txt; then
+          if grep $version releases.txt; then
             echo wasfound
             gh release delete $version
           else
