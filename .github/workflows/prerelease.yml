@@ -1,13 +1,17 @@
 # This workflow will build a .NET project
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
 
-name: .NET
+name: Prerelease
 
 on:
   push:
     branches: [ "unstable" ]
   pull_request:
     branches: [ "unstable" ]
+
+
+env:
+  VERSION: "0.2.6"
 
 jobs:
   build:
@@ -16,6 +20,7 @@ jobs:
         os: [ ubuntu-latest ]
         dotnet-version: [ '8.0.x' ]
     runs-on: ${{ matrix.os }}
+    if: false
     steps:
     - uses: actions/checkout@v3
     - name: Setup .NET Core SDK ${{ matrix.dotnet-version }}
@@ -44,7 +49,7 @@ jobs:
         fail-fast: false
       runs-on: ${{ matrix.os }}
       needs: [build]
-      if: ${{ needs.build.result == 'success' }}
+      if: true #${{ needs.build.result == 'success' }}
       steps:
       - uses: actions/checkout@v3
       - name: Setup dotnet
@@ -54,6 +59,7 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore
       - name: Publish
+        if: false
         run: |
           dotnet publish bookmark-dlp.sln --configuration Release --runtime win-x64 --self-contained
           dotnet publish bookmark-dlp.sln --configuration Release --runtime win-x86 --self-contained
@@ -67,6 +73,7 @@ jobs:
           echo $PWD
           ls -R
       - name: "Rename based on architecture"
+        if: false
         run: |
           mv "/home/runner/work/bookmark-dlp/bookmark-dlp/bin/Release/net8.0/win-x64/publish/bookmark-dlp.exe" "/home/runner/work/bookmark-dlp/bookmark-dlp/bin/Release/net8.0/win-x64/publish/bookmark-dlp-win-x64-${{ matrix.dotnet-version }}.exe"
           mv "/home/runner/work/bookmark-dlp/bookmark-dlp/bin/Release/net8.0/win-x86/publish/bookmark-dlp.exe" "/home/runner/work/bookmark-dlp/bookmark-dlp/bin/Release/net8.0/win-x86/publish/bookmark-dlp-win-x86-${{ matrix.dotnet-version }}.exe"
@@ -91,7 +98,7 @@ jobs:
           fi
 
           
-          version=${{ matrix.version }}
+          version=${{ env.VERSION }}
           echo "second:"
           echo $version
           if grep -Fxq "$version" releases.txt; then
