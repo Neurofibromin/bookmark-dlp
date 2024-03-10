@@ -37,6 +37,8 @@ Build your own: this project is open source
 - [ ] Fedora
 - [ ] GitLab
 <br>new features<br/>
+- [x] start console and gui from same binary
+- [ ] better versioning
 - [ ] tray icon
 - [ ] systemd module
 - [ ] dot dekstop file

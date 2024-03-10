@@ -90,6 +90,17 @@ jobs:
             echo "notfound"
           fi
 
+          
+          version=${{ matrix.version }}
+          echo "second:"
+          echo $version
+          if grep -Fxq "$version" releases.txt; then
+            echo wasfound
+            gh release delete $version
+          else
+            echo "notfound"
+          fi
+
       - name: "Create new prerelease"
         env:
           GH_TOKEN: ${{ github.token }}
