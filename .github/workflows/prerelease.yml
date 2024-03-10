@@ -49,7 +49,7 @@ jobs:
         fail-fast: false
       runs-on: ${{ matrix.os }}
       needs: [build]
-      if: true #${{ needs.build.result == 'success' }}
+      #if: true #${{ needs.build.result == 'success' }}
       steps:
       - uses: actions/checkout@v3
       - name: Setup dotnet
