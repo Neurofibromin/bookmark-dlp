@@ -38,7 +38,7 @@ Build your own: this project is open source
 - [ ] GitLab
 <br>new features<br/>
 - [x] start console and gui from same binary
-- [ ] better versioning
+- [x] better versioning
 - [ ] tray icon
 - [ ] systemd module
 - [ ] dot dekstop file
