@@ -20,7 +20,6 @@ jobs:
         os: [ ubuntu-latest ]
         dotnet-version: [ '8.0.x' ]
     runs-on: ${{ matrix.os }}
-    if: false
     steps:
     - uses: actions/checkout@v3
     - name: Setup .NET Core SDK ${{ matrix.dotnet-version }}
@@ -45,11 +44,10 @@ jobs:
         matrix:
           os: [ ubuntu-latest ]
           dotnet-version: [ '8.0.x' ]
-          version: [ '0.2.6' ]
         fail-fast: false
       runs-on: ${{ matrix.os }}
-      # needs: [build]
-      #if: true #${{ needs.build.result == 'success' }}
+      needs: [build]
+      if: ${{ needs.build.result == 'success' }}
       steps:
       - uses: actions/checkout@v3
       - name: Setup dotnet
@@ -59,7 +57,6 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore
       - name: Publish
-        if: false
         run: |
           dotnet publish bookmark-dlp.sln --configuration Release --runtime win-x64 --self-contained
           dotnet publish bookmark-dlp.sln --configuration Release --runtime win-x86 --self-contained
@@ -73,7 +70,6 @@ jobs:
           echo $PWD
           ls -R
       - name: "Rename based on architecture"
-        if: false
         run: |
           mv "/home/runner/work/bookmark-dlp/bookmark-dlp/bin/Release/net8.0/win-x64/publish/bookmark-dlp.exe" "/home/runner/work/bookmark-dlp/bookmark-dlp/bin/Release/net8.0/win-x64/publish/bookmark-dlp-win-x64-${{ matrix.dotnet-version }}.exe"
           mv "/home/runner/work/bookmark-dlp/bookmark-dlp/bin/Release/net8.0/win-x86/publish/bookmark-dlp.exe" "/home/runner/work/bookmark-dlp/bookmark-dlp/bin/Release/net8.0/win-x86/publish/bookmark-dlp-win-x86-${{ matrix.dotnet-version }}.exe"
@@ -88,18 +84,7 @@ jobs:
         run: |
           gh release list > releases.txt
           cat releases.txt
-          version=$(cat "version.txt")
-          echo $version
-          if grep -Fxq "$version" releases.txt; then
-            echo wasfound
-            gh release delete $version
-          else
-            echo "notfound"
-          fi
-
-          
           version="${{ env.VERSION }}"
-          echo "second:"
           echo $version
           if grep $version releases.txt; then
             echo wasfound
@@ -112,18 +97,18 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create "${{ matrix.version }}" --target unstable --prerelease --title "Development build ${{ matrix.version }}" --generate-notes
+          gh release create "${{ env.VERSION }}" --target unstable --prerelease --title "Development build ${{ env.VERSION }}" --generate-notes
       - name: Upload
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release upload "${{ matrix.version }}" "./bin/Release/net8.0/win-x64/publish/bookmark-dlp-win-x64-${{ matrix.dotnet-version }}.exe" --clobber
-          gh release upload "${{ matrix.version }}" "./bin/Release/net8.0/win-x86/publish/bookmark-dlp-win-x86-${{ matrix.dotnet-version }}.exe" --clobber
-          gh release upload "${{ matrix.version }}" "./bin/Release/net8.0/linux-arm64/publish/bookmark-dlp-linux-arm64-${{ matrix.dotnet-version }}" --clobber
-          gh release upload "${{ matrix.version }}" "./bin/Release/net8.0/linux-x64/publish/bookmark-dlp-linux-x64-${{ matrix.dotnet-version }}" --clobber
-          gh release upload "${{ matrix.version }}" "./bin/Release/net8.0/osx-x64/publish/bookmark-dlp-osx-x64-${{ matrix.dotnet-version }}" --clobber
-          gh release upload "${{ matrix.version }}" "./bin/Release/net8.0/osx-arm64/publish/bookmark-dlp-osx-arm64" --clobber
-          gh release upload "${{ matrix.version }}" "./bin/Release/net8.0/win-arm64/publish/bookmark-dlp-win-arm64-${{ matrix.dotnet-version }}.exe" --clobber
+          gh release upload "${{ env.VERSION }}" "./bin/Release/net8.0/win-x64/publish/bookmark-dlp-win-x64-${{ matrix.dotnet-version }}.exe" --clobber
+          gh release upload "${{ env.VERSION }}" "./bin/Release/net8.0/win-x86/publish/bookmark-dlp-win-x86-${{ matrix.dotnet-version }}.exe" --clobber
+          gh release upload "${{ env.VERSION }}" "./bin/Release/net8.0/linux-arm64/publish/bookmark-dlp-linux-arm64-${{ matrix.dotnet-version }}" --clobber
+          gh release upload "${{ env.VERSION }}" "./bin/Release/net8.0/linux-x64/publish/bookmark-dlp-linux-x64-${{ matrix.dotnet-version }}" --clobber
+          gh release upload "${{ env.VERSION }}" "./bin/Release/net8.0/osx-x64/publish/bookmark-dlp-osx-x64-${{ matrix.dotnet-version }}" --clobber
+          gh release upload "${{ env.VERSION }}" "./bin/Release/net8.0/osx-arm64/publish/bookmark-dlp-osx-arm64" --clobber
+          gh release upload "${{ env.VERSION }}" "./bin/Release/net8.0/win-arm64/publish/bookmark-dlp-win-arm64-${{ matrix.dotnet-version }}.exe" --clobber
             
   
     
