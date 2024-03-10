@@ -48,7 +48,7 @@ jobs:
           version: [ '0.2.6' ]
         fail-fast: false
       runs-on: ${{ matrix.os }}
-      needs: [build]
+      # needs: [build]
       #if: true #${{ needs.build.result == 'success' }}
       steps:
       - uses: actions/checkout@v3
