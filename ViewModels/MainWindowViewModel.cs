@@ -40,9 +40,9 @@ namespace bookmark_dlp.ViewModels
 
         public MainWindowViewModel()
         {
-
-            StartPage = new StartPageViewModel();
             Settings = new SettingsViewModel();
+            StartPage = new StartPageViewModel();
+            
             Downloading = new DownloadingViewModel();
 
             ContentViewModel = StartPage;

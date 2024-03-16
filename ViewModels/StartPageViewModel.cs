@@ -42,26 +42,26 @@ namespace bookmark_dlp.ViewModels
         public string[] browserlist = { "Firefox", "Chrome", "Safari" };
         [ObservableProperty]
         public bool ytdlp_executable_not_found = true;
+        [ObservableProperty]
+        public string? chosenBrowser;
 
         public StartPageViewModel() { 
             
             
-                if (Methods.Yt_dlp_pathfinder(Directory.GetCurrentDirectory()) != null) { Ytdlp_executable_not_found = false; }
-                
-                /*Task.Run(async () =>
-                {
-                    Console.WriteLine("something");
-                });*/
+            if (Methods.Yt_dlp_pathfinder(Directory.GetCurrentDirectory()) != null) { Ytdlp_executable_not_found = false; }
             
+            //implement some inotifypropertychanged for this?
+            
+
+
+            /*Task.Run(async () =>
+            {
+                Console.WriteLine("something");
+            });*/
+
         }
 
         [ObservableProperty] private string? _fileText;
-
-        [RelayCommand]
-        public void TestTwo()
-        {
-            Htmlfilelocation = "hey";
-        }
 
 
         [RelayCommand]

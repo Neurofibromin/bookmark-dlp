@@ -9,6 +9,9 @@ on:
   pull_request:
     branches: [ "master" ]
 
+env:
+  VERSION: "0.1.0"
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -38,8 +41,8 @@ jobs:
         matrix:
           os: [ ubuntu-latest ]
           dotnet-version: [ '8.0.x' ]
-          tag: [ '0.3.0' ]
-        fail-fast: false
+          # tag: [ '0.3.0' ]
+        fail-fast: true
       runs-on: ${{ matrix.os }}
       steps:
       - uses: actions/checkout@v3
@@ -74,23 +77,24 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release delete ${{ matrix.tag }}
+          # gh release delete ${{ matrix.tag }}
+          echo "this no longer happens for main releases"
       - name: "Create new release"
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create ${{ matrix.tag }} --latest --target master --title "${{ github.event.head_commit.message }}" --generate-notes
+          gh release create ${{ env.VERSION }} --latest --target master --title "${{ github.event.head_commit.message }}" --generate-notes
       - name: Upload
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release upload ${{ matrix.tag }} "./bin/Release/net8.0/win-x64/publish/bookmark-dlp-win-x64.exe" --clobber
-          gh release upload ${{ matrix.tag }} "./bin/Release/net8.0/win-x86/publish/bookmark-dlp-win-x86.exe" --clobber
-          gh release upload ${{ matrix.tag }} "./bin/Release/net8.0/linux-arm64/publish/bookmark-dlp-linux-arm64" --clobber
-          gh release upload ${{ matrix.tag }} "./bin/Release/net8.0/linux-x64/publish/bookmark-dlp-linux-x64" --clobber
-          gh release upload ${{ matrix.tag }} "./bin/Release/net8.0/osx-x64/publish/bookmark-dlp-osx-x64" --clobber
-          gh release upload ${{ matrix.tag }} "./bin/Release/net8.0/osx-x64/publish/bookmark-dlp-osx-arm64" --clobber
-          gh release upload ${{ matrix.tag }} "./bin/Release/net8.0/win-arm64/publish/bookmark-dlp-win-arm64.exe" --clobber
+          gh release upload ${{ env.VERSION }} "./bin/Release/net8.0/win-x64/publish/bookmark-dlp-win-x64.exe" --clobber
+          gh release upload ${{ env.VERSION }} "./bin/Release/net8.0/win-x86/publish/bookmark-dlp-win-x86.exe" --clobber
+          gh release upload ${{ env.VERSION }} "./bin/Release/net8.0/linux-arm64/publish/bookmark-dlp-linux-arm64" --clobber
+          gh release upload ${{ env.VERSION }} "./bin/Release/net8.0/linux-x64/publish/bookmark-dlp-linux-x64" --clobber
+          gh release upload ${{ env.VERSION }} "./bin/Release/net8.0/osx-x64/publish/bookmark-dlp-osx-x64" --clobber
+          gh release upload ${{ env.VERSION }} "./bin/Release/net8.0/osx-x64/publish/bookmark-dlp-osx-arm64" --clobber
+          gh release upload ${{ env.VERSION }} "./bin/Release/net8.0/win-arm64/publish/bookmark-dlp-win-arm64.exe" --clobber
             
   
     

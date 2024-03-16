@@ -38,7 +38,7 @@
                 Margin="0"
                 Background="Fuchsia"
                 ItemsSource="{Binding Browserlist}"
-                SelectedItem="{Binding Selectedsource}"
+                SelectedItem="{Binding ChosenBrowser}"
                 SelectionMode="Single,Toggle" />
         </Grid>
 
@@ -109,16 +109,18 @@
                 Command="{Binding $parent[Window].DataContext.SettingsCommand}">
                 Settings
             </Button>
-            <TextBlock
-                Grid.Column="1"
-                Margin="4"
-                HorizontalAlignment="Center"
-                VerticalAlignment="Center"
-                Background="Red"
-                IsEnabled="False"
-                IsVisible="{Binding Ytdlp_executable_not_found}">
-                No yt-dlp executable found
-            </TextBlock>
+            <StackPanel Grid.Column="1">
+                <Label Content="not used yet" />
+                <TextBlock
+                    Margin="4"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Background="Red"
+                    IsEnabled="False"
+                    IsVisible="{Binding Ytdlp_executable_not_found}">
+                    No yt-dlp executable found
+                </TextBlock>
+            </StackPanel>
             <Button
                 Grid.Column="2"
                 Margin="10"

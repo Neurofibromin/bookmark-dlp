@@ -16,6 +16,7 @@
 
     <TrayIcon.Icons>
         <TrayIcons>
+            <!--  not yet complete  -->
             <TrayIcon Icon="/Assets/avalonia-logo.ico" ToolTipText="bookmark-dlp">
                 <TrayIcon.Menu>
                     <NativeMenu>

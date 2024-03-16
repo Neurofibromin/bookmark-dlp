@@ -29,6 +29,14 @@ using System;
 
 namespace bookmark_dlp.ViewModels
 {
+    /// <summary>
+    /// TODO: autodetect yt-dlp.config file at folders where
+    /// 1) program is called from
+    /// 2) program executable is found in
+    /// 3) output folder
+    /// 4) yt-dlp executable is found in
+    /// 5) yt-dlp default folder (somewhere in .local?
+    /// </summary>
     public partial class SettingsViewModel : ViewModelBase
     {
         [ObservableProperty]
@@ -50,6 +58,7 @@ namespace bookmark_dlp.ViewModels
         
         }
 
+
         [RelayCommand]
         public async Task ChooseYtdlpBinary(CancellationToken token)
         {
@@ -57,7 +66,15 @@ namespace bookmark_dlp.ViewModels
             try
             {
                 var file = await DoOpenFilePickerAsync();
-                Yt_dlp_binary_path = file.Path.ToString();
+                if (file != null)
+                {
+                    Yt_dlp_binary_path = file.TryGetLocalPath();
+                }
+                else
+                {
+
+                    Yt_dlp_binary_path = Yt_dlp_binary_path;
+                }
             }
             catch (Exception e)
             {
