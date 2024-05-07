@@ -7,10 +7,10 @@ using System.Threading.Tasks;
 
 namespace bookmark_dlp.Models
 {
-    public static class Config
+    public static class Config : Object
     {
         
-        public static string htmlfilelocation { get; set; }
+        public static string Htmlfilelocation { get; set; }
         public static bool htmlImportUsed {  get; set; }
         public static string outputfolder { get; set; }
         public static string[] browserlist {  get; set; }

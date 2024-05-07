@@ -50,7 +50,7 @@ namespace bookmark_dlp.ViewModels
 
         }
 
-        public StartPageViewModel StartPage { get; set; }
+        public StartPageViewModel StartPage { get ; set; }
         public DownloadingViewModel Downloading { get; set; }
         public SettingsViewModel Settings { get; set; }
         public void GoBack()
