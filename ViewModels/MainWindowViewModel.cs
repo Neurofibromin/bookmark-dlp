@@ -30,6 +30,14 @@ namespace bookmark_dlp.ViewModels
 {
     public partial class MainWindowViewModel : ViewModelBase
     {
+        StartPageViewModel myStartPageViewModel;
+        // public StartPageViewModel MyStartPageViewModel { get; set; }
+
+        DownloadingViewModel myDownloadingViewModel;
+        // public DownloadingViewModel MyDownloadingViewModel { get; set; }
+
+        SettingsViewModel mySettingsViewModel;
+        // public SettingsViewModel MySettingsViewModel { get; set; }
 
 
         [ObservableProperty]
@@ -40,19 +48,21 @@ namespace bookmark_dlp.ViewModels
 
         public MainWindowViewModel()
         {
-            Settings = new SettingsViewModel();
-            StartPage = new StartPageViewModel();
-            
-            Downloading = new DownloadingViewModel();
+            mySettingsViewModel = new SettingsViewModel();
+            myStartPageViewModel = new StartPageViewModel();
+            myDownloadingViewModel = new DownloadingViewModel();
 
-            ContentViewModel = StartPage;
-            PreviousViewModel = StartPage;
+            ContentViewModel = myStartPageViewModel;
+            PreviousViewModel = myStartPageViewModel;
+
+            var window2 = new AskConfigWindow();
+            window2.Show();
 
         }
-
+        /*
         public StartPageViewModel StartPage { get ; set; }
         public DownloadingViewModel Downloading { get; set; }
-        public SettingsViewModel Settings { get; set; }
+        public SettingsViewModel Settings { get; set; }*/
         public void GoBack()
         {
             (PreviousViewModel, ContentViewModel) = (ContentViewModel, PreviousViewModel);
@@ -61,19 +71,19 @@ namespace bookmark_dlp.ViewModels
         public void SettingsCommand()
         {
             PreviousViewModel = ContentViewModel;
-            ContentViewModel = Settings;
+            ContentViewModel = mySettingsViewModel;
         }
 
         public void GoForward()
         {
             PreviousViewModel = ContentViewModel;
-            ContentViewModel = Downloading;
+            ContentViewModel = myDownloadingViewModel;
         }
 
         public void BackToStartPage()
         {
             PreviousViewModel = ContentViewModel;
-            ContentViewModel = StartPage;
+            ContentViewModel = myStartPageViewModel;
         }
     }
 }

@@ -10,7 +10,13 @@
     <Grid Margin="5" RowDefinitions="Auto,*">
 
         <Grid Grid.Row="0" ColumnDefinitions="Auto,*, Auto">
-            <Button Grid.Column="0" Command="{Binding $parent[Window].DataContext.BackToStartPage}">Back</Button>
+            <Button Grid.Column="0" Command="{Binding $parent[Window].DataContext.BackToStartPage}">
+
+                <StackPanel Orientation="Horizontal">
+                    <PathIcon Data="{StaticResource arrow_reply_regular}" />
+                    <TextBlock>Back</TextBlock>
+                </StackPanel>
+            </Button>
             <Label Grid.Column="1">Bookmarks</Label>
             <Button
                 Grid.Column="2"
@@ -18,7 +24,10 @@
                 HorizontalAlignment="Right"
                 VerticalAlignment="Center"
                 Command="{Binding $parent[Window].DataContext.SettingsCommand}">
-                Settings
+                <StackPanel Orientation="Horizontal">
+                    <PathIcon Data="{StaticResource settings_regular}" />
+                    <TextBlock>Settings</TextBlock>
+                </StackPanel>
             </Button>
         </Grid>
 
@@ -38,7 +47,10 @@
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Top"
                     IsEnabled="False">
-                    Refresh stats
+                    <StackPanel Orientation="Horizontal">
+                        <PathIcon Data="{StaticResource arrow_sync_circle_regular}" />
+                        <TextBlock>Refresh stats</TextBlock>
+                    </StackPanel>
                 </Button>
                 <Grid Grid.Row="1" Background="DarkCyan">
                     <Label Grid.Row="1">Stats</Label>
@@ -55,7 +67,11 @@
                     Grid.Row="2"
                     Margin="5"
                     VerticalAlignment="Bottom">
-                    Start download
+
+                    <StackPanel Orientation="Horizontal">
+                        <PathIcon Data="{StaticResource arrow_download_regular}" />
+                        <TextBlock>Start download</TextBlock>
+                    </StackPanel>
                 </Button>
             </Grid>
 

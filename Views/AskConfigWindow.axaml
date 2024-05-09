@@ -1,0 +1,49 @@
+<Window
+    x:Class="bookmark_dlp.Views.AskConfigWindow"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="using:bookmark_dlp.ViewModels"
+    Title="Config location"
+    Width="400"
+    Height="200"
+    d:DesignHeight="200"
+    d:DesignWidth="400"
+    x:DataType="vm:AskConfigWindowViewModel"
+    mc:Ignorable="d">
+    <StackPanel Margin="10" Spacing="25">
+        <TextBlock
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Background="AliceBlue">
+            No config file detected
+        </TextBlock>
+        <Grid
+            Margin="10"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            ColumnDefinitions="*,*,*"
+            ShowGridLines="True">
+            <Button
+                Grid.Column="0"
+                Margin="7"
+                HorizontalAlignment="Center">
+                Appdata/local
+            </Button>
+            <Button
+                Grid.Column="1"
+                Margin="7"
+                HorizontalAlignment="Center">
+                local dir
+            </Button>
+            <Button
+                Grid.Column="2"
+                Margin="7"
+                HorizontalAlignment="Center">
+                No config
+            </Button>
+
+        </Grid>
+    </StackPanel>
+</Window>

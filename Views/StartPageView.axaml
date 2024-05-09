@@ -30,7 +30,7 @@
                 Grid.Column="0"
                 Background="AliceBlue"
                 TextWrapping="Wrap">
-                Import from browser: Choose source (and profile)
+                Import from browser: Choose source (and profile)>
             </TextBlock>
             <ListBox
                 Name="browsers"
@@ -44,35 +44,37 @@
 
 
         <!--  HTML  -->
-        <Grid
+		<StackPanel
             Grid.Row="2"
-            Margin="20,0,20,0"
-            ColumnDefinitions="Auto,Auto,Auto,Auto">
-            <Label Grid.Column="0" Margin="4">
-                or choose html file
-            </Label>
-            <Button
+            Margin="20,0,20,0" Orientation="Horizontal">
+
+			<Label  Margin="4">
+				or choose html file
+			</Label>
+			<Label
+                Name="chosenfilelabel"
+                
+                Margin="4"
+                IsVisible="{Binding HtmlImportUsed}">
+				Chosen file:
+			</Label>
+			<TextBox
+                Margin="4"
+                IsVisible="{Binding HtmlImportUsed}"
+                Text="{Binding Htmlfilelocation, Mode=TwoWay}"></TextBox>
+			<Button
                 Name="OpenFileButton"
-                Grid.Column="1"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Center"
                 Command="{Binding OpenFileCommand}">
-                Select file
-            </Button>
-            <Label
-                Name="chosenfilelabel"
-                Grid.Column="2"
-                Margin="4"
-                IsVisible="{Binding HtmlImportUsed}">
-                Chosen file:
-            </Label>
-            <TextBox
-                Grid.Column="3"
-                Margin="4"
-                IsVisible="{Binding HtmlImportUsed}"
-                Text="{Binding Htmlfilelocation, Mode=TwoWay}" />
+				<StackPanel Orientation="Horizontal">
+					<PathIcon Data="{StaticResource copy_add_regular}"></PathIcon>
+					<Label>Select file</Label>
+				</StackPanel>
+			</Button>
 
-        </Grid>
+
+		</StackPanel>
 
         <!--  Folder  -->
         <Grid
@@ -95,7 +97,11 @@
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
                 Command="{Binding OpenFolderCommand}">
-                Change folder
+				
+				<StackPanel Orientation="Horizontal">
+					<PathIcon Data="{StaticResource folder_open_regular}"></PathIcon>
+					<Label>Change folder</Label>
+				</StackPanel>
             </Button>
         </Grid>
 
