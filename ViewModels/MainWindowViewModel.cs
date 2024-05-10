@@ -54,10 +54,6 @@ namespace bookmark_dlp.ViewModels
 
             ContentViewModel = myStartPageViewModel;
             PreviousViewModel = myStartPageViewModel;
-
-            var window2 = new AskConfigWindow();
-            window2.Show();
-
         }
         /*
         public StartPageViewModel StartPage { get ; set; }
