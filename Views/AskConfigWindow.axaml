@@ -33,25 +33,32 @@
             <Button
                 Grid.Column="0"
                 Margin="7"
-                HorizontalAlignment="Center">
+                HorizontalAlignment="Center"
+                Command="{Binding ButtonCommand}"
+                CommandParameter="{Binding Content, RelativeSource={RelativeSource Self}}">
                 Appdata/local
             </Button>
             <Button
                 Grid.Column="1"
                 Margin="7"
-                HorizontalAlignment="Center">
+                HorizontalAlignment="Center"
+                Command="{Binding ButtonCommand}"
+                CommandParameter="{Binding Content, RelativeSource={RelativeSource Self}}">
                 local dir
             </Button>
             <Button
                 Grid.Column="2"
                 Margin="7"
-                HorizontalAlignment="Center">
+                HorizontalAlignment="Center"
+                Command="{Binding ButtonCommand}"
+                CommandParameter="{Binding Content, RelativeSource={RelativeSource Self}}">
                 No config
             </Button>
 
         </Grid>
         <DockPanel>
             <Label Content="{Binding MyLabel}">message</Label>
+            <Label Content="{Binding WhichButton}">which</Label>
             <Button
                 Margin="7"
                 HorizontalAlignment="Right"

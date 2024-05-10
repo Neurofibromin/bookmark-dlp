@@ -24,6 +24,7 @@ using System.Threading.Channels;
 using System.Threading.Tasks;
 using System.Threading;
 using System;
+using bookmark_dlp.Models;
 
 
 
@@ -52,8 +53,10 @@ namespace bookmark_dlp.ViewModels
         [ObservableProperty]
         public string? yt_dlp_binary_path = "";
 
-        
-        public SettingsViewModel() {
+        private readonly ISettingsService _settingsService;
+
+        public SettingsViewModel(ISettingsService settingsService) {
+            _settingsService = settingsService;
             Console.WriteLine("Settings!");
         
         }

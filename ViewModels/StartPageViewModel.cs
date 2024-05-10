@@ -24,6 +24,7 @@ using System.Threading.Channels;
 using System.Threading.Tasks;
 using System.Threading;
 using System;
+using bookmark_dlp.Models;
 
 
 
@@ -45,19 +46,14 @@ namespace bookmark_dlp.ViewModels
         [ObservableProperty]
         public string? chosenBrowser;
 
-        public StartPageViewModel() { 
-            
-            
+        private readonly ISettingsService _settingsService;
+
+        public StartPageViewModel(ISettingsService settingsService) {
+
+            _settingsService = settingsService;
             if (Methods.Yt_dlp_pathfinder(Directory.GetCurrentDirectory()) != null) { Ytdlp_executable_not_found = false; }
             
-            //implement some inotifypropertychanged for this?
             
-
-
-            /*Task.Run(async () =>
-            {
-                Console.WriteLine("something");
-            });*/
 
         }
 

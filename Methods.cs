@@ -12,6 +12,7 @@ using System.Text;
 using System.Threading;
 using Microsoft.Data.Sqlite;
 using Avalonia.Automation.Peers;
+using SkiaSharp;
 
 internal class Methods
 {
@@ -611,4 +612,20 @@ internal class Methods
         }
         return wantcomplex;
     }
+
+    public static bool IsConfigPresent()
+    {
+        string configpath_local = Path.Combine(Directory.GetCurrentDirectory(), "bookmark-dlp.conf");
+        string configpath_windows = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "bookmark-dlp\\bookmark-dlp.conf");
+        string configpath_linux = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "bookmark-dlp/bookmark-dlp.conf");
+        string configpath_osx = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.Personal), "bookmark-dlp/bookmark-dlp.conf");
+
+        if (File.Exists(configpath_local)){ return true; }
+        if (File.Exists(configpath_windows)) { return true; }
+        if (File.Exists(configpath_linux)) { return true; }
+        if (File.Exists(configpath_osx)) { return true; }
+        return false;
+
+    }
+
 }

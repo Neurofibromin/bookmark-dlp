@@ -3,6 +3,7 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Data.Core;
 using Avalonia.Data.Core.Plugins;
 using Avalonia.Markup.Xaml;
+using bookmark_dlp.Models;
 using bookmark_dlp.ViewModels;
 using bookmark_dlp.Views;
 
@@ -23,41 +24,50 @@ namespace bookmark_dlp
                 // Without this line you will get duplicate validations from both Avalonia and CT
                 BindingPlugins.DataValidators.RemoveAt(0);
 
-                var askConfigViewModel = new AskConfigWindowViewModel();
-                var askConfigWindow = new AskConfigWindow
+                if (!Methods.IsConfigPresent())
                 {
-                    DataContext = askConfigViewModel,
-                };
-                desktop.MainWindow = askConfigWindow;
-                askConfigWindow.Show();
+                    var askConfigViewModel = new AskConfigWindowViewModel();
+                    var askConfigWindow = new AskConfigWindow
+                    {
+                        DataContext = askConfigViewModel,
+                    };
+                    desktop.MainWindow = askConfigWindow;
+                    askConfigWindow.Show();
 
-                try
-                {
-                    await Task.Delay(1000);
-                    askConfigViewModel.MyLabel = "Searching for devices...";
-                    await Task.Delay(1000, askConfigViewModel.CancellationToken);
-                    askConfigViewModel.MyLabel = "Connecting to device #1...";
-                    await Task.Delay(2000, askConfigViewModel.CancellationToken);
-                    askConfigViewModel.MyLabel = "Configuring device...";
-                    await Task.Delay(2000, askConfigViewModel.CancellationToken);
+                    MessageBus.ButtonClicked += async (sender, buttonText) =>
+                    {
+                        await Console.Out.WriteLineAsync(buttonText);
+                        var mainWindowVM = new MainWindowViewModel();
+                        var MainWindow = new MainWindow
+                        {
+                            DataContext = mainWindowVM,
+                        };
+
+                        desktop.MainWindow = MainWindow;
+                        MainWindow.Show();
+                        askConfigWindow.Close();
+                    };
                 }
-                catch (TaskCanceledException)
+                else 
                 {
-                    askConfigWindow.Close();
-                    return; //program exits
+                    Console.WriteLine("Config was found");
+                    var mainWindowVM = new MainWindowViewModel();
+                    var MainWindow = new MainWindow
+                    {
+                        DataContext = mainWindowVM,
+                    };
+
+                    desktop.MainWindow = MainWindow;
+                    MainWindow.Show();
                 }
-
-                var mainWindowVM = new MainWindowViewModel();
-                var MainWindow = new MainWindow
-                {
-                    DataContext = mainWindowVM,
-                };
+                
 
 
 
-                desktop.MainWindow = MainWindow;
-                MainWindow.Show();
-                askConfigWindow.Close();
+
+
+
+
             }
 
             base.OnFrameworkInitializationCompleted();

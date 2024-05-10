@@ -24,6 +24,7 @@ using System.Threading.Channels;
 using System.Threading.Tasks;
 using System.Threading;
 using System;
+using bookmark_dlp.Models;
 
 
 namespace bookmark_dlp.ViewModels
@@ -39,6 +40,8 @@ namespace bookmark_dlp.ViewModels
         SettingsViewModel mySettingsViewModel;
         // public SettingsViewModel MySettingsViewModel { get; set; }
 
+        ISettingsService mySettingsService;
+
 
         [ObservableProperty]
         public ViewModelBase? contentViewModel;
@@ -48,8 +51,9 @@ namespace bookmark_dlp.ViewModels
 
         public MainWindowViewModel()
         {
-            mySettingsViewModel = new SettingsViewModel();
-            myStartPageViewModel = new StartPageViewModel();
+            var mySettingsService = new ISettingsService();
+            mySettingsViewModel = new SettingsViewModel(mySettingsService);
+            myStartPageViewModel = new StartPageViewModel(mySettingsService);
             myDownloadingViewModel = new DownloadingViewModel();
 
             ContentViewModel = myStartPageViewModel;
