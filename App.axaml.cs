@@ -16,6 +16,7 @@ namespace bookmark_dlp
             AvaloniaXamlLoader.Load(this);
         }
 
+
         public override async void OnFrameworkInitializationCompleted()
         {
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)

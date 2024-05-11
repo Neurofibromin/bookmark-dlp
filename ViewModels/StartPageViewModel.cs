@@ -46,11 +46,11 @@ namespace bookmark_dlp.ViewModels
         [ObservableProperty]
         public string? chosenBrowser;
 
-        private readonly ISettingsService _settingsService;
+        
 
-        public StartPageViewModel(ISettingsService settingsService) {
+        public StartPageViewModel() {
 
-            _settingsService = settingsService;
+            
             if (Methods.Yt_dlp_pathfinder(Directory.GetCurrentDirectory()) != null) { Ytdlp_executable_not_found = false; }
             
             

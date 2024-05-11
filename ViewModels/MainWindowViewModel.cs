@@ -40,7 +40,6 @@ namespace bookmark_dlp.ViewModels
         SettingsViewModel mySettingsViewModel;
         // public SettingsViewModel MySettingsViewModel { get; set; }
 
-        ISettingsService mySettingsService;
 
 
         [ObservableProperty]
@@ -51,9 +50,9 @@ namespace bookmark_dlp.ViewModels
 
         public MainWindowViewModel()
         {
-            var mySettingsService = new ISettingsService();
-            mySettingsViewModel = new SettingsViewModel(mySettingsService);
-            myStartPageViewModel = new StartPageViewModel(mySettingsService);
+            
+            mySettingsViewModel = new SettingsViewModel();
+            myStartPageViewModel = new StartPageViewModel();
             myDownloadingViewModel = new DownloadingViewModel();
 
             ContentViewModel = myStartPageViewModel;

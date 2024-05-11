@@ -53,10 +53,10 @@ namespace bookmark_dlp.ViewModels
         [ObservableProperty]
         public string? yt_dlp_binary_path = "";
 
-        private readonly ISettingsService _settingsService;
 
-        public SettingsViewModel(ISettingsService settingsService) {
-            _settingsService = settingsService;
+
+        public SettingsViewModel() {
+            
             Console.WriteLine("Settings!");
         
         }
