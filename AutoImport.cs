@@ -35,6 +35,8 @@ internal class AutoImport
     /// 
     /// dumptoconsole just writes after one another, if child does not follow parent its problematic
     /// 
+    /// handle config files, writing settings to the conf
+    /// 
     /// </summary>
 
 

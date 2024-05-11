@@ -16,13 +16,19 @@
 	<RepositoryType>git</RepositoryType>
 	<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <!--	  <PublishTrimmed>true</PublishTrimmed> trimming is currently problematic with Avalonia -->
+	<Version>0.2.7</Version>
+	<!--      <AssemblyVersion>1.0.0.0</AssemblyVersion>   -->
+	<!--      <FileVersion>1.0.0.0</FileVersion>           -->
+	<AvaloniaUseCompiledBindingsByDefault>false</AvaloniaUseCompiledBindingsByDefault>
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Models\" />
     <AvaloniaResource Include="Assets\**" />
   </ItemGroup>
 
+  <ItemGroup>
+    <AvaloniaResource Remove="Assets\Icons.axaml" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Avalonia" Version="11.0.10" />
@@ -35,4 +41,6 @@
     <PackageReference Include="Microsoft.Data.Sqlite" Version="8.0.2" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
+
+
 </Project>

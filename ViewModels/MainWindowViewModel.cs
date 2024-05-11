@@ -24,12 +24,22 @@ using System.Threading.Channels;
 using System.Threading.Tasks;
 using System.Threading;
 using System;
+using bookmark_dlp.Models;
 
 
 namespace bookmark_dlp.ViewModels
 {
     public partial class MainWindowViewModel : ViewModelBase
     {
+        StartPageViewModel myStartPageViewModel;
+        // public StartPageViewModel MyStartPageViewModel { get; set; }
+
+        DownloadingViewModel myDownloadingViewModel;
+        // public DownloadingViewModel MyDownloadingViewModel { get; set; }
+
+        SettingsViewModel mySettingsViewModel;
+        // public SettingsViewModel MySettingsViewModel { get; set; }
+
 
 
         [ObservableProperty]
@@ -40,19 +50,18 @@ namespace bookmark_dlp.ViewModels
 
         public MainWindowViewModel()
         {
+            
+            mySettingsViewModel = new SettingsViewModel();
+            myStartPageViewModel = new StartPageViewModel();
+            myDownloadingViewModel = new DownloadingViewModel();
 
-            StartPage = new StartPageViewModel();
-            Settings = new SettingsViewModel();
-            Downloading = new DownloadingViewModel();
-
-            ContentViewModel = StartPage;
-            PreviousViewModel = StartPage;
-
+            ContentViewModel = myStartPageViewModel;
+            PreviousViewModel = myStartPageViewModel;
         }
-
-        public StartPageViewModel StartPage { get; set; }
+        /*
+        public StartPageViewModel StartPage { get ; set; }
         public DownloadingViewModel Downloading { get; set; }
-        public SettingsViewModel Settings { get; set; }
+        public SettingsViewModel Settings { get; set; }*/
         public void GoBack()
         {
             (PreviousViewModel, ContentViewModel) = (ContentViewModel, PreviousViewModel);
@@ -61,19 +70,19 @@ namespace bookmark_dlp.ViewModels
         public void SettingsCommand()
         {
             PreviousViewModel = ContentViewModel;
-            ContentViewModel = Settings;
+            ContentViewModel = mySettingsViewModel;
         }
 
         public void GoForward()
         {
             PreviousViewModel = ContentViewModel;
-            ContentViewModel = Downloading;
+            ContentViewModel = myDownloadingViewModel;
         }
 
         public void BackToStartPage()
         {
             PreviousViewModel = ContentViewModel;
-            ContentViewModel = StartPage;
+            ContentViewModel = myStartPageViewModel;
         }
     }
 }

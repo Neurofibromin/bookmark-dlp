@@ -1,13 +1,17 @@
 # This workflow will build a .NET project
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
 
-name: .NET
+name: Prerelease
 
 on:
   push:
     branches: [ "unstable" ]
   pull_request:
     branches: [ "unstable" ]
+
+
+env:
+  VERSION: "0.2.7"
 
 jobs:
   build:
@@ -24,13 +28,6 @@ jobs:
         dotnet-version: ${{ matrix.dotnet-version }}  
     - name: Restore dependencies
       run: dotnet restore
-    - name: Run .NET Code Analysis
-      uses: dotnet/code-analysis@v1
-      id: code-analysis
-      with:
-        solution: bookmark-dlp.sln
-        build-breaking: true
-        all-categories: all
     - name: Build
       run: dotnet build --configuration Release --no-restore
     - name: Test
@@ -47,11 +44,10 @@ jobs:
         matrix:
           os: [ ubuntu-latest ]
           dotnet-version: [ '8.0.x' ]
-          version: [ '0.2.6' ]
         fail-fast: false
       runs-on: ${{ matrix.os }}
       needs: [build]
-      if: needs.build.result == "success"
+      if: ${{ needs.build.result == 'success' }}
       steps:
       - uses: actions/checkout@v3
       - name: Setup dotnet
@@ -86,24 +82,33 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          #gh release delete alpha
-          echo delete
+          gh release list > releases.txt
+          cat releases.txt
+          version="${{ env.VERSION }}"
+          echo $version
+          if grep $version releases.txt; then
+            echo wasfound
+            gh release delete $version
+          else
+            echo "notfound"
+          fi
+
       - name: "Create new prerelease"
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create "${{ matrix.version }}" --target unstable --prerelease --title "Development build ${{ matrix.version }}" --generate-notes
+          gh release create "${{ env.VERSION }}" --target unstable --prerelease --title "Development build ${{ env.VERSION }}" --generate-notes
       - name: Upload
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release upload "${{ matrix.version }}" "./bin/Release/net8.0/win-x64/publish/bookmark-dlp-win-x64-${{ matrix.dotnet-version }}.exe" --clobber
-          gh release upload "${{ matrix.version }}" "./bin/Release/net8.0/win-x86/publish/bookmark-dlp-win-x86-${{ matrix.dotnet-version }}.exe" --clobber
-          gh release upload "${{ matrix.version }}" "./bin/Release/net8.0/linux-arm64/publish/bookmark-dlp-linux-arm64-${{ matrix.dotnet-version }}" --clobber
-          gh release upload "${{ matrix.version }}" "./bin/Release/net8.0/linux-x64/publish/bookmark-dlp-linux-x64-${{ matrix.dotnet-version }}" --clobber
-          gh release upload "${{ matrix.version }}" "./bin/Release/net8.0/osx-x64/publish/bookmark-dlp-osx-x64-${{ matrix.dotnet-version }}" --clobber
-          gh release upload "${{ matrix.version }}" "./bin/Release/net8.0/osx-arm64/publish/bookmark-dlp-osx-arm64" --clobber
-          gh release upload "${{ matrix.version }}" "./bin/Release/net8.0/win-arm64/publish/bookmark-dlp-win-arm64-${{ matrix.dotnet-version }}.exe" --clobber
+          gh release upload "${{ env.VERSION }}" "./bin/Release/net8.0/win-x64/publish/bookmark-dlp-win-x64-${{ matrix.dotnet-version }}.exe" --clobber
+          gh release upload "${{ env.VERSION }}" "./bin/Release/net8.0/win-x86/publish/bookmark-dlp-win-x86-${{ matrix.dotnet-version }}.exe" --clobber
+          gh release upload "${{ env.VERSION }}" "./bin/Release/net8.0/linux-arm64/publish/bookmark-dlp-linux-arm64-${{ matrix.dotnet-version }}" --clobber
+          gh release upload "${{ env.VERSION }}" "./bin/Release/net8.0/linux-x64/publish/bookmark-dlp-linux-x64-${{ matrix.dotnet-version }}" --clobber
+          gh release upload "${{ env.VERSION }}" "./bin/Release/net8.0/osx-x64/publish/bookmark-dlp-osx-x64-${{ matrix.dotnet-version }}" --clobber
+          gh release upload "${{ env.VERSION }}" "./bin/Release/net8.0/osx-arm64/publish/bookmark-dlp-osx-arm64" --clobber
+          gh release upload "${{ env.VERSION }}" "./bin/Release/net8.0/win-arm64/publish/bookmark-dlp-win-arm64-${{ matrix.dotnet-version }}.exe" --clobber
             
   
     

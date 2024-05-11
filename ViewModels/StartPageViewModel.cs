@@ -24,6 +24,7 @@ using System.Threading.Channels;
 using System.Threading.Tasks;
 using System.Threading;
 using System;
+using bookmark_dlp.Models;
 
 
 
@@ -42,26 +43,21 @@ namespace bookmark_dlp.ViewModels
         public string[] browserlist = { "Firefox", "Chrome", "Safari" };
         [ObservableProperty]
         public bool ytdlp_executable_not_found = true;
+        [ObservableProperty]
+        public string? chosenBrowser;
 
-        public StartPageViewModel() { 
+        
+
+        public StartPageViewModel() {
+
+            
+            if (Methods.Yt_dlp_pathfinder(Directory.GetCurrentDirectory()) != null) { Ytdlp_executable_not_found = false; }
             
             
-                if (Methods.Yt_dlp_pathfinder(Directory.GetCurrentDirectory()) != null) { Ytdlp_executable_not_found = false; }
-                
-                /*Task.Run(async () =>
-                {
-                    Console.WriteLine("something");
-                });*/
-            
+
         }
 
         [ObservableProperty] private string? _fileText;
-
-        [RelayCommand]
-        public void TestTwo()
-        {
-            Htmlfilelocation = "hey";
-        }
 
 
         [RelayCommand]

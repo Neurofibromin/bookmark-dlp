@@ -38,41 +38,43 @@
                 Margin="0"
                 Background="Fuchsia"
                 ItemsSource="{Binding Browserlist}"
-                SelectedItem="{Binding Selectedsource}"
+                SelectedItem="{Binding ChosenBrowser}"
                 SelectionMode="Single,Toggle" />
         </Grid>
 
 
         <!--  HTML  -->
-        <Grid
+        <StackPanel
             Grid.Row="2"
             Margin="20,0,20,0"
-            ColumnDefinitions="Auto,Auto,Auto,Auto">
-            <Label Grid.Column="0" Margin="4">
+            Orientation="Horizontal">
+
+            <Label Margin="4">
                 or choose html file
             </Label>
-            <Button
-                Name="OpenFileButton"
-                Grid.Column="1"
-                HorizontalAlignment="Left"
-                VerticalAlignment="Center"
-                Command="{Binding OpenFileCommand}">
-                Select file
-            </Button>
             <Label
                 Name="chosenfilelabel"
-                Grid.Column="2"
                 Margin="4"
                 IsVisible="{Binding HtmlImportUsed}">
                 Chosen file:
             </Label>
             <TextBox
-                Grid.Column="3"
                 Margin="4"
                 IsVisible="{Binding HtmlImportUsed}"
                 Text="{Binding Htmlfilelocation, Mode=TwoWay}" />
+            <Button
+                Name="OpenFileButton"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Center"
+                Command="{Binding OpenFileCommand}">
+                <StackPanel Orientation="Horizontal">
+                    <PathIcon Data="{StaticResource copy_add_regular}" />
+                    <Label>Select file</Label>
+                </StackPanel>
+            </Button>
 
-        </Grid>
+
+        </StackPanel>
 
         <!--  Folder  -->
         <Grid
@@ -95,7 +97,11 @@
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
                 Command="{Binding OpenFolderCommand}">
-                Change folder
+
+                <StackPanel Orientation="Horizontal">
+                    <PathIcon Data="{StaticResource folder_open_regular}" />
+                    <Label>Change folder</Label>
+                </StackPanel>
             </Button>
         </Grid>
 
@@ -109,16 +115,18 @@
                 Command="{Binding $parent[Window].DataContext.SettingsCommand}">
                 Settings
             </Button>
-            <TextBlock
-                Grid.Column="1"
-                Margin="4"
-                HorizontalAlignment="Center"
-                VerticalAlignment="Center"
-                Background="Red"
-                IsEnabled="False"
-                IsVisible="{Binding Ytdlp_executable_not_found}">
-                No yt-dlp executable found
-            </TextBlock>
+            <StackPanel Grid.Column="1">
+                <Label Content="not used yet" />
+                <TextBlock
+                    Margin="4"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Background="Red"
+                    IsEnabled="False"
+                    IsVisible="{Binding Ytdlp_executable_not_found}">
+                    No yt-dlp executable found
+                </TextBlock>
+            </StackPanel>
             <Button
                 Grid.Column="2"
                 Margin="10"

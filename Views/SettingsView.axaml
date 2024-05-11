@@ -7,48 +7,29 @@
     d:DesignHeight="450"
     d:DesignWidth="800"
     mc:Ignorable="d">
-    <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto">
+    <StackPanel>
         <TextBox
-            Grid.Row="0"
             HorizontalAlignment="Center"
             VerticalAlignment="Top"
             FontWeight="Bold">
             Settings
         </TextBox>
-        <CheckBox
-            Grid.Row="1"
-            Margin="4"
-            IsChecked="{Binding DownloadPlaylists}">
+        <CheckBox Margin="4" IsChecked="{Binding DownloadPlaylists}">
             Playlists
         </CheckBox>
-        <CheckBox
-            Grid.Row="2"
-            Margin="4"
-            IsChecked="{Binding DownloadShorts}">
+        <CheckBox Margin="4" IsChecked="{Binding DownloadShorts}">
             Shorts
         </CheckBox>
-        <CheckBox
-            Grid.Row="3"
-            Margin="4"
-            IsChecked="{Binding DownloadChannels}">
+        <CheckBox Margin="4" IsChecked="{Binding DownloadChannels}">
             Channels
         </CheckBox>
-        <CheckBox
-            Grid.Row="4"
-            Margin="4"
-            IsChecked="{Binding Concurrent_downloads}">
+        <CheckBox Margin="4" IsChecked="{Binding Concurrent_downloads}">
             Concurrent downloads
         </CheckBox>
-        <CheckBox
-            Grid.Row="5"
-            Margin="4"
-            IsChecked="{Binding Cookies_autoextract}">
+        <CheckBox Margin="4" IsChecked="{Binding Cookies_autoextract}">
             Cookies autoextract
         </CheckBox>
-        <Grid
-            Grid.Row="6"
-            Margin="4"
-            ColumnDefinitions="Auto,*,Auto,Auto">
+        <Grid Margin="4" ColumnDefinitions="Auto,*,Auto,Auto">
             <Label Grid.Column="0" FontSize="9">Current yt-dlp execuatble path:</Label>
             <Label
                 Grid.Column="1"
@@ -64,11 +45,11 @@
 
         </Grid>
         <Button
-            Grid.Row="7"
             Margin="4"
             Command="{Binding $parent[Window].DataContext.GoBack}"
             FontSize="9">
             Save settings
         </Button>
-    </Grid>
+
+    </StackPanel>
 </UserControl>
