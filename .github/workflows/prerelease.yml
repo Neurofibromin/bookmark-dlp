@@ -20,6 +20,7 @@ jobs:
         os: [ ubuntu-latest ]
         dotnet-version: [ '8.0.x' ]
     runs-on: ${{ matrix.os }}
+    if: false
     steps:
     - uses: actions/checkout@v3
     - name: Setup .NET Core SDK ${{ matrix.dotnet-version }}
@@ -109,6 +110,69 @@ jobs:
           gh release upload "${{ env.VERSION }}" "./bin/Release/net8.0/osx-x64/publish/bookmark-dlp-osx-x64-${{ matrix.dotnet-version }}" --clobber
           gh release upload "${{ env.VERSION }}" "./bin/Release/net8.0/osx-arm64/publish/bookmark-dlp-osx-arm64" --clobber
           gh release upload "${{ env.VERSION }}" "./bin/Release/net8.0/win-arm64/publish/bookmark-dlp-win-arm64-${{ matrix.dotnet-version }}.exe" --clobber
+
+
+
+  pupnet:
+      strategy:
+        matrix:
+          os: [ ubuntu-latest ]
+          dotnet-version: [ '8.0.x' ]
+        fail-fast: false
+      runs-on: ${{ matrix.os }}
+      # needs: [release]
+      # if: ${{ needs.release.result == 'success' }}
+      steps:
+      - uses: actions/checkout@v3
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: ${{ matrix.dotnet-version }}
+      - name: Setup dependencies
+        run: |
+          # dnf -y install dpkg rpmdevtools # flatpak flatpak-builder pandoc
+          sudo apt-get -y install dpkg rpm flatpak flatpak-builder pandoc
+          sudo flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+          # echo  ${{ env.MULTIENV }}
+          #if "${{ env.MULTIENV }}" == "true"; then
+          sudo flatpak install -y flathub org.freedesktop.Platform//23.08 org.freedesktop.Sdk//23.08
+          dotnet tool install -g KuiperZone.PupNet
+      - name: Restore dependencies
+        run: dotnet restore
+      - name: Publish
+        run: |
+          # dotnet publish bookmark-dlp.sln --configuration Release --runtime win-x64 --self-contained
+          # runtime: [ 'linux-x64', 'linux-arm64' ]
+          # kind: [ 'appimage', 'deb', 'rpm', 'flatpak' ]
+          pupnet --runtime linux-x64 --kind appimage --build Release --app-version ${{ env.VERSION }} --verbose
+          pupnet --runtime linux-x64 --kind deb --build Release --app-version ${{ env.VERSION }} --verbose
+          pupnet --runtime linux-x64 --kind rpm --build Release --app-version ${{ env.VERSION }} --verbose
+          pupnet --runtime linux-x64 --kind flatpak --build Release --app-version ${{ env.VERSION }} --verbose
+          pupnet --runtime linux-arm64 --kind appimage --build Release --app-version ${{ env.VERSION }} --verbose
+          pupnet --runtime linux-arm64 --kind deb --build Release --app-version ${{ env.VERSION }} --verbose
+          # pupnet --runtime linux-arm64 --kind rpm --build Release --app-version ${{ env.VERSION }} --verbose
+          pupnet --runtime linux-arm64 --kind flatpak --build Release --app-version ${{ env.VERSION }} --verbose
+      - name: "List all files"
+        run: |
+          echo $PWD
+          ls -R
+          # no need to rename, pupnet names things according to conventions
+          # no need to delete/create release here, it was resolved in "release" job
+      - name: Upload
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # gh release upload "${{ env.VERSION }}" "./pupnet/out/*" --clobber
+
+          gh release upload "${{ env.VERSION }}" ./pupnet/out/bookmark-dlp-${{ env.VERSION }}-1.aarch64.flatpak --clobber         
+          gh release upload "${{ env.VERSION }}" ./pupnet/out/bookmark-dlp-${{ env.VERSION }}-1.x86_64.flatpak --clobber
+
+          gh release upload "${{ env.VERSION }}" ./pupnet/out/bookmark-dlp-${{ env.VERSION }}-1.x86_64.AppImage --clobber
+
+          gh release upload "${{ env.VERSION }}" ./pupnet/out/bookmark-dlp_${{ env.VERSION }}-1.x86_64.rpm --clobber
+
+          gh release upload "${{ env.VERSION }}" ./pupnet/out/bookmark-dlp_${{ env.VERSION }}-1_amd64.deb --clobber
+          gh release upload "${{ env.VERSION }}" ./pupnet/out/bookmark-dlp_${{ env.VERSION }}-1_arm64.deb --clobber
             
   
     

@@ -1,8 +1,20 @@
 # bookmark-dlp
-Utility program for downloading bookmarked youtube links using yt-dlp. A program to replicate the folder structure of your Chrome/Brave/Firefox/etc. bookmarks and call yt-dlp to download all youtube videos amongst the bookmarks.
+Utility program for downloading bookmarked youtube links using yt-dlp. It replicates the folder structure of your Chrome/Brave/Firefox/etc. bookmarks and calls yt-dlp to download all YouTube videos among the bookmarks.
 
 ## Usage
-Download the executable for your system from [releases](https://github.com/Neurofibromin/bookmark-dlp/releases/download/latest). Run it. Select your browser profile to auto import bookmarks or load a Google Takeout Chrome bookmarks html file. Currently "exports" from browsers do not work. Choose an output folder for the downloaded files - this cannot be a network folder on some platforms. If the yt-dlp executable not found automatically, select the location in the settings. If you do not have the newest version you can get it [here](https://github.com/yt-dlp/yt-dlp#installation).
+- Run the executable and select your browser profile to auto-import bookmarks, or load a Google Takeout Chrome bookmarks HTML file.
+- Choose an output folder for the downloaded files.
+- If necessary, specify the location of the yt-dlp executable in the settings.
+- Additional CLI usage options are available for more advanced users.
+
+
+## Installation & How to get
+Make sure yt-dlp is installed: If you do not have the newest version you can get it [here](https://github.com/yt-dlp/yt-dlp#installation).<br>
+Download the executable for your system from [releases](https://github.com/Neurofibromin/bookmark-dlp/releases/download/latest). Run it.
+
+## Limitations
+- Currently "exports" from browsers do not work.
+- Output folder cannot be a network folder on some platforms.
 
 ## CLI Usage
 Put the Bookmarks.html and the **yt-dlp(.exe) into the same directory as the executable**. Get the Bookmarks.html from a Google takeout. The yt-dlp executable can be found [here](https://github.com/yt-dlp/yt-dlp#installation).<br/>
@@ -13,6 +25,13 @@ Linux: in terminal in the directory: `./bookmark-dlp-linux-x64-8.0.x --console`
 More flags/usage info: `bookmark-dlp-.. --help`
 
 ## How it works
+1. The program checks for a Bookmarks.html file in its root directory. If not found, it searches default locations for supported browsers.
+2. It replicates the folder structure of the bookmarks bar on disk.
+3. YouTube links are extracted from the bookmarks and organized into text files.
+4. Helper scripts are generated for each folder to call yt-dlp for downloading.
+5. Optional: Provide a yt-dlp.conf file in the program root directory for advanced configurations.
+
+## More details
 The program first checks if a Bookmarks.html exists within its root directory/where it was called from. If yes, that is the input file. If no, default locations for some browsers (Chrome, Brave and Firefox<sup>unstable</sup> currently) are checked, to find any browser profiles with bookmarks.<br/>
 When a bookmark containing file is found or provided, the content is taken in, and the folder structure of the bookmarks bar is replicated on disk, in the root(running) directory.
 The youtube links in the given folder are written into a \${foldername}.txt file. Complex youtube links (not links for video, but for channels and playlists etc) are placed in a separate \${foldername}.complex.txt.<br/>
