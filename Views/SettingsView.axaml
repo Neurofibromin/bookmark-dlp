@@ -4,8 +4,10 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="using:bookmark_dlp.ViewModels"
     d:DesignHeight="450"
     d:DesignWidth="800"
+    x:DataType="vm:SettingsViewModel"
     mc:Ignorable="d">
     <StackPanel>
         <TextBox
@@ -14,19 +16,19 @@
             FontWeight="Bold">
             Settings
         </TextBox>
-        <CheckBox Margin="4" IsChecked="{Binding DownloadPlaylists}">
+        <CheckBox Margin="4" IsChecked="{Binding ActiveSettings.DownloadPlaylists}">
             Playlists
         </CheckBox>
-        <CheckBox Margin="4" IsChecked="{Binding DownloadShorts}">
+        <CheckBox Margin="4" IsChecked="{Binding ActiveSettings.DownloadShorts}">
             Shorts
         </CheckBox>
-        <CheckBox Margin="4" IsChecked="{Binding DownloadChannels}">
+        <CheckBox Margin="4" IsChecked="{Binding ActiveSettings.DownloadChannels}">
             Channels
         </CheckBox>
-        <CheckBox Margin="4" IsChecked="{Binding Concurrent_downloads}">
+        <CheckBox Margin="4" IsChecked="{Binding ActiveSettings.Concurrent_downloads}">
             Concurrent downloads
         </CheckBox>
-        <CheckBox Margin="4" IsChecked="{Binding Cookies_autoextract}">
+        <CheckBox Margin="4" IsChecked="{Binding ActiveSettings.Cookies_autoextract}">
             Cookies autoextract
         </CheckBox>
         <Grid Margin="4" ColumnDefinitions="Auto,*,Auto,Auto">
@@ -34,7 +36,7 @@
             <Label
                 Grid.Column="1"
                 Background="Red"
-                Content="{Binding Yt_dlp_binary_path}" />
+                Content="{Binding ActiveSettings.Yt_dlp_binary_path, TargetNullValue='not found'}" />
             <Button
                 Grid.Column="2"
                 VerticalAlignment="Top"
@@ -46,7 +48,7 @@
         </Grid>
         <Button
             Margin="4"
-            Command="{Binding $parent[Window].DataContext.GoBack}"
+            Command="{ReflectionBinding $parent[Window].DataContext.GoBack}"
             FontSize="9">
             Save settings
         </Button>

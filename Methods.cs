@@ -287,10 +287,11 @@ internal class Methods
 
     public static string Yt_dlp_pathfinder(string rootdir)
     {
+        Console.WriteLine("pathfinding ongoing");
         string ytdlp_path = ""; //checks is yt-dlp binary is present in root or if it is on path, returns ytdlp_path so it can be written into the script files
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
-            if (File.Exists(Path.Combine(rootdir, "yt-dlp.exe")))
+            if (rootdir != null && File.Exists(Path.Combine(rootdir, "yt-dlp.exe")))
             {
                 //Console.WriteLine(Path.Combine(rootdir, "yt-dlp.exe") + " found");
                 ytdlp_path = Path.Combine(rootdir, "yt-dlp.exe");
@@ -330,7 +331,7 @@ internal class Methods
             string[] filenames = {"yt-dlp", "yt-dlp_linux", "yt-dlp_linux_aarch64", "yt-dlp_linux_armv7l" };
             foreach (string filename in filenames)
             {
-                if (File.Exists(Path.Combine(rootdir, filename)))
+                if (rootdir != null && File.Exists(Path.Combine(rootdir, filename)))
                 {
                     Console.WriteLine(Path.Combine(rootdir, filename) + " found");
                     ytdlp_path = Path.Combine(rootdir, filename);
@@ -379,7 +380,7 @@ internal class Methods
             string[] filenames = { "yt-dlp", "yt-dlp_macos", "yt-dlp_macos_legacy" };
             foreach (string filename in filenames)
             {
-                if (File.Exists(Path.Combine(rootdir, filename)))
+                if (rootdir != null && File.Exists(Path.Combine(rootdir, filename)))
                 {
                     Console.WriteLine(Path.Combine(rootdir, filename) + " found");
                     ytdlp_path = Path.Combine(rootdir, filename);
@@ -613,19 +614,55 @@ internal class Methods
         return wantcomplex;
     }
 
-    public static bool IsConfigPresent()
+    public static string? ConfigFileLocation()
     {
         string configpath_local = Path.Combine(Directory.GetCurrentDirectory(), "bookmark-dlp.conf");
-        string configpath_windows = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "bookmark-dlp\\bookmark-dlp.conf");
-        string configpath_linux = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "bookmark-dlp/bookmark-dlp.conf");
-        string configpath_osx = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.Personal), "bookmark-dlp/bookmark-dlp.conf");
 
-        if (File.Exists(configpath_local)){ return true; }
-        if (File.Exists(configpath_windows)) { return true; }
-        if (File.Exists(configpath_linux)) { return true; }
-        if (File.Exists(configpath_osx)) { return true; }
-        return false;
+        if (File.Exists(configpath_local)) 
+        {
+            return configpath_local; 
+        }
+        
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        {
+            string configpath_osx = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.Personal), "bookmark-dlp/bookmark-dlp.conf");
+            if (File.Exists(configpath_osx)) { return configpath_osx; }
+        }
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            string configpath_windows = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "bookmark-dlp\\bookmark-dlp.conf");
+            if (File.Exists(configpath_windows)) { return configpath_windows; }
+        }
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        {
+            string configpath_linux = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "bookmark-dlp/bookmark-dlp.conf");
+            if (File.Exists(configpath_linux)) { return configpath_linux; }
+        }
+        
+        return null; //no config paths were found
+    }
 
+    public static bool IsConfigPresent()
+    {
+        /*
+         string configpath_local = Path.Combine(Directory.GetCurrentDirectory(), "bookmark-dlp.conf");
+           string configpath_windows = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "bookmark-dlp\\bookmark-dlp.conf");
+           string configpath_linux = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "bookmark-dlp/bookmark-dlp.conf");
+           string configpath_osx = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.Personal), "bookmark-dlp/bookmark-dlp.conf");
+
+           if (File.Exists(configpath_local)){ return true; }
+           if (File.Exists(configpath_windows)) { return true; }
+           if (File.Exists(configpath_linux)) { return true; }
+           if (File.Exists(configpath_osx)) { return true; }
+         */
+        if (ConfigFileLocation() == null)
+        {
+            return false;
+        }
+        else
+        {
+            return true;
+        }
     }
 
 }

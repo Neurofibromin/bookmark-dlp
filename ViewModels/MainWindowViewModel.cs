@@ -39,8 +39,7 @@ namespace bookmark_dlp.ViewModels
 
         SettingsViewModel mySettingsViewModel;
         // public SettingsViewModel MySettingsViewModel { get; set; }
-
-
+        
 
         [ObservableProperty]
         public ViewModelBase? contentViewModel;
@@ -65,6 +64,11 @@ namespace bookmark_dlp.ViewModels
         public void GoBack()
         {
             (PreviousViewModel, ContentViewModel) = (ContentViewModel, PreviousViewModel);
+            if (PreviousViewModel == mySettingsViewModel)
+            {
+                MessageBus2.RaiseButtonClicked("Saved");
+                AppSettings.SaveToFile();
+            }
         }
 
         public void SettingsCommand()

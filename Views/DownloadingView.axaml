@@ -4,13 +4,15 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="using:bookmark_dlp.ViewModels"
     d:DesignHeight="450"
     d:DesignWidth="800"
+    x:DataType="vm:DownloadingViewModel"
     mc:Ignorable="d">
     <Grid Margin="5" RowDefinitions="Auto,*">
 
         <Grid Grid.Row="0" ColumnDefinitions="Auto,*, Auto">
-            <Button Grid.Column="0" Command="{Binding $parent[Window].DataContext.BackToStartPage}">
+            <Button Grid.Column="0" Command="{ReflectionBinding $parent[Window].DataContext.BackToStartPage}">
 
                 <StackPanel Orientation="Horizontal">
                     <PathIcon Data="{StaticResource arrow_reply_regular}" />
@@ -23,7 +25,7 @@
                 Margin="4"
                 HorizontalAlignment="Right"
                 VerticalAlignment="Center"
-                Command="{Binding $parent[Window].DataContext.SettingsCommand}">
+                Command="{ReflectionBinding $parent[Window].DataContext.SettingsCommand}">
                 <StackPanel Orientation="Horizontal">
                     <PathIcon Data="{StaticResource settings_regular}" />
                     <TextBlock>Settings</TextBlock>

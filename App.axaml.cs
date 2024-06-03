@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Data.Core;
+using System.Runtime.InteropServices;
 using Avalonia.Data.Core.Plugins;
 using Avalonia.Markup.Xaml;
 using bookmark_dlp.Models;
@@ -38,6 +39,38 @@ namespace bookmark_dlp
                     MessageBus.ButtonClicked += async (sender, buttonText) =>
                     {
                         await Console.Out.WriteLineAsync(buttonText);
+                        switch (buttonText)
+                        {
+                            case "Appdata/local":
+                                if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                                {
+                                    string configpath_osx = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.Personal), "bookmark-dlp/bookmark-dlp.conf");
+                                    AppSettings.configloc = configpath_osx;
+                                }
+                                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                                {
+                                    string configpath_windows = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "bookmark-dlp\\bookmark-dlp.conf");
+                                    AppSettings.configloc = configpath_windows;
+                                }
+                                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                                {
+                                    string configpath_linux = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "bookmark-dlp/bookmark-dlp.conf");
+                                    AppSettings.configloc = configpath_linux;
+                                }
+                                break;
+                            case "No config":
+                                AppSettings.configloc = null;
+                                break;
+                            case "local dir":
+                                AppSettings.configloc = Path.Combine(Directory.GetCurrentDirectory(), "bookmark-dlp.conf");
+                                break;
+                            default:
+                                AppSettings.configloc = null;
+                                throw new Exception("Should not have happened");
+                                Environment.Exit(1);
+                            
+                        }
+                        
                         var mainWindowVM = new MainWindowViewModel();
                         var MainWindow = new MainWindow
                         {
@@ -52,6 +85,7 @@ namespace bookmark_dlp
                 else 
                 {
                     Console.WriteLine("Config was found");
+                    Console.WriteLine("Location: " + Methods.ConfigFileLocation());
                     var mainWindowVM = new MainWindowViewModel();
                     var MainWindow = new MainWindow
                     {

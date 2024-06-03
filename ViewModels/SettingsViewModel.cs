@@ -40,27 +40,26 @@ namespace bookmark_dlp.ViewModels
     /// </summary>
     public partial class SettingsViewModel : ViewModelBase
     {
-        [ObservableProperty]
-        public bool downloadPlaylists = false;
-        [ObservableProperty]
+
+        /*public bool downloadPlaylists = false;
         public bool downloadShorts = false;
-        [ObservableProperty]
         public bool downloadChannels = false;
-        [ObservableProperty]
         public bool concurrent_downloads = false;
-        [ObservableProperty]
         public bool cookies_autoextract = false;
+        public string? yt_dlp_binary_path = "";*/
+
         [ObservableProperty]
-        public string? yt_dlp_binary_path = "";
-
-
+        private SettingsStruct _activeSettings;
 
         public SettingsViewModel() {
-            
-            Console.WriteLine("Settings!");
-        
+            ActiveSettings = AppSettings._settings;
         }
 
+        public async Task SaveActiveSettings()
+        {
+            AppSettings._settings = ActiveSettings;
+        }
+        
 
         [RelayCommand]
         public async Task ChooseYtdlpBinary(CancellationToken token)
@@ -71,12 +70,8 @@ namespace bookmark_dlp.ViewModels
                 var file = await DoOpenFilePickerAsync();
                 if (file != null)
                 {
-                    Yt_dlp_binary_path = file.TryGetLocalPath();
-                }
-                else
-                {
-
-                    Yt_dlp_binary_path = Yt_dlp_binary_path;
+                    ActiveSettings.Yt_dlp_binary_path = file.TryGetLocalPath();
+                    ActiveSettings.Ytdlp_executable_not_found = false;
                 }
             }
             catch (Exception e)

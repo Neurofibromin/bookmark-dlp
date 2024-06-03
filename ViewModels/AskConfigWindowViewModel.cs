@@ -40,7 +40,6 @@ namespace bookmark_dlp.ViewModels
 
         private async Task HandleButtonClickAsync(string buttonText)
         {
-            
             WhichButton = buttonText;
             MessageBus.RaiseButtonClicked(buttonText);
             try

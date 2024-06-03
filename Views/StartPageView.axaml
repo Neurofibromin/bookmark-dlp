@@ -4,8 +4,11 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:sts="using:bookmark_dlp.Models"
+    xmlns:vm="using:bookmark_dlp.ViewModels"
     d:DesignHeight="450"
     d:DesignWidth="800"
+    x:DataType="vm:StartPageViewModel"
     mc:Ignorable="d">
 
 
@@ -91,7 +94,7 @@
                 Grid.Column="1"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
-                Text="{Binding Outputfolder}" />
+                Text="{ReflectionBinding ActiveSettings.Outputfolder}" />
             <Button
                 Grid.Column="2"
                 HorizontalAlignment="Center"
@@ -112,18 +115,18 @@
                 Margin="4"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Center"
-                Command="{Binding $parent[Window].DataContext.SettingsCommand}">
+                Command="{ReflectionBinding $parent[Window].DataContext.SettingsCommand}">
                 Settings
             </Button>
             <StackPanel Grid.Column="1">
-                <Label Content="not used yet" />
+                <Label Content="{ReflectionBinding ActiveSettings.Yt_dlp_binary_path}">not used yet</Label>
                 <TextBlock
                     Margin="4"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
                     Background="Red"
                     IsEnabled="False"
-                    IsVisible="{Binding Ytdlp_executable_not_found}">
+                    IsVisible="{ReflectionBinding ActiveSettings.Ytdlp_executable_not_found}">
                     No yt-dlp executable found
                 </TextBlock>
             </StackPanel>
@@ -133,7 +136,7 @@
                 HorizontalAlignment="Right"
                 VerticalAlignment="Bottom"
                 Background="Aqua"
-                Command="{Binding $parent[Window].DataContext.GoForward}">
+                Command="{ReflectionBinding $parent[Window].DataContext.GoForward}">
                 Next
             </Button>
         </Grid>

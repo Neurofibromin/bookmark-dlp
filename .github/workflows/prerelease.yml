@@ -20,7 +20,7 @@ jobs:
         os: [ ubuntu-latest ]
         dotnet-version: [ '8.0.x' ]
     runs-on: ${{ matrix.os }}
-    if: false
+    if: true
     steps:
     - uses: actions/checkout@v3
     - name: Setup .NET Core SDK ${{ matrix.dotnet-version }}
