@@ -68,7 +68,7 @@ internal class Methods
     {
         ///docs: https://kb.mozillazine.org/Places.sqlite
         ///https://stackoverflow.com/questions/11769524/how-can-i-restore-firefox-bookmark-files-from-sqlite-files
-        int[] parentid = new int[File.ReadLines(filePath).Count()+1]; //parentid[i] = the id of the parent folder of the bookmark with the id i
+        int[] parentid = new int[File.ReadLines(filePath).Count() + 1]; //parentid[i] = the id of the parent folder of the bookmark with the id i
         List<Bookmark> bookmarks = new List<Bookmark>();
         using (var connection = new SqliteConnection("Data Source=" + filePath))
         {
@@ -224,7 +224,7 @@ internal class Methods
     {
         if (numberoffolders == 0)
         {
-            numberoffolders = folders.Count()-1; //buggy, try to set numberoffolders before calling instead
+            numberoffolders = folders.Count() - 1; //buggy, try to set numberoffolders before calling instead
         }
         Console.WriteLine("\n\n");
         Console.WriteLine("The following folders were found");
@@ -327,7 +327,7 @@ internal class Methods
         }
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
         {
-            string[] filenames = {"yt-dlp", "yt-dlp_linux", "yt-dlp_linux_aarch64", "yt-dlp_linux_armv7l" };
+            string[] filenames = { "yt-dlp", "yt-dlp_linux", "yt-dlp_linux_aarch64", "yt-dlp_linux_armv7l" };
             foreach (string filename in filenames)
             {
                 if (rootdir != null && File.Exists(Path.Combine(rootdir, filename)))
@@ -617,11 +617,11 @@ internal class Methods
     {
         string configpath_local = Path.Combine(Directory.GetCurrentDirectory(), "bookmark-dlp.conf");
 
-        if (File.Exists(configpath_local)) 
+        if (File.Exists(configpath_local))
         {
-            return configpath_local; 
+            return configpath_local;
         }
-        
+
         if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
         {
             string configpath_osx = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.Personal), "bookmark-dlp/bookmark-dlp.conf");
@@ -637,7 +637,7 @@ internal class Methods
             string configpath_linux = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "bookmark-dlp/bookmark-dlp.conf");
             if (File.Exists(configpath_linux)) { return configpath_linux; }
         }
-        
+
         return null; //no config paths were found
     }
 
@@ -661,6 +661,28 @@ internal class Methods
         else
         {
             return true;
+        }
+    }
+
+    public enum ProgramUI { GUI, CLI }
+    public static ProgramUI programUI;
+    public enum Verbosity { silent = 0, error = 1, warning = 2, info = 3, log = 4 }
+    public static Verbosity verbosity;
+
+
+    public static void LogVerbose(string message, Verbosity messageurgency = Verbosity.silent)
+    {
+        if (programUI == ProgramUI.CLI)
+        {
+            Console.WriteLine(message);
+        }
+
+        else
+        {
+            if (messageurgency <= verbosity)
+            {
+                Console.WriteLine(message);
+            }
         }
     }
 

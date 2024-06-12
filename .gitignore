@@ -4,6 +4,7 @@ releases.txt
 *.deb 
 *.rpm
 todo.txt
+/.idea
 
 ################################################################################
 # This .gitignore file was automatically created by Microsoft(R) Visual Studio.

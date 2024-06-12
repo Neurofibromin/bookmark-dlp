@@ -8,6 +8,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.ComponentModel;
 using Microsoft.Data.Sqlite;
+//using Avalonia.Controls.Shapes;
 
 //TODO: Migrate from Newtonsoft.Json to System.Text.Json
 
@@ -24,7 +25,7 @@ namespace bookmark_dlp
 
             Console.OutputEncoding = System.Text.Encoding.UTF8;
             Console.WriteLine("Consoleout working");
-            return;
+            //return;
             string rootdir = Directory.GetCurrentDirectory(); //current directory
             if (!File.Exists(Path.Combine(rootdir, "Bookmarks.html"))) //If no .html in rootdir tries autoimporting from known browser directories
             {
@@ -33,13 +34,45 @@ namespace bookmark_dlp
                 throw new Exception($"Finish of route");
                 Environment.Exit(1); //leaving the program, so it does not contiue running according to Program.cs
             }
-            
-            //read .html
-            StreamReader reader = new StreamReader("Bookmarks.html"); //read the file containing all the bookmarks - a single file using chrome export
-            var lineCount = File.ReadLines("Bookmarks.html").Count(); //how many lines are there in the file - max number of bookmarks
-                                                                      //read whole file into inputarray[] array line by line
-            string oneline;
+
+
             bool wantcomplex = Methods.Wantcomplex();
+            Folderclass[] folders;
+            int numberoffolders;
+            string[] inputarray;
+            (folders, numberoffolders, inputarray) = htmlReader(System.IO.Path.Combine(rootdir, "Bookmarks.html"));
+
+            //create folder structure
+            CreateFolderStructure(folders, numberoffolders, rootdir);
+
+            int deepestdepth = 0; //Finding the deepest folder depth
+            for (int q = 1; q < numberoffolders + 1; q++)
+            {
+                if (deepestdepth < folders[q].depth)
+                {
+                    deepestdepth = folders[q].depth;
+                }
+            }
+            int i = WriteLinksToFiles(folders, numberoffolders, deepestdepth, inputarray, rootdir, wantcomplex);
+            Methods.Dumptoconsole(folders, numberoffolders, i); //dump all the folder info to console
+            string ytdlp_path = Methods.Yt_dlp_pathfinder(rootdir); //check if yt-dlp is in the root folder, on the path or not available
+            Methods.Scriptwriter(folders, numberoffolders, ytdlp_path);
+            Methods.Deleteemptyfolders(folders, rootdir, numberoffolders, deepestdepth);
+            Methods.Runningthescripts(folders, numberoffolders);
+            //Methods.Checkformissing(rootdir, folders, numberoffolders); //checking if all the desired links have indeed been downloaded, archive.txt integrity as well
+            Methods.Dumptoconsole(folders, numberoffolders, i);
+            Console.WriteLine("Press enter to exit");
+            Console.Read();
+        }
+
+        public static (Folderclass[], int, string[]) htmlReader(string htmlfilepath)
+        {
+
+            //read .html
+            StreamReader reader = new StreamReader(htmlfilepath); //read the file containing all the bookmarks - a single file using chrome export
+            var lineCount = File.ReadLines(htmlfilepath).Count(); //how many lines are there in the file - max number of bookmarks
+                                                                  //read whole file into inputarray[] array line by line
+            string oneline;
             oneline = reader.ReadLine();
             string[] inputarray = new string[lineCount + 100];
             int i = 1;
@@ -114,9 +147,14 @@ namespace bookmark_dlp
                 line = inputarray[folders[m].startline].Split('<');
                 folders[m].depth = line[0].Length / 8;
             }
-            Console.WriteLine("\n\n");
+            return (folders, numberoffolders, inputarray);
+        }
 
+        public static void CreateFolderStructure(Folderclass[] folders, int numberoffolders, string rootdir)
+        {
             //creating the folder structure and storing the access paths to the folders[].folderpath object array
+            if (!Directory.Exists(rootdir)) { Directory.CreateDirectory(rootdir); }
+            System.IO.Directory.SetCurrentDirectory(rootdir);
             System.IO.Directory.CreateDirectory("Bookmarks");
             Directory.SetCurrentDirectory("Bookmarks");
             for (int m = 1; m < numberoffolders + 1; m++)
@@ -150,7 +188,7 @@ namespace bookmark_dlp
                         System.IO.Directory.CreateDirectory(folders[m].name);
                         Directory.SetCurrentDirectory(folders[m].name); //going into the folder
                         folders[m].folderpath = Directory.GetCurrentDirectory(); //path
-                        Directory.SetCurrentDirectory(Path.Combine(Directory.GetCurrentDirectory(), "..")); //coming out of the folder
+                        Directory.SetCurrentDirectory(System.IO.Path.Combine(Directory.GetCurrentDirectory(), "..")); //coming out of the folder
                     }
 
                 }
@@ -160,19 +198,13 @@ namespace bookmark_dlp
                     folders[m].folderpath = Directory.GetCurrentDirectory(); //path
                 }
             }
+        }
 
-            int deepestdepth = 0; //Finding the deepest folder depth
-            for (int q = 1; q < numberoffolders + 1; q++)
-            {
-                if (deepestdepth < folders[q].depth)
-                {
-                    deepestdepth = folders[q].depth;
-                }
-            }
-
+        public static int WriteLinksToFiles(Folderclass[] folders, int numberoffolders, int deepestdepth, string[] inputarray, string rootdir, bool wantcomplex)
+        {
             StreamWriter temp = new StreamWriter(Path.Combine(rootdir, "temp.txt"), append: true); //writing into temp.txt all the youtube links that are not for videos (but for channels, playlists, etc.)
-
-            i = 0; //writing the content of the deepest folders first, and deleting the lines from inputarray[] that were written
+            string[] line;
+            int i = 0; //writing the content of the deepest folders first, and deleting the lines from inputarray[] that were written
             for (int q = deepestdepth; q > 0; q--) //writing the content of the deepest folders first, and deleting the lines from inputarray[] that were written
             {
                 for (int j = 0; j < numberoffolders; j++) //going through all the folders
@@ -288,18 +320,8 @@ namespace bookmark_dlp
             }
             temp.Flush();
             temp.Close();
-
-            Methods.Dumptoconsole(folders, numberoffolders, i); //dump all the folder info to console
-            string ytdlp_path = Methods.Yt_dlp_pathfinder(rootdir); //check if yt-dlp is in the root folder, on the path or not available
-            Methods.Scriptwriter(folders, numberoffolders, ytdlp_path);
-            Methods.Deleteemptyfolders(folders, rootdir, numberoffolders, deepestdepth);
-            Methods.Runningthescripts(folders, numberoffolders);
-            //Methods.Checkformissing(rootdir, folders, numberoffolders); //checking if all the desired links have indeed been downloaded, archive.txt integrity as well
-            Methods.Dumptoconsole(folders, numberoffolders, i);
-            Console.WriteLine("Press enter to exit");
-            Console.Read();
+            return i;
         }
-    
     }
 
     public class Folderclass //defining the folderclass class to create an object array from it

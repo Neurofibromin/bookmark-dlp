@@ -1,8 +1,12 @@
 ﻿using Avalonia;
 using System;
+using System.Security.Cryptography.X509Certificates;
+
+
 
 namespace bookmark_dlp
 {
+
     internal sealed class Program
     {
         // Initialization code. Don't use any Avalonia, third-party APIs or any
@@ -19,19 +23,23 @@ namespace bookmark_dlp
                 /// Will leave it in for now, as launching from the terminal is a lot less likely in my opinion.
                 ///
                 //WindowsOperations.SetWindowMode(WindowMode.Hidden);
+                Methods.programUI = Methods.ProgramUI.GUI;
                 BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
                 return;
             }
-            CoreLogic.CoreLogicMain();
-            // Handling other arguments for console application style behaviour
+            else
+            {
+                Methods.programUI = Methods.ProgramUI.CLI;
+                CoreLogic.CoreLogicMain();
+                // Handling other arguments for console application style behaviour}
+            }
         }
-
         // Avalonia configuration, don't remove; also used by visual designer.
         public static AppBuilder BuildAvaloniaApp()
-            => AppBuilder.Configure<App>()
-                .UsePlatformDetect()
-                .WithInterFont()
-                .LogToTrace();
+        => AppBuilder.Configure<App>()
+            .UsePlatformDetect()
+            .WithInterFont()
+            .LogToTrace();
     }
 
 
