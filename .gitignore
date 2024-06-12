@@ -3,6 +3,7 @@ releases.txt
 *.AppImage
 *.deb 
 *.rpm
+todo.txt
 
 ################################################################################
 # This .gitignore file was automatically created by Microsoft(R) Visual Studio.

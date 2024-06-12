@@ -6,6 +6,8 @@
     RequestedThemeVariant="Default">
     <!--  "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options.  -->
 
+    <!--  TODO: aero-theme and theme switcher?  -->
+
     <Application.DataTemplates>
         <local:ViewLocator />
     </Application.DataTemplates>

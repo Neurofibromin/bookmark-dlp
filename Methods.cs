@@ -287,7 +287,6 @@ internal class Methods
 
     public static string Yt_dlp_pathfinder(string rootdir)
     {
-        Console.WriteLine("pathfinding ongoing");
         string ytdlp_path = ""; //checks is yt-dlp binary is present in root or if it is on path, returns ytdlp_path so it can be written into the script files
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
@@ -333,7 +332,7 @@ internal class Methods
             {
                 if (rootdir != null && File.Exists(Path.Combine(rootdir, filename)))
                 {
-                    Console.WriteLine(Path.Combine(rootdir, filename) + " found");
+                    // Console.WriteLine(Path.Combine(rootdir, filename) + " found");
                     ytdlp_path = Path.Combine(rootdir, filename);
                     break;
                 }
@@ -382,7 +381,7 @@ internal class Methods
             {
                 if (rootdir != null && File.Exists(Path.Combine(rootdir, filename)))
                 {
-                    Console.WriteLine(Path.Combine(rootdir, filename) + " found");
+                    // Console.WriteLine(Path.Combine(rootdir, filename) + " found");
                     ytdlp_path = Path.Combine(rootdir, filename);
                 }
             }

@@ -49,7 +49,7 @@ namespace bookmark_dlp.ViewModels
 
         public MainWindowViewModel()
         {
-            
+            // Console.WriteLine("In orig at mwvm: " + JsonConvert.SerializeObject(AppSettings._settings));
             mySettingsViewModel = new SettingsViewModel();
             myStartPageViewModel = new StartPageViewModel();
             myDownloadingViewModel = new DownloadingViewModel();
@@ -61,26 +61,34 @@ namespace bookmark_dlp.ViewModels
         public StartPageViewModel StartPage { get ; set; }
         public DownloadingViewModel Downloading { get; set; }
         public SettingsViewModel Settings { get; set; }*/
-        public void GoBack()
+        public void GoBack() //also Bound by the savesettingsbutton
         {
             (PreviousViewModel, ContentViewModel) = (ContentViewModel, PreviousViewModel);
             if (PreviousViewModel == mySettingsViewModel)
             {
-                MessageBus2.RaiseButtonClicked("Saved");
+                mySettingsViewModel.SaveActiveSettings();
                 AppSettings.SaveToFile();
+                myStartPageViewModel.ReBindSettings(); //TODO: should raise some propertychanged event instead
+                myDownloadingViewModel.ReBindSettings();
             }
         }
 
-        public void SettingsCommand()
+        public async Task SettingsCommand()
         {
             PreviousViewModel = ContentViewModel;
             ContentViewModel = mySettingsViewModel;
+            if (PreviousViewModel == myStartPageViewModel)
+            {
+                await myStartPageViewModel.SaveActiveSettings();
+                mySettingsViewModel.ReBindSettings();
+            }
         }
 
-        public void GoForward()
+        public async Task GoForward()
         {
             PreviousViewModel = ContentViewModel;
             ContentViewModel = myDownloadingViewModel;
+            await myStartPageViewModel.SaveActiveSettings();
         }
 
         public void BackToStartPage()

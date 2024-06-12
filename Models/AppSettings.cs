@@ -14,11 +14,8 @@ namespace bookmark_dlp.Models
         /// <summary>
         /// Singleton!
         /// </summary>
-        private static AppSettings _instance = new();
         public static SettingsStruct _settings = new SettingsStruct();
-        public static string? configloc = Methods.ConfigFileLocation();
-
-        private readonly SettingsStruct defaultsettings = new SettingsStruct
+        public static readonly SettingsStruct defaultsettings = new SettingsStruct
         {
             htmlImportUsed = false,
             htmlfilelocation = "",       
@@ -31,6 +28,20 @@ namespace bookmark_dlp.Models
             cookies_autoextract = false,
             yt_dlp_binary_path = null,
         };
+        public static string? configloc = Methods.ConfigFileLocation();
+        private static AppSettings _instance = new AppSettings();
+        
+        
+        /*
+        public static AppSettings Instance
+        {
+            get
+            {
+                if (_instance == null)
+                    _instance = new AppSettings();
+                return _instance;
+            }
+        }*/
         
         //Constructor
         protected AppSettings()
@@ -39,12 +50,15 @@ namespace bookmark_dlp.Models
             if (File.Exists(configloc))
             {
                 string jsonimportstring = File.ReadAllText(configloc);
+                // Console.WriteLine("importing: " + jsonimportstring);
+                // Console.WriteLine("\n");
                 try
                 {
                     SettingsStruct imported = JsonConvert.DeserializeObject<SettingsStruct>(jsonimportstring);
                     if (imported == null) { throw new NullReferenceException(); }
                     _settings = imported;
-                    Console.WriteLine("import successful");
+                    Console.WriteLine("Config import successful");
+                    // Console.WriteLine("afterimport: " + JsonConvert.SerializeObject(_settings));
                 }
                 catch
                 {
@@ -59,8 +73,9 @@ namespace bookmark_dlp.Models
                 Console.WriteLine("Config file doesnt exist, going with defaults");
                 _settings = defaultsettings; //no config file, so set configs to default value
                 configloc = null;
-                Console.WriteLine(_settings.ytdlp_executable_not_found + " " + _settings.Ytdlp_executable_not_found);
+                // Console.WriteLine(_settings.ytdlp_executable_not_found); // + " " + _settings.Ytdlp_executable_not_found);
             }
+            // Console.WriteLine(_settings.downloadShorts);
         }
         
         public static AppSettings GetAppSettings()
@@ -68,19 +83,21 @@ namespace bookmark_dlp.Models
             return _instance;
         }
 
+        
+
         public static void SaveToFile()
         {
-            //if configloc already exists overwrite it, if not create it?
-            Console.WriteLine(_settings.ytdlp_executable_not_found + " " + _settings.Ytdlp_executable_not_found);
+            //if configloc already exists overwrite it, if not create it
             string jsonstringexport = JsonConvert.SerializeObject(_settings);
-            if (configloc != null)
+            if (configloc != null) //only save to file if a config file is present or was chosen
             {
                 File.Delete(configloc);
                 StreamWriter write = new StreamWriter(configloc);
+                // Console.WriteLine("exporting: " + jsonstringexport);
+                // Console.WriteLine("\n");
                 write.Write(jsonstringexport);
                 write.Close();
             }
-            Console.WriteLine("Saved");
         }
 
         //Finalizer
@@ -90,15 +107,60 @@ namespace bookmark_dlp.Models
             
         }
         
-        public static string? GetStringExample()
+        public static string GetJsonStringRepresentation()
         {
-            return _settings.Outputfolder;
+            string a = JsonConvert.SerializeObject(_settings);
+            return a;
         }
         
     }
 
     public partial class SettingsStruct : ObservableObject
     {
+        public SettingsStruct(string chtmlfilelocation, bool chtmlImportUsed, string coutputfolder, bool cytdlp_executable_not_found, 
+            bool cdownloadPlaylists, bool cdownloadShorts, bool cdownloadChannels, bool cconcurrent_downloads, bool ccookies_autoextract, string cyt_dlp_binary_path)
+        {
+            htmlfilelocation = chtmlfilelocation;
+            htmlImportUsed = chtmlImportUsed;
+            outputfolder = coutputfolder;
+            ytdlp_executable_not_found = cytdlp_executable_not_found;
+            downloadPlaylists = cdownloadPlaylists;
+            downloadShorts = cdownloadShorts;
+            downloadChannels = cdownloadChannels;
+            concurrent_downloads = cconcurrent_downloads;
+            cookies_autoextract = ccookies_autoextract;
+            yt_dlp_binary_path = cyt_dlp_binary_path;
+        }
+        
+        public SettingsStruct(SettingsStruct other)
+        {
+            htmlfilelocation = other.htmlfilelocation;
+            htmlImportUsed = other.htmlImportUsed;
+            outputfolder = other.outputfolder;
+            ytdlp_executable_not_found = other.ytdlp_executable_not_found;
+            downloadPlaylists = other.downloadPlaylists;
+            downloadShorts = other.downloadShorts;
+            downloadChannels = other.downloadChannels;
+            concurrent_downloads = other.concurrent_downloads;
+            cookies_autoextract = other.cookies_autoextract;
+            yt_dlp_binary_path = other.yt_dlp_binary_path;
+        }
+
+        public SettingsStruct()
+        {
+            htmlfilelocation = null;
+            htmlImportUsed = false;
+            outputfolder = null;
+            ytdlp_executable_not_found = true;
+            downloadPlaylists = false;
+            downloadShorts = false;
+            downloadChannels = false;
+            concurrent_downloads = false;
+            cookies_autoextract = false;
+            yt_dlp_binary_path = null;
+        }
+        
+        
         [ObservableProperty]
         public string htmlfilelocation;
         [ObservableProperty]

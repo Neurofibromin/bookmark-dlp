@@ -1,57 +1,57 @@
 <Window
+    Height="200"
+    Title="Choose config location"
+    Width="400"
+    d:DesignHeight="200"
+    d:DesignWidth="400"
+    mc:Ignorable="d"
     x:Class="bookmark_dlp.Views.AskConfigWindow"
+    x:DataType="vm:AskConfigWindowViewModel"
     xmlns="https://github.com/avaloniaui"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="using:bookmark_dlp.ViewModels"
-    Title="Choose config location"
-    Width="400"
-    Height="200"
-    d:DesignHeight="200"
-    d:DesignWidth="400"
-    x:DataType="vm:AskConfigWindowViewModel"
-    mc:Ignorable="d">
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <StackPanel Margin="10" Spacing="7">
         <TextBlock
+            Background="AliceBlue"
             HorizontalAlignment="Center"
-            VerticalAlignment="Center"
-            Background="AliceBlue">
+            VerticalAlignment="Center">
             No config file detected
         </TextBlock>
         <TextBlock
-            Margin="10"
             HorizontalAlignment="Left"
-            VerticalAlignment="Top"
-            TextWrapping="Wrap">
+            Margin="10"
+            TextWrapping="Wrap"
+            VerticalAlignment="Top">
             No exising config was found, please choose location for new config file:
         </TextBlock>
         <Grid
+            ColumnDefinitions="*,*,*"
             HorizontalAlignment="Center"
-            VerticalAlignment="Center"
-            ColumnDefinitions="*,*,*">
+            VerticalAlignment="Center">
             <Button
-                Grid.Column="0"
-                Margin="7"
-                HorizontalAlignment="Center"
                 Command="{Binding ButtonCommand}"
-                CommandParameter="{Binding Content, RelativeSource={RelativeSource Self}}">
+                CommandParameter="{Binding Content, RelativeSource={RelativeSource Self}}"
+                Grid.Column="0"
+                HorizontalAlignment="Center"
+                Margin="7">
                 Appdata/local
             </Button>
             <Button
-                Grid.Column="1"
-                Margin="7"
-                HorizontalAlignment="Center"
                 Command="{Binding ButtonCommand}"
-                CommandParameter="{Binding Content, RelativeSource={RelativeSource Self}}">
+                CommandParameter="{Binding Content, RelativeSource={RelativeSource Self}}"
+                Grid.Column="1"
+                HorizontalAlignment="Center"
+                Margin="7">
                 local dir
             </Button>
             <Button
-                Grid.Column="2"
-                Margin="7"
-                HorizontalAlignment="Center"
                 Command="{Binding ButtonCommand}"
-                CommandParameter="{Binding Content, RelativeSource={RelativeSource Self}}">
+                CommandParameter="{Binding Content, RelativeSource={RelativeSource Self}}"
+                Grid.Column="2"
+                HorizontalAlignment="Center"
+                Margin="7">
                 No config
             </Button>
 
@@ -60,10 +60,10 @@
             <Label Content="{Binding MyLabel}">message</Label>
             <Label Content="{Binding WhichButton}">which</Label>
             <Button
-                Margin="7"
+                Command="{Binding Cancel}"
                 HorizontalAlignment="Right"
-                VerticalAlignment="Bottom"
-                Command="{Binding Cancel}">
+                Margin="7"
+                VerticalAlignment="Bottom">
                 Cancel
             </Button>
         </DockPanel>

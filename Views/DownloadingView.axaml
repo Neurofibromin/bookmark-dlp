@@ -1,18 +1,18 @@
 <UserControl
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    mc:Ignorable="d"
     x:Class="bookmark_dlp.Views.DownloadingView"
+    x:DataType="vm:DownloadingViewModel"
     xmlns="https://github.com/avaloniaui"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="using:bookmark_dlp.ViewModels"
-    d:DesignHeight="450"
-    d:DesignWidth="800"
-    x:DataType="vm:DownloadingViewModel"
-    mc:Ignorable="d">
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <Grid Margin="5" RowDefinitions="Auto,*">
 
-        <Grid Grid.Row="0" ColumnDefinitions="Auto,*, Auto">
-            <Button Grid.Column="0" Command="{ReflectionBinding $parent[Window].DataContext.BackToStartPage}">
+        <Grid ColumnDefinitions="Auto,*, Auto" Grid.Row="0">
+            <Button Command="{ReflectionBinding $parent[Window].DataContext.BackToStartPage}" Grid.Column="0">
 
                 <StackPanel Orientation="Horizontal">
                     <PathIcon Data="{StaticResource arrow_reply_regular}" />
@@ -21,11 +21,11 @@
             </Button>
             <Label Grid.Column="1">Bookmarks</Label>
             <Button
+                Command="{ReflectionBinding $parent[Window].DataContext.SettingsCommand}"
                 Grid.Column="2"
-                Margin="4"
                 HorizontalAlignment="Right"
-                VerticalAlignment="Center"
-                Command="{ReflectionBinding $parent[Window].DataContext.SettingsCommand}">
+                Margin="4"
+                VerticalAlignment="Center">
                 <StackPanel Orientation="Horizontal">
                     <PathIcon Data="{StaticResource settings_regular}" />
                     <TextBlock>Settings</TextBlock>
@@ -33,35 +33,35 @@
             </Button>
         </Grid>
 
-        <Grid Grid.Row="1" ColumnDefinitions="*, 4*, *">
+        <Grid ColumnDefinitions="*, 4*, *" Grid.Row="1">
 
             <!--  tree of folders  -->
-            <Rectangle Grid.Column="0" Fill="Aquamarine" />
+            <Rectangle Fill="Aquamarine" Grid.Column="0" />
 
             <!--  main view  -->
-            <Rectangle Grid.Column="1" Fill="Red" />
+            <Rectangle Fill="Red" Grid.Column="1" />
 
 
             <!--  stats  -->
             <Grid Grid.Column="2" RowDefinitions="Auto,*,Auto">
                 <Button
-                    Margin="5"
                     HorizontalAlignment="Stretch"
-                    VerticalAlignment="Top"
-                    IsEnabled="False">
+                    IsEnabled="False"
+                    Margin="5"
+                    VerticalAlignment="Top">
                     <StackPanel Orientation="Horizontal">
                         <PathIcon Data="{StaticResource arrow_sync_circle_regular}" />
                         <TextBlock>Refresh stats</TextBlock>
                     </StackPanel>
                 </Button>
-                <Grid Grid.Row="1" Background="DarkCyan">
+                <Grid Background="DarkCyan" Grid.Row="1">
                     <Label Grid.Row="1">Stats</Label>
                     <Button
                         Grid.Row="2"
                         HorizontalAlignment="Stretch"
-                        VerticalAlignment="Bottom"
                         IsEnabled="False"
-                        IsVisible="True">
+                        IsVisible="True"
+                        VerticalAlignment="Bottom">
                         View logs
                     </Button>
                 </Grid>

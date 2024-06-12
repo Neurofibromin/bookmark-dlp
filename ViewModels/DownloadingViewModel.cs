@@ -31,6 +31,20 @@ namespace bookmark_dlp.ViewModels
 {
     public partial class DownloadingViewModel : ViewModelBase
     {
+        [ObservableProperty]
+        private SettingsStruct _activeSettings;
+        
+        public DownloadingViewModel()
+        {
+            ActiveSettings = AppSettings._settings;
+        }
+        
+        
+        public void ReBindSettings()
+        {
+            ActiveSettings = AppSettings._settings;
+        }
+        
         
     }
 }

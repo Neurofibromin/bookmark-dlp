@@ -52,12 +52,74 @@ namespace bookmark_dlp.ViewModels
         private SettingsStruct _activeSettings;
 
         public SettingsViewModel() {
-            ActiveSettings = AppSettings._settings;
+            // Console.WriteLine("jsonrepr: " + AppSettings.GetJsonStringRepresentation());
+            // Console.WriteLine("In orig at vmcreation: " + JsonConvert.SerializeObject(AppSettings._settings));
+            ActiveSettings = new SettingsStruct(AppSettings._settings);
+            // Console.WriteLine("In settingsviewmodel at creation: " + JsonConvert.SerializeObject(ActiveSettings));
         }
 
         public async Task SaveActiveSettings()
         {
-            AppSettings._settings = ActiveSettings;
+            AppSettings._settings = new SettingsStruct(ActiveSettings);
+        }
+        
+        public void ReBindSettings()
+        {
+            ActiveSettings = new SettingsStruct(AppSettings._settings);
+        }
+
+        [RelayCommand]
+        public async Task RestoreDefaultSettings()
+        {
+            ActiveSettings = new SettingsStruct(AppSettings.defaultsettings);
+        }
+        
+        
+        [RelayCommand]
+        public async Task ChooseOutputFolder(CancellationToken token)
+        {
+            ErrorMessages?.Clear();
+            try
+            {
+                var folder = await DoOpenFolderPickerAsync();
+                if (folder != null)
+                {
+                    ActiveSettings.Outputfolder = folder.TryGetLocalPath();
+                }
+                else { }
+            }
+            catch (Exception e)
+            {
+                ErrorMessages?.Add(e.Message);
+            }
+            if (Methods.Yt_dlp_pathfinder(ActiveSettings.Outputfolder) != null)
+            {
+                // await Console.Out.WriteLineAsync("thisone");
+                ActiveSettings.Ytdlp_executable_not_found = false;
+                //ActiveSettings.Ytdlp_executable_not_found = false;
+            }
+        }
+        
+        private async Task<IStorageFolder?> DoOpenFolderPickerAsync()
+        {
+
+            if (Application.Current?.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop ||
+                desktop.MainWindow?.StorageProvider is not { } provider)
+                throw new NullReferenceException("Missing StorageProvider instance.");
+
+            var result = await provider.OpenFolderPickerAsync(new FolderPickerOpenOptions()
+            {
+                Title = "Choose output folder for saving the videos",
+
+            });
+            if (result?.Count >= 1)
+            {
+                return (IStorageFolder?)result[0];
+            }
+            else
+            {
+                return null;
+            }
         }
         
 

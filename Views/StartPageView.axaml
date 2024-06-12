@@ -58,13 +58,13 @@
             <Label
                 Name="chosenfilelabel"
                 Margin="4"
-                IsVisible="{Binding HtmlImportUsed}">
+                IsVisible="{Binding ActiveSettings.HtmlImportUsed}">
                 Chosen file:
             </Label>
             <TextBox
                 Margin="4"
-                IsVisible="{Binding HtmlImportUsed}"
-                Text="{Binding Htmlfilelocation, Mode=TwoWay}" />
+                IsVisible="{Binding ActiveSettings.HtmlImportUsed}"
+                Text="{Binding ActiveSettings.Htmlfilelocation, Mode=TwoWay}" />
             <Button
                 Name="OpenFileButton"
                 HorizontalAlignment="Left"
@@ -94,7 +94,7 @@
                 Grid.Column="1"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
-                Text="{ReflectionBinding ActiveSettings.Outputfolder}" />
+                Text="{Binding ActiveSettings.Outputfolder}" />
             <Button
                 Grid.Column="2"
                 HorizontalAlignment="Center"
@@ -119,14 +119,14 @@
                 Settings
             </Button>
             <StackPanel Grid.Column="1">
-                <Label Content="{ReflectionBinding ActiveSettings.Yt_dlp_binary_path}">not used yet</Label>
+                <Label Content="{Binding ActiveSettings.Yt_dlp_binary_path}">not used yet</Label>
                 <TextBlock
                     Margin="4"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
                     Background="Red"
                     IsEnabled="False"
-                    IsVisible="{ReflectionBinding ActiveSettings.Ytdlp_executable_not_found}">
+                    IsVisible="{Binding ActiveSettings.Ytdlp_executable_not_found}">
                     No yt-dlp executable found
                 </TextBlock>
             </StackPanel>

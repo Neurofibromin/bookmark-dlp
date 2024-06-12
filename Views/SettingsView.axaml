@@ -46,6 +46,21 @@
             </Button>
 
         </Grid>
+        <DockPanel Margin="4">
+            <Label FontSize="9">Current output folder:</Label>
+            <Label
+                
+                Background="YellowGreen"
+                Content="{Binding ActiveSettings.Outputfolder, TargetNullValue='not found'}" />
+            <Button
+                DockPanel.Dock="Right"
+                HorizontalAlignment="Right"
+                Command="{Binding ChooseOutputFolderCommand}"
+                FontSize="9">
+                Select output folder
+            </Button>
+        </DockPanel>
+        <Button Margin="4" FontSize="9" Command="{Binding RestoreDefaultSettingsCommand}">Restore Defauls</Button>
         <Button
             Margin="4"
             Command="{ReflectionBinding $parent[Window].DataContext.GoBack}"

@@ -39,6 +39,34 @@ A helper script (.bat or .sh) is also generated for each folder. If a folder con
 The scripts run one at a time, in sequence. I recommend also providing a **yt-dlp.conf file into program root** (running) directory, and enabling the archive function - that way bookmark-dlp can be run from the same directory again, and only new files get downloaded.
 If the same directory is used for different profiles things can get written into same directories, but probably nothing should be lost.
 
+### Locations for files
+Config for bookmark-dlp:
+1. local 
+    1. Path.Combine(Directory.GetCurrentDirectory(), "bookmark-dlp.conf");
+    2. Assembly.GetExecutingAssembly
+2. OS config directory
+    * windows = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "bookmark-dlp\\bookmark-dlp.conf");
+    * linux = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "bookmark-dlp/bookmark-dlp.conf"); 
+    * osx = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.Personal), "bookmark-dlp/bookmark-dlp.conf");
+If no config is found at startup popup asks for location for new config file.
+
+yt-dlp:
+1. program is called from
+2. program executable is found in
+3. chosen output folder
+accepted filenames:
+osx: { "yt-dlp", "yt-dlp_macos", "yt-dlp_macos_legacy" }
+linux: {"yt-dlp", "yt-dlp_linux", "yt-dlp_linux_aarch64", "yt-dlp_linux_armv7l" }
+windows: "yt-dlp.exe"
+
+yt-dlp.config is sought in the following locations:
+1. program is called from
+2. program executable is found in
+3. chosen output folder
+4. yt-dlp executable is found in (even if manually selected)
+5. yt-dlp default folder (somewhere in .local?)
+
+
 ## Releases
 Windows and linux compatible, written in C#, builds for x86 and ARM available. <br/>
 Build your own: this project is open source

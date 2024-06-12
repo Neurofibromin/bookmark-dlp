@@ -33,10 +33,7 @@ namespace bookmark_dlp.ViewModels
     public partial class StartPageViewModel : ViewModelBase
     {
 
-        [ObservableProperty]
-        public string? htmlfilelocation = "";
-        [ObservableProperty]
-        public bool htmlImportUsed = false;
+        
         
         [ObservableProperty]
         public string[] browserlist = { "Firefox", "Chrome", "Safari" };
@@ -50,7 +47,17 @@ namespace bookmark_dlp.ViewModels
 
         public StartPageViewModel() {
             if (Methods.Yt_dlp_pathfinder(Directory.GetCurrentDirectory()) != null) { AppSettings._settings.Ytdlp_executable_not_found = false; }          
-            ActiveSettings = AppSettings._settings;
+            ActiveSettings = new SettingsStruct(AppSettings._settings);
+        }
+
+        public void ReBindSettings()
+        {
+            ActiveSettings = new SettingsStruct(AppSettings._settings);
+        }
+        
+        public async Task SaveActiveSettings()
+        {
+            AppSettings._settings = new SettingsStruct(ActiveSettings);
         }
 
         [ObservableProperty] private string? _fileText;
@@ -59,21 +66,17 @@ namespace bookmark_dlp.ViewModels
         [RelayCommand]
         public async Task OpenFile(CancellationToken token)
         {
-            HtmlImportUsed = true;
+            ActiveSettings.HtmlImportUsed = true;
             ErrorMessages?.Clear();
             try
             {
                 var file = await DoOpenFilePickerAsync();
                 if (file != null)
                 {
-                    Htmlfilelocation = file.TryGetLocalPath();
-                    AppSettings._settings.Htmlfilelocation = Htmlfilelocation;
+                    ActiveSettings.Htmlfilelocation = file.TryGetLocalPath();
+                    // AppSettings._settings.Htmlfilelocation = ActiveSettings.Htmlfilelocation;
                 }
-                else
-                {
-
-                    Htmlfilelocation = Htmlfilelocation;
-                }
+                else { }
             }
             catch (Exception e)
             {
@@ -108,8 +111,8 @@ namespace bookmark_dlp.ViewModels
                 var folder = await DoOpenFolderPickerAsync();
                 if (folder != null)
                 {
-                    AppSettings._settings.Outputfolder = folder.TryGetLocalPath();
-                    //ActiveSettings.Outputfolder = folder.TryGetLocalPath();
+                    // AppSettings._settings.Outputfolder = folder.TryGetLocalPath();
+                    ActiveSettings.Outputfolder = folder.TryGetLocalPath();
                 }
                 else { }
             }
@@ -117,11 +120,11 @@ namespace bookmark_dlp.ViewModels
             {
                 ErrorMessages?.Add(e.Message);
             }
-            if (Methods.Yt_dlp_pathfinder(AppSettings._settings.Outputfolder) != null)
+            if (Methods.Yt_dlp_pathfinder(ActiveSettings.Outputfolder) != null)
             {
-                await Console.Out.WriteLineAsync("thisone");
-                AppSettings._settings.Ytdlp_executable_not_found = false;
-                //ActiveSettings.Ytdlp_executable_not_found = false;
+                // await Console.Out.WriteLineAsync("thisone");
+                // AppSettings._settings.Ytdlp_executable_not_found = false;
+                ActiveSettings.Ytdlp_executable_not_found = false;
             }
         }
 
