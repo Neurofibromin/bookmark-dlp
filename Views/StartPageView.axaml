@@ -39,8 +39,8 @@
                 Name="browsers"
                 Grid.Column="1"
                 Margin="0"
-                Background="Fuchsia"
-                ItemsSource="{Binding Browserlist}"
+                Background="LightGoldenrodYellow"
+                ItemsSource="{Binding AvailableBrowserBookmarkPaths, Mode=OneWay}"
                 SelectedItem="{Binding ChosenBrowser}"
                 SelectionMode="Single,Toggle" />
         </Grid>

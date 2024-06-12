@@ -45,7 +45,7 @@ internal class AutoImport
         Console.OutputEncoding = System.Text.Encoding.UTF8;
         string rootdir = Directory.GetCurrentDirectory(); //current directory
         bool wantcomplex = Methods.Wantcomplex();
-        string filePath = FindfilePath();
+        string filePath = QueryChosenBookmarksFile(FindBrowserBookmarkFilesPaths());
         Folderclass[] folders;
         if (filePath.Contains("sqlite"))
         {
@@ -224,11 +224,8 @@ internal class AutoImport
         return folders;
     }
 
-    public static string FindfilePath()
+    public static List<BrowserLocations> GetBrowserLocations()
     {
-        string filePath = "";
-        string profilespath = "";
-        List<string> filepaths = new List<string>();
 
         BrowserLocations Chrome = new BrowserLocations
         {
@@ -306,6 +303,232 @@ internal class AutoImport
             Edge,
             Opera
         };
+        return browserLocations;
+    }
+
+
+    public static string QueryChosenBookmarksFile(List<BrowserLocations> browserLocations)
+    {
+        string filePath;
+        List<string> filepaths = new List<string>();
+        Console.WriteLine("Which browser bookmarks would you like to use?\nWrite the number");
+        int m = 0;
+        foreach (BrowserLocations browser in browserLocations)
+        {
+            foreach (string path in browser.foundFiles)
+            {
+                Console.WriteLine(m + ". path: " + path);
+                filepaths.Add(path);
+                m++;
+            }
+        }
+        filePath = filepaths.ElementAt(Convert.ToInt32(Console.ReadLine()));
+        Console.WriteLine("Chosen path: " + filePath);
+        return filePath;
+    }
+
+    public static BrowserLocations chromeBasedBrowserCheck(BrowserLocations browser)
+    {
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            if (Directory.Exists(browser.windows_profilespath))
+            {
+                foreach (string profile in Directory.GetDirectories(browser.windows_profilespath))
+                {
+                    if (File.Exists(Path.Combine(profile, "Bookmarks")))
+                    {
+                        browser.foundFiles.Add(Convert.ToString(Path.Combine(profile, "Bookmarks")));
+                        Console.WriteLine("File found! Filepath in " + browser.browsername + ": " + Convert.ToString(Path.Combine(profile, "Bookmarks")));
+                        browser.linksfound++;
+                    }
+                }
+                if (browser.linksfound == 0) { Console.WriteLine(($"No Bookmarks file found in " + browser.browsername)); }
+            }
+            else if (browser.hardcodedpaths.Count != 0)
+            {
+                foreach (string hardpath in browser.hardcodedpaths)
+                {
+                    if (File.Exists(hardpath))
+                    {
+                        browser.foundFiles.Add(hardpath);
+                        Console.WriteLine("File found! Filepath in " + browser.browsername + ": " + hardpath);
+                        browser.linksfound++;
+                    }
+
+                }
+                if (browser.linksfound == 0) { Console.WriteLine(($"No Bookmarks file found in " + browser.browsername)); }
+            }
+            else { Console.WriteLine(browser.browsername + " install folder not found"); }
+        }
+        else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        {
+            if (Directory.Exists(browser.linux_profilespath))
+            {
+                foreach (string profile in Directory.GetDirectories(browser.linux_profilespath))
+                {
+                    if (File.Exists(Path.Combine(profile, "Bookmarks")))
+                    {
+                        //For every chrome profile that has bookmarks
+                        browser.foundFiles.Add(Convert.ToString(Path.Combine(profile, "Bookmarks")));
+                        Console.WriteLine("File found! Filepath in " + browser.browsername + ": " + Convert.ToString(Path.Combine(profile, "Bookmarks")));
+                        browser.linksfound++;
+                    }
+                }
+                if (browser.linksfound == 0) { Console.WriteLine(($"Bookmarks file not found in " + browser.browsername)); }
+            }
+            else if (browser.hardcodedpaths.Count != 0)
+            {
+                foreach (string hardpath in browser.hardcodedpaths)
+                {
+                    if (File.Exists(hardpath))
+                    {
+                        browser.foundFiles.Add(hardpath);
+                        Console.WriteLine("File found! Filepath in " + browser.browsername + ": " + hardpath);
+                        browser.linksfound++;
+                    }
+
+                }
+                if (browser.linksfound == 0) { Console.WriteLine(($"No Bookmarks file found in " + browser.browsername)); }
+            }
+            else { Console.WriteLine(browser.browsername + " install folder not found"); }
+        }
+        else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        {
+            if (Directory.Exists(browser.osx_profilespath))
+            {
+                foreach (string profile in Directory.GetDirectories(browser.osx_profilespath))
+                {
+                    if (File.Exists(Path.Combine(profile, "Bookmarks")))
+                    {
+                        browser.foundFiles.Add(Convert.ToString(Path.Combine(profile, "Bookmarks")));
+                        Console.WriteLine("File found! Filepath in " + browser.browsername + ": " + Convert.ToString(Path.Combine(profile, "Bookmarks")));
+                        browser.linksfound++;
+                    }
+                }
+                if (browser.linksfound == 0) { Console.WriteLine(($"Bookmarks file not found in " + browser.browsername)); }
+            }
+            else if (browser.hardcodedpaths.Count != 0)
+            {
+                foreach (string hardpath in browser.hardcodedpaths)
+                {
+                    if (File.Exists(hardpath))
+                    {
+                        browser.foundFiles.Add(hardpath);
+                        Console.WriteLine("File found! Filepath in " + browser.browsername + ": " + hardpath);
+                        browser.linksfound++;
+                    }
+
+                }
+                if (browser.linksfound == 0) { Console.WriteLine(($"No Bookmarks file found in " + browser.browsername)); }
+            }
+            else { Console.WriteLine(browser.browsername + " install folder not found"); }
+        }
+        return browser;
+    }
+
+    public static BrowserLocations firefoxBrowserCheck()
+    {
+        BrowserLocations Firefox = new BrowserLocations
+        {
+            browsername = "Firefox",
+            windows_profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Mozilla\\Firefox\\Profiles\\"),
+            //linksfound = "",
+            linux_profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.Personal), "snap/firefox/common/.mozilla/firefox/"),
+            osx_profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.Personal), "Library/Application Support/Firefox/Profiles"),
+        };
+
+        //Firefox
+        //Finding the sqlite databases
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            ///C:\Windows.old\Users\<UserName>\AppData\Roaming\Mozilla\Firefox\Profiles\<filename.default>\places.sqlite
+            //filePath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Mozilla\\Firefox\\Profiles\\<filename.default>\\places.sqlite");
+            // profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Mozilla\\Firefox\\Profiles\\");
+            int firefoxBookmarkFilesCount = 0;
+            //Console.WriteLine("profilespath " + profilespath);
+            if (Directory.Exists(Firefox.windows_profilespath))
+            {
+                foreach (string profile in Directory.GetDirectories(Firefox.windows_profilespath))
+                {
+                    if (File.Exists(Path.Combine(profile, "places.sqlite")))
+                    {
+                        //For every firefox profile that has bookmarks
+                        Firefox.foundFiles.Add(Convert.ToString(Path.Combine(profile, "places.sqlite")));
+                        Console.WriteLine("File found! " + "Filepath in Firefox: " + Convert.ToString(Path.Combine(profile, "places.sqlite")));
+                        Firefox.linksfound++;
+                    }
+                }
+            }
+            else { Console.WriteLine("Firefox install folder not found"); }
+            if (Firefox.linksfound == 0) { Console.WriteLine(($"Bookmarks file not found in Firefox")); }
+        }
+        else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        {
+            ///home/$User/snap/firefox/common/.mozilla/firefox/aaaa.default/places.sqlite/
+            ///home/$User/.mozilla/firefox/aaaa.default/places.sqlite
+            string profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.Personal), "snap/firefox/common/.mozilla/firefox/");
+            //profilespath has to stay for firefox linux, because Firefox.linux_profilespath is a single string (not List<string>) and changing it for every browser would take long
+            if (Directory.Exists(profilespath))
+            {
+                foreach (string profile in Directory.GetDirectories(Firefox.linux_profilespath))
+                {
+                    if (File.Exists(Path.Combine(profile, "places.sqlite")))
+                    {
+                        //For every firefox profile that has bookmarks
+                        Firefox.foundFiles.Add(Convert.ToString(Path.Combine(profile, "places.sqlite")));
+                        Console.WriteLine("File found! " + "Filepath in snap firefox: " + Convert.ToString(Path.Combine(profile, "places.sqlite")));
+                        Firefox.linksfound++;
+                    }
+                }
+            }
+            else { Console.WriteLine("Firefox snap install not found"); }
+            profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.Personal), ".mozilla/firefox");
+            if (Directory.Exists(profilespath))
+            {
+                foreach (string profile in Directory.GetDirectories(profilespath))
+                {
+                    if (File.Exists(Path.Combine(profile, "places.sqlite")))
+                    {
+                        //For every firefox profile that has bookmarks
+                        Firefox.foundFiles.Add(Convert.ToString(Path.Combine(profile, "places.sqlite")));
+                        Console.WriteLine("File found! " + "Filepath in Firefox: " + Convert.ToString(Path.Combine(profile, "places.sqlite")));
+                        Firefox.linksfound++;
+                    }
+                }
+            }
+            else { Console.WriteLine("Firefox native install not found"); }
+            if (Firefox.linksfound == 0) { Console.WriteLine(($"Bookmarks file not found in Firefox")); }
+        }
+        else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        {
+            ///Users/<username>/Library/Application Support/Firefox/Profiles/<profile folder>
+            // profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.Personal), "Library/Application Support/Firefox/Profiles");
+            if (Directory.Exists(Firefox.osx_profilespath))
+            {
+                foreach (string profile in Directory.GetDirectories(Firefox.osx_profilespath))
+                {
+                    if (File.Exists(Path.Combine(profile, "places.sqlite")))
+                    {
+                        //For every firefox profile that has bookmarks
+                        Firefox.foundFiles.Add(Convert.ToString(Path.Combine(profile, "places.sqlite")));
+                        Console.WriteLine("File found! " + "Filepath in Firefox: " + Convert.ToString(Path.Combine(profile, "places.sqlite")));
+                        Firefox.linksfound++;
+                    }
+                }
+            }
+            else { Console.WriteLine("Firefox install folder not found."); }
+            if (Firefox.linksfound == 0) { Console.WriteLine(($"Bookmarks file not found in Firefox")); }
+        }
+        return Firefox;
+    }
+
+    public static List<BrowserLocations> FindBrowserBookmarkFilesPaths()
+    {
+        string filePath = "";
+        string profilespath = "";
+        List<string> filepaths = new List<string>();
+        List<BrowserLocations> browserLocations = GetBrowserLocations();
+        List<BrowserLocations> completeBrowserLocations = new List<BrowserLocations>();
         /*
         //use default location for bookmarks file
         //Chrome
@@ -542,234 +765,27 @@ internal class AutoImport
         //Generic chrome based:
         foreach (BrowserLocations browser in browserLocations)
         {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                if (Directory.Exists(browser.windows_profilespath))
-                {
-                    foreach (string profile in Directory.GetDirectories(browser.windows_profilespath))
-                    {
-                        if (File.Exists(Path.Combine(profile, "Bookmarks")))
-                        {
-                            filepaths.Add(Convert.ToString(Path.Combine(profile, "Bookmarks")));
-                            Console.WriteLine("File found! Filepath in " + browser.browsername + ": " + Convert.ToString(Path.Combine(profile, "Bookmarks")));
-                            browser.linksfound++;
-                        }
-                    }
-                    if (browser.linksfound == 0)
-                    {
-                        Console.WriteLine(($"No Bookmarks file found in " + browser.browsername));
-                    }
-                }
-                else if (browser.hardcodedpaths.Count != 0)
-                {
-                    foreach (string hardpath in browser.hardcodedpaths)
-                    {
-                        if (File.Exists(hardpath))
-                        {
-                            filepaths.Add(hardpath);
-                            Console.WriteLine("File found! Filepath in " + browser.browsername + ": " + hardpath);
-                            browser.linksfound++;
-                        }
+            completeBrowserLocations.Add(chromeBasedBrowserCheck(browser));
+        }
+        browserLocations = completeBrowserLocations; //completeBrowserLocations had to be introduced because: cannot assign to foreach variable
 
-                    }
-                    if (browser.linksfound == 0)
-                    {
-                        Console.WriteLine(($"No Bookmarks file found in " + browser.browsername));
-                    }
-                }
-                else
-                {
-                    Console.WriteLine(browser.browsername + " install folder not found");
-                }
-            }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-            {
-                if (Directory.Exists(browser.linux_profilespath))
-                {
-                    foreach (string profile in Directory.GetDirectories(browser.linux_profilespath))
-                    {
-                        if (File.Exists(Path.Combine(profile, "Bookmarks")))
-                        {
-                            //For every chrome profile that has bookmarks
-                            filepaths.Add(Convert.ToString(Path.Combine(profile, "Bookmarks")));
-                            Console.WriteLine("File found! Filepath in " + browser.browsername + ": " + Convert.ToString(Path.Combine(profile, "Bookmarks")));
-                            browser.linksfound++;
-                        }
-                    }
-                    if (browser.linksfound == 0) { Console.WriteLine(($"Bookmarks file not found in " + browser.browsername)); }
-                }
-                else if (browser.hardcodedpaths.Count != 0)
-                {
-                    foreach (string hardpath in browser.hardcodedpaths)
-                    {
-                        if (File.Exists(hardpath))
-                        {
-                            filepaths.Add(hardpath);
-                            Console.WriteLine("File found! Filepath in " + browser.browsername + ": " + hardpath);
-                            browser.linksfound++;
-                        }
+        BrowserLocations Firefox = firefoxBrowserCheck();
+        browserLocations.Add(Firefox);
 
-                    }
-                    if (browser.linksfound == 0)
-                    {
-                        Console.WriteLine(($"No Bookmarks file found in " + browser.browsername));
-                    }
-                }
-                else
-                {
-                    Console.WriteLine(browser.browsername + " install folder not found");
-                }
-            }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-            {
-                if (Directory.Exists(browser.osx_profilespath))
-                {
-                    foreach (string profile in Directory.GetDirectories(browser.osx_profilespath))
-                    {
-                        if (File.Exists(Path.Combine(profile, "Bookmarks")))
-                        {
-                            filepaths.Add(Convert.ToString(Path.Combine(profile, "Bookmarks")));
-                            Console.WriteLine("File found! Filepath in " + browser.browsername + ": " + Convert.ToString(Path.Combine(profile, "Bookmarks")));
-                            browser.linksfound++;
-                        }
-                    }
-                    if (browser.linksfound == 0) { Console.WriteLine(($"Bookmarks file not found in " + browser.browsername)); }
-                }
-                else if (browser.hardcodedpaths.Count != 0)
-                {
-                    foreach (string hardpath in browser.hardcodedpaths)
-                    {
-                        if (File.Exists(hardpath))
-                        {
-                            filepaths.Add(hardpath);
-                            Console.WriteLine("File found! Filepath in " + browser.browsername + ": " + hardpath);
-                            browser.linksfound++;
-                        }
-
-                    }
-                    if (browser.linksfound == 0)
-                    {
-                        Console.WriteLine(($"No Bookmarks file found in " + browser.browsername));
-                    }
-                }
-                else
-                {
-                    Console.WriteLine(browser.browsername + " install folder not found");
-                }
-            }
-        }
-
-        //Firefox
-        //Finding the sqlite databases
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        //count how many links were found
+        int linksFoundCount = 0;
+        completeBrowserLocations = new List<BrowserLocations>();
+        foreach (BrowserLocations browser in browserLocations)
         {
-            ///C:\Windows.old\Users\<UserName>\AppData\Roaming\Mozilla\Firefox\Profiles\<filename.default>\places.sqlite
-            //filePath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Mozilla\\Firefox\\Profiles\\<filename.default>\\places.sqlite");
-            profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Mozilla\\Firefox\\Profiles\\");
-            int n = 0;
-            //Console.WriteLine("profilespath " + profilespath);
-            if (Directory.Exists(profilespath))
-            {
-                foreach (string profile in Directory.GetDirectories(profilespath))
-                {
-                    if (File.Exists(Path.Combine(profile, "places.sqlite")))
-                    {
-                        //For every firefox profile that has bookmarks
-                        filepaths.Add(Convert.ToString(Path.Combine(profile, "places.sqlite")));
-                        Console.WriteLine("File found! " + "Filepath in Firefox: " + Convert.ToString(Path.Combine(profile, "places.sqlite")));
-                        n++;
-                    }
-                }
-            }
-            else
-            {
-                Console.WriteLine("Firefox install folder not found");
-            }
-            if (n == 0) { Console.WriteLine(($"Bookmarks file not found in Firefox")); }
+            linksFoundCount += browser.foundFiles.Count();
+            if (browser.linksfound != 0) { completeBrowserLocations.Add(browser); } //only return with browsers that are present
         }
-        else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        if (linksFoundCount == 0)
         {
-            ///home/$User/snap/firefox/common/.mozilla/firefox/aaaa.default/places.sqlite/
-            ///home/$User/.mozilla/firefox/aaaa.default/places.sqlite
-            profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.Personal), "snap/firefox/common/.mozilla/firefox/");
-            int n = 0;
-            if (Directory.Exists(profilespath))
-            {
-                foreach (string profile in Directory.GetDirectories(profilespath))
-                {
-                    if (File.Exists(Path.Combine(profile, "places.sqlite")))
-                    {
-                        //For every firefox profile that has bookmarks
-                        filepaths.Add(Convert.ToString(Path.Combine(profile, "places.sqlite")));
-                        Console.WriteLine("File found! " + "Filepath in snap firefox: " + Convert.ToString(Path.Combine(profile, "places.sqlite")));
-                        n++;
-                    }
-                }
-            }
-            else
-            {
-                Console.WriteLine("Firefox snap install not found");
-            }
-            profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.Personal), ".mozilla/firefox");
-            if (Directory.Exists(profilespath))
-            {
-                foreach (string profile in Directory.GetDirectories(profilespath))
-                {
-                    if (File.Exists(Path.Combine(profile, "places.sqlite")))
-                    {
-                        //For every firefox profile that has bookmarks
-                        filepaths.Add(Convert.ToString(Path.Combine(profile, "places.sqlite")));
-                        Console.WriteLine("File found! " + "Filepath in Firefox: " + Convert.ToString(Path.Combine(profile, "places.sqlite")));
-                        n++;
-                    }
-                }
-            }
-            else
-            {
-                Console.WriteLine("Firefox native install not found");
-            }
-            if (n == 0) { Console.WriteLine(($"Bookmarks file not found in Firefox")); }
+            // maybe too harsh: throw new FileNotFoundException($"No bookmarks file was found by autoimport in any of the locations");
+            return null;
         }
-        else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-        {
-            ///Users/<username>/Library/Application Support/Firefox/Profiles/<profile folder>
-            profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.Personal), "Library/Application Support/Firefox/Profiles");
-            int n = 0;
-            if (Directory.Exists(profilespath))
-            {
-                foreach (string profile in Directory.GetDirectories(profilespath))
-                {
-                    if (File.Exists(Path.Combine(profile, "places.sqlite")))
-                    {
-                        //For every firefox profile that has bookmarks
-                        filepaths.Add(Convert.ToString(Path.Combine(profile, "places.sqlite")));
-                        Console.WriteLine("File found! " + "Filepath in Firefox: " + Convert.ToString(Path.Combine(profile, "places.sqlite")));
-                        n++;
-                    }
-                }
-            }
-            else
-            {
-                Console.WriteLine("Firefox install folder not found.");
-            }
-            if (n == 0) { Console.WriteLine(($"Bookmarks file not found in Firefox")); }
-            
-        }
-
-        if (filepaths.Count == 0)
-        {
-            throw new FileNotFoundException($"No bookmarks file was found by autoimport in any of the locations");
-        }
-        Console.WriteLine("Which browser bookmarks would you like to use?\nWrite the number");
-        int m = 0;
-        foreach (string path in filepaths)
-        {
-            Console.WriteLine(m + ". path: " + path);
-            m++;
-        }
-        filePath = filepaths.ElementAt(Convert.ToInt32(Console.ReadLine()));
-        Console.WriteLine("Chosen path: " + filePath);
-        return filePath;
+        return completeBrowserLocations;
     }
 
     public static Folderclass[] Intake(string filePath)
@@ -856,7 +872,7 @@ internal class AutoImport
             else if (child.type == "folder")
             {
                 //Console.WriteLine("Root folder: " + child.name);
-                Globals.folderclasses.Add(Childfinder(child, depth+1));
+                Globals.folderclasses.Add(Childfinder(child, depth + 1));
             }
         }
         thisBookmark.name = bookmarkroot.name;
@@ -899,7 +915,7 @@ internal class AutoImport
             else if (child.type == "folder")
             {
                 //Console.WriteLine(current.name + "'s child Folder: " + child.name);
-                Globals.folderclasses.Add(Childfinder(child, depth+1));
+                Globals.folderclasses.Add(Childfinder(child, depth + 1));
             }
         }
         thisBookmark.name = current.name;
@@ -975,4 +991,5 @@ public class BrowserLocations
     public string osx_profilespath = "";
     public Int16 linksfound = 0;
     public List<string> hardcodedpaths = new List<string>();
+    public List<string> foundFiles = new List<string>();
 }

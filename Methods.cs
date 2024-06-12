@@ -1,18 +1,8 @@
-﻿using System;
-using System.IO;
-using System.Linq;
+﻿using bookmark_dlp;
+using Microsoft.Data.Sqlite;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
-using System.Collections.Generic;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using bookmark_dlp;
-using System.ComponentModel;
-using System.Text;
-using System.Threading;
-using Microsoft.Data.Sqlite;
-using Avalonia.Automation.Peers;
-using SkiaSharp;
 
 internal class Methods
 {

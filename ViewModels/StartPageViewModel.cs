@@ -32,9 +32,9 @@ namespace bookmark_dlp.ViewModels
 {
     public partial class StartPageViewModel : ViewModelBase
     {
+        [ObservableProperty]
+        public List<string> availableBrowserBookmarkPaths; //= (List<string>)(from browser in AutoImport.FindBrowserBookmarkFilesPaths() select browser.foundFiles)
 
-        
-        
         [ObservableProperty]
         public string[] browserlist = { "Firefox", "Chrome", "Safari" };
         [ObservableProperty]
@@ -45,8 +45,18 @@ namespace bookmark_dlp.ViewModels
 
 
 
-        public StartPageViewModel() {
-            if (Methods.Yt_dlp_pathfinder(Directory.GetCurrentDirectory()) != null) { AppSettings._settings.Ytdlp_executable_not_found = false; }          
+        public StartPageViewModel()
+        {
+            List<string> temp = new List<string>();
+            foreach (BrowserLocations browser in AutoImport.FindBrowserBookmarkFilesPaths())
+            {
+                foreach (string path in browser.foundFiles)
+                {
+                    temp.Add(path);
+                }
+            }
+            AvailableBrowserBookmarkPaths = temp;
+            if (Methods.Yt_dlp_pathfinder(Directory.GetCurrentDirectory()) != null) { AppSettings._settings.Ytdlp_executable_not_found = false; }
             ActiveSettings = new SettingsStruct(AppSettings._settings);
         }
 
@@ -54,7 +64,7 @@ namespace bookmark_dlp.ViewModels
         {
             ActiveSettings = new SettingsStruct(AppSettings._settings);
         }
-        
+
         public async Task SaveActiveSettings()
         {
             AppSettings._settings = new SettingsStruct(ActiveSettings);

@@ -12,7 +12,6 @@ using Microsoft.Data.Sqlite;
 
 //TODO: Migrate from Newtonsoft.Json to System.Text.Json
 
-
 namespace bookmark_dlp
 {
     public class CoreLogic
