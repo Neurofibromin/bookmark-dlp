@@ -40,7 +40,7 @@
                 Grid.Column="1"
                 Margin="0"
                 Background="LightGoldenrodYellow"
-                ItemsSource="{Binding AvailableBrowserBookmarkPaths, Mode=OneWay}"
+                ItemsSource="{Binding AvailableBrowserBookmarkPaths, Mode=OneWay, TargetNullValue=ErrorMessage}"
                 SelectedItem="{Binding ChosenBrowser}"
                 SelectionMode="Single,Toggle" />
         </Grid>

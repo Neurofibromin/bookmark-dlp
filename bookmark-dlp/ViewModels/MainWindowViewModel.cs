@@ -8,8 +8,6 @@ using bookmark_dlp.Views;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Data.Sqlite;
-using Newtonsoft.Json.Linq;
-using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -87,8 +85,20 @@ namespace bookmark_dlp.ViewModels
         public async Task GoForward()
         {
             PreviousViewModel = ContentViewModel;
-            ContentViewModel = myDownloadingViewModel;
+            
             await myStartPageViewModel.SaveActiveSettings();
+            myDownloadingViewModel.ReBindSettings();
+            //TODO: make the goforwardbutton disabled when no file is selected
+            if (AppSettings._settings.HtmlImportUsed)
+            {
+                myDownloadingViewModel.FileSource = AppSettings._settings.Htmlfilelocation;
+            }
+            else
+            {
+                myDownloadingViewModel.FileSource = myStartPageViewModel.ChosenBrowser;
+            }
+            await myDownloadingViewModel.LoadFoldersFromFile();
+            ContentViewModel = myDownloadingViewModel;
         }
 
         public void BackToStartPage()

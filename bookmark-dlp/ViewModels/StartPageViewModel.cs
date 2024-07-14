@@ -8,8 +8,6 @@ using bookmark_dlp.Views;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Data.Sqlite;
-using Newtonsoft.Json.Linq;
-using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -40,6 +38,8 @@ namespace bookmark_dlp.ViewModels
         [ObservableProperty]
         public string? chosenBrowser;
 
+        [ObservableProperty] public string[] _errorMessage = { "No browsers found", };
+
         [ObservableProperty]
         private SettingsStruct _activeSettings;
 
@@ -47,16 +47,23 @@ namespace bookmark_dlp.ViewModels
 
         public StartPageViewModel()
         {
-            List<string> temp = new List<string>();
-            foreach (BrowserLocations browser in AutoImport.FindBrowserBookmarkFilesPaths())
+            var temp = new List<string>();
+            List<BrowserLocations> temp2 = Import.GetBrowserBookmarkFilesPaths();
+
+            if (temp2 != null)
             {
-                foreach (string path in browser.foundFiles)
+                foreach (BrowserLocations browser in temp2)
                 {
-                    temp.Add(path);
+                    foreach (string path in browser.foundFiles)
+                    {
+                        temp.Add(path);
+                    }
                 }
             }
+            
             AvailableBrowserBookmarkPaths = temp;
-            if (Methods.Yt_dlp_pathfinder(Directory.GetCurrentDirectory()) != null) { AppSettings._settings.Ytdlp_executable_not_found = false; }
+            
+            if (AppMethods.Yt_dlp_pathfinder(Directory.GetCurrentDirectory()) != null) { AppSettings._settings.Ytdlp_executable_not_found = false; }
             ActiveSettings = new SettingsStruct(AppSettings._settings);
         }
 
@@ -130,7 +137,7 @@ namespace bookmark_dlp.ViewModels
             {
                 ErrorMessages?.Add(e.Message);
             }
-            if (Methods.Yt_dlp_pathfinder(ActiveSettings.Outputfolder) != null)
+            if (AppMethods.Yt_dlp_pathfinder(ActiveSettings.Outputfolder) != null)
             {
                 // await Console.Out.WriteLineAsync("thisone");
                 // AppSettings._settings.Ytdlp_executable_not_found = false;

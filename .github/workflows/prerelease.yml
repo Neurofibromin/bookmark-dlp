@@ -120,8 +120,8 @@ jobs:
           dotnet-version: [ '8.0.x' ]
         fail-fast: false
       runs-on: ${{ matrix.os }}
-      # needs: [release]
-      # if: ${{ needs.release.result == 'success' }}
+      needs: [release]
+      if: ${{ needs.release.result == 'success' }}
       steps:
       - uses: actions/checkout@v3
       - name: Setup dotnet

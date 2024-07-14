@@ -11,17 +11,15 @@
     mc:Ignorable="d">
     <Grid Margin="5" RowDefinitions="Auto,*">
 
-        <Grid Grid.Row="0" ColumnDefinitions="Auto,*, Auto">
-            <Button Grid.Column="0" Command="{ReflectionBinding $parent[Window].DataContext.BackToStartPage}">
-
+        <DockPanel>
+            <Button Command="{ReflectionBinding $parent[Window].DataContext.BackToStartPage}">
                 <StackPanel Orientation="Horizontal">
                     <PathIcon Data="{StaticResource arrow_reply_regular}" />
                     <TextBlock>Back</TextBlock>
                 </StackPanel>
             </Button>
-            <Label Grid.Column="1">Bookmarks</Label>
+            <Label>Bookmarks</Label>
             <Button
-                Grid.Column="2"
                 Margin="4"
                 HorizontalAlignment="Right"
                 VerticalAlignment="Center"
@@ -31,15 +29,51 @@
                     <TextBlock>Settings</TextBlock>
                 </StackPanel>
             </Button>
-        </Grid>
+        </DockPanel>
 
         <Grid Grid.Row="1" ColumnDefinitions="*, 4*, *">
 
             <!--  tree of folders  -->
-            <Rectangle Grid.Column="0" Fill="Aquamarine" />
+            <Grid Grid.Column="0" RowDefinitions="*, Auto">
+                <Rectangle Grid.Row="0" Fill="Aquamarine" />
+                <StackPanel
+                    Grid.Row="1"
+                    Height="30"
+                    Orientation="Horizontal">
+                    <TextBlock
+                        DockPanel.Dock="Bottom"
+                        FontSize="6"
+                        TextWrapping="WrapWithOverflow">
+                        Source:
+                    </TextBlock>
+                    <TextBlock
+                        FontSize="6"
+                        Text="{Binding FileSource}"
+                        TextWrapping="WrapWithOverflow">
+                        C:/something
+                    </TextBlock>
+                </StackPanel>
+            </Grid>
 
             <!--  main view  -->
-            <Rectangle Grid.Column="1" Fill="Red" />
+            <DataGrid
+                Grid.Column="1"
+                Margin="20"
+                Background="Chartreuse"
+                BorderBrush="Gray"
+                BorderThickness="1"
+                CanUserReorderColumns="True"
+                CanUserResizeColumns="True"
+                CanUserSortColumns="False"
+                GridLinesVisibility="All"
+                IsReadOnly="False"
+                ItemsSource="{Binding FolderCollection}">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Binding="{Binding Name}" Header="Folder Name" />
+                    <DataGridTextColumn Binding="{Binding Numberoflinks}" Header="Number of links" />
+                    <DataGridCheckBoxColumn Binding="{Binding Wantdownloaded}" Header="Want downloaded" />
+                </DataGrid.Columns>
+            </DataGrid>
 
 
             <!--  stats  -->

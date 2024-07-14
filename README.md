@@ -83,6 +83,7 @@ Build your own: this project is open source
 - [ ] Arch/AUR
 - [ ] Fedora
 - [ ] GitLab
+
 <br>new features<br/>
 - [x] start console and gui from same binary
 - [x] better versioning

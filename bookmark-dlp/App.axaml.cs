@@ -26,7 +26,7 @@ namespace bookmark_dlp
                 // Without this line you will get duplicate validations from both Avalonia and CT
                 BindingPlugins.DataValidators.RemoveAt(0);
 
-                if (!Methods.IsConfigPresent())
+                if (!AppMethods.IsConfigPresent())
                 {
                     var askConfigViewModel = new AskConfigWindowViewModel();
                     var askConfigWindow = new AskConfigWindow
@@ -85,7 +85,7 @@ namespace bookmark_dlp
                 else 
                 {
                     Console.WriteLine("Config was found");
-                    Console.WriteLine("Location: " + Methods.ConfigFileLocation());
+                    Console.WriteLine("Location: " + AppMethods.ConfigFileLocation());
                     var mainWindowVM = new MainWindowViewModel();
                     var MainWindow = new MainWindow
                     {

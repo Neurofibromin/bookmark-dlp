@@ -8,8 +8,6 @@ using bookmark_dlp.Views;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Data.Sqlite;
-using Newtonsoft.Json.Linq;
-using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -92,7 +90,7 @@ namespace bookmark_dlp.ViewModels
             {
                 ErrorMessages?.Add(e.Message);
             }
-            if (Methods.Yt_dlp_pathfinder(ActiveSettings.Outputfolder) != null)
+            if (AppMethods.Yt_dlp_pathfinder(ActiveSettings.Outputfolder) != null)
             {
                 // await Console.Out.WriteLineAsync("thisone");
                 ActiveSettings.Ytdlp_executable_not_found = false;

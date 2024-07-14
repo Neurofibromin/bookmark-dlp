@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.9.34622.214
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "bookmark-dlp", "bookmark-dlp.csproj", "{9D5616D1-7070-4024-BF23-5866CBA41D36}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "bookmark-dlp", "bookmark-dlp\bookmark-dlp.csproj", "{9D5616D1-7070-4024-BF23-5866CBA41D36}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "nfbookmark", "nfbookmark\nfbookmark.csproj", "{7B4F79E4-7E8D-4B1F-9832-633752C71374}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{9D5616D1-7070-4024-BF23-5866CBA41D36}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9D5616D1-7070-4024-BF23-5866CBA41D36}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9D5616D1-7070-4024-BF23-5866CBA41D36}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7B4F79E4-7E8D-4B1F-9832-633752C71374}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7B4F79E4-7E8D-4B1F-9832-633752C71374}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7B4F79E4-7E8D-4B1F-9832-633752C71374}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7B4F79E4-7E8D-4B1F-9832-633752C71374}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -17,8 +17,8 @@ Utility program for downloading bookmarked youtube links. A program to replicate
 |    `$ bookmark-dlp`
 
 ## CLI
-|    `$bookmark-dlp --console --source SOURCE --target TARGET `
-| `$bookmark-dlp [-h | --help ]`
+|    `$bookmark-dlp --console --sourcehtml SOURCE --outputfolder TARGET `
+|    `$bookmark-dlp [-h | --help ]`
 Get the Bookmarks.html from a Google takeout. The yt-dlp executable can be found at <https://github.com/yt-dlp/yt-dlp#installation> or probably in your distribution's repository.
 
 

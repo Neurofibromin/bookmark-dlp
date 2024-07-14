@@ -1,11 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices.JavaScript;
-using System.Text;
-using System.Threading.Tasks;
-using Newtonsoft.Json;
+using System.Text.Json;
 
 namespace bookmark_dlp.Models
 {
@@ -28,37 +22,22 @@ namespace bookmark_dlp.Models
             cookies_autoextract = false,
             yt_dlp_binary_path = null,
         };
-        public static string? configloc = Methods.ConfigFileLocation();
+        public static string? configloc = AppMethods.ConfigFileLocation();
         private static AppSettings _instance = new AppSettings();
-        
-        
-        /*
-        public static AppSettings Instance
-        {
-            get
-            {
-                if (_instance == null)
-                    _instance = new AppSettings();
-                return _instance;
-            }
-        }*/
         
         //Constructor
         protected AppSettings()
         {
-            configloc = Methods.ConfigFileLocation();
+            configloc = AppMethods.ConfigFileLocation();
             if (File.Exists(configloc))
             {
                 string jsonimportstring = File.ReadAllText(configloc);
-                // Console.WriteLine("importing: " + jsonimportstring);
-                // Console.WriteLine("\n");
                 try
                 {
-                    SettingsStruct imported = JsonConvert.DeserializeObject<SettingsStruct>(jsonimportstring);
+                    SettingsStruct imported = JsonSerializer.Deserialize<SettingsStruct>(jsonimportstring);
                     if (imported == null) { throw new NullReferenceException(); }
                     _settings = imported;
                     Console.WriteLine("Config import successful");
-                    // Console.WriteLine("afterimport: " + JsonConvert.SerializeObject(_settings));
                 }
                 catch
                 {
@@ -73,9 +52,7 @@ namespace bookmark_dlp.Models
                 Console.WriteLine("Config file doesnt exist, going with defaults");
                 _settings = defaultsettings; //no config file, so set configs to default value
                 configloc = null;
-                // Console.WriteLine(_settings.ytdlp_executable_not_found); // + " " + _settings.Ytdlp_executable_not_found);
             }
-            // Console.WriteLine(_settings.downloadShorts);
         }
         
         public static AppSettings GetAppSettings()
@@ -88,13 +65,11 @@ namespace bookmark_dlp.Models
         public static void SaveToFile()
         {
             //if configloc already exists overwrite it, if not create it
-            string jsonstringexport = JsonConvert.SerializeObject(_settings);
+            string jsonstringexport = JsonSerializer.Serialize(_settings);
             if (configloc != null) //only save to file if a config file is present or was chosen
             {
                 File.Delete(configloc);
                 StreamWriter write = new StreamWriter(configloc);
-                // Console.WriteLine("exporting: " + jsonstringexport);
-                // Console.WriteLine("\n");
                 write.Write(jsonstringexport);
                 write.Close();
             }
@@ -103,13 +78,13 @@ namespace bookmark_dlp.Models
         //Finalizer
         ~AppSettings()
         {
-            if(configloc != null){ SaveToFile();} //only save to file if a config file is present or was chosen
+            if(configloc != null){ SaveToFile(); } //only save to file if a config file is present or was chosen
             
         }
         
         public static string GetJsonStringRepresentation()
         {
-            string a = JsonConvert.SerializeObject(_settings);
+            string a = JsonSerializer.Serialize(_settings);
             return a;
         }
         
