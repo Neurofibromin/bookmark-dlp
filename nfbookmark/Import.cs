@@ -206,10 +206,10 @@ namespace bookmark_dlp
                         {
                             browser.foundFiles.Add(Convert.ToString(Path.Combine(profile, "Bookmarks")));
                             Console.WriteLine("File found! Filepath in " + browser.browsername + ": " + Convert.ToString(Path.Combine(profile, "Bookmarks")));
-                            browser.linksfound++;
+                            browser.profilesfound++;
                         }
                     }
-                    if (browser.linksfound == 0) { Console.WriteLine(($"No Bookmarks file found in " + browser.browsername)); }
+                    if (browser.profilesfound == 0) { Console.WriteLine(($"No Bookmarks file found in " + browser.browsername)); }
                 }
                 else if (browser.hardcodedpaths.Count != 0)
                 {
@@ -219,11 +219,11 @@ namespace bookmark_dlp
                         {
                             browser.foundFiles.Add(hardpath);
                             Console.WriteLine("File found! Filepath in " + browser.browsername + ": " + hardpath);
-                            browser.linksfound++;
+                            browser.profilesfound++;
                         }
 
                     }
-                    if (browser.linksfound == 0) { Console.WriteLine(($"No Bookmarks file found in " + browser.browsername)); }
+                    if (browser.profilesfound == 0) { Console.WriteLine(($"No Bookmarks file found in " + browser.browsername)); }
                 }
                 else { Console.WriteLine(browser.browsername + " install folder not found"); }
             }
@@ -240,10 +240,10 @@ namespace bookmark_dlp
                                 //For every chrome profile that has bookmarks
                                 browser.foundFiles.Add(Convert.ToString(Path.Combine(profile, "Bookmarks")));
                                 Console.WriteLine("File found! Filepath in " + browser.browsername + ": " + Convert.ToString(Path.Combine(profile, "Bookmarks")));
-                                browser.linksfound++;
+                                browser.profilesfound++;
                             }
                         }
-                        if (browser.linksfound == 0) { Console.WriteLine(($"Bookmarks file not found in " + browser.browsername)); }
+                        if (browser.profilesfound == 0) { Console.WriteLine(($"Bookmarks file not found in " + browser.browsername)); }
                     }
                 }
                 if (browser.hardcodedpaths.Count != 0)
@@ -254,11 +254,11 @@ namespace bookmark_dlp
                         {
                             browser.foundFiles.Add(hardpath);
                             Console.WriteLine("File found! Filepath in " + browser.browsername + ": " + hardpath);
-                            browser.linksfound++;
+                            browser.profilesfound++;
                         }
 
                     }
-                    if (browser.linksfound == 0) { Console.WriteLine(($"No Bookmarks file found in " + browser.browsername)); }
+                    if (browser.profilesfound == 0) { Console.WriteLine(($"No Bookmarks file found in " + browser.browsername)); }
                 }
                 else { Console.WriteLine(browser.browsername + " install folder not found"); }
             }
@@ -274,10 +274,10 @@ namespace bookmark_dlp
                             {
                                 browser.foundFiles.Add(Convert.ToString(Path.Combine(profile, "Bookmarks")));
                                 Console.WriteLine("File found! Filepath in " + browser.browsername + ": " + Convert.ToString(Path.Combine(profile, "Bookmarks")));
-                                browser.linksfound++;
+                                browser.profilesfound++;
                             }
                         }
-                        if (browser.linksfound == 0) { Console.WriteLine(($"Bookmarks file not found in " + browser.browsername)); }
+                        if (browser.profilesfound == 0) { Console.WriteLine(($"Bookmarks file not found in " + browser.browsername)); }
                     }
                 }
                 if (browser.hardcodedpaths.Count != 0)
@@ -288,11 +288,11 @@ namespace bookmark_dlp
                         {
                             browser.foundFiles.Add(hardpath);
                             Console.WriteLine("File found! Filepath in " + browser.browsername + ": " + hardpath);
-                            browser.linksfound++;
+                            browser.profilesfound++;
                         }
 
                     }
-                    if (browser.linksfound == 0) { Console.WriteLine(($"No Bookmarks file found in " + browser.browsername)); }
+                    if (browser.profilesfound == 0) { Console.WriteLine(($"No Bookmarks file found in " + browser.browsername)); }
                 }
                 else { Console.WriteLine(browser.browsername + " install folder not found"); }
             }
@@ -318,7 +318,7 @@ namespace bookmark_dlp
                             //For every firefox profile that has bookmarks
                             browser.foundFiles.Add(Convert.ToString(Path.Combine(profile, "places.sqlite")));
                             Console.WriteLine("File found! " + "Filepath in Firefox: " + Convert.ToString(Path.Combine(profile, "places.sqlite")));
-                            browser.linksfound++;
+                            browser.profilesfound++;
                         }
                     }
                 }
@@ -341,7 +341,7 @@ namespace bookmark_dlp
                                 //For every firefox profile that has bookmarks
                                 browser.foundFiles.Add(Convert.ToString(Path.Combine(profile, "places.sqlite")));
                                 Console.WriteLine("File found! " + "Filepath in " + browser.browsername + ": " + Convert.ToString(Path.Combine(profile, "places.sqlite")));
-                                browser.linksfound++;
+                                browser.profilesfound++;
                             }
                         }
                     }
@@ -363,14 +363,14 @@ namespace bookmark_dlp
                                 //For every firefox profile that has bookmarks
                                 browser.foundFiles.Add(Convert.ToString(Path.Combine(profile, "places.sqlite")));
                                 Console.WriteLine("File found! " + "Filepath in Firefox: " + Convert.ToString(Path.Combine(profile, "places.sqlite")));
-                                browser.linksfound++;
+                                browser.profilesfound++;
                             }
                         }
                     }
                     else { Console.WriteLine("Firefox install folder not found."); }
                 }
             }
-            if (browser.linksfound == 0) { Console.WriteLine($"Bookmarks file not found in {0}", browser.browsername); }
+            if (browser.profilesfound == 0) { Console.WriteLine($"Bookmarks file not found in {0}", browser.browsername); }
             return browser;
         }
 
@@ -393,8 +393,8 @@ namespace bookmark_dlp
             completeBrowserLocations = new List<BrowserLocations>();
             foreach (BrowserLocations browser in browserLocations)
             {
-                TotalLinksFoundCount += browser.linksfound;
-                if (browser.linksfound != 0) { completeBrowserLocations.Add(browser); } //only return with browsers that have profiles
+                TotalLinksFoundCount += browser.profilesfound;
+                if (browser.profilesfound != 0) { completeBrowserLocations.Add(browser); } //only return with browsers that have profiles
             }
             if (TotalLinksFoundCount == 0)
             {

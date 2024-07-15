@@ -12,6 +12,7 @@ on:
 
 env:
   VERSION: "0.2.7"
+  DOTNETVERSION: "net8.0"
 
 jobs:
   build:
@@ -59,26 +60,26 @@ jobs:
         run: dotnet restore
       - name: Publish
         run: |
-          dotnet publish bookmark-dlp.sln --configuration Release --runtime win-x64 --self-contained
-          dotnet publish bookmark-dlp.sln --configuration Release --runtime win-x86 --self-contained
-          dotnet publish bookmark-dlp.sln --configuration Release --runtime win-arm64 --self-contained
-          dotnet publish bookmark-dlp.sln --configuration Release --runtime linux-x64 --self-contained
-          dotnet publish bookmark-dlp.sln --configuration Release --runtime linux-arm64 --self-contained 
-          dotnet publish bookmark-dlp.sln --configuration Release --runtime osx-x64 --self-contained
-          dotnet publish bookmark-dlp.sln --configuration Release --runtime osx-arm64 --self-contained
+          dotnet publish bookmark-dlp/bookmark-dlp.csproj --configuration Release --runtime win-x64 --self-contained --framework ${{ env.DOTNETVERSION }}
+          dotnet publish bookmark-dlp/bookmark-dlp.csproj --configuration Release --runtime win-x86 --self-contained --framework ${{ env.DOTNETVERSION }}
+          dotnet publish bookmark-dlp/bookmark-dlp.csproj --configuration Release --runtime win-arm64 --self-contained --framework ${{ env.DOTNETVERSION }}
+          dotnet publish bookmark-dlp/bookmark-dlp.csproj --configuration Release --runtime linux-x64 --self-contained --framework ${{ env.DOTNETVERSION }}
+          dotnet publish bookmark-dlp/bookmark-dlp.csproj --configuration Release --runtime linux-arm64 --self-contained --framework ${{ env.DOTNETVERSION }}
+          dotnet publish bookmark-dlp/bookmark-dlp.csproj --configuration Release --runtime osx-x64 --self-contained --framework ${{ env.DOTNETVERSION }}
+          dotnet publish bookmark-dlp/bookmark-dlp.csproj --configuration Release --runtime osx-arm64 --self-contained --framework ${{ env.DOTNETVERSION }}
       - name: "List all files"
         run: |
           echo $PWD
           ls -R
       - name: "Rename based on architecture"
         run: |
-          mv "/home/runner/work/bookmark-dlp/bookmark-dlp/bin/Release/net8.0/win-x64/publish/bookmark-dlp.exe" "/home/runner/work/bookmark-dlp/bookmark-dlp/bin/Release/net8.0/win-x64/publish/bookmark-dlp-win-x64-${{ matrix.dotnet-version }}.exe"
-          mv "/home/runner/work/bookmark-dlp/bookmark-dlp/bin/Release/net8.0/win-x86/publish/bookmark-dlp.exe" "/home/runner/work/bookmark-dlp/bookmark-dlp/bin/Release/net8.0/win-x86/publish/bookmark-dlp-win-x86-${{ matrix.dotnet-version }}.exe"
-          mv "/home/runner/work/bookmark-dlp/bookmark-dlp/bin/Release/net8.0/linux-arm64/publish/bookmark-dlp" "/home/runner/work/bookmark-dlp/bookmark-dlp/bin/Release/net8.0/linux-arm64/publish/bookmark-dlp-linux-arm64-${{ matrix.dotnet-version }}"
-          mv "/home/runner/work/bookmark-dlp/bookmark-dlp/bin/Release/net8.0/linux-x64/publish/bookmark-dlp" "/home/runner/work/bookmark-dlp/bookmark-dlp/bin/Release/net8.0/linux-x64/publish/bookmark-dlp-linux-x64-${{ matrix.dotnet-version }}"
-          mv "/home/runner/work/bookmark-dlp/bookmark-dlp/bin/Release/net8.0/osx-x64/publish/bookmark-dlp" "/home/runner/work/bookmark-dlp/bookmark-dlp/bin/Release/net8.0/osx-x64/publish/bookmark-dlp-osx-x64-${{ matrix.dotnet-version }}"
-          mv "/home/runner/work/bookmark-dlp/bookmark-dlp/bin/Release/net8.0/osx-arm64/publish/bookmark-dlp" "/home/runner/work/bookmark-dlp/bookmark-dlp/bin/Release/net8.0/osx-arm64/publish/bookmark-dlp-osx-arm64"
-          mv "/home/runner/work/bookmark-dlp/bookmark-dlp/bin/Release/net8.0/win-arm64/publish/bookmark-dlp.exe" "/home/runner/work/bookmark-dlp/bookmark-dlp/bin/Release/net8.0/win-arm64/publish/bookmark-dlp-win-arm64-${{ matrix.dotnet-version }}.exe"
+          mv "/home/runner/work/bookmark-dlp/bookmark-dlp/bookmark-dlp/bin/Release/net8.0/win-x64/publish/bookmark-dlp.exe" "/home/runner/work/bookmark-dlp/bookmark-dlp/bookmark-dlp/bin/Release/net8.0/win-x64/publish/bookmark-dlp-win-x64-${{ matrix.dotnet-version }}.exe"
+          mv "/home/runner/work/bookmark-dlp/bookmark-dlp/bookmark-dlp/bin/Release/net8.0/win-x86/publish/bookmark-dlp.exe" "/home/runner/work/bookmark-dlp/bookmark-dlp/bookmark-dlp/bin/Release/net8.0/win-x86/publish/bookmark-dlp-win-x86-${{ matrix.dotnet-version }}.exe"
+          mv "/home/runner/work/bookmark-dlp/bookmark-dlp/bookmark-dlp/bin/Release/net8.0/linux-arm64/publish/bookmark-dlp" "/home/runner/work/bookmark-dlp/bookmark-dlp/bookmark-dlp/bin/Release/net8.0/linux-arm64/publish/bookmark-dlp-linux-arm64-${{ matrix.dotnet-version }}"
+          mv "/home/runner/work/bookmark-dlp/bookmark-dlp/bookmark-dlp/bin/Release/net8.0/linux-x64/publish/bookmark-dlp" "/home/runner/work/bookmark-dlp/bookmark-dlp/bookmark-dlp/bin/Release/net8.0/linux-x64/publish/bookmark-dlp-linux-x64-${{ matrix.dotnet-version }}"
+          mv "/home/runner/work/bookmark-dlp/bookmark-dlp/bookmark-dlp/bin/Release/net8.0/osx-x64/publish/bookmark-dlp" "/home/runner/work/bookmark-dlp/bookmark-dlp/bookmark-dlp/bin/Release/net8.0/osx-x64/publish/bookmark-dlp-osx-x64-${{ matrix.dotnet-version }}"
+          mv "/home/runner/work/bookmark-dlp/bookmark-dlp/bookmark-dlp/bin/Release/net8.0/osx-arm64/publish/bookmark-dlp" "/home/runner/work/bookmark-dlp/bookmark-dlp/bookmark-dlp/bin/Release/net8.0/osx-arm64/publish/bookmark-dlp-osx-arm64"
+          mv "/home/runner/work/bookmark-dlp/bookmark-dlp/bookmark-dlp/bin/Release/net8.0/win-arm64/publish/bookmark-dlp.exe" "/home/runner/work/bookmark-dlp/bookmark-dlp/bookmark-dlp/bin/Release/net8.0/win-arm64/publish/bookmark-dlp-win-arm64-${{ matrix.dotnet-version }}.exe"
       - name: "Delete old release"
         env:
           GH_TOKEN: ${{ github.token }}
@@ -103,13 +104,13 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release upload "${{ env.VERSION }}" "./bin/Release/net8.0/win-x64/publish/bookmark-dlp-win-x64-${{ matrix.dotnet-version }}.exe" --clobber
-          gh release upload "${{ env.VERSION }}" "./bin/Release/net8.0/win-x86/publish/bookmark-dlp-win-x86-${{ matrix.dotnet-version }}.exe" --clobber
-          gh release upload "${{ env.VERSION }}" "./bin/Release/net8.0/linux-arm64/publish/bookmark-dlp-linux-arm64-${{ matrix.dotnet-version }}" --clobber
-          gh release upload "${{ env.VERSION }}" "./bin/Release/net8.0/linux-x64/publish/bookmark-dlp-linux-x64-${{ matrix.dotnet-version }}" --clobber
-          gh release upload "${{ env.VERSION }}" "./bin/Release/net8.0/osx-x64/publish/bookmark-dlp-osx-x64-${{ matrix.dotnet-version }}" --clobber
-          gh release upload "${{ env.VERSION }}" "./bin/Release/net8.0/osx-arm64/publish/bookmark-dlp-osx-arm64" --clobber
-          gh release upload "${{ env.VERSION }}" "./bin/Release/net8.0/win-arm64/publish/bookmark-dlp-win-arm64-${{ matrix.dotnet-version }}.exe" --clobber
+          gh release upload "${{ env.VERSION }}" "./bookmark-dlp/bin/Release/net8.0/win-x64/publish/bookmark-dlp-win-x64-${{ matrix.dotnet-version }}.exe" --clobber
+          gh release upload "${{ env.VERSION }}" "./bookmark-dlp/bin/Release/net8.0/win-x86/publish/bookmark-dlp-win-x86-${{ matrix.dotnet-version }}.exe" --clobber
+          gh release upload "${{ env.VERSION }}" "./bookmark-dlp/bin/Release/net8.0/linux-arm64/publish/bookmark-dlp-linux-arm64-${{ matrix.dotnet-version }}" --clobber
+          gh release upload "${{ env.VERSION }}" "./bookmark-dlp/bin/Release/net8.0/linux-x64/publish/bookmark-dlp-linux-x64-${{ matrix.dotnet-version }}" --clobber
+          gh release upload "${{ env.VERSION }}" "./bookmark-dlp/bin/Release/net8.0/osx-x64/publish/bookmark-dlp-osx-x64-${{ matrix.dotnet-version }}" --clobber
+          gh release upload "${{ env.VERSION }}" "./bookmark-dlp/bin/Release/net8.0/osx-arm64/publish/bookmark-dlp-osx-arm64" --clobber
+          gh release upload "${{ env.VERSION }}" "./bookmark-dlp/bin/Release/net8.0/win-arm64/publish/bookmark-dlp-win-arm64-${{ matrix.dotnet-version }}.exe" --clobber
 
 
 

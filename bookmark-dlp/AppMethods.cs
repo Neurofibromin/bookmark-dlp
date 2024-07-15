@@ -1,10 +1,8 @@
 ﻿using bookmark_dlp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.Data.Sqlite;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
-using System.Security.Cryptography.X509Certificates;
 
 internal class AppMethods
 {

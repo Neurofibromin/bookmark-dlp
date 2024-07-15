@@ -1,0 +1,53 @@
+# This workflow will build a .NET project
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
+
+name: Nuget
+
+env:
+  VERSION: "0.2.7"
+
+jobs:
+  pack:
+    strategy:
+      matrix:
+        os: [ ubuntu-latest ]
+    runs-on: ${{ matrix.os }}
+    if: true
+    steps:
+    - uses: actions/checkout@v3
+    - name: Setup .NET Core SDK ${{ matrix.dotnet-version }}
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: ${{ matrix.dotnet-version }}  
+    - name: Restore dependencies
+      run: dotnet restore
+    - name: Build
+      run: dotnet pack Nfbookmark/Nfbookmark.csproj
+    - name: Display dotnet version
+      run: dotnet --version
+    - name: "List all files"
+      run: ls -R
+          
+  release:
+      strategy:
+        matrix:
+          os: [ ubuntu-latest ]
+      runs-on: ${{ matrix.os }}
+      needs: [pack]
+      if: ${{ needs.pack.result == 'success' }}
+      steps:
+      - uses: actions/checkout@v3
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: ${{ matrix.dotnet-version }}
+      - name: Restore dependencies
+        run: dotnet restore
+      - name: Pack
+        run: dotnet pack Nfbookmark/Nfbookmark.csproj
+      - name: "List all files"
+        run: |
+          echo $PWD
+          ls -R
+      - name: "Upload to NuGet.org"
+        run: dotnet nuget push Nfbookmark/bin/Release/Nfbookmark.${{ env.VERSION }}.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json

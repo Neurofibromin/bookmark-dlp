@@ -1,30 +1,50 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;net8.0</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;netstandard2.1;netcoreapp3.1;net481;net5.0;net6.0;net7.0;net8.0</TargetFrameworks>
 	<OutputType>Library</OutputType>
 	<BuiltInComInteropSupport>true</BuiltInComInteropSupport>
-	<RootNamespace>bookmark_dlp</RootNamespace>
-	
-	<SelfContained>true</SelfContained>
-	<!-- Without native library self extraction the published file will not be singular.-->
-	<IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
-	<PublishSingleFile>true</PublishSingleFile>
+	<RootNamespace>Nfbookmark</RootNamespace>
+        <CopyDebugSymbolFilesFromPackages>true</CopyDebugSymbolFilesFromPackages>
+        <CopyDocumentationFilesFromPackages>true</CopyDocumentationFilesFromPackages>
+	<IncludeSymbols>true</IncludeSymbols>
+	<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+	<EmbedAllSources>true</EmbedAllSources>
+	<GenerateDocumentationFile>True</GenerateDocumentationFile>
+	<DebugType>Portable</DebugType>
+	  
+	<PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
+	<PackageReadmeFile>README.md</PackageReadmeFile>
 	<PackageProjectUrl>https://github.com/Neurofibromin/bookmark-dlp</PackageProjectUrl>
 	<RepositoryUrl>https://github.com/Neurofibromin/bookmark-dlp</RepositoryUrl>
 	<RepositoryType>git</RepositoryType>
+	<Authors>Neurofibromin</Authors>
+
+	<IsPackable>true</IsPackable>
+	<PackageDescription>
+	   Provides general functions for importing bookmarks from different browsers across platforms.
+	</PackageDescription>
+	
 	<AllowUnsafeBlocks>false</AllowUnsafeBlocks>
-	<!--	  <PublishTrimmed>true</PublishTrimmed> trimming is currently problematic with Avalonia -->
-	<Version>0.2.7</Version>
-	<!--      <AssemblyVersion>1.0.0.0</AssemblyVersion>   -->
-	<!--      <FileVersion>1.0.0.0</FileVersion>           -->
+	
+	<Version>0.2.8-alpha</Version>
+	  
+	  <!--	  <PublishTrimmed>true</PublishTrimmed> trimming is currently problematic with Avalonia -->
+	  <!-- Without native library self extraction the published file will not be singular.-->
+	  <!-- <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract> -->
+	  <!-- <SelfContained>true</SelfContained> -->
+	  <!-- 	<PublishSingleFile>false</PublishSingleFile> -->
 	</PropertyGroup>
 
+        
 	
 	<ItemGroup>
 		<PackageReference Include="Microsoft.Data.Sqlite" Version="8.0.7" />
 		<PackageReference Include="System.Text.Json" Version="8.0.4" />
+		<None Include="README.md" Pack="true" PackagePath="\"/>
 	</ItemGroup>
 
+	
+	
 </Project>
 

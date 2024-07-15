@@ -44,7 +44,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\nfbookmark\nfbookmark.csproj" />
+    <ProjectReference Include="..\Nfbookmark\Nfbookmark.csproj" />
   </ItemGroup>
 
 
