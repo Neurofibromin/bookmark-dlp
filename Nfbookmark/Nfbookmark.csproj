@@ -8,6 +8,7 @@
         <CopyDebugSymbolFilesFromPackages>true</CopyDebugSymbolFilesFromPackages>
         <CopyDocumentationFilesFromPackages>true</CopyDocumentationFilesFromPackages>
 	<IncludeSymbols>true</IncludeSymbols>
+	<IncludeSource>true</IncludeSource>
 	<SymbolPackageFormat>snupkg</SymbolPackageFormat>
 	<EmbedAllSources>true</EmbedAllSources>
 	<GenerateDocumentationFile>True</GenerateDocumentationFile>
@@ -26,8 +27,8 @@
 	</PackageDescription>
 	
 	<AllowUnsafeBlocks>false</AllowUnsafeBlocks>
-	
-	<Version>0.2.8-alpha</Version>
+	<NoWarn>1591</NoWarn>
+	<Version>0.2.8</Version>
 	  
 	  <!--	  <PublishTrimmed>true</PublishTrimmed> trimming is currently problematic with Avalonia -->
 	  <!-- Without native library self extraction the published file will not be singular.-->

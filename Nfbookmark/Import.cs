@@ -9,6 +9,9 @@ using Microsoft.Data.Sqlite;
 
 namespace bookmark_dlp
 {
+    /// <summary>
+    /// Contains all functions relating to importing from browsers and files
+    /// </summary>
     public class Import
     {
         /// <summary>
@@ -26,10 +29,10 @@ namespace bookmark_dlp
                 case ".sqlite":
                     return SqlIntake(filePath);
                     break;
-                case ".html":
-                    throw new NotImplementedException();
-                    HtmlExportIntake(filePath);
-                    HtmlTakeoutIntake(filePath);
+                case ".html":                    
+                    return HtmlExportIntake(filePath);
+                    break;
+                    //TODO: HtmlTakeoutIntake(filePath);
                     break;
                 default:
                     break;
@@ -39,7 +42,7 @@ namespace bookmark_dlp
         }
 
         /// <summary>
-        /// Default locations for profiles for Linux, OSX and Windows
+        /// Gives list of default locations for profiles for Linux, OSX and Windows
         /// </summary>
         /// <returns>List of folder paths where profile folders may be located (not just for installed browsers)</returns>
         public static List<BrowserLocations> GetBrowserLocations()
@@ -47,34 +50,31 @@ namespace bookmark_dlp
             BrowserLocations Chrome = new BrowserLocations
             {
                 browsername = "Chrome",
-                browserType = BrowserType.chromebased,
+                browserType = BrowserType.chromiumbased,
                 windows_profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Google\\Chrome\\User Data\\"),
-                //linksfound = "",
                 linux_profilespath = new List<string> { Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "google-chrome") },
                 osx_profilespath = new List<string> { Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.Personal), "Library/Application Support/Google/Chrome") },
             };
             BrowserLocations Chrome_beta = new BrowserLocations
             {
                 browsername = "Chrome-beta",
-                browserType = BrowserType.chromebased,
+                browserType = BrowserType.chromiumbased,
                 windows_profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Google\\Chrome Beta\\User Data\\"),
-                //linksfound = "",
                 linux_profilespath = new List<string> { Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "google-chrome-beta") },
                 osx_profilespath = new List<string> { Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.Personal), "Library/Application Support/Google/Chrome Beta") }
             };
             BrowserLocations Chrome_canary = new BrowserLocations
             {
                 browsername = "Chrome-canary",
-                browserType = BrowserType.chromebased,
+                browserType = BrowserType.chromiumbased,
                 windows_profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Google\\Chrome SxS\\User Data\\"),
-                //linksfound = "",
                 linux_profilespath = new List<string> { Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "google-chrome-unstable") }, //technically its called chrome unstable on linux, but its the same thing
                 osx_profilespath = new List<string> { Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.Personal), "Library/Application Support/Google/Chrome Canary") }
             };
             BrowserLocations Brave = new BrowserLocations
             {
                 browsername = "Brave-browser",
-                browserType = BrowserType.chromebased,
+                browserType = BrowserType.chromiumbased,
                 windows_profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "BraveSoftware\\Brave-Browser\\User Data\\"),
                 linux_profilespath = new List<string> { Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "BraveSoftware/Brave-Browser/") },
                 osx_profilespath = new List<string> { Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.Personal), "Library/Application Support/BraveSoftware/Brave-Browser") }
@@ -83,7 +83,7 @@ namespace bookmark_dlp
             {
                 //great docs: https://chromium.googlesource.com/chromium/src/+/master/docs/user_data_dir.md
                 browsername = "chromium",
-                browserType = BrowserType.chromebased,
+                browserType = BrowserType.chromiumbased,
                 windows_profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Chromium\\User Data"),
                 linux_profilespath = new List<string> { Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "chromium") },
                 osx_profilespath = new List<string> { Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.Personal), "Library/Application Support/Chromium") }
@@ -91,7 +91,7 @@ namespace bookmark_dlp
             BrowserLocations Vivaldi = new BrowserLocations()
             {
                 browsername = "Vivaldi",
-                browserType = BrowserType.chromebased,
+                browserType = BrowserType.chromiumbased,
                 windows_profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Vivaldi\\User Data"),
                 linux_profilespath = new List<string> { Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "vivaldi") },
                 osx_profilespath = new List<string> { Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.Personal), "Library/Application Support/Vivaldi") }
@@ -99,16 +99,17 @@ namespace bookmark_dlp
             BrowserLocations Edge = new BrowserLocations()
             {
                 browsername = "Microsoft Edge",
-                browserType = BrowserType.chromebased,
+                browserType = BrowserType.chromiumbased,
                 windows_profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Microsoft\\Edge\\User Data"),
                 linux_profilespath = new List<string> { Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "microsoft-edge") }, 
                 //.config/microsoft-edge/Default/Bookmarks
                 // C:\Users\<Current-user>\AppData\Local\Microsoft\Edge\User Data\Default.
+                //TODO: osx
             };
             BrowserLocations Opera = new BrowserLocations()
             {
                 browsername = "Opera",
-                browserType = BrowserType.chromebased,
+                browserType = BrowserType.chromiumbased,
                 //C:\Users\%username%\AppData\Roaming\Opera Software\Opera Stable\Bookmarks is the Bookmarks file
                 windows_profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Opera Software"),
                 //opera: .config/opera/Bookmarks
@@ -116,7 +117,7 @@ namespace bookmark_dlp
                 {
                     Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "opera/Bookmarks"),
                 }
-                //osx has to be checked
+                //TODO: osx and linux
             };
             BrowserLocations Firefox = new BrowserLocations
             {
@@ -155,13 +156,13 @@ namespace bookmark_dlp
             if (browserLocations.Count == 0) { return null; }
             string filePath;
             List<string> filepaths = new List<string>();
-            Methods.LogVerbose("Which browser bookmarks would you like to use?\nWrite the number");
+            Logger.LogVerbose("Which browser bookmarks would you like to use?\nWrite the number");
             int m = 1;
             foreach (BrowserLocations browser in browserLocations)
             {
-                foreach (string path in browser.foundFiles)
+                foreach (string path in browser.foundProfiles)
                 {
-                    Methods.LogVerbose(m + ". path: " + path);
+                    Logger.LogVerbose(m + ". path: " + path);
                     filepaths.Add(path);
                     m++;
                 }
@@ -179,12 +180,12 @@ namespace bookmark_dlp
                 }
                 catch (Exception)
                 {
-                    Methods.LogVerbose("Wrong input", Methods.Verbosity.error);
+                    Logger.LogVerbose("Wrong input", Logger.Verbosity.error);
                     continue;
                 }
             }
             filePath = filepaths.ElementAt(chosenindexInt - 1);
-            Methods.LogVerbose("Chosen path: " + filePath);
+            Logger.LogVerbose("Chosen path: " + filePath);
             return filePath;
         }
 
@@ -195,7 +196,7 @@ namespace bookmark_dlp
         /// <returns>Browserlocations object that has foundfiles and linksfound filled. If no profiles are found then the BrowserLocations object is returned as it was.</returns>
         private static BrowserLocations BrowserCheck(BrowserLocations browser)
         {
-            if (browser.browserType != BrowserType.chromebased) { return firefoxBrowserCheck(browser); }
+            if (browser.browserType != BrowserType.chromiumbased) { return firefoxBrowserCheck(browser); }
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 if (Directory.Exists(browser.windows_profilespath))
@@ -204,12 +205,11 @@ namespace bookmark_dlp
                     {
                         if (File.Exists(Path.Combine(profile, "Bookmarks")))
                         {
-                            browser.foundFiles.Add(Convert.ToString(Path.Combine(profile, "Bookmarks")));
-                            Console.WriteLine("File found! Filepath in " + browser.browsername + ": " + Convert.ToString(Path.Combine(profile, "Bookmarks")));
-                            browser.profilesfound++;
+                            browser.foundProfiles.Add(Convert.ToString(Path.Combine(profile, "Bookmarks")));
+                            Logger.LogVerbose("File found! Filepath in " + browser.browsername + ": " + Convert.ToString(Path.Combine(profile, "Bookmarks")));
                         }
                     }
-                    if (browser.profilesfound == 0) { Console.WriteLine(($"No Bookmarks file found in " + browser.browsername)); }
+                    if (browser.foundProfiles.Count == 0) { Logger.LogVerbose(($"No Bookmarks file found in " + browser.browsername)); }
                 }
                 else if (browser.hardcodedpaths.Count != 0)
                 {
@@ -217,15 +217,14 @@ namespace bookmark_dlp
                     {
                         if (File.Exists(hardpath))
                         {
-                            browser.foundFiles.Add(hardpath);
-                            Console.WriteLine("File found! Filepath in " + browser.browsername + ": " + hardpath);
-                            browser.profilesfound++;
+                            browser.foundProfiles.Add(hardpath);
+                            Logger.LogVerbose("File found! Filepath in " + browser.browsername + ": " + hardpath);
                         }
 
                     }
-                    if (browser.profilesfound == 0) { Console.WriteLine(($"No Bookmarks file found in " + browser.browsername)); }
+                    if (browser.foundProfiles.Count == 0) { Logger.LogVerbose(($"No Bookmarks file found in " + browser.browsername)); }
                 }
-                else { Console.WriteLine(browser.browsername + " install folder not found"); }
+                else { Logger.LogVerbose(browser.browsername + " install folder not found"); }
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
@@ -238,12 +237,11 @@ namespace bookmark_dlp
                             if (File.Exists(Path.Combine(profile, "Bookmarks")))
                             {
                                 //For every chrome profile that has bookmarks
-                                browser.foundFiles.Add(Convert.ToString(Path.Combine(profile, "Bookmarks")));
-                                Console.WriteLine("File found! Filepath in " + browser.browsername + ": " + Convert.ToString(Path.Combine(profile, "Bookmarks")));
-                                browser.profilesfound++;
+                                browser.foundProfiles.Add(Convert.ToString(Path.Combine(profile, "Bookmarks")));
+                                Logger.LogVerbose("File found! Filepath in " + browser.browsername + ": " + Convert.ToString(Path.Combine(profile, "Bookmarks")));
                             }
                         }
-                        if (browser.profilesfound == 0) { Console.WriteLine(($"Bookmarks file not found in " + browser.browsername)); }
+                        if (browser.foundProfiles.Count == 0) { Logger.LogVerbose(($"Bookmarks file not found in " + browser.browsername)); }
                     }
                 }
                 if (browser.hardcodedpaths.Count != 0)
@@ -252,15 +250,14 @@ namespace bookmark_dlp
                     {
                         if (File.Exists(hardpath))
                         {
-                            browser.foundFiles.Add(hardpath);
-                            Console.WriteLine("File found! Filepath in " + browser.browsername + ": " + hardpath);
-                            browser.profilesfound++;
+                            browser.foundProfiles.Add(hardpath);
+                            Logger.LogVerbose("File found! Filepath in " + browser.browsername + ": " + hardpath);
                         }
 
                     }
-                    if (browser.profilesfound == 0) { Console.WriteLine(($"No Bookmarks file found in " + browser.browsername)); }
+                    if (browser.foundProfiles.Count == 0) { Logger.LogVerbose(($"No Bookmarks file found in " + browser.browsername)); }
                 }
-                else { Console.WriteLine(browser.browsername + " install folder not found"); }
+                else { Logger.LogVerbose(browser.browsername + " install folder not found"); }
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
@@ -272,12 +269,11 @@ namespace bookmark_dlp
                         {
                             if (File.Exists(Path.Combine(profile, "Bookmarks")))
                             {
-                                browser.foundFiles.Add(Convert.ToString(Path.Combine(profile, "Bookmarks")));
-                                Console.WriteLine("File found! Filepath in " + browser.browsername + ": " + Convert.ToString(Path.Combine(profile, "Bookmarks")));
-                                browser.profilesfound++;
+                                browser.foundProfiles.Add(Convert.ToString(Path.Combine(profile, "Bookmarks")));
+                                Logger.LogVerbose("File found! Filepath in " + browser.browsername + ": " + Convert.ToString(Path.Combine(profile, "Bookmarks")));
                             }
                         }
-                        if (browser.profilesfound == 0) { Console.WriteLine(($"Bookmarks file not found in " + browser.browsername)); }
+                        if (browser.foundProfiles.Count == 0) { Logger.LogVerbose(($"Bookmarks file not found in " + browser.browsername)); }
                     }
                 }
                 if (browser.hardcodedpaths.Count != 0)
@@ -286,19 +282,23 @@ namespace bookmark_dlp
                     {
                         if (File.Exists(hardpath))
                         {
-                            browser.foundFiles.Add(hardpath);
-                            Console.WriteLine("File found! Filepath in " + browser.browsername + ": " + hardpath);
-                            browser.profilesfound++;
+                            browser.foundProfiles.Add(hardpath);
+                            Logger.LogVerbose("File found! Filepath in " + browser.browsername + ": " + hardpath);
                         }
 
                     }
-                    if (browser.profilesfound == 0) { Console.WriteLine(($"No Bookmarks file found in " + browser.browsername)); }
+                    if (browser.foundProfiles.Count == 0) { Logger.LogVerbose(($"No Bookmarks file found in " + browser.browsername)); }
                 }
-                else { Console.WriteLine(browser.browsername + " install folder not found"); }
+                else { Logger.LogVerbose(browser.browsername + " install folder not found"); }
             }
             return browser;
         }
 
+        /// <summary>
+        /// Helper function for BrowserCheck
+        /// </summary>
+        /// <param name="browser">Firefox BrowserLocations object with folder paths</param>
+        /// <returns>Firefox BrowserLocations object that has foundProfiles filled</returns>
         private static BrowserLocations firefoxBrowserCheck(BrowserLocations browser)
         {
             if (browser.browserType != BrowserType.firefoxbased) { return  browser; }
@@ -316,13 +316,12 @@ namespace bookmark_dlp
                         if (File.Exists(Path.Combine(profile, "places.sqlite")))
                         {
                             //For every firefox profile that has bookmarks
-                            browser.foundFiles.Add(Convert.ToString(Path.Combine(profile, "places.sqlite")));
-                            Console.WriteLine("File found! " + "Filepath in Firefox: " + Convert.ToString(Path.Combine(profile, "places.sqlite")));
-                            browser.profilesfound++;
+                            browser.foundProfiles.Add(Convert.ToString(Path.Combine(profile, "places.sqlite")));
+                            Logger.LogVerbose("File found! " + "Filepath in Firefox: " + Convert.ToString(Path.Combine(profile, "places.sqlite")));
                         }
                     }
                 }
-                else { Console.WriteLine("Firefox install folder not found"); }
+                else { Logger.LogVerbose($"{browser.browsername} install folder not found"); }
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
@@ -339,13 +338,12 @@ namespace bookmark_dlp
                             if (File.Exists(Path.Combine(profile, "places.sqlite")))
                             {
                                 //For every firefox profile that has bookmarks
-                                browser.foundFiles.Add(Convert.ToString(Path.Combine(profile, "places.sqlite")));
-                                Console.WriteLine("File found! " + "Filepath in " + browser.browsername + ": " + Convert.ToString(Path.Combine(profile, "places.sqlite")));
-                                browser.profilesfound++;
+                                browser.foundProfiles.Add(Convert.ToString(Path.Combine(profile, "places.sqlite")));
+                                Logger.LogVerbose("File found! " + "Filepath in " + browser.browsername + ": " + Convert.ToString(Path.Combine(profile, "places.sqlite")));
                             }
                         }
                     }
-                    else { Console.WriteLine("{0} at {1} not found", browser.browsername, profilespath); }
+                    else { Logger.LogVerbose($"{browser.browsername} at {profilespath} not found"); }
                 }
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
@@ -361,21 +359,20 @@ namespace bookmark_dlp
                             if (File.Exists(Path.Combine(profile, "places.sqlite")))
                             {
                                 //For every firefox profile that has bookmarks
-                                browser.foundFiles.Add(Convert.ToString(Path.Combine(profile, "places.sqlite")));
-                                Console.WriteLine("File found! " + "Filepath in Firefox: " + Convert.ToString(Path.Combine(profile, "places.sqlite")));
-                                browser.profilesfound++;
+                                browser.foundProfiles.Add(Convert.ToString(Path.Combine(profile, "places.sqlite")));
+                                Logger.LogVerbose("File found! " + "Filepath in Firefox: " + Convert.ToString(Path.Combine(profile, "places.sqlite")));
                             }
                         }
                     }
-                    else { Console.WriteLine("Firefox install folder not found."); }
+                    else { Logger.LogVerbose("Firefox install folder not found."); }
                 }
             }
-            if (browser.profilesfound == 0) { Console.WriteLine($"Bookmarks file not found in {0}", browser.browsername); }
+            if (browser.foundProfiles.Count == 0) { Logger.LogVerbose($"Bookmarks file not found in {browser.browsername}"); }
             return browser;
         }
 
         /// <summary>
-        /// Complete list of browsers with profiles, supports crossplatform. Only installed
+        /// Complete list of browsers with profiles, supports crossplatform. Only shows installed browsers that have profiles.
         /// </summary>
         /// <returns>List with all browser and their paths that have any browser profiles</returns>
         public static List<BrowserLocations> GetBrowserBookmarkFilesPaths()
@@ -393,8 +390,8 @@ namespace bookmark_dlp
             completeBrowserLocations = new List<BrowserLocations>();
             foreach (BrowserLocations browser in browserLocations)
             {
-                TotalLinksFoundCount += browser.profilesfound;
-                if (browser.profilesfound != 0) { completeBrowserLocations.Add(browser); } //only return with browsers that have profiles
+                TotalLinksFoundCount += browser.foundProfiles.Count;
+                if (browser.foundProfiles.Count != 0) { completeBrowserLocations.Add(browser); } //only return with browsers that have profiles
             }
             if (TotalLinksFoundCount == 0)
             {
@@ -403,33 +400,55 @@ namespace bookmark_dlp
             return completeBrowserLocations;
         }
 
-
+        /// <summary>
+        /// Imports bookmarks from a json file. Used for chromium based browsers
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <returns>List of bookmark folders containing all the bookmarks</returns>
         public static List<Folderclass> JsonIntake(string filePath)
         {
             string text = "";
             Bookmark bookmark_bar;
             Bookmark other;
             Bookmark synced;
-            Methods.LogVerbose("Autoimport intake start", Methods.Verbosity.info);
+            Logger.LogVerbose("Autoimport intake start", Logger.Verbosity.info);
             try { text = File.ReadAllText(filePath); }
-            catch (FileLoadException ex) { Methods.LogVerbose($"Json file could not be accessed: {ex.Message}", Methods.Verbosity.error); return null; }
-            catch (FileNotFoundException ex) { Methods.LogVerbose($"Json file could not found: {ex.Message}", Methods.Verbosity.error); return null; }
+            catch (FileLoadException ex) { Logger.LogVerbose($"Json file could not be accessed: {ex.Message}", Logger.Verbosity.error); return null; }
+            catch (FileNotFoundException ex) { Logger.LogVerbose($"Json file could not found: {ex.Message}", Logger.Verbosity.error); return null; }
+            catch (IOException ex) { Logger.LogVerbose($"Json file IOException: {ex.Message}", Logger.Verbosity.error); return null; }
 
             try
             {
                 JsonDocument doc = JsonDocument.Parse(text);
-                JsonElement roots_Element = doc.RootElement.GetProperty("roots");
-                JsonElement bookmarks_bar_Element = roots_Element.GetProperty("bookmark_bar");
-                JsonElement other_Element = roots_Element.GetProperty("other");
-                JsonElement synced_Element = roots_Element.GetProperty("synced");
+                JsonElement roots_Element;
+
+                if (!doc.RootElement.TryGetProperty("roots", out roots_Element))
+                {
+                    Logger.LogVerbose("Invalid JSON: 'roots' property missing.", Logger.Verbosity.error);
+                    return null;
+                }
+
+                JsonElement bookmarks_bar_Element;
+                JsonElement other_Element;
+                JsonElement synced_Element;
+
+                if (!roots_Element.TryGetProperty("bookmark_bar", out bookmarks_bar_Element) ||
+                    !roots_Element.TryGetProperty("other", out other_Element) ||
+                    !roots_Element.TryGetProperty("synced", out synced_Element))
+                {
+                    Logger.LogVerbose("Invalid JSON: Required bookmark properties are missing.", Logger.Verbosity.error);
+                    return null;
+                }
+
+
                 var options = new JsonSerializerOptions { IncludeFields = true, NumberHandling = JsonNumberHandling.AllowReadingFromString }; //by default no fields only properties, by default no num from string conversion
                 bookmark_bar = System.Text.Json.JsonSerializer.Deserialize<Bookmark>(bookmarks_bar_Element, options);
                 other = System.Text.Json.JsonSerializer.Deserialize<Bookmark>(other_Element, options);
                 synced = System.Text.Json.JsonSerializer.Deserialize<Bookmark>(synced_Element, options);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                Methods.LogVerbose("Parsing the Json failed.", Methods.Verbosity.error);
+                Logger.LogVerbose($"Parsing the Json failed: {ex.Message}", Logger.Verbosity.error);
                 return null;
             }
 
@@ -449,8 +468,8 @@ namespace bookmark_dlp
                                                 //note: the naming MUST be consistent, so if html and autoimport are both used in the same directory videos will not get downloaded twice
 
             Bookmark root = new Bookmark
-            ///the root is not actually a bookmark json object, it just contains the 3 json objects of other, synced and bookmarks_bar
-            ///as such here a root json object is created, which will contain those three as children
+            // the root is not actually a bookmark json object, it just contains the 3 json objects of other, synced and bookmarks_bar
+            // as such here a root json object is created, which will contain those three as children
             {
                 name = "Bookmarks",
                 guid = Guid.NewGuid().ToString(), //adding new guid to the root
@@ -526,25 +545,35 @@ namespace bookmark_dlp
                     folders.Add(Childfinder(child, depth + 1, ref globalState, ref folders));
                 }
             }
+
             thisBookmark.name = bookmarkroot.name;
             thisBookmark.numberoflinks = numberoflinks;
             thisBookmark.depth = 0;
             thisBookmark.endingline = globalState.endingline;
             globalState.endingline++;
             folders[0] = thisBookmark;
-            foreach (Folderclass folder in folders)
+
+            foreach (Folderclass parent in folders)
             {
-                foreach (Folderclass ffold in folders)
+                foreach (Folderclass child in folders)
                 {
-                    if (folder.depth == ffold.depth - 1 && folder.startline < ffold.startline && folder.endingline < ffold.endingline)
+                    if (parent.depth == child.depth - 1 && parent.startline < child.startline && child.endingline < parent.endingline)
                     {
-                        folder.parent = ffold.id;
+                        child.parent = parent.id;
                     }
                 }
             }
             return folders;
         }
 
+        /// <summary>
+        /// Helper function for finding the children of a given folder
+        /// </summary>
+        /// <param name="current">The folder whose children we are searching for</param>
+        /// <param name="depth">How deeply nested the current folder is</param>
+        /// <param name="globalState">Used to keep track of ending lines (which folders are closed)</param>
+        /// <param name="folders">The list of folders found so far</param>
+        /// <returns></returns>
         private static Folderclass Childfinder(Bookmark current, int depth, ref GlobalState globalState, ref List<Folderclass> folders)
         {
             Folderclass thisBookmark = new Folderclass();
@@ -582,30 +611,36 @@ namespace bookmark_dlp
         /// Gets List of Bookmarks that only has folder bookmarks in it and fills the appropriate values. Only for SqlIntake
         /// </summary>
         /// <param name="bookmarks">Contains only folders</param>
-        /// <param name="parentid">parentid[i] = the id of the parent folder of the bookmark with the id i</param>
-        /// <returns>List of Folderclasses with most values filled (parent, depth)</returns>
-        private static List<Folderclass> Bookmarktofolderclasses(List<Bookmark> bookmarks, int[] parentid)
+        /// <param name="parentid">parentid[i] = the sql id of the parent folder of the bookmark with the id i</param>
+        /// <returns>List of Folderclasses with most values filled (parent, depth) or null</returns>
+        private static List<Folderclass> Bookmarktofolderclasses(List<Bookmark> bookmarks, Dictionary<int, int> parentid)
         {
-            //only folders remain in the sql_list
-            /*Folderclass[] folders = new Folderclass[bookmarks.Count + 1]; //declare and initialise the folders[]
-            for (int q = 0; q < bookmarks.Count + 1; q++)
+            // only folders remain in the sql_list
+
+            if (bookmarks.Count == 0)
             {
-                folders[q] = new Folderclass();
-            }*/
+                return null;
+            }
 
             List<Folderclass> folders = new List<Folderclass>();
-            folders.Add(new Folderclass()); //indexing should start at 1 apparently? So fill 0 with empty.
             // now bookmarks contains all the Bookmark objects for every folder.
             // These should now be united into one Bookmarkroot by adding them as each other's children from deepest depth upwards.
             // but instead they are just converted into folderclasses - this is also fine
-            int folderid = 1;
+            int folderid = 0;
             foreach (Bookmark bookmark in bookmarks)
             {
                 Folderclass currentfolder = new Folderclass();
                 currentfolder.id = folderid;
+                currentfolder.name = bookmark.name;
+                currentfolder.startline = bookmark.id;
+                currentfolder.numberoflinks = bookmark.children.Count();
+                currentfolder.urls = new List<string>();
 
-                int i = bookmark.id;
-                
+                foreach (Bookmark urlbookmark in bookmark.children)
+                {
+                    currentfolder.urls.Add(urlbookmark.url); //adding the url of each child to the url list of their parent
+                }
+
                 // i refers to the id (from the sql) of the folder that is being examined. folderid will be its new id, so every folderid refers to folders and there is no gap between them:
                 // examples:
                 // folder toolbars id: 2 folderid: 1
@@ -615,47 +650,40 @@ namespace bookmark_dlp
                 // the difference is large because id was also given in the sql db for url bookmarks, while now only folder bookmarks are examined, so large gaps are expected
 
 
-                int index = folders.FindIndex(a => a.startline == parentid[i]);
                 // i - id of the examined folder, parentid[i] - id of the examined folder's parent :
-                // we are looking for the folder[] that has this parentid[i] as its startingline (refers to the original id),
+                // we are looking for the folder that has this parentid[i] as its startingline (refers to the original id),
                 // so "folders.SingleOrDefault(a => a.startline == parentid[i])" refers to the parent of the examined folder
-                if (index != -1)
-                { 
-                    currentfolder.depth = folders.SingleOrDefault(a => a.startline == parentid[i]).depth + 1; //the given folders depth is the depth of their parent folder + 1
-                    currentfolder.parent = folders.SingleOrDefault(a => a.startline == parentid[i]).id;
+                Folderclass parent = folders.SingleOrDefault(a => a.startline == parentid[bookmark.id]);
+                if (parent != null)
+                {
+                    currentfolder.depth = parent.depth + 1; //the given folders depth is the depth of their parent folder + 1
+                    currentfolder.parent = parent.id; // parentid[bookmark.id] should be the same?
                 }
-                else //if (index == -1), the folder has no parent
+                else // the folder has no parent
                 {
                     currentfolder.depth = 1;
                 }
-                currentfolder.name = bookmark.name;
-                currentfolder.startline = bookmark.id;
-                currentfolder.numberoflinks = bookmark.children.Count();
+
                 //Console.WriteLine("Name: {0} ID: {1} Numberoflinks: {2} Depth: {3}", folders[folderid].name, folders[folderid].startline, folders[folderid].numberoflinks, folders[folderid].depth);
-                foreach (Bookmark urlbookmark in bookmark.children)
-                {
-                    //adding the url of each child to the url list of their parent
-                    currentfolder.urls.Add(urlbookmark.url);
-                }
+                
                 folderid++;
                 folders.Add(currentfolder);
             }
-            // AutoImport.Globals.folderid = folderid - 1; //helps for setting numberoffolders later
-            folders[1].name = "root"; //TODO: why from index 1?
+            folders[0].name = "root";
             return folders;
         }
 
         /// <summary>
         /// Takes all bookmarks and folders from an sql file and creates a list to hold them
         /// </summary>
-        /// <param name="filePath"></param>
+        /// <param name="filePath">Sqlite file location</param>
         /// <returns>List of bookmark folders that have their children in them or null</returns>
         public static List<Folderclass> SqlIntake(string filePath)
         {
             if (!File.Exists(filePath)) { return null; }
             // docs: https://kb.mozillazine.org/Places.sqlite
             // https://stackoverflow.com/questions/11769524/how-can-i-restore-firefox-bookmark-files-from-sqlite-files
-            int[] parentid = new int[File.ReadLines(filePath).Count() + 1]; //parentid[i] = the id of the parent folder of the bookmark with the id i
+            Dictionary<int, int> parentid = new Dictionary<int, int>(); //parentid[i] = the id of the parent folder of the bookmark with the id i
             List<Bookmark> bookmarks = new List<Bookmark>();
             using (var connection = new SqliteConnection("Data Source=" + filePath))
             {
@@ -684,11 +712,11 @@ namespace bookmark_dlp
                         }
                         if (!reader.IsDBNull(2))
                         {
-                            thisone.id = Convert.ToInt32(reader.GetString(2));
+                            thisone.id = reader.GetInt32(2);
                         }
                         if (!reader.IsDBNull(3))
                         {
-                            parentid[thisone.id] = Convert.ToInt32(reader.GetString(3));
+                            parentid[thisone.id] = reader.GetInt32(3);
                         }
                         if (!reader.IsDBNull(4))
                         {
@@ -696,11 +724,11 @@ namespace bookmark_dlp
                         }
                         if (!reader.IsDBNull(5))
                         {
-                            thisone.date_added = Convert.ToInt64(reader.GetString(5));
+                            thisone.date_added = reader.GetInt64(5);
                         }
                         if (!reader.IsDBNull(6))
                         {
-                            thisone.date_modified = Convert.ToInt64(reader.GetString(6));
+                            thisone.date_modified = reader.GetInt64(6);
                         }
                         if (type.Contains("2"))
                         {
@@ -713,7 +741,7 @@ namespace bookmark_dlp
                         }
                         else
                         {
-                            Methods.LogVerbose("This bookmark is not of type folder or url - undefined", Methods.Verbosity.error);
+                            Logger.LogVerbose("This bookmark is not of type folder or url - undefined", Logger.Verbosity.error);
                         }
                         bookmarks.Add(thisone);
                     }
@@ -732,7 +760,7 @@ namespace bookmark_dlp
                 //only folders remain in the sql_list
             }
 
-            List<Folderclass> folders = Bookmarktofolderclasses(bookmarks, parentid); //converts the List<Bookmark> to Folderclasses[]
+            List<Folderclass> folders = Bookmarktofolderclasses(bookmarks, parentid); //converts the List<Bookmark> to List<Folderclasses>
             return folders;
         }
 
@@ -741,9 +769,9 @@ namespace bookmark_dlp
         /// <summary>
         /// Intake of bookmarks and bookmarkfolders from a Google Takeout Html file
         /// </summary>
-        /// <param name="htmlfilepath"></param>
+        /// <param name="filePath">Html file location</param>
         /// <returns>List of folders that have all their url bookmarks as children</returns>
-        public static List<Folderclass> HtmlTakeoutIntake(string htmlfilepath)
+        public static List<Folderclass> HtmlTakeoutIntake(string filePath)
         {
             // read .html
             string[] inputarray;
@@ -751,14 +779,15 @@ namespace bookmark_dlp
             try
             {
                 // StreamReader reader = new StreamReader(htmlfilepath); //read the file containing all the bookmarks - a single file using chrome export
-                lineCount = File.ReadLines(htmlfilepath).Count(); //how many lines are there in the file - max number of bookmarks
-                inputarray = File.ReadAllLines(htmlfilepath); //read whole file into inputarray[] array
+                lineCount = File.ReadLines(filePath).Count(); //how many lines are there in the file - max number of bookmarks
+                inputarray = File.ReadAllLines(filePath); //read whole file into inputarray[] array
             }
-            catch (FileLoadException ex) { Methods.LogVerbose($"Html file could not be accessed: {ex.Message}", Methods.Verbosity.error); return null; }
-            catch (FileNotFoundException ex) { Methods.LogVerbose($"Html file could not found: {ex.Message}", Methods.Verbosity.error); return null; }
+            catch (FileLoadException ex) { Logger.LogVerbose($"Html file could not be accessed: {ex.Message}", Logger.Verbosity.error); return null; }
+            catch (FileNotFoundException ex) { Logger.LogVerbose($"Html file could not found: {ex.Message}", Logger.Verbosity.error); return null; }
+            catch (IOException ex) { Logger.LogVerbose($"Html file IOException: {ex.Message}", Logger.Verbosity.error); return null; }
 
-            Methods.LogVerbose(inputarray.Length + "/" + lineCount + " lines were read.", Methods.Verbosity.debug);
-            Methods.LogVerbose("The intake has finished!", Methods.Verbosity.debug);
+            Logger.LogVerbose(inputarray.Length + "/" + lineCount + " lines were read.", Logger.Verbosity.debug);
+            Logger.LogVerbose("The intake has finished!", Logger.Verbosity.debug);
 
             /*//Creating the folders[] object array and initialize all its elements, notice that the max number of folders equals the number of lines
             Folderclass[] folders = new Folderclass[lineCount];
@@ -788,7 +817,7 @@ namespace bookmark_dlp
                     }
                 }
             }
-            Methods.LogVerbose(folders.Count + " folders were found in the bookmarks", Methods.Verbosity.debug);
+            Logger.LogVerbose(folders.Count + " folders were found in the bookmarks", Logger.Verbosity.debug);
 
             // Finding the end of the folders (</DL><p>) and adding the line number to the object array (folders[].endingline)
             // Counting the lines from the start while the folders from the back, so even in folders embedded into folders the endingline will be correct
@@ -797,7 +826,7 @@ namespace bookmark_dlp
                 string oneline = inputarray[j].Trim();
                 if (oneline == "</DL><p>") // if we find a line that ends a folder
                 {
-                    for (int m = folders.Count - 1; m > 0; m--)
+                    for (int m = folders.Count - 1; m >= 0; m--)
                     {
                         if (folders[m].startline < j && folders[m].endingline == 0) //finding the last folder that has a starting line earlier than this endingline, and has not yet been closed
                         {
@@ -852,12 +881,18 @@ namespace bookmark_dlp
                 }
                 else
                 {
-                    Methods.LogVerbose($"Folder {folders[k].name} with id {folders[k].id} has less than 2 lines. Start {folders[k].startline} end {folders[k].endingline}", Methods.Verbosity.warning);
+                    Logger.LogVerbose($"Folder {folders[k].name} with id {folders[k].id} has less than 2 lines. Start {folders[k].startline} end {folders[k].endingline}", Logger.Verbosity.warning);
                 }
             }
             return folders;
         }
 
+        /// <summary>
+        /// Intake of bookmarks and bookmarkfolders from a browser exported Html file
+        /// </summary>
+        /// <param name="filePath">Html file location</param>
+        /// <returns>List of folders that have all their url bookmarks as children</returns>
+        /// <exception cref="NotImplementedException"></exception>
         public static List<Folderclass> HtmlExportIntake (string filePath)
         {
             throw new NotImplementedException();

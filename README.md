@@ -74,6 +74,7 @@ Build your own: this project is open source
 ### Status
 [![.NET](https://github.com/Neurofibromin/bookmark-dlp/actions/workflows/prerelease.yml/badge.svg)](https://github.com/Neurofibromin/bookmark-dlp/actions/workflows/prerelease.yml)
 [![.NET](https://github.com/Neurofibromin/bookmark-dlp/actions/workflows/dotnet.yml/badge.svg)](https://github.com/Neurofibromin/bookmark-dlp/actions/workflows/dotnet.yml)
+[![.NET](https://github.com/Neurofibromin/bookmark-dlp/actions/workflows/nuget.yml/badge.svg)](https://github.com/Neurofibromin/bookmark-dlp/actions/workflows/nuget.yml)
 
 ### Aims
 <br>CI/CD<br/>
@@ -82,15 +83,28 @@ Build your own: this project is open source
 - [ ] Debian
 - [ ] Arch/AUR
 - [ ] Fedora
-- [ ] GitLab
+- [ ] [Gitea mirror](N/A)
+- [x] [sourceforge mirror](https://sourceforge.net/projects/bookmark-dlp/)
+- [x] [NuGet](https://www.nuget.org/packages/nfbookmark)
 
 <br>new features<br/>
 - [x] start console and gui from same binary
 - [x] better versioning
+- [x] refactor bookmarks import to library
 - [ ] tray icon
 - [ ] systemd module
 - [ ] dot dekstop file
 - [ ] add manpages
+- [ ] logging
+
+<br>Increase support<br/>
+- [ ] safari support
+- [ ] opera osx support
+- [ ] bsd support
+- [ ] docker
+- [ ] netcore3.1
+- [ ] innosetup
+- [ ] flatpak support
 
 ### Build instructions
 Install dependencies: [dotnet](https://dotnet.microsoft.com/en-us/download)
@@ -98,7 +112,7 @@ Install dependencies: [dotnet](https://dotnet.microsoft.com/en-us/download)
 git clone -b master https://github.com/Neurofibromin/bookmark-dlp bookmark-dlp
 cd bookmark-dlp
 dotnet restore
-dotnet publish bookmark-dlp.sln --configuration Release
+dotnet publish bookmark-dlp/bookmark-dlp.csproj --configuration Release
 ```
 | Windows  | Linux | OSX (semi-supported) |
 | ------------- | ------------- | ------------- |

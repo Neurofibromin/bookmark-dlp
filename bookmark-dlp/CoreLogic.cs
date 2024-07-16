@@ -15,6 +15,12 @@ namespace bookmark_dlp
     {
         public static void CoreLogicMain(string[] args)
         {
+#if DEBUG
+            Logger.verbosity = Logger.Verbosity.critical;
+            Functions.PrintToConsole(Import.SmartImport(Import.GetBrowserBookmarkFilesPaths()[0].foundProfiles[0]));
+            Console.ReadKey();
+            Environment.Exit(0);
+#endif
             ParserResult<CommandLineOptions> commandLineOptions = CommandLine.Parser.Default.ParseArguments<CommandLineOptions>(args);
             CommandLineOptions setOptions = commandLineOptions.Value;
             AppMethods.ValidateCommandLineOptions(setOptions);
@@ -35,33 +41,33 @@ namespace bookmark_dlp
                 ///    Interactive
                 ///======
                 ///
-                Methods.verbosity = Methods.Verbosity.debug;
+                Logger.verbosity = Logger.Verbosity.debug;
                 bool downloadPlaylists = false;
                 bool downloadShorts = false;
                 bool downloadChannels = false;
                 bool concurrent_downloads = false;
                 bool cookies_autoextract = false;
 
-                Methods.LogVerbose("Interactive CLI session");
+                Logger.LogVerbose("Interactive CLI session");
                 if (setOptions.HtmlFileLocation != null) { localhtml = setOptions.HtmlFileLocation; }
 
                 if (File.Exists(localhtml))
                 {
-                    Methods.LogVerbose($"{localhtml} is the html import file");
+                    Logger.LogVerbose($"{localhtml} is the html import file");
                     importSourceFound = true;
                     ishtml = true;
                 }
                 else
                 {
-                    Methods.LogVerbose($"{localhtml} not found.");
+                    Logger.LogVerbose($"{localhtml} not found.");
                 }
                 if (!importSourceFound)
                 {
 
-                    Methods.LogVerbose("Choose import location.");
+                    Logger.LogVerbose("Choose import location.");
                     while (true)
                     {
-                        Methods.LogVerbose("HTML file? Y/N");
+                        Logger.LogVerbose("HTML file? Y/N");
                         string yn = Console.ReadLine();
                         yn = yn.Trim();
                         if (yn.ToLower() == "y" || yn.ToLower() == "n") { ishtml = (yn == "y") ? true : false; break; }
@@ -70,16 +76,16 @@ namespace bookmark_dlp
                     {
                         while (true)
                         {
-                            Methods.LogVerbose("Source of html file? (path) eg.: /home/user/Desktop/mybookmarks.html");
+                            Logger.LogVerbose("Source of html file? (path) eg.: /home/user/Desktop/mybookmarks.html");
                             localhtml = Console.ReadLine();
-                            if (File.Exists(localhtml)) { Methods.LogVerbose($"{localhtml} is the html import file"); break; }
-                            else { Methods.LogVerbose($"{localhtml} not found."); }
+                            if (File.Exists(localhtml)) { Logger.LogVerbose($"{localhtml} is the html import file"); break; }
+                            else { Logger.LogVerbose($"{localhtml} not found."); }
                         }
                     }
                     else
                     {
                         //not html
-                        Methods.LogVerbose("No html set, proceeding with search in installed browser default locations"); //goig to autoimport, as no .html present
+                        Logger.LogVerbose("No html set, proceeding with search in installed browser default locations"); //goig to autoimport, as no .html present
                         filePath = Import.QueryChosenBookmarksFile(Import.GetBrowserBookmarkFilesPaths());
                     }
                     //A source was chosen
@@ -88,20 +94,20 @@ namespace bookmark_dlp
 
                 (downloadPlaylists, downloadShorts, downloadChannels) = AppMethods.Wantcomplex();
 
-                Methods.LogVerbose("Concurrent downloads? Y/N");
+                Logger.LogVerbose("Concurrent downloads? Y/N");
                 if (Console.ReadKey().ToString().ToLower().Equals("y")) { concurrent_downloads = true; }
-                Methods.LogVerbose("Cookies autoextract? Y/N");
+                Logger.LogVerbose("Cookies autoextract? Y/N");
                 if (Console.ReadKey().ToString().ToLower().Equals("y")) { cookies_autoextract = true; }
                 if (setOptions.Outputfolder == null)
                 {
                     while (true)
                     {
-                        Methods.LogVerbose($"Output folder? default: current directory {rootdir}");
+                        Logger.LogVerbose($"Output folder? default: current directory {rootdir}");
                         string readOutputFolder = Console.ReadLine();
                         if (String.IsNullOrEmpty(readOutputFolder)) { setOptions.Outputfolder = rootdir; break; }
                         if (Directory.Exists(readOutputFolder)) { setOptions.Outputfolder = readOutputFolder; break; }
                         try { Directory.CreateDirectory(readOutputFolder); }
-                        catch { Methods.LogVerbose($"Could not create directory {readOutputFolder}.", Methods.Verbosity.error); }
+                        catch { Logger.LogVerbose($"Could not create directory {readOutputFolder}.", Logger.Verbosity.error); }
                     }
                 }
 
@@ -111,9 +117,9 @@ namespace bookmark_dlp
                 {
                     while (true)
                     {
-                        Methods.LogVerbose("yt-dlp not found, add path now? Y/N");
-                        if (Console.ReadKey().ToString().ToLower().Equals("n")) { Methods.LogVerbose("Cannnot continue", Methods.Verbosity.error); Environment.Exit(2); }
-                        Methods.LogVerbose("Choose path. e.g.: /usr/bin/yt-dlp");
+                        Logger.LogVerbose("yt-dlp not found, add path now? Y/N");
+                        if (Console.ReadKey().ToString().ToLower().Equals("n")) { Logger.LogVerbose("Cannnot continue", Logger.Verbosity.error); Environment.Exit(2); }
+                        Logger.LogVerbose("Choose path. e.g.: /usr/bin/yt-dlp");
                         string readYtdlpPath = Console.ReadLine();
                         if (Directory.Exists(readYtdlpPath)) { ytdlp_path = readYtdlpPath; }
                     }
@@ -122,17 +128,16 @@ namespace bookmark_dlp
 
                 if (ishtml)
                 {
-                    //html intake
-                    folders = Import.HtmlTakeoutIntake(localhtml); //TODO: Use SmartImport instead
+                    filePath = localhtml;
                 }
-                else if (!String.IsNullOrEmpty(filePath))
+                if (!String.IsNullOrEmpty(filePath))
                 {
-                    //not html AutoImport
+                    // Intake for both html and sql and json
                     folders = Import.SmartImport(filePath);
                 }
-                else { Methods.LogVerbose("No source file!", Methods.Verbosity.error); Environment.Exit(1); }
+                else { Logger.LogVerbose("No source file!", Logger.Verbosity.error); Environment.Exit(1); }
                 //now import is finished
-                Methods.LogVerbose("Import finished", Methods.Verbosity.info);
+                Logger.LogVerbose("Import finished", Logger.Verbosity.info);
 
                 int deepestdepth = 0; //Finding the deepest folder depth
                 for (int q = 0; q < folders.Count; q++)
@@ -143,17 +148,17 @@ namespace bookmark_dlp
                     }
                 }
                 
-                AutoImport.Createfolderstructure(ref folders, rootdir);
+                Functions.Createfolderstructure(ref folders, rootdir);
                 totalyoutubelinksnumber = AutoImport.WritelinkstotxtFromFolderclasses(ref folders, rootdir, downloadPlaylists, downloadShorts, downloadChannels);
                 
-                AppMethods.Dumptoconsole(folders); //dump all the folder info to console
+                Functions.PrintToConsole(folders); //dump all the folder info to console
                 AppMethods.Scriptwriter(folders, ytdlp_path); //writing the scripts that call yt-dlp and add .txt with the links in the arguments //NOT the method that creates the .txt files
                 AppMethods.Deleteemptyfolders(folders); //deletes the folders from the folder structure that are empty (no youtube links were written into them)
                 Console.WriteLine("Running the scripts after ENTER.");
                 Console.ReadKey();
                 AppMethods.Runningthescripts(folders);
-                //Methods.Checkformissing //checking if all the desired links have indeed been downloaded, archive.txt integrity as well
-                AppMethods.Dumptoconsole(folders);
+                //AppMethods.Checkformissing //checking if all the desired links have indeed been downloaded, archive.txt integrity as well
+                Functions.PrintToConsole(folders);
                 Console.WriteLine("Press enter to exit");
                 Console.Read();
                 Environment.Exit(0);
@@ -165,8 +170,8 @@ namespace bookmark_dlp
                 ///======
                 ///
 
-                Methods.LogVerbose("Non-Interactive CLI session", Methods.Verbosity.info);
-                Methods.verbosity = Methods.Verbosity.warning;
+                Logger.LogVerbose("Non-Interactive CLI session", Logger.Verbosity.info);
+                Logger.verbosity = Logger.Verbosity.warning;
 
                 bool downloadPlaylists = setOptions.DownloadPlaylists;
                 bool downloadShorts = setOptions.DownloadShorts;
@@ -178,11 +183,11 @@ namespace bookmark_dlp
                 if (setOptions.HtmlFileLocation != null) { localhtml = setOptions.HtmlFileLocation; }
                 string ytdlp_path = AppMethods.Yt_dlp_pathfinder(rootdir);
                 if (String.IsNullOrEmpty(ytdlp_path)) { ytdlp_path = AppMethods.Yt_dlp_pathfinder(setOptions.Outputfolder); }
-                if (String.IsNullOrEmpty(ytdlp_path)) { Methods.LogVerbose("yt-dlp not found", Methods.Verbosity.error); Environment.Exit(1); }
+                if (String.IsNullOrEmpty(ytdlp_path)) { Logger.LogVerbose("yt-dlp not found", Logger.Verbosity.error); Environment.Exit(1); }
 
                 if (File.Exists(localhtml))
                 {
-                    Methods.LogVerbose($"{localhtml} is the html import file", Methods.Verbosity.info);
+                    Logger.LogVerbose($"{localhtml} is the html import file", Logger.Verbosity.info);
                     importSourceFound = true;
                     ishtml = true;
                 }
@@ -190,23 +195,22 @@ namespace bookmark_dlp
                 {
                     // import from browser
                     // not html
-                    Methods.LogVerbose("No html set, proceeding with search in installed browser default locations"); //goig to autoimport, as no .html present
+                    Logger.LogVerbose("No html set, proceeding with search in installed browser default locations"); //goig to autoimport, as no .html present
                     throw new NotImplementedException();
                     //TODO: cannot as its interactive : filePath = AutoImport.QueryChosenBookmarksFile(AutoImport.FindBrowserBookmarkFilesPaths());
                 }
                 if (ishtml)
                 {
-                    //html intake
-                    folders = Import.HtmlTakeoutIntake(localhtml); //TODO: use smartimport instead
+                    filePath = localhtml;
                 }
                 else if (!String.IsNullOrEmpty(filePath))
                 {
-                    //not html => AutoImport
+                    // Import for both json and sql and html
                     folders = Import.SmartImport(filePath);
                 }
                 else { throw new FileNotFoundException("No source file!"); }
                 //now import is finished
-                Methods.LogVerbose("Import finished", Methods.Verbosity.debug);
+                Logger.LogVerbose("Import finished", Logger.Verbosity.debug);
 
                 int deepestdepth = 0; //Finding the deepest folder depth
                 for (int q = 0; q < folders.Count; q++)
@@ -217,7 +221,7 @@ namespace bookmark_dlp
                     }
                 }
                 
-                AutoImport.Createfolderstructure(ref folders, rootdir);
+                Functions.Createfolderstructure(ref folders, rootdir);
                 totalyoutubelinksnumber = AutoImport.WritelinkstotxtFromFolderclasses(ref folders, rootdir, downloadPlaylists, downloadShorts, downloadChannels);
                 
                 
@@ -229,7 +233,7 @@ namespace bookmark_dlp
                 AppMethods.Scriptwriter(folders, ytdlp_path); //writing the scripts that call yt-dlp and add .txt with the links in the arguments //NOT the method that creates the .txt files
                 AppMethods.Deleteemptyfolders(folders); //deletes the folders from the folder structure that are empty (no youtube links were written into them)
                 AppMethods.Runningthescripts(folders);
-                //Methods.Checkformissing
+                //Functions.Checkformissing
                 Environment.Exit(0); //leaving the program, so it does not contiue running according to Program.cs
             }
         }

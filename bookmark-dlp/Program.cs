@@ -13,6 +13,10 @@ namespace bookmark_dlp
         [STAThread]
         public static void Main(string[] args)
         {
+#if DEBUG
+            AppMethods.programUI = AppMethods.ProgramUI.CLI;
+            CoreLogic.CoreLogicMain(args); }
+#else
             if (args.Length == 0)
             {
                 ///
@@ -37,6 +41,7 @@ namespace bookmark_dlp
             .UsePlatformDetect()
             .WithInterFont()
             .LogToTrace();
+#endif
     }
 
 

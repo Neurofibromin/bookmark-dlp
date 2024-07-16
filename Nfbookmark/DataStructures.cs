@@ -21,9 +21,9 @@ namespace bookmark_dlp
     public class Folderclass //defining the folderclass class to create an object array from it
     {
         /// <summary>
-        /// for html: the line number in which the folder starts in the html. <br/>
-        /// json (chrome-based): the folder id, same as the folder[totalyoutubelinknumber] index. <br/>
-        /// sql (firefox-based): the bookmark id of the folder in the sql db
+        /// For HTML: the line number in which the folder starts in the html. <br/>
+        /// For JSON: (chromium-based): the folder id, same as the folder[totalyoutubelinknumber] index. <br/>
+        /// For SQL: (firefox-based): the bookmark id of the folder in the sql db
         /// </summary>
         public int startline;
         /// <summary>
@@ -51,6 +51,11 @@ namespace bookmark_dlp
         /// the children folders of current folder
         /// </summary>
         public List<int> children = new List<int>();
+
+        public override string ToString()
+        {
+            return $"Name:{name}, id:{id}, depth:{depth}, number of urls:{urls.Count}";
+        }
     }
 
     /// <summary>
@@ -67,6 +72,11 @@ namespace bookmark_dlp
         public string type;
         public string url; //only where type = url
         public List<Bookmark> children = new List<Bookmark>(); //only where type = folder
+
+        public override string ToString()
+        {
+            return $"name:{name} type:{type}, id:{id}";
+        }
     }
 
     /// <summary>
@@ -78,20 +88,34 @@ namespace bookmark_dlp
         public string windows_profilespath = "";
         public List<string> linux_profilespath = new List<string>();
         public List<string> osx_profilespath = new List<string>();
-        public Int16 profilesfound = 0;
+        //public Int16 profilesfound = 0;
         public List<string> hardcodedpaths = new List<string>();
-        public List<string> foundFiles = new List<string>();
+        /// <summary>
+        /// List of paths to FILES containing bookmarks (one file for one browser profile usually)
+        /// </summary>
+        public List<string> foundProfiles = new List<string>();
+        /// <summary>
+        /// Type of this browser: Chromium of Firefox based
+        /// </summary>
         public BrowserType browserType = BrowserType.none;
+
+        public override string ToString()
+        {
+            return $"Name:{browsername}, found profiles:{foundProfiles.ToString()}";
+        }
     }
 
-    public enum BrowserType { none, chromebased, firefoxbased }
+    /// <summary>
+    /// Type: Chromium of Firefox based
+    /// </summary>
+    public enum BrowserType { none, chromiumbased, firefoxbased }
 
     struct GlobalState
     {
         public int folderid; //used a lot instead of numberoffolders, maybe not ideal?
-        public int totalyoutubelinknumber;
-        public int startline;
-        public int depth;
+        //public int totalyoutubelinknumber;
+        //public int startline;
+        //public int depth;
         public int endingline;
     }
 }

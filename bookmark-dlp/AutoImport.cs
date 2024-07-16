@@ -13,7 +13,16 @@ using System.Threading.Channels;
 
 internal class AutoImport
 {
-    public static int WritelinkstotxtFromFolderclasses(ref List<Folderclass> folders, string rootdir, bool downloadPlaylists, bool downloadShorts, bool downloadChannels)
+    /// <summary>
+    /// Writes the links found in the bookmark folder into the filesystem folder in a $foldername.txt file. Id sequencial writing is NOT GUARANTEED.
+    /// </summary>
+    /// <param name="folders">the bookmark folders containing the links</param>
+    /// <param name="rootdir">the filesystem directory (not really used)</param>
+    /// <param name="downloadPlaylists">options</param>
+    /// <param name="downloadShorts">options</param>
+    /// <param name="downloadChannels">options</param>
+    /// <returns></returns>
+    public static int WritelinkstotxtFromFolderclasses(ref List<Folderclass> folders, string rootdir, bool downloadPlaylists = false, bool downloadShorts = false, bool downloadChannels = false)
     {
         StreamWriter temp = new StreamWriter(Path.Combine(rootdir, "temp.txt"), append: true); //writing into temp.txt all the youtube links that are not for videos (but for channels, playlists, etc.)
         int totalyoutubelinknumber = 0;
@@ -130,7 +139,7 @@ internal class AutoImport
             if (new FileInfo(Path.Combine(folders[j].folderpath, folders[j].name + ".txt")).Length == 0) //if the txt remained empty it is deleted
             {
                 File.Delete(Path.Combine(folders[j].folderpath, folders[j].name + ".txt"));
-                Methods.LogVerbose($"Deleted txt of {folders[j].name}", Methods.Verbosity.trace);
+                Logger.LogVerbose($"Deleted txt of {folders[j].name}", Logger.Verbosity.trace);
             }
             /*if (!wantcomplex)
             {
@@ -139,65 +148,11 @@ internal class AutoImport
         }
         temp.Flush();
         temp.Close();
-        Methods.LogVerbose("Total number of youtube links found: " + totalyoutubelinknumber, Methods.Verbosity.info);
+        Logger.LogVerbose("Total number of youtube links found: " + totalyoutubelinknumber, Logger.Verbosity.info);
         return totalyoutubelinknumber;
     }
 
-    public static void Createfolderstructure(ref List<Folderclass> folders, string rootdir)
-    {
-        //creating the folder structure and storing the access paths to the folders[].folderpath object array
-        if (!Directory.Exists(rootdir)) { Directory.CreateDirectory(rootdir); }
-        Directory.SetCurrentDirectory(rootdir);
-        System.IO.Directory.CreateDirectory("Bookmarks");
-        Directory.SetCurrentDirectory("Bookmarks");
-        for (int m = 0; m < folders.Count; m++)
-        {
-            if (m > 0)
-            {
-
-                if (folders[m].depth > folders[m - 1].depth) //more depth than previous folder
-                {
-                    Directory.SetCurrentDirectory(folders[m - 1].name);
-                    Directory.CreateDirectory(folders[m].name);
-                    Directory.SetCurrentDirectory(folders[m].name); //going into the folder
-                    folders[m].folderpath = Directory.GetCurrentDirectory(); //path
-                    Directory.SetCurrentDirectory(Path.Combine(Directory.GetCurrentDirectory(), "..")); //coming out of the folder
-                }
-
-                if (folders[m].depth < folders[m - 1].depth) //less depth than the previous folder
-                {
-                    for (int q = 0; q < (folders[m - 1].depth - folders[m].depth); q++) //the depth may have decreased by more than 1
-                    {
-                        Directory.SetCurrentDirectory(Path.Combine(Directory.GetCurrentDirectory(), ".."));
-                    }
-                    Directory.CreateDirectory(folders[m].name);
-                    Directory.SetCurrentDirectory(folders[m].name); //going into the folder
-                    folders[m].folderpath = Directory.GetCurrentDirectory(); //path
-                    Directory.SetCurrentDirectory(Path.Combine(Directory.GetCurrentDirectory(), "..")); //coming out of the folder
-                }
-
-                if (folders[m].depth == folders[m - 1].depth) //the same depth as the previous folder
-                {
-                    Directory.CreateDirectory(folders[m].name);
-                    Directory.SetCurrentDirectory(folders[m].name); //going into the folder
-                    folders[m].folderpath = Directory.GetCurrentDirectory(); //path
-                    Directory.SetCurrentDirectory(Path.Combine(Directory.GetCurrentDirectory(), "..")); //coming out of the folder
-                }
-
-            }
-            else //it is the first folder
-            {
-                System.IO.Directory.CreateDirectory(folders[m].name);
-                Directory.SetCurrentDirectory(folders[m].name); //going into the folder
-                folders[m].folderpath = Directory.GetCurrentDirectory(); //path
-                Directory.SetCurrentDirectory(Path.Combine(Directory.GetCurrentDirectory(), "..")); //coming out of the folder
-            }
-        }
-    }
-
-
-
-
+   
     /*
     public static Folderclass[] Convertlisttoarray(List<Folderclass> folderclasses)
     {

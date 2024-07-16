@@ -54,7 +54,7 @@ namespace bookmark_dlp.ViewModels
             {
                 foreach (BrowserLocations browser in temp2)
                 {
-                    foreach (string path in browser.foundFiles)
+                    foreach (string path in browser.foundProfiles)
                     {
                         temp.Add(path);
                     }

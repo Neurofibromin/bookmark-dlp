@@ -60,67 +60,6 @@ internal class AppMethods
         Console.WriteLine("Total number of missing links: ");
     }
 
-    public static void Dumptoconsole(List<Folderclass> folders, int totalyoutubelinknumber = 0)
-    {
-        Methods.LogVerbose("Dumptoconsole not given totalyoutubelinknumber", Methods.Verbosity.warning);
-        Console.WriteLine("\n\n");
-        Console.WriteLine("The following folders were found");
-        int depthsymbolcounter = 0;
-        Console.Write(string.Concat(Enumerable.Repeat("-", depthsymbolcounter)) + folders[0].depth + " is the depth of " + folders[0].startline + "/" + folders[0].endingline + " "); //writing root folder first
-        Console.ForegroundColor = ConsoleColor.Red;
-        Console.Write(folders[0].name);
-        Console.ResetColor();
-        Console.Write(" root folder, which contains ");
-        Console.ForegroundColor = ConsoleColor.Red;
-        Console.Write(folders[0].numberoflinks);
-        Console.ResetColor();
-        Console.WriteLine(" youtube links.");
-        for (int m = 1; m < folders.Count; m++) //writing the depth, the starting line, the ending line, name, and number of links of all the folders
-        {
-            if (folders[m].depth > folders[m - 1].depth) //greater depth than before
-            {
-                depthsymbolcounter = depthsymbolcounter + (folders[m].depth - folders[m - 1].depth);
-            }
-            if (folders[m].depth < folders[m - 1].depth) //lesser depth than before
-            {
-                depthsymbolcounter = depthsymbolcounter - (folders[m - 1].depth - folders[m].depth);
-            }
-            if (folders[m].depth == folders[m - 1].depth) //same depth as before
-            { 
-                //depthsymbolcounter does not change
-            }
-            Console.Write(string.Concat(Enumerable.Repeat("-", depthsymbolcounter)) + folders[m].depth + " is the depth of " + folders[m].startline + "/" + folders[m].endingline + " ");
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.Write(folders[m].name);
-            Console.ResetColor();
-            Console.Write(" folder, which contains ");
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.Write(folders[m].numberoflinks);
-            Console.ResetColor();
-            Console.Write(" youtube links. m:" + m + " id: " + folders[m].id + " parent: " + folders[m].parent);
-            if (folders[m].numberofmissinglinks != 0)
-            {
-                Console.Write(" (missing: ");
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine(folders[m].numberofmissinglinks);
-                Console.ResetColor();
-            }
-            else
-            {
-                Console.WriteLine();
-            }
-        }
-        if (totalyoutubelinknumber != 0)
-        {
-            Console.WriteLine(totalyoutubelinknumber + " youtube links were found, written into " + folders.Count + " folders.");
-        }
-        else
-        {
-            Console.WriteLine("Alltogether " + folders.Count + " folders were written.");
-        }
-        Console.WriteLine("Waiting for enter to confirm findings");
-        Console.ReadKey();
-    }
 
     public static string Yt_dlp_pathfinder(string rootdir)
     {
@@ -253,9 +192,9 @@ internal class AppMethods
                     writer1.Flush();
                     writer1.Close();
                 }
-                Methods.LogVerbose(q + "/" + folders.Count + " folder bat file writing finished.", Methods.Verbosity.trace);
+                Logger.LogVerbose(q + "/" + folders.Count + " folder bat file writing finished.", Logger.Verbosity.trace);
             }
-            Methods.LogVerbose(folders.Count + " folder bat file writing finished.", Methods.Verbosity.info);
+            Logger.LogVerbose(folders.Count + " folder bat file writing finished.", Logger.Verbosity.info);
         }
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
         {
@@ -271,9 +210,9 @@ internal class AppMethods
                     writer1.Flush();
                     writer1.Close();
                 }
-                Methods.LogVerbose(q + "/" + folders.Count + " folder sh file writing finished.", Methods.Verbosity.trace);
+                Logger.LogVerbose(q + "/" + folders.Count + " folder sh file writing finished.", Logger.Verbosity.trace);
             }
-            Methods.LogVerbose(folders.Count + " folder sh file writing finished", Methods.Verbosity.info);
+            Logger.LogVerbose(folders.Count + " folder sh file writing finished", Logger.Verbosity.info);
         }
         if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
         {
@@ -289,13 +228,13 @@ internal class AppMethods
                     writer1.Flush();
                     writer1.Close();
                 }
-                Methods.LogVerbose(q + "/" + folders.Count + " folder sh file writing finished.", Methods.Verbosity.trace);
+                Logger.LogVerbose(q + "/" + folders.Count + " folder sh file writing finished.", Logger.Verbosity.trace);
             }
-            Methods.LogVerbose(folders.Count + " folder sh file writing finished", Methods.Verbosity.info);
+            Logger.LogVerbose(folders.Count + " folder sh file writing finished", Logger.Verbosity.info);
         }
-        if (Methods.verbosity >= Methods.Verbosity.info)
+        if (Logger.verbosity >= Logger.Verbosity.info)
         {
-            Methods.LogVerbose("Waiting for enter to confirm");
+            Logger.LogVerbose("Waiting for enter to confirm");
             Console.Read();
         }
     }
@@ -342,19 +281,19 @@ internal class AppMethods
                 }
             }
         }
-        Methods.LogVerbose("Empty folders deleted", Methods.Verbosity.info);
-        if (Methods.verbosity >= Methods.Verbosity.info)
+        Logger.LogVerbose("Empty folders deleted", Logger.Verbosity.info);
+        if (Logger.verbosity >= Logger.Verbosity.info)
         {
-            Methods.LogVerbose("Waiting for enter to confirm");
+            Logger.LogVerbose("Waiting for enter to confirm");
             Console.Read();
         }
     }
 
     public static void Runningthescripts(List<Folderclass> folders)
     {
-        if (Methods.verbosity >= Methods.Verbosity.info)
+        if (Logger.verbosity >= Logger.Verbosity.info)
         {
-            Methods.LogVerbose("Running the scripts, press enter to confirm.", Methods.Verbosity.info);
+            Logger.LogVerbose("Running the scripts, press enter to confirm.", Logger.Verbosity.info);
             Console.Read();
         }
         string extensionforscript = ""; //writing scripts
@@ -461,21 +400,21 @@ internal class AppMethods
 
     public static (bool, bool, bool) Wantcomplex()
     {
-        Methods.LogVerbose("Do you want to write and download not video links? (eg. playlists and channels. by default: no)");
-        Methods.LogVerbose("Depending on the yt-dlp conf settings this can result in very large downloads, a single bookmark can lead to hundreds of videos being downloaded.");
-        Methods.LogVerbose("Y/N");
+        Logger.LogVerbose("Do you want to write and download not video links? (eg. playlists and channels. by default: no)");
+        Logger.LogVerbose("Depending on the yt-dlp conf settings this can result in very large downloads, a single bookmark can lead to hundreds of videos being downloaded.");
+        Logger.LogVerbose("Y/N");
         bool downloadPlaylists = false;
         bool downloadShorts = false;
         bool downloadChannels = false;
-        if (Methods.verbosity >= Methods.Verbosity.info)
+        if (Logger.verbosity >= Logger.Verbosity.info)
         {
             if (Console.ReadKey().ToString().ToLower().Equals("y"))
             {
-                Methods.LogVerbose("Playlists? Y/N");
+                Logger.LogVerbose("Playlists? Y/N");
                 if (Console.ReadKey().ToString().ToLower().Equals("y")) { downloadPlaylists = true; }
-                Methods.LogVerbose("Shorts? Y/N");
+                Logger.LogVerbose("Shorts? Y/N");
                 if (Console.ReadKey().ToString().ToLower().Equals("y")) { downloadShorts = true; }
-                Methods.LogVerbose("Channels? Y/N");
+                Logger.LogVerbose("Channels? Y/N");
                 if (Console.ReadKey().ToString().ToLower().Equals("y")) { downloadChannels = true; }
             }
         }
@@ -554,7 +493,7 @@ internal class AppMethods
                 }
                 catch (Exception)
                 {
-                    Methods.LogVerbose("Could not create directory: " + options.Outputfolder, Methods.Verbosity.error);
+                    Logger.LogVerbose("Could not create directory: " + options.Outputfolder, Logger.Verbosity.error);
                     return 1;
                 }
             }
