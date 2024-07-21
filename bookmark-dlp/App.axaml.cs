@@ -25,7 +25,11 @@ namespace bookmark_dlp
                 // Line below is needed to remove Avalonia data validation.
                 // Without this line you will get duplicate validations from both Avalonia and CT
                 BindingPlugins.DataValidators.RemoveAt(0);
-
+#if DEBUG
+                Logger.verbosity = Logger.Verbosity.trace;
+#else
+                Logger.verbosity = Logger.Verbosity.warning;
+#endif
                 if (!AppMethods.IsConfigPresent())
                 {
                     var askConfigViewModel = new AskConfigWindowViewModel();

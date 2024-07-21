@@ -10,6 +10,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using System.Text.Json.Serialization;
 using System.Text.Json;
 using System.Threading.Channels;
+using System.Collections.ObjectModel;
 
 internal class AutoImport
 {
@@ -221,43 +222,43 @@ internal class AutoImport
 public partial class ObsFolderclass : ObservableObject
 {
     [ObservableProperty]
-    public int startline; //for html: the line number in which the folder starts in the html. json(autoimport intake chrome): the folder id, same as the folder[totalyoutubelinknumber] index. firefox-sql: the bookmark id of the folder in the sql db
+    public int _startline; //for html: the line number in which the folder starts in the html. json(autoimport intake chrome): the folder id, same as the folder[totalyoutubelinknumber] index. firefox-sql: the bookmark id of the folder in the sql db
     [ObservableProperty]
-    public string name;
+    public string _name;
     [ObservableProperty]
-    public int depth;
+    public int _depth;
     [ObservableProperty]
-    public int endingline;
+    public int _endingline;
     [ObservableProperty]
-    public string folderpath;
+    public string _folderpath;
     [ObservableProperty]
-    public int numberoflinks;
+    public int _numberoflinks;
     [ObservableProperty]
-    public int numberofmissinglinks;
+    public int _numberofmissinglinks;
     [ObservableProperty]
-    public List<string> urls = new List<string>();
+    public List<string> _urls = new List<string>();
     [ObservableProperty]
-    public int id; //same as array index
+    public int _id; //same as array index
     [ObservableProperty]
-    public int parent;
+    public int _parent;
+
+    public ObservableCollection<ObsFolderclass> Children = new ObservableCollection<ObsFolderclass>();
     [ObservableProperty]
-    public List<int> children = new List<int>();
-    [ObservableProperty]
-    public bool wantdownloaded = true;
+    public bool _wantdownloaded = true;
 
 
     public ObsFolderclass(Folderclass other) 
     {
-        startline = other.startline;
-        name = other.name;
-        depth = other.depth;
-        endingline = other.endingline;
-        folderpath = other.folderpath;
-        numberoflinks = other.numberoflinks;
-        numberofmissinglinks = other.numberofmissinglinks;
-        urls = other.urls;
-        id = other.id;
-        parent = other.parent;
-        children = other.children;
+        _startline = other.startline;
+        _name = other.name;
+        _depth = other.depth;
+        _endingline = other.endingline;
+        _folderpath = other.folderpath;
+        _numberoflinks = other.numberoflinks;
+        _numberofmissinglinks = other.numberofmissinglinks;
+        _urls = other.urls;
+        _id = other.id;
+        _parent = other.parent;
+        // children = new ObservableCollection<Folderclass>();
     }
 }

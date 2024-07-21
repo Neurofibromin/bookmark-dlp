@@ -35,5 +35,9 @@ class CommandLineOptions()
     [Option('b', "browser", Required = false, HelpText = "Browser autoimport setting. Designate one browser eg. \"chrome\" or use -b 1 to autochoose. Ignored when --interactive.")]
     public string BrowserChosenByFlag { get; set; }
 
+    /*Done automatically by library
+     * [Option('h', "help", Required = false, Default = false, HelpText = "Displays help and usage information.")]
+    public bool Help { get; set; }*/
+
 
 }

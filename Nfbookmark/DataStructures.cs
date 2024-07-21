@@ -48,7 +48,7 @@ namespace bookmark_dlp
         /// </summary>
         public int parent;
         /// <summary>
-        /// the children folders of current folder
+        /// the id of children folders of current folder
         /// </summary>
         public List<int> children = new List<int>();
 

@@ -6,31 +6,34 @@ using System.Runtime.InteropServices;
 
 internal class AppMethods
 {
-    public static void Checkformissing(string rootdir, Folderclass[] folders, int numberoffolders)
+    /// <summary>
+    /// Check whether the youtube links that were on the list are now dowloaded into the appripriate directories. Good for finding rotten links.
+    /// Only checks the filenames for the yt-id (11 characters): if yt-dlp config is set to not include such id in the filename it will not work.
+    /// yt-dlp logs could also be parsed for the same info, although if a video was downloaded in the past and no longer available on the net, it would still be flagged (?) - depends on the archive.txt usage setting
+    /// </summary>
+    /// <param name="rootdir">Filesystem directory path to find videos in</param>
+    /// <param name="folders"></param>
+    public static void Checkformissing(string rootdir, List<Folderclass> folders)
     {
-        ///Check whether the youtube links that were on the list are now dowloaded into the appripriate directories. Good for finding rotten links.
-        ///Only checks the filenames for the yt-id (11 characters): if yt-dlp config is set to not include such id in the filename it will not work.
-        ///yt-dlp logs could also be parsed for the same info, although if a video was downloaded in the past and no longer available on the net, it would still be flagged (?) - depends on the archive.txt usage setting
+        //TODO: handle channels
         List<Bookmark> notfoundbookmarks = new List<Bookmark>();
-        //temptative: numberoffolders = folders.Length
-        for (int r = 0; r < numberoffolders; r++)
+        foreach (Folderclass folder in folders)
         {
-            if (Directory.Exists(folders[r].folderpath))
+            if (Directory.Exists(folder.folderpath))
             {
-                Directory.SetCurrentDirectory(folders[r].folderpath);
-                int parentid = folders[r].id;
+                Directory.SetCurrentDirectory(folder.folderpath);
                 int checkspassed = 0;
-                if (File.Exists(folders[r].name + ".txt"))
+                if (File.Exists(folder.name + ".txt"))
                 {
-                    string[] linkcheckerlist = File.ReadAllLines(folders[r].name + ".txt");
+                    string[] linkcheckerlist = File.ReadAllLines(folder.name + ".txt");
                     foreach (string link in linkcheckerlist)
                     {
                         string youtubeid = link.Substring(32, 11);
                         bool contains = Directory.EnumerateFiles(Directory.GetCurrentDirectory()).Any(f => f.Contains(youtubeid));
                         if (!contains)
                         {
-                            Console.WriteLine(youtubeid + " id in folder: " + folders[r].name + " not found. Probably download unsuccessful.");
-                            notfoundbookmarks.Add(new Bookmark(){url = link});
+                            Logger.LogVerbose($"{youtubeid} in folder: {folder.name} not found.", Logger.Verbosity.warning);
+                            notfoundbookmarks.Add(new Bookmark() { url = link });
                         }
                     }
                     checkspassed++;
@@ -46,18 +49,18 @@ internal class AppMethods
                             bool contains = Directory.EnumerateFiles(Directory.GetCurrentDirectory()).Any(f => f.Contains(youtubeid));
                             if (!contains)
                             {
-                                Console.WriteLine(youtubeid + " id in folder: " + folders[r].name + " not found, despite it being present in archive.txt.");
+                                Logger.LogVerbose($"{youtubeid} in folder: {folder.name} not found, despite it being present in archive.txt.", Logger.Verbosity.warning);
+                                notfoundbookmarks.Add(new Bookmark() { url = link });
                             }
                         }
                     }
                     checkspassed++;
                 }
-                if (checkspassed == 0) { Console.WriteLine("No checks for directory content passed."); }
-                Console.WriteLine("Number of missing links in directory");
-                folders[r].numberofmissinglinks = 1;
+                if (checkspassed == 0) { Logger.LogVerbose($"No checks for directory content passed for {folder.name}.", Logger.Verbosity.warning); }
+                folder.numberofmissinglinks = notfoundbookmarks.Distinct().Count();
+                Logger.LogVerbose($"Number of missing links in directory {folder.name}: {folder.numberofmissinglinks}");
             }
         }
-        Console.WriteLine("Total number of missing links: ");
     }
 
 
@@ -464,41 +467,4 @@ internal class AppMethods
     public enum ProgramUI { GUI, CLI }
     public static ProgramUI programUI;
     
-
-
-
-
-    public static int ValidateCommandLineOptions(CommandLineOptions options)
-    {
-        if (options.Interactive)
-        {
-            return 0; //if interactive the options don't matter
-        }
-        if (options.HtmlFileLocation != null)
-        {
-            if (!File.Exists(options.HtmlFileLocation)) { return 1; }
-            if (Path.GetExtension(options.HtmlFileLocation) != ".html") { return 1; }
-        }
-        if (options.Yt_dlp_binary_path != null)
-        {
-            if (!File.Exists(options.Yt_dlp_binary_path)) { return 1; }
-        }
-        if (options.Outputfolder != null)
-        {
-            if (!Directory.Exists(options.HtmlFileLocation)) 
-            {
-                try
-                {
-                    Directory.CreateDirectory(options.Outputfolder);
-                }
-                catch (Exception)
-                {
-                    Logger.LogVerbose("Could not create directory: " + options.Outputfolder, Logger.Verbosity.error);
-                    return 1;
-                }
-            }
-            return 0;
-        }
-        return 0;
-    }
 }

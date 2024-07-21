@@ -35,7 +35,18 @@
 
             <!--  tree of folders  -->
             <Grid Grid.Column="0" RowDefinitions="*, Auto">
+                <!--
+				<TreeView Grid.Row="0" ItemsSource="{Binding HierarchcalFolderCollection}">
+                    <TreeView.ItemTemplate>
+                        <TreeDataTemplate ItemsSource="{Binding Children}">
+                            <TextBlock Text="{Binding Name}" />
+                        </TreeDataTemplate>
+                    </TreeView.ItemTemplate>
+                </TreeView>
+				
+				-->
                 <Rectangle Grid.Row="0" Fill="Aquamarine" />
+
                 <StackPanel
                     Grid.Row="1"
                     Height="30"

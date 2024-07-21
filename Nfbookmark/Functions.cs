@@ -9,7 +9,7 @@ namespace bookmark_dlp
     /// <summary>
     /// Contains functions relating to the management of bookmark folders and logging
     /// </summary>
-    public partial class Functions
+    public class Functions
     {
 
         /// <summary>
@@ -114,7 +114,7 @@ namespace bookmark_dlp
         }
 
         /// <summary>
-        /// Attempt to make sure all bookmark folder names are good for filesystems folder names. <br/>
+        /// Attempt to make sure all bookmark folder names are good for filesystems folder names. If needed, changes the folder.name value<br/>
         /// Neccessary because bookmark folders can have 1) empty names 2) the same names 3) contain not allowed characters or character combinations
         /// </summary>
         /// <param name="folders">The bookmark folders to operate on</param>
@@ -133,7 +133,7 @@ namespace bookmark_dlp
                         folder.name = newfoldername;
                     }
                 }
-                if (folder.name.Trim().Replace(" ", string.Empty).Distinct().ToList().Count() == 0 && folder.name.Trim().Replace(" ", string.Empty).Distinct().ToList()[0] == '.') 
+                if (folder.name.Trim().Replace(" ", string.Empty).Distinct().ToList().Count() == 1 && folder.name.Trim().Replace(" ", string.Empty).Distinct().ToList()[0] == '.') 
                 {
                     // name is only made up of spaces and .
                     string newfoldername = $"ID{folder.id}";
@@ -180,7 +180,7 @@ namespace bookmark_dlp
         }
 
         /// <summary>
-        /// creating the folder structure and storing the access paths to folders[].folderpath
+        /// Creating the folder structure on filesystems and storing the access paths to folders[].folderpath
         /// </summary>
         /// <param name="folders">Bookmark folders to be made into filesystem folders</param>
         /// <param name="rootdir">Fiilesystems directory to contain all the folders</param>

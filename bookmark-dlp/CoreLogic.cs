@@ -23,7 +23,8 @@ namespace bookmark_dlp
 #endif
             ParserResult<CommandLineOptions> commandLineOptions = CommandLine.Parser.Default.ParseArguments<CommandLineOptions>(args);
             CommandLineOptions setOptions = commandLineOptions.Value;
-            AppMethods.ValidateCommandLineOptions(setOptions);
+            int retu = ValidateCommandLineOptions(setOptions);
+            if (retu == 1) { Environment.Exit(1); }
 
             Console.OutputEncoding = System.Text.Encoding.UTF8;
             string rootdir = Directory.GetCurrentDirectory(); //current directory
@@ -237,5 +238,43 @@ namespace bookmark_dlp
                 Environment.Exit(0); //leaving the program, so it does not contiue running according to Program.cs
             }
         }
+
+
+        private static int ValidateCommandLineOptions(CommandLineOptions options)
+        {
+            if (options == null) { return 1; }
+            if (options.Interactive)
+            {
+                return 0; //if interactive the options don't matter
+            }
+            if (options.HtmlFileLocation != null)
+            {
+                if (!File.Exists(options.HtmlFileLocation)) { return 1; }
+                if (Path.GetExtension(options.HtmlFileLocation) != ".html") { return 1; }
+            }
+            if (options.Yt_dlp_binary_path != null)
+            {
+                if (!File.Exists(options.Yt_dlp_binary_path)) { return 1; }
+            }
+            if (options.Outputfolder != null)
+            {
+                if (!Directory.Exists(options.HtmlFileLocation))
+                {
+                    try
+                    {
+                        Directory.CreateDirectory(options.Outputfolder);
+                    }
+                    catch (Exception)
+                    {
+                        Logger.LogVerbose("Could not create directory: " + options.Outputfolder, Logger.Verbosity.error);
+                        return 1;
+                    }
+                }
+                return 0;
+            }
+            return 0;
+        }
+
+
     }
 }
