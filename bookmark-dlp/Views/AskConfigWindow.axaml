@@ -24,7 +24,7 @@
             HorizontalAlignment="Left"
             VerticalAlignment="Top"
             TextWrapping="Wrap">
-            No exising config was found, please choose location for new config file:
+            No existing config was found, please choose location for new config file:
         </TextBlock>
         <Grid
             HorizontalAlignment="Center"
@@ -57,8 +57,8 @@
 
         </Grid>
         <DockPanel>
-            <Label Content="{Binding MyLabel}">message</Label>
-            <Label Content="{Binding WhichButton}">which</Label>
+            <Label Content="{Binding MyLabel}"></Label>
+            <Label Content="{Binding WhichButton}"></Label>
             <Button
                 Margin="7"
                 HorizontalAlignment="Right"

@@ -5,13 +5,13 @@ name: Prerelease
 
 on:
   push:
-    branches: [ "unstable" ]
+    branches-ignore: [ "master" ]
   pull_request:
-    branches: [ "unstable" ]
+    branches-ignore: [ "master" ]
 
 
 env:
-  VERSION: "0.2.8"
+  VERSION: "0.3.0"
   DOTNETVERSION: "net8.0"
 
 jobs:

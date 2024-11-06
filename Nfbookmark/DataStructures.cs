@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace bookmark_dlp
 {
     /// <summary>
-    /// Not used for now. A more refined wrapper aroung just a list of folders, intended to represent all bookmarks found in a single browser profile
+    /// Not used for now. A more refined wrapper around just a list of folders, intended to represent all bookmarks found in a single browser profile
     /// </summary>
     public class Bookmarks
     {
