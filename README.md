@@ -94,7 +94,7 @@ Build your own: this project is open source
 - [x] refactor bookmarks import to library
 - [ ] tray icon
 - [ ] systemd module
-- [ ] dot dekstop file
+- [ ] dot desktop file
 - [ ] add manpages
 - [ ] logging
 
