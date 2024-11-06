@@ -17,7 +17,11 @@ namespace bookmark_dlp
         {
 #if DEBUG
             Logger.verbosity = Logger.Verbosity.critical;
-            Functions.PrintToConsole(Import.SmartImport(Import.GetBrowserBookmarkFilesPaths()[0].foundProfiles[0]));
+            // Functions.PrintToConsole(Import.SmartImport(Import.GetBrowserBookmarkFilesPaths()[0].foundProfiles[0]));
+            Console.WriteLine("starting");
+            Functions.PrintToConsole(Import.SmartImport("test1.html"));
+            Console.WriteLine("\n\n\n");
+            Functions.PrintToConsole(Import.SmartImport("test2.html"));
             Console.ReadKey();
             Environment.Exit(0);
 #endif
