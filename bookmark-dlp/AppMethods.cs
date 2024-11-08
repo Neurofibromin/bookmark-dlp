@@ -109,6 +109,7 @@ internal class AppMethods
             string[] filenames = { "yt-dlp", "yt-dlp_linux", "yt-dlp_linux_aarch64", "yt-dlp_linux_armv7l" };
             foreach (string filename in filenames)
             {
+                // check for yt-dlp executable in working rootdir
                 if (rootdir != null && File.Exists(Path.Combine(rootdir, filename)))
                 {
                     // Console.WriteLine(Path.Combine(rootdir, filename) + " found");
@@ -118,40 +119,43 @@ internal class AppMethods
             }
             if (ytdlp_path == "")
             {
-                throw new NotImplementedException();
-                
+                // check for yt-dlp binary on path
                 Console.WriteLine(Path.Combine(rootdir, "yt-dlp") + " not found, searching PATH.");
-                Process process;
-                string command = "if (which yt-dlp); then echo \"true\"; else echo \"false\"; fi";
-                process = new Process
+                string command = $"-c \"if (which yt-dlp); then echo \"true\"; else echo \"false\"; fi\"";
+                command = $"-c \"which yt-dlp\"";
+                Process process = new Process();
+                // Console.WriteLine("command: " + command);
+                var processStartInfo = new ProcessStartInfo()
                 {
-                    StartInfo = new ProcessStartInfo("bash", command)
-                    {
-                        WorkingDirectory = rootdir,
-                        CreateNoWindow = true,
-                        UseShellExecute = false,
-                        RedirectStandardError = true,
-                        RedirectStandardOutput = true
-                    }
+                    WindowStyle = ProcessWindowStyle.Hidden,
+                    FileName = "bash",
+                    WorkingDirectory = rootdir,
+                    CreateNoWindow = true,
+                    UseShellExecute = false,
+                    RedirectStandardError = true,
+                    RedirectStandardOutput = true,
+                    Arguments = command
                 };
+                process.StartInfo = processStartInfo;
                 process.Start();
                 string result = process.StandardOutput.ReadToEnd();
+                String error = process.StandardError.ReadToEnd();
                 process.WaitForExit();
-                Console.WriteLine("Result: " + result);
-                if (result.Contains("true"))
-                {
-                    ytdlp_path = "yt-dlp"; //yt-dlp is on the path
-                }
-                else
+                // Console.WriteLine("Result: " + result.Trim());
+                // Console.WriteLine("Error: " + error);
+                if (result.Contains("which"))
                 {
                     throw new Exception($"yt-dlp not found in path or in rootdir, install it before continuing.");
                 }
-                Console.WriteLine("ExitCode: {0}", process.ExitCode);
+                else //yt-dlp is on the path
+                {
+                    ytdlp_path = result.Trim();
+                }
+                // Console.WriteLine("ExitCode: {0}", process.ExitCode);
                 process.Close();
                 //Console.WriteLine("Is it on the path? Y/N");
                 //if(Console.ReadLine().Contains("Y")) { ytdlp_path = "yt-dlp"; }
                 //else { throw new Exception($"yt-dlp not found in path or in rootdir, install it before continuing."); }
-                return null;
             }
         }
         if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))

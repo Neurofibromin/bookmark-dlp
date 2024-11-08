@@ -15,16 +15,18 @@ namespace bookmark_dlp
         {
 #if DEBUG
             AppMethods.programUI = AppMethods.ProgramUI.CLI;
+            Logger.LogVerbose("Program started in DEBUG mode");
             CoreLogic.CoreLogicMain(args); }
 #else
+            Logger.LogVerbose("Program started in RELEASE mode", Logger.Verbosity.trace);
             if (args.Length == 0)
             {
-                ///
-                /// If WindowsOperations.SetWindowMode(WindowMode.Hidden) is used the console invoking the program will close after the program has started. This is undesirable
-                /// when the user intentionally launches ./bookmark-dlp from the terminal, but desirable if the app is launched by just double clicking on the executable.
-                /// Will leave it in for now, as launching from the terminal is a lot less likely in my opinion.
-                ///
-                //WindowsOperations.SetWindowMode(WindowMode.Hidden);
+                //
+                // If WindowsOperations.SetWindowMode(WindowMode.Hidden) is used the console invoking the program will close after the program has started. This is undesirable
+                // when the user intentionally launches ./bookmark-dlp from the terminal, but desirable if the app is launched by just double clicking on the executable.
+                // Will leave it in for now, as launching from the terminal is a lot less likely in my opinion.
+                //
+                // WindowsOperations.SetWindowMode(WindowMode.Hidden);
                 AppMethods.programUI = AppMethods.ProgramUI.GUI;
                 BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
                 return;
