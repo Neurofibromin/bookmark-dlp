@@ -13,12 +13,24 @@ namespace bookmark_dlp
         [STAThread]
         public static void Main(string[] args)
         {
+#if CLIMODE
 #if DEBUG
-            AppMethods.programUI = AppMethods.ProgramUI.CLI;
+            Logger.verbosity = Logger.Verbosity.trace;
             Logger.LogVerbose("Program started in DEBUG mode");
+#else
+            Logger.verbosity = Logger.Verbosity.warning;
+#endif
+            AppMethods.programUI = AppMethods.ProgramUI.CLI;
+            Logger.LogVerbose("Program started in CLI mode");
             CoreLogic.CoreLogicMain(args); }
 #else
-            Logger.LogVerbose("Program started in RELEASE mode", Logger.Verbosity.trace);
+#if DEBUG
+            Logger.verbosity = Logger.Verbosity.trace;
+            Logger.LogVerbose("Program started in DEBUG mode");
+#else
+            Logger.verbosity = Logger.Verbosity.warning;
+#endif
+            Logger.LogVerbose("Program started in GUI mode", Logger.Verbosity.debug);
             if (args.Length == 0)
             {
                 //

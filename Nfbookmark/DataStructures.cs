@@ -82,7 +82,7 @@ namespace bookmark_dlp
     /// <summary>
     /// Representing the default locations (filepaths) where one browser might store its user profiles.
     /// </summary>
-    public class BrowserLocations
+    public partial class BrowserLocations
     {
         public string browsername;
         public string windows_profilespath = "";
@@ -110,6 +110,7 @@ namespace bookmark_dlp
     /// </summary>
     public enum BrowserType { none, chromiumbased, firefoxbased }
 
+    // Legacy code
     struct GlobalState
     {
         public int folderid; //used a lot instead of numberoffolders, maybe not ideal?

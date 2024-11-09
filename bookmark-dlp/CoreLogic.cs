@@ -91,7 +91,7 @@ namespace bookmark_dlp
                     {
                         //not html
                         Logger.LogVerbose("No html set, proceeding with search in installed browser default locations"); //goig to autoimport, as no .html present
-                        filePath = Import.QueryChosenBookmarksFile(Import.GetBrowserBookmarkFilesPaths());
+                        filePath = BrowserLocations.QueryChosenBookmarksFile(BrowserLocations.GetBrowserBookmarkFilesPaths());
                     }
                     //A source was chosen
                     importSourceFound = true;

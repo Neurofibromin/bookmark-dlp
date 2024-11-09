@@ -92,9 +92,8 @@ namespace bookmark_dlp.ViewModels
             }
             if (AppMethods.Yt_dlp_pathfinder(ActiveSettings.Outputfolder) != null)
             {
-                // await Console.Out.WriteLineAsync("thisone");
                 ActiveSettings.Ytdlp_executable_not_found = false;
-                //ActiveSettings.Ytdlp_executable_not_found = false;
+                ActiveSettings.Yt_dlp_binary_path = AppMethods.Yt_dlp_pathfinder(ActiveSettings.Outputfolder);                
             }
         }
         

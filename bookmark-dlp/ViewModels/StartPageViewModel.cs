@@ -48,7 +48,7 @@ namespace bookmark_dlp.ViewModels
         public StartPageViewModel()
         {
             var temp = new List<string>();
-            List<BrowserLocations> temp2 = Import.GetBrowserBookmarkFilesPaths();
+            List<BrowserLocations> temp2 = BrowserLocations.GetBrowserBookmarkFilesPaths();
 
             if (temp2 != null)
             {

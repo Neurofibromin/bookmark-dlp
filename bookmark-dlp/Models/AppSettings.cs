@@ -20,7 +20,7 @@ namespace bookmark_dlp.Models
             downloadChannels = false,        
             concurrent_downloads = false,        
             cookies_autoextract = false,
-            yt_dlp_binary_path = null,
+            yt_dlp_binary_path = AppMethods.Yt_dlp_pathfinder(Directory.GetCurrentDirectory()),
         };
         public static string? configloc = AppMethods.ConfigFileLocation();
         private static AppSettings _instance = new AppSettings();
@@ -37,19 +37,18 @@ namespace bookmark_dlp.Models
                     SettingsStruct imported = JsonSerializer.Deserialize<SettingsStruct>(jsonimportstring);
                     if (imported == null) { throw new NullReferenceException(); }
                     _settings = imported;
-                    Console.WriteLine("Config import successful");
+                    Logger.LogVerbose("Config import successful");
                 }
                 catch
                 {
-                    Console.WriteLine("Settings could not be deserialized, fallback to default settings. Not overwriting corrupt file!");
+                    Logger.LogVerbose("Settings could not be deserialized, fallback to default settings. Not overwriting corrupt file!");
                     _settings = defaultsettings;
                     configloc = null; //to protect file from overwrite
                 }
-                
             }
             else
             {
-                Console.WriteLine("Config file doesnt exist, going with defaults");
+                Logger.LogVerbose("Config file doesnt exist, going with defaults");
                 _settings = defaultsettings; //no config file, so set configs to default value
                 configloc = null;
             }
