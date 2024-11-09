@@ -15,12 +15,32 @@ env:
   DOTNETVERSION: "net8.0"
 
 jobs:
+  detect-platform:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v3
+      - name: List all environment variables
+        run: printenv | sort
+      - name: Detect if running on GitHub or Gitea
+        run: |
+          if [ "$GITHUB_ACTIONS" = "true" ]; then
+              echo "Running on GitHub Actions"
+          fi
+          if [ "$GITEA_ACTIONS" = "true" ]; then
+              echo "Running on Gitea Actions"
+          else
+              echo "Unknown platform"
+              exit 1
+          fi
+          
   build:
     strategy:
       matrix:
         os: [ ubuntu-latest ]
         dotnet-version: [ '8.0.x' ]
     runs-on: ${{ matrix.os }}
+    needs: [detect-platform]
     if: true
     steps:
     - uses: actions/checkout@v3
@@ -28,6 +48,9 @@ jobs:
       uses: actions/setup-dotnet@v3
       with:
         dotnet-version: ${{ matrix.dotnet-version }}  
+    - name: cancel
+      if: ${{ GITEA_ACTIONS }}
+      run: cancelled()
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
@@ -39,8 +62,6 @@ jobs:
     - name: "List all files"
       run: ls -R
       
-        
-    
   release:
       strategy:
         matrix:
@@ -73,47 +94,81 @@ jobs:
           ls -R
       - name: "Rename based on architecture"
         run: |
-          mv "/home/runner/work/bookmark-dlp/bookmark-dlp/bookmark-dlp/bin/Release/net8.0/win-x64/publish/bookmark-dlp.exe" "/home/runner/work/bookmark-dlp/bookmark-dlp/bookmark-dlp/bin/Release/net8.0/win-x64/publish/bookmark-dlp-win-x64-${{ matrix.dotnet-version }}.exe"
-          mv "/home/runner/work/bookmark-dlp/bookmark-dlp/bookmark-dlp/bin/Release/net8.0/win-x86/publish/bookmark-dlp.exe" "/home/runner/work/bookmark-dlp/bookmark-dlp/bookmark-dlp/bin/Release/net8.0/win-x86/publish/bookmark-dlp-win-x86-${{ matrix.dotnet-version }}.exe"
-          mv "/home/runner/work/bookmark-dlp/bookmark-dlp/bookmark-dlp/bin/Release/net8.0/linux-arm64/publish/bookmark-dlp" "/home/runner/work/bookmark-dlp/bookmark-dlp/bookmark-dlp/bin/Release/net8.0/linux-arm64/publish/bookmark-dlp-linux-arm64-${{ matrix.dotnet-version }}"
-          mv "/home/runner/work/bookmark-dlp/bookmark-dlp/bookmark-dlp/bin/Release/net8.0/linux-x64/publish/bookmark-dlp" "/home/runner/work/bookmark-dlp/bookmark-dlp/bookmark-dlp/bin/Release/net8.0/linux-x64/publish/bookmark-dlp-linux-x64-${{ matrix.dotnet-version }}"
-          mv "/home/runner/work/bookmark-dlp/bookmark-dlp/bookmark-dlp/bin/Release/net8.0/osx-x64/publish/bookmark-dlp" "/home/runner/work/bookmark-dlp/bookmark-dlp/bookmark-dlp/bin/Release/net8.0/osx-x64/publish/bookmark-dlp-osx-x64-${{ matrix.dotnet-version }}"
-          mv "/home/runner/work/bookmark-dlp/bookmark-dlp/bookmark-dlp/bin/Release/net8.0/osx-arm64/publish/bookmark-dlp" "/home/runner/work/bookmark-dlp/bookmark-dlp/bookmark-dlp/bin/Release/net8.0/osx-arm64/publish/bookmark-dlp-osx-arm64"
-          mv "/home/runner/work/bookmark-dlp/bookmark-dlp/bookmark-dlp/bin/Release/net8.0/win-arm64/publish/bookmark-dlp.exe" "/home/runner/work/bookmark-dlp/bookmark-dlp/bookmark-dlp/bin/Release/net8.0/win-arm64/publish/bookmark-dlp-win-arm64-${{ matrix.dotnet-version }}.exe"
+          if [ "$GITEA_ACTIONS" = "true" ]; then
+            cd /workspace/def/bookmark-dlp  
+          elif [ "$GITHUB_ACTIONS" = "true" ]; then
+            cd /home/runner/work/bookmark-dlp/bookmark-dlp
+          fi      
+          mkdir releases
+          mv "./bookmark-dlp/bin/Release/net8.0/win-x64/publish/bookmark-dlp.exe" "./releases/bookmark-dlp-win-x64-${{ matrix.dotnet-version }}.exe"
+          mv "./bookmark-dlp/bin/Release/net8.0/win-x86/publish/bookmark-dlp.exe" "./releases/bookmark-dlp-win-x86-${{ matrix.dotnet-version }}.exe"
+          mv "./bookmark-dlp/bin/Release/net8.0/linux-arm64/publish/bookmark-dlp" "./releases/bookmark-dlp-linux-arm64-${{ matrix.dotnet-version }}"
+          mv "./bookmark-dlp/bin/Release/net8.0/linux-x64/publish/bookmark-dlp" "./releases/bookmark-dlp-linux-x64-${{ matrix.dotnet-version }}"
+          mv "./bookmark-dlp/bin/Release/net8.0/osx-x64/publish/bookmark-dlp" "./releases/bookmark-dlp-osx-x64-${{ matrix.dotnet-version }}"
+          mv "./bookmark-dlp/bin/Release/net8.0/osx-arm64/publish/bookmark-dlp" "./releases/bookmark-dlp-osx-arm64"
+          mv "./bookmark-dlp/bin/Release/net8.0/win-arm64/publish/bookmark-dlp.exe" "./releases/bookmark-dlp-win-arm64-${{ matrix.dotnet-version }}.exe"
+          cd releases
+          ls -lah
       - name: "Delete old release"
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release list > releases.txt
-          cat releases.txt
-          version="${{ env.VERSION }}"
-          echo $version
-          if grep $version releases.txt; then
-            echo wasfound
-            gh release delete $version
-          else
-            echo "notfound"
-          fi
-
+          if [ "$GITEA_ACTIONS" = "true" ]; then
+            echo "Running on Gitea Actions"
+            wget -q https://dl.gitea.com/tea/main/tea-main-linux-amd64
+            chmod a+x ./tea-main-linux-amd64
+            mv ./tea-main-linux-amd64 tea
+            ./tea login add --url ${{ github.server_url }} --token ${{ secrets.MY_GITEA_TOKEN }}
+            ./tea releases list --output simple --repo  ${{ github.repository }} > releases.txt
+            cat releases.txt
+            version="${{ env.VERSION }}"
+            echo $version
+            if grep $version releases.txt; then
+              echo wasfound
+              ./tea releases delete --output simple --confirm --repo ${{ github.repository }} ${{ env.VERSION }}
+            else
+              echo "notfound"
+            fi
+          elif [ "$GITHUB_ACTIONS" = "true" ]; then
+            echo "Running on GitHub Actions"
+            gh release list > releases.txt
+            cat releases.txt
+            version="${{ env.VERSION }}"
+            echo $version
+            if grep $version releases.txt; then
+              echo wasfound
+              gh release delete $version
+            else
+              echo "notfound"
+            fi
+          fi      
       - name: "Create new prerelease"
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create "${{ env.VERSION }}" --target unstable --prerelease --title "Development build ${{ env.VERSION }}" --generate-notes
+          VERSION="${{ env.VERSION }}"
+          echo $VERSION
+          if [ "$GITEA_ACTIONS" = "true" ]; then
+            ./tea releases create --title "Autogen" --tag $VERSION --target "0.3.0" --prerelease --repo ${{ github.repository }} --asset ./releases/**
+          elif [ "$GITHUB_ACTIONS" = "true" ]; then
+            gh release create "${{ env.VERSION }}" --target unstable --prerelease --title "Development build ${{ env.VERSION }}" --generate-notes  
+          fi     
       - name: Upload
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release upload "${{ env.VERSION }}" "./bookmark-dlp/bin/Release/net8.0/win-x64/publish/bookmark-dlp-win-x64-${{ matrix.dotnet-version }}.exe" --clobber
-          gh release upload "${{ env.VERSION }}" "./bookmark-dlp/bin/Release/net8.0/win-x86/publish/bookmark-dlp-win-x86-${{ matrix.dotnet-version }}.exe" --clobber
-          gh release upload "${{ env.VERSION }}" "./bookmark-dlp/bin/Release/net8.0/linux-arm64/publish/bookmark-dlp-linux-arm64-${{ matrix.dotnet-version }}" --clobber
-          gh release upload "${{ env.VERSION }}" "./bookmark-dlp/bin/Release/net8.0/linux-x64/publish/bookmark-dlp-linux-x64-${{ matrix.dotnet-version }}" --clobber
-          gh release upload "${{ env.VERSION }}" "./bookmark-dlp/bin/Release/net8.0/osx-x64/publish/bookmark-dlp-osx-x64-${{ matrix.dotnet-version }}" --clobber
-          gh release upload "${{ env.VERSION }}" "./bookmark-dlp/bin/Release/net8.0/osx-arm64/publish/bookmark-dlp-osx-arm64" --clobber
-          gh release upload "${{ env.VERSION }}" "./bookmark-dlp/bin/Release/net8.0/win-arm64/publish/bookmark-dlp-win-arm64-${{ matrix.dotnet-version }}.exe" --clobber
-
-
-
+          if [ "$GITEA_ACTIONS" = "true" ]; then
+            echo done  
+          elif [ "$GITHUB_ACTIONS" = "true" ]; then
+            gh release upload "${{ env.VERSION }}" "./releases/bookmark-dlp-win-x64-${{ matrix.dotnet-version }}.exe" --clobber
+            gh release upload "${{ env.VERSION }}" "./releases/bookmark-dlp-win-x86-${{ matrix.dotnet-version }}.exe" --clobber
+            gh release upload "${{ env.VERSION }}" "./releases/bookmark-dlp-linux-arm64-${{ matrix.dotnet-version }}" --clobber
+            gh release upload "${{ env.VERSION }}" "./releases/bookmark-dlp-linux-x64-${{ matrix.dotnet-version }}" --clobber
+            gh release upload "${{ env.VERSION }}" "./releases/bookmark-dlp-osx-x64-${{ matrix.dotnet-version }}" --clobber
+            gh release upload "${{ env.VERSION }}" "./releases/bookmark-dlp-osx-arm64" --clobber
+            gh release upload "${{ env.VERSION }}" "./releases/bookmark-dlp-win-arm64-${{ matrix.dotnet-version }}.exe" --clobber  
+          fi 
+          
   pupnet:
       strategy:
         matrix:
@@ -122,7 +177,7 @@ jobs:
         fail-fast: false
       runs-on: ${{ matrix.os }}
       needs: [release]
-      if: ${{ needs.release.result == 'success' }}
+      if: false # ${{ needs.release.result == 'success' }}
       steps:
       - uses: actions/checkout@v3
       - name: Setup dotnet
