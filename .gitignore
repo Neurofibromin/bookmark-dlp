@@ -5,6 +5,7 @@ releases.txt
 *.rpm
 todo.txt
 /.idea
+doxygen-generated/
 
 ################################################################################
 # This .gitignore file was automatically created by Microsoft(R) Visual Studio.
