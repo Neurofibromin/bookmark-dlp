@@ -13,6 +13,7 @@ on:
 env:
   VERSION: "0.3.0"
   DOTNETVERSION: "net8.0"
+  RUNNER_TOOL_CACHE: /toolcache
 
 jobs:
   detect-platform:
@@ -28,13 +29,24 @@ jobs:
               echo "Running on GitHub Actions"
           fi
           if [ "$GITEA_ACTIONS" = "true" ]; then
-              echo "Running on Gitea Actions"
+            echo "Running on Gitea Actions"
+            #      VERSION="${{ env.VERSION }}"
+            #      echo $VERSION
+            #      mkdir releases
+            #      echo "test3" > releases/a.txt
+            #      wget -q https://dl.gitea.com/tea/main/tea-main-linux-amd64
+            #      chmod a+x ./tea-main-linux-amd64
+            #      mv ./tea-main-linux-amd64 tea
+            #      ./tea login add --url ${{ github.server_url }} --token ${{ secrets.MY_GITEA_TOKEN }}
+            #      ./tea releases create --title "Autogen" --tag $VERSION --target "feature" --prerelease --repo ${{ github.repository }} --asset ./releases/**
           else
               echo "Unknown platform"
               exit 1
           fi
-          
+                 
   build:
+    env:
+      RUNNER_TOOL_CACHE: /toolcache
     strategy:
       matrix:
         os: [ ubuntu-latest ]
@@ -43,6 +55,8 @@ jobs:
     needs: [detect-platform]
     if: true
     steps:
+    - name: bash-logs
+      run: set -x
     - uses: actions/checkout@v3
     - name: Setup .NET Core SDK ${{ matrix.dotnet-version }}
       uses: actions/setup-dotnet@v3
@@ -63,173 +77,181 @@ jobs:
       run: ls -R
       
   release:
-      strategy:
-        matrix:
-          os: [ ubuntu-latest ]
-          dotnet-version: [ '8.0.x' ]
-        fail-fast: false
-      runs-on: ${{ matrix.os }}
-      needs: [build]
-      if: ${{ needs.build.result == 'success' }}
-      steps:
-      - uses: actions/checkout@v3
-      - name: Setup dotnet
-        uses: actions/setup-dotnet@v3
-        with:
-          dotnet-version: ${{ matrix.dotnet-version }}
-      - name: Restore dependencies
-        run: dotnet restore
-      - name: Publish
-        run: |
-          dotnet publish bookmark-dlp/bookmark-dlp.csproj --configuration Release --runtime win-x64 --self-contained --framework ${{ env.DOTNETVERSION }}
-          dotnet publish bookmark-dlp/bookmark-dlp.csproj --configuration Release --runtime win-x86 --self-contained --framework ${{ env.DOTNETVERSION }}
-          dotnet publish bookmark-dlp/bookmark-dlp.csproj --configuration Release --runtime win-arm64 --self-contained --framework ${{ env.DOTNETVERSION }}
-          dotnet publish bookmark-dlp/bookmark-dlp.csproj --configuration Release --runtime linux-x64 --self-contained --framework ${{ env.DOTNETVERSION }}
-          dotnet publish bookmark-dlp/bookmark-dlp.csproj --configuration Release --runtime linux-arm64 --self-contained --framework ${{ env.DOTNETVERSION }}
-          dotnet publish bookmark-dlp/bookmark-dlp.csproj --configuration Release --runtime osx-x64 --self-contained --framework ${{ env.DOTNETVERSION }}
-          dotnet publish bookmark-dlp/bookmark-dlp.csproj --configuration Release --runtime osx-arm64 --self-contained --framework ${{ env.DOTNETVERSION }}
-      - name: "List all files"
-        run: |
-          echo $PWD
-          ls -R
-      - name: "Rename based on architecture"
-        run: |
-          if [ "$GITEA_ACTIONS" = "true" ]; then
-            cd /workspace/def/bookmark-dlp  
-          elif [ "$GITHUB_ACTIONS" = "true" ]; then
-            cd /home/runner/work/bookmark-dlp/bookmark-dlp
-          fi      
-          mkdir releases
-          mv "./bookmark-dlp/bin/Release/net8.0/win-x64/publish/bookmark-dlp.exe" "./releases/bookmark-dlp-win-x64-${{ matrix.dotnet-version }}.exe"
-          mv "./bookmark-dlp/bin/Release/net8.0/win-x86/publish/bookmark-dlp.exe" "./releases/bookmark-dlp-win-x86-${{ matrix.dotnet-version }}.exe"
-          mv "./bookmark-dlp/bin/Release/net8.0/linux-arm64/publish/bookmark-dlp" "./releases/bookmark-dlp-linux-arm64-${{ matrix.dotnet-version }}"
-          mv "./bookmark-dlp/bin/Release/net8.0/linux-x64/publish/bookmark-dlp" "./releases/bookmark-dlp-linux-x64-${{ matrix.dotnet-version }}"
-          mv "./bookmark-dlp/bin/Release/net8.0/osx-x64/publish/bookmark-dlp" "./releases/bookmark-dlp-osx-x64-${{ matrix.dotnet-version }}"
-          mv "./bookmark-dlp/bin/Release/net8.0/osx-arm64/publish/bookmark-dlp" "./releases/bookmark-dlp-osx-arm64"
-          mv "./bookmark-dlp/bin/Release/net8.0/win-arm64/publish/bookmark-dlp.exe" "./releases/bookmark-dlp-win-arm64-${{ matrix.dotnet-version }}.exe"
-          cd releases
-          ls -lah
-      - name: "Delete old release"
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          if [ "$GITEA_ACTIONS" = "true" ]; then
-            echo "Running on Gitea Actions"
-            wget -q https://dl.gitea.com/tea/main/tea-main-linux-amd64
-            chmod a+x ./tea-main-linux-amd64
-            mv ./tea-main-linux-amd64 tea
-            ./tea login add --url ${{ github.server_url }} --token ${{ secrets.MY_GITEA_TOKEN }}
-            ./tea releases list --output simple --repo  ${{ github.repository }} > releases.txt
-            cat releases.txt
-            version="${{ env.VERSION }}"
-            echo $version
-            if grep $version releases.txt; then
-              echo wasfound
-              ./tea releases delete --output simple --confirm --repo ${{ github.repository }} ${{ env.VERSION }}
-            else
-              echo "notfound"
-            fi
-          elif [ "$GITHUB_ACTIONS" = "true" ]; then
-            echo "Running on GitHub Actions"
-            gh release list > releases.txt
-            cat releases.txt
-            version="${{ env.VERSION }}"
-            echo $version
-            if grep $version releases.txt; then
-              echo wasfound
-              gh release delete $version
-            else
-              echo "notfound"
-            fi
-          fi      
-      - name: "Create new prerelease"
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          VERSION="${{ env.VERSION }}"
-          echo $VERSION
-          if [ "$GITEA_ACTIONS" = "true" ]; then
-            ./tea releases create --title "Autogen" --tag $VERSION --target "0.3.0" --prerelease --repo ${{ github.repository }} --asset ./releases/**
-          elif [ "$GITHUB_ACTIONS" = "true" ]; then
-            gh release create "${{ env.VERSION }}" --target unstable --prerelease --title "Development build ${{ env.VERSION }}" --generate-notes  
-          fi     
-      - name: Upload
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          if [ "$GITEA_ACTIONS" = "true" ]; then
-            echo done  
-          elif [ "$GITHUB_ACTIONS" = "true" ]; then
-            gh release upload "${{ env.VERSION }}" "./releases/bookmark-dlp-win-x64-${{ matrix.dotnet-version }}.exe" --clobber
-            gh release upload "${{ env.VERSION }}" "./releases/bookmark-dlp-win-x86-${{ matrix.dotnet-version }}.exe" --clobber
-            gh release upload "${{ env.VERSION }}" "./releases/bookmark-dlp-linux-arm64-${{ matrix.dotnet-version }}" --clobber
-            gh release upload "${{ env.VERSION }}" "./releases/bookmark-dlp-linux-x64-${{ matrix.dotnet-version }}" --clobber
-            gh release upload "${{ env.VERSION }}" "./releases/bookmark-dlp-osx-x64-${{ matrix.dotnet-version }}" --clobber
-            gh release upload "${{ env.VERSION }}" "./releases/bookmark-dlp-osx-arm64" --clobber
-            gh release upload "${{ env.VERSION }}" "./releases/bookmark-dlp-win-arm64-${{ matrix.dotnet-version }}.exe" --clobber  
-          fi 
+    env:
+      RUNNER_TOOL_CACHE: /toolcache
+    strategy:
+      matrix:
+        os: [ ubuntu-latest ]
+        dotnet-version: [ '8.0.x' ]
+      fail-fast: false
+    runs-on: ${{ matrix.os }}
+    needs: [build]
+    if: ${{ needs.build.result == 'success' }}
+    steps:
+    - name: bash-logs
+      run: set -x
+    - uses: actions/checkout@v3
+    - name: Setup dotnet
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: ${{ matrix.dotnet-version }}
+    - name: Restore dependencies
+      run: dotnet restore
+    - name: Publish
+      run: |
+        dotnet publish bookmark-dlp/bookmark-dlp.csproj --configuration Release --runtime win-x64 --self-contained --framework ${{ env.DOTNETVERSION }}
+        dotnet publish bookmark-dlp/bookmark-dlp.csproj --configuration Release --runtime win-x86 --self-contained --framework ${{ env.DOTNETVERSION }}
+        dotnet publish bookmark-dlp/bookmark-dlp.csproj --configuration Release --runtime win-arm64 --self-contained --framework ${{ env.DOTNETVERSION }}
+        dotnet publish bookmark-dlp/bookmark-dlp.csproj --configuration Release --runtime linux-x64 --self-contained --framework ${{ env.DOTNETVERSION }}
+        dotnet publish bookmark-dlp/bookmark-dlp.csproj --configuration Release --runtime linux-arm64 --self-contained --framework ${{ env.DOTNETVERSION }}
+        dotnet publish bookmark-dlp/bookmark-dlp.csproj --configuration Release --runtime osx-x64 --self-contained --framework ${{ env.DOTNETVERSION }}
+        dotnet publish bookmark-dlp/bookmark-dlp.csproj --configuration Release --runtime osx-arm64 --self-contained --framework ${{ env.DOTNETVERSION }}
+    - name: "List all files"
+      run: |
+        echo $PWD
+        ls -R
+    - name: "Rename based on architecture"
+      run: |
+        if [ "$GITEA_ACTIONS" = "true" ]; then
+          cd /workspace/def/bookmark-dlp  
+        elif [ "$GITHUB_ACTIONS" = "true" ]; then
+          cd /home/runner/work/bookmark-dlp/bookmark-dlp
+        fi      
+        mkdir releases
+        mv "./bookmark-dlp/bin/Release/net8.0/win-x64/publish/bookmark-dlp.exe" "./releases/bookmark-dlp-win-x64-${{ matrix.dotnet-version }}.exe"
+        mv "./bookmark-dlp/bin/Release/net8.0/win-x86/publish/bookmark-dlp.exe" "./releases/bookmark-dlp-win-x86-${{ matrix.dotnet-version }}.exe"
+        mv "./bookmark-dlp/bin/Release/net8.0/linux-arm64/publish/bookmark-dlp" "./releases/bookmark-dlp-linux-arm64-${{ matrix.dotnet-version }}"
+        mv "./bookmark-dlp/bin/Release/net8.0/linux-x64/publish/bookmark-dlp" "./releases/bookmark-dlp-linux-x64-${{ matrix.dotnet-version }}"
+        mv "./bookmark-dlp/bin/Release/net8.0/osx-x64/publish/bookmark-dlp" "./releases/bookmark-dlp-osx-x64-${{ matrix.dotnet-version }}"
+        mv "./bookmark-dlp/bin/Release/net8.0/osx-arm64/publish/bookmark-dlp" "./releases/bookmark-dlp-osx-arm64"
+        mv "./bookmark-dlp/bin/Release/net8.0/win-arm64/publish/bookmark-dlp.exe" "./releases/bookmark-dlp-win-arm64-${{ matrix.dotnet-version }}.exe"
+        cd releases
+        ls -lah
+    - name: "Delete old release"
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        if [ "$GITEA_ACTIONS" = "true" ]; then
+          echo "Running on Gitea Actions"
+          wget -q https://dl.gitea.com/tea/main/tea-main-linux-amd64
+          chmod a+x ./tea-main-linux-amd64
+          mv ./tea-main-linux-amd64 tea
+          ./tea login add --url ${{ github.server_url }} --token ${{ secrets.MY_GITEA_TOKEN }}
+          ./tea releases list --output simple --repo  ${{ github.repository }} > releases.txt
+          cat releases.txt
+          version="${{ env.VERSION }}"
+          echo $version
+          if grep $version releases.txt; then
+            echo wasfound
+            ./tea releases delete --output simple --confirm --repo ${{ github.repository }} ${{ env.VERSION }}
+          else
+            echo "notfound"
+          fi
+        elif [ "$GITHUB_ACTIONS" = "true" ]; then
+          echo "Running on GitHub Actions"
+          gh release list > releases.txt
+          cat releases.txt
+          version="${{ env.VERSION }}"
+          echo $version
+          if grep $version releases.txt; then
+            echo wasfound
+            gh release delete $version
+          else
+            echo "notfound"
+          fi
+        fi      
+    - name: "Create new prerelease"
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        VERSION="${{ env.VERSION }}"
+        echo $VERSION
+        if [ "$GITEA_ACTIONS" = "true" ]; then
+          echo ./tea releases create --title "Autogen" "${{ env.VERSION }}" --target "feature" --prerelease --repo ${{ github.repository }} --asset ./releases/**
+          ./tea releases create --title "Autogen" "${{ env.VERSION }}" --target "feature" --prerelease --repo ${{ github.repository }} --asset ./releases/**
+        elif [ "$GITHUB_ACTIONS" = "true" ]; then
+          gh release create "${{ env.VERSION }}" --target unstable --prerelease --title "Development build ${{ env.VERSION }}" --generate-notes  
+        fi     
+    - name: Upload
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        ls -lah ./releases/
+        if [ "$GITEA_ACTIONS" = "true" ]; then
+          echo done  
+        elif [ "$GITHUB_ACTIONS" = "true" ]; then
+          gh release upload "${{ env.VERSION }}" "./releases/bookmark-dlp-win-x64-${{ matrix.dotnet-version }}.exe" --clobber
+          gh release upload "${{ env.VERSION }}" "./releases/bookmark-dlp-win-x86-${{ matrix.dotnet-version }}.exe" --clobber
+          gh release upload "${{ env.VERSION }}" "./releases/bookmark-dlp-linux-arm64-${{ matrix.dotnet-version }}" --clobber
+          gh release upload "${{ env.VERSION }}" "./releases/bookmark-dlp-linux-x64-${{ matrix.dotnet-version }}" --clobber
+          gh release upload "${{ env.VERSION }}" "./releases/bookmark-dlp-osx-x64-${{ matrix.dotnet-version }}" --clobber
+          gh release upload "${{ env.VERSION }}" "./releases/bookmark-dlp-osx-arm64" --clobber
+          gh release upload "${{ env.VERSION }}" "./releases/bookmark-dlp-win-arm64-${{ matrix.dotnet-version }}.exe" --clobber  
+        fi 
           
   pupnet:
-      strategy:
-        matrix:
-          os: [ ubuntu-latest ]
-          dotnet-version: [ '8.0.x' ]
-        fail-fast: false
-      runs-on: ${{ matrix.os }}
-      needs: [release]
-      if: false # ${{ needs.release.result == 'success' }}
-      steps:
-      - uses: actions/checkout@v3
-      - name: Setup dotnet
-        uses: actions/setup-dotnet@v3
-        with:
-          dotnet-version: ${{ matrix.dotnet-version }}
-      - name: Setup dependencies
-        run: |
-          # dnf -y install dpkg rpmdevtools # flatpak flatpak-builder pandoc
-          sudo apt-get -y install dpkg rpm flatpak flatpak-builder pandoc
-          sudo flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
-          # echo  ${{ env.MULTIENV }}
-          #if "${{ env.MULTIENV }}" == "true"; then
-          sudo flatpak install -y flathub org.freedesktop.Platform//23.08 org.freedesktop.Sdk//23.08
-          dotnet tool install -g KuiperZone.PupNet
-      - name: Restore dependencies
-        run: dotnet restore
-      - name: Publish
-        run: |
-          # dotnet publish bookmark-dlp.sln --configuration Release --runtime win-x64 --self-contained
-          # runtime: [ 'linux-x64', 'linux-arm64' ]
-          # kind: [ 'appimage', 'deb', 'rpm', 'flatpak' ]
-          pupnet --runtime linux-x64 --kind appimage --build Release --app-version ${{ env.VERSION }} --verbose
-          pupnet --runtime linux-x64 --kind deb --build Release --app-version ${{ env.VERSION }} --verbose
-          pupnet --runtime linux-x64 --kind rpm --build Release --app-version ${{ env.VERSION }} --verbose
-          pupnet --runtime linux-x64 --kind flatpak --build Release --app-version ${{ env.VERSION }} --verbose
-          pupnet --runtime linux-arm64 --kind appimage --build Release --app-version ${{ env.VERSION }} --verbose
-          pupnet --runtime linux-arm64 --kind deb --build Release --app-version ${{ env.VERSION }} --verbose
-          # pupnet --runtime linux-arm64 --kind rpm --build Release --app-version ${{ env.VERSION }} --verbose
-          pupnet --runtime linux-arm64 --kind flatpak --build Release --app-version ${{ env.VERSION }} --verbose
-      - name: "List all files"
-        run: |
-          echo $PWD
-          ls -R
-          # no need to rename, pupnet names things according to conventions
-          # no need to delete/create release here, it was resolved in "release" job
-      - name: Upload
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          # gh release upload "${{ env.VERSION }}" "./pupnet/out/*" --clobber
+    env:
+      RUNNER_TOOL_CACHE: /toolcache
+    strategy:
+      matrix:
+        os: [ ubuntu-latest ]
+        dotnet-version: [ '8.0.x' ]
+      fail-fast: false
+    runs-on: ${{ matrix.os }}
+    needs: [release]
+    if: false # ${{ needs.release.result == 'success' }}
+    steps:
+    - uses: actions/checkout@v3
+    - name: Setup dotnet
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: ${{ matrix.dotnet-version }}
+    - name: Setup dependencies
+      run: |
+        # dnf -y install dpkg rpmdevtools # flatpak flatpak-builder pandoc
+        sudo apt-get -y install dpkg rpm flatpak flatpak-builder pandoc
+        sudo flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+        # echo  ${{ env.MULTIENV }}
+        #if "${{ env.MULTIENV }}" == "true"; then
+        sudo flatpak install -y flathub org.freedesktop.Platform//23.08 org.freedesktop.Sdk//23.08
+        dotnet tool install -g KuiperZone.PupNet
+    - name: Restore dependencies
+      run: dotnet restore
+    - name: Publish
+      run: |
+        # dotnet publish bookmark-dlp.sln --configuration Release --runtime win-x64 --self-contained
+        # runtime: [ 'linux-x64', 'linux-arm64' ]
+        # kind: [ 'appimage', 'deb', 'rpm', 'flatpak' ]
+        pupnet --runtime linux-x64 --kind appimage --build Release --app-version ${{ env.VERSION }} --verbose
+        pupnet --runtime linux-x64 --kind deb --build Release --app-version ${{ env.VERSION }} --verbose
+        pupnet --runtime linux-x64 --kind rpm --build Release --app-version ${{ env.VERSION }} --verbose
+        pupnet --runtime linux-x64 --kind flatpak --build Release --app-version ${{ env.VERSION }} --verbose
+        pupnet --runtime linux-arm64 --kind appimage --build Release --app-version ${{ env.VERSION }} --verbose
+        pupnet --runtime linux-arm64 --kind deb --build Release --app-version ${{ env.VERSION }} --verbose
+        # pupnet --runtime linux-arm64 --kind rpm --build Release --app-version ${{ env.VERSION }} --verbose
+        pupnet --runtime linux-arm64 --kind flatpak --build Release --app-version ${{ env.VERSION }} --verbose
+    - name: "List all files"
+      run: |
+        echo $PWD
+        ls -R
+        # no need to rename, pupnet names things according to conventions
+        # no need to delete/create release here, it was resolved in "release" job
+    - name: Upload
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        # gh release upload "${{ env.VERSION }}" "./pupnet/out/*" --clobber
 
-          gh release upload "${{ env.VERSION }}" ./pupnet/out/bookmark-dlp-${{ env.VERSION }}-1.aarch64.flatpak --clobber         
-          gh release upload "${{ env.VERSION }}" ./pupnet/out/bookmark-dlp-${{ env.VERSION }}-1.x86_64.flatpak --clobber
+        gh release upload "${{ env.VERSION }}" ./pupnet/out/bookmark-dlp-${{ env.VERSION }}-1.aarch64.flatpak --clobber         
+        gh release upload "${{ env.VERSION }}" ./pupnet/out/bookmark-dlp-${{ env.VERSION }}-1.x86_64.flatpak --clobber
 
-          gh release upload "${{ env.VERSION }}" ./pupnet/out/bookmark-dlp-${{ env.VERSION }}-1.x86_64.AppImage --clobber
+        gh release upload "${{ env.VERSION }}" ./pupnet/out/bookmark-dlp-${{ env.VERSION }}-1.x86_64.AppImage --clobber
 
-          gh release upload "${{ env.VERSION }}" ./pupnet/out/bookmark-dlp_${{ env.VERSION }}-1.x86_64.rpm --clobber
+        gh release upload "${{ env.VERSION }}" ./pupnet/out/bookmark-dlp_${{ env.VERSION }}-1.x86_64.rpm --clobber
 
-          gh release upload "${{ env.VERSION }}" ./pupnet/out/bookmark-dlp_${{ env.VERSION }}-1_amd64.deb --clobber
-          gh release upload "${{ env.VERSION }}" ./pupnet/out/bookmark-dlp_${{ env.VERSION }}-1_arm64.deb --clobber
-            
+        gh release upload "${{ env.VERSION }}" ./pupnet/out/bookmark-dlp_${{ env.VERSION }}-1_amd64.deb --clobber
+        gh release upload "${{ env.VERSION }}" ./pupnet/out/bookmark-dlp_${{ env.VERSION }}-1_arm64.deb --clobber
+          
   
     
     #comments  https://github.com/seerge/g-helper/blob/main/.github/workflows/release.yml
