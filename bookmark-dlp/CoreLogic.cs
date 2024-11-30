@@ -7,7 +7,8 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using Microsoft.Data.Sqlite;
 using CommandLine;
-
+using NfLogger;
+using Nfbookmark;
 
 namespace bookmark_dlp
 {

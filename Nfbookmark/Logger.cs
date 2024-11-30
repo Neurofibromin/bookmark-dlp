@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 
-namespace bookmark_dlp
+namespace NfLogger
 {
     /// <summary>
     /// Used for logging to console or optionally to files.

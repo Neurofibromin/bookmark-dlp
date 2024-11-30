@@ -23,7 +23,8 @@ using System.Threading.Tasks;
 using System.Threading;
 using System;
 using bookmark_dlp.Models;
-
+using NfLogger;
+using Nfbookmark;
 
 namespace bookmark_dlp.ViewModels
 {

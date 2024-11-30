@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using System.Text.Json;
+using NfLogger;
 
 namespace bookmark_dlp.Models
 {

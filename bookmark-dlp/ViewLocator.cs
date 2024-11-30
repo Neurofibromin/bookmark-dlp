@@ -1,6 +1,7 @@
 using Avalonia.Controls;
 using Avalonia.Controls.Templates;
 using bookmark_dlp.ViewModels;
+using NfLogger;
 
 namespace bookmark_dlp
 {

@@ -11,6 +11,7 @@ using System.Text.Json.Serialization;
 using System.Text.Json;
 using System.Threading.Channels;
 using System.Collections.ObjectModel;
+using NfLogger;
 
 internal class AutoImport
 {

@@ -2,9 +2,10 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using bookmark_dlp;
+using NfLogger;
 
-
-namespace bookmark_dlp
+namespace Nfbookmark
 {
     /// <summary>
     /// Contains functions relating to the management of bookmark folders and logging

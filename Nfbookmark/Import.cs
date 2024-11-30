@@ -2,12 +2,13 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text.Json.Serialization;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Microsoft.Data.Sqlite;
+using bookmark_dlp;
+using NfLogger;
 
-namespace bookmark_dlp
+namespace Nfbookmark
 {
     /// <summary>
     /// Contains all functions relating to importing from browsers and files

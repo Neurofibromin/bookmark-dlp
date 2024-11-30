@@ -1,4 +1,5 @@
 ﻿using CommandLine;
+using NfLogger;
 
 class CommandLineOptions()
 {

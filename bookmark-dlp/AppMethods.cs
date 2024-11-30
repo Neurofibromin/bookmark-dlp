@@ -3,6 +3,7 @@ using Microsoft.Data.Sqlite;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using NfLogger;
 
 internal class AppMethods
 {
