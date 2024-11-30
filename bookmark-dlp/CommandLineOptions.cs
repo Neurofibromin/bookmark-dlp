@@ -1,6 +1,9 @@
 ﻿using CommandLine;
 using NfLogger;
 
+/// <summary>
+/// Parsing of command line options, using an external library.
+/// </summary>
 class CommandLineOptions()
 {
     [Option('s', "sourcehtml", Required = false, HelpText = "Input html file containing bookmarks.")]

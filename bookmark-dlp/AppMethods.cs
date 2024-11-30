@@ -64,7 +64,12 @@ internal class AppMethods
         }
     }
 
-
+    /// <summary>
+    /// Finds yt-dlp binary. Checks multiple places. More details in project Readme.
+    /// </summary>
+    /// <param name="rootdir">The rootdir where bookmark-dlp is called from.</param>
+    /// <returns>String containing the yt-dlp binary filepath.</returns>
+    /// <exception cref="Exception">yt-dlp is not installed! Cannot proceed.</exception>
     public static string Yt_dlp_pathfinder(string rootdir)
     {
         string ytdlp_path = ""; //checks is yt-dlp binary is present in root or if it is on path, returns ytdlp_path so it can be written into the script files
@@ -78,6 +83,8 @@ internal class AppMethods
             else
             {
                 //Console.WriteLine(Path.Combine(rootdir, "yt-dlp.exe") + " not found, searching PATH.");
+                //TODO: Windows path check for yt-dlp
+                // maybe already works? test.
                 try
                 {
                     Process proc = new Process();
@@ -93,8 +100,9 @@ internal class AppMethods
                     {
                         // 2 => "The system cannot find the FILE specified."
                         // 3 => "The system cannot find the PATH specified."
-                        // throw new Exception($"yt-dlp not found in path or in rootdir, install it before continuing.");
-                        return null;
+                        Logger.LogVerbose("yt-dlp not installed!", Logger.Verbosity.Critical);
+                        throw new Exception($"yt-dlp not found in path or in rootdir, install it before continuing.");
+                        //return null;
                     }
                     else
                     {
@@ -146,6 +154,7 @@ internal class AppMethods
                 // Console.WriteLine("Error: " + error);
                 if (result.Contains("which"))
                 {
+                    Logger.LogVerbose("yt-dlp not installed!", Logger.Verbosity.Critical);
                     throw new Exception($"yt-dlp not found in path or in rootdir, install it before continuing.");
                 }
                 else //yt-dlp is on the path
@@ -172,7 +181,7 @@ internal class AppMethods
             }
             if (ytdlp_path == "")
             {
-                // TODO
+                // TODO check OSX path for yt-dlp
                 /*Console.WriteLine(Path.Combine(rootdir, "yt-dlp") + " not found, searching PATH.");
                 Console.WriteLine("Is it on the path? Y/N");
                 if (Console.ReadLine().Contains("Y")) { ytdlp_path = "yt-dlp"; }
@@ -183,6 +192,11 @@ internal class AppMethods
         return ytdlp_path;
     }
 
+    /// <summary>
+    /// Creates the scripts in every filesystem folder where they are necessary. Operating system aware.
+    /// </summary>
+    /// <param name="folders">The bookmark folder structure, where every bookmark folder already has the folderpath field filled with the correct filesystem folder path.</param>
+    /// <param name="ytdlp_path">Path to the yt-dlp binary which will be called by the scripts.</param>
     public static void Scriptwriter(List<Folderclass> folders, string ytdlp_path)
     {
         string extensionforscript = ""; //writing scripts
@@ -297,6 +311,10 @@ internal class AppMethods
         }
     }
 
+    /// <summary>
+    /// Executes the batch or bash scripts in every folder. The scripts had to be written before (by Scriptwriter()) and the Folderclass folderpaths must be correct.
+    /// </summary>
+    /// <param name="folders">List containing all the bookmark folders, their folderpath has the filesystem path to the folder representing them.</param>
     public static void Runningthescripts(List<Folderclass> folders)
     {
         if (Logger.verbosity >= Logger.Verbosity.Info)
@@ -406,6 +424,10 @@ internal class AppMethods
         }
     }
 
+    /// <summary>
+    /// Asks user if they want playlists, shorts and channels downloaded.
+    /// </summary>
+    /// <returns>Want (downloadPlaylists, downloadShorts, downloadChannels) in this order.</returns>
     public static (bool, bool, bool) Wantcomplex()
     {
         Logger.LogVerbose("Do you want to write and download not video links? (eg. playlists and channels. by default: no)");
@@ -429,6 +451,10 @@ internal class AppMethods
         return (downloadPlaylists, downloadShorts, downloadChannels);
     }
 
+    /// <summary>
+    /// Finds config file for bookmark-dlp. Searches multiple locations, more details in project Readme. 
+    /// </summary>
+    /// <returns>Found config path or NULL, if config not found.</returns>
     public static string? ConfigFileLocation()
     {
         string configpath_local = Path.Combine(Directory.GetCurrentDirectory(), "bookmark-dlp.conf");

@@ -12,6 +12,9 @@ using Nfbookmark;
 
 namespace bookmark_dlp
 {
+    /// <summary>
+    /// Command line version of the program.
+    /// </summary>
     public class CoreLogic
     {
         public static void CoreLogicMain(string[] args)
