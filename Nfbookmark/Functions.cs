@@ -129,7 +129,7 @@ namespace bookmark_dlp
                     if (folder.name.Contains(ch))
                     {
                         string newfoldername = folder.name.Replace(ch, string.Empty);
-                        Logger.LogVerbose($"foldername {folder.name} contained illegal character {ch}. New name:{newfoldername}", Logger.Verbosity.warning);
+                        Logger.LogVerbose($"foldername {folder.name} contained illegal character {ch}. New name:{newfoldername}", Logger.Verbosity.Warning);
                         folder.name = newfoldername;
                     }
                 }
@@ -137,19 +137,19 @@ namespace bookmark_dlp
                 {
                     // name is only made up of spaces and .
                     string newfoldername = $"ID{folder.id}";
-                    Logger.LogVerbose($"foldername {folder.name} contained only spaces and periods. New name:{newfoldername}", Logger.Verbosity.warning);
+                    Logger.LogVerbose($"foldername {folder.name} contained only spaces and periods. New name:{newfoldername}", Logger.Verbosity.Warning);
                     folder.name = newfoldername;
                 }
                 if (folder.name.StartsWith("."))
                 {
                     string newfoldername = $"ID{folder.id}";
-                    Logger.LogVerbose($"foldername {folder.name} started with period. New name:{newfoldername}", Logger.Verbosity.warning);
+                    Logger.LogVerbose($"foldername {folder.name} started with period. New name:{newfoldername}", Logger.Verbosity.Warning);
                     folder.name = newfoldername;
                 }
                 if (String.IsNullOrWhiteSpace(folder.name))
                 {
                     string newfoldername = $"ID{folder.id}";
-                    Logger.LogVerbose($"foldername {folder.name} contained only spaces. New name:{newfoldername}", Logger.Verbosity.warning);
+                    Logger.LogVerbose($"foldername {folder.name} contained only spaces. New name:{newfoldername}", Logger.Verbosity.Warning);
                     folder.name = newfoldername;
                 }
             }

@@ -52,11 +52,11 @@ namespace bookmark_dlp
             Bookmark bookmark_bar;
             Bookmark other;
             Bookmark synced;
-            Logger.LogVerbose("Autoimport intake start", Logger.Verbosity.info);
+            Logger.LogVerbose("Autoimport intake start", Logger.Verbosity.Info);
             try { text = File.ReadAllText(filePath); }
-            catch (FileLoadException ex) { Logger.LogVerbose($"Json file could not be accessed: {ex.Message}", Logger.Verbosity.error); return null; }
-            catch (FileNotFoundException ex) { Logger.LogVerbose($"Json file could not found: {ex.Message}", Logger.Verbosity.error); return null; }
-            catch (IOException ex) { Logger.LogVerbose($"Json file IOException: {ex.Message}", Logger.Verbosity.error); return null; }
+            catch (FileLoadException ex) { Logger.LogVerbose($"Json file could not be accessed: {ex.Message}", Logger.Verbosity.Error); return null; }
+            catch (FileNotFoundException ex) { Logger.LogVerbose($"Json file could not found: {ex.Message}", Logger.Verbosity.Error); return null; }
+            catch (IOException ex) { Logger.LogVerbose($"Json file IOException: {ex.Message}", Logger.Verbosity.Error); return null; }
 
             try
             {
@@ -65,7 +65,7 @@ namespace bookmark_dlp
 
                 if (!doc.RootElement.TryGetProperty("roots", out roots_Element))
                 {
-                    Logger.LogVerbose("Invalid JSON: 'roots' property missing.", Logger.Verbosity.error);
+                    Logger.LogVerbose("Invalid JSON: 'roots' property missing.", Logger.Verbosity.Error);
                     return null;
                 }
 
@@ -77,7 +77,7 @@ namespace bookmark_dlp
                     !roots_Element.TryGetProperty("other", out other_Element) ||
                     !roots_Element.TryGetProperty("synced", out synced_Element))
                 {
-                    Logger.LogVerbose("Invalid JSON: Required bookmark properties are missing.", Logger.Verbosity.error);
+                    Logger.LogVerbose("Invalid JSON: Required bookmark properties are missing.", Logger.Verbosity.Error);
                     return null;
                 }
 
@@ -89,7 +89,7 @@ namespace bookmark_dlp
             }
             catch (Exception ex)
             {
-                Logger.LogVerbose($"Parsing the Json failed: {ex.Message}", Logger.Verbosity.error);
+                Logger.LogVerbose($"Parsing the Json failed: {ex.Message}", Logger.Verbosity.Error);
                 return null;
             }
 
@@ -382,7 +382,7 @@ namespace bookmark_dlp
                         }
                         else
                         {
-                            Logger.LogVerbose("This bookmark is not of type folder or url - undefined", Logger.Verbosity.error);
+                            Logger.LogVerbose("This bookmark is not of type folder or url - undefined", Logger.Verbosity.Error);
                         }
                         bookmarks.Add(thisone);
                     }
@@ -423,22 +423,22 @@ namespace bookmark_dlp
                 lineCount = File.ReadLines(filePath).Count(); //how many lines are there in the file - max number of bookmarks
                 inputarray = File.ReadAllLines(filePath); //read whole file into inputarray[] array
             }
-            catch (FileLoadException ex) { Logger.LogVerbose($"Html file could not be accessed: {ex.Message}", Logger.Verbosity.error); return null; }
-            catch (FileNotFoundException ex) { Logger.LogVerbose($"Html file could not found: {ex.Message}", Logger.Verbosity.error); return null; }
-            catch (IOException ex) { Logger.LogVerbose($"Html file IOException: {ex.Message}", Logger.Verbosity.error); return null; }
+            catch (FileLoadException ex) { Logger.LogVerbose($"Html file could not be accessed: {ex.Message}", Logger.Verbosity.Error); return null; }
+            catch (FileNotFoundException ex) { Logger.LogVerbose($"Html file could not found: {ex.Message}", Logger.Verbosity.Error); return null; }
+            catch (IOException ex) { Logger.LogVerbose($"Html file IOException: {ex.Message}", Logger.Verbosity.Error); return null; }
 
             if (inputarray[2].Substring(0,3) == "   ")
             {
-                Logger.LogVerbose($"The html file {filePath} appears to be an exported one", Logger.Verbosity.info);
+                Logger.LogVerbose($"The html file {filePath} appears to be an exported one", Logger.Verbosity.Info);
                 return HtmlExportIntake(filePath);
             }
             else
             {
-                Logger.LogVerbose($"The html file {filePath} appears to be a takeout one", Logger.Verbosity.info);
+                Logger.LogVerbose($"The html file {filePath} appears to be a takeout one", Logger.Verbosity.Info);
             }
 
-            Logger.LogVerbose(inputarray.Length + "/" + lineCount + " lines were read.", Logger.Verbosity.debug);
-            Logger.LogVerbose("The intake has finished!", Logger.Verbosity.debug);
+            Logger.LogVerbose(inputarray.Length + "/" + lineCount + " lines were read.", Logger.Verbosity.Debug);
+            Logger.LogVerbose("The intake has finished!", Logger.Verbosity.Debug);
 
             /*//Creating the folders[] object array and initialize all its elements, notice that the max number of folders equals the number of lines
             Folderclass[] folders = new Folderclass[lineCount];
@@ -468,7 +468,7 @@ namespace bookmark_dlp
                     }
                 }
             }
-            Logger.LogVerbose(folders.Count + " folders were found in the bookmarks", Logger.Verbosity.debug);
+            Logger.LogVerbose(folders.Count + " folders were found in the bookmarks", Logger.Verbosity.Debug);
 
             // Finding the end of the folders (</DL><p>) and adding the line number to the object array (folders[].endingline)
             // Counting the lines from the start while the folders from the back, so even in folders embedded into folders the endingline will be correct
@@ -532,7 +532,7 @@ namespace bookmark_dlp
                 }
                 else
                 {
-                    Logger.LogVerbose($"Folder {folders[k].name} with id {folders[k].id} has less than 2 lines. Start {folders[k].startline} end {folders[k].endingline}", Logger.Verbosity.warning);
+                    Logger.LogVerbose($"Folder {folders[k].name} with id {folders[k].id} has less than 2 lines. Start {folders[k].startline} end {folders[k].endingline}", Logger.Verbosity.Warning);
                 }
             }
             return folders;
@@ -555,9 +555,9 @@ namespace bookmark_dlp
                 lineCount = File.ReadLines(filePath).Count(); //how many lines are there in the file - max number of bookmarks
                 inputarray = File.ReadAllLines(filePath); //read whole file into inputarray[] array
             }
-            catch (FileLoadException ex) { Logger.LogVerbose($"Html file could not be accessed: {ex.Message}", Logger.Verbosity.error); return null; }
-            catch (FileNotFoundException ex) { Logger.LogVerbose($"Html file could not found: {ex.Message}", Logger.Verbosity.error); return null; }
-            catch (IOException ex) { Logger.LogVerbose($"Html file IOException: {ex.Message}", Logger.Verbosity.error); return null; }
+            catch (FileLoadException ex) { Logger.LogVerbose($"Html file could not be accessed: {ex.Message}", Logger.Verbosity.Error); return null; }
+            catch (FileNotFoundException ex) { Logger.LogVerbose($"Html file could not found: {ex.Message}", Logger.Verbosity.Error); return null; }
+            catch (IOException ex) { Logger.LogVerbose($"Html file IOException: {ex.Message}", Logger.Verbosity.Error); return null; }
 
             List<Folderclass> folders = new List<Folderclass>();
 
@@ -580,7 +580,7 @@ namespace bookmark_dlp
                     }
                 }
             }
-            Logger.LogVerbose(folders.Count + " folders were found in the bookmarks", Logger.Verbosity.debug);
+            Logger.LogVerbose(folders.Count + " folders were found in the bookmarks", Logger.Verbosity.Debug);
 
             // Finding the end of the folders (</DL><p>) and adding the line number to the object array (folders[].endingline)
             // Counting the lines from the start while the folders from the back, so even in folders embedded into folders the endingline will be correct
@@ -644,7 +644,7 @@ namespace bookmark_dlp
                 }
                 else
                 {
-                    Logger.LogVerbose($"Folder {folders[k].name} with id {folders[k].id} has less than 2 lines. Start {folders[k].startline} end {folders[k].endingline}", Logger.Verbosity.warning);
+                    Logger.LogVerbose($"Folder {folders[k].name} with id {folders[k].id} has less than 2 lines. Start {folders[k].startline} end {folders[k].endingline}", Logger.Verbosity.Warning);
                 }
             }
             return folders;

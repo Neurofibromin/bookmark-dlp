@@ -150,7 +150,7 @@ namespace bookmark_dlp
                 }
                 catch (Exception)
                 {
-                    Logger.LogVerbose("Wrong input", Logger.Verbosity.error);
+                    Logger.LogVerbose("Wrong input", Logger.Verbosity.Error);
                     continue;
                 }
             }
@@ -166,7 +166,7 @@ namespace bookmark_dlp
         /// <returns>Browserlocations object that has foundfiles and linksfound filled. If no profiles are found then the BrowserLocations object is returned as it was.</returns>
         private static BrowserLocations BrowserCheck(BrowserLocations browser)
         {
-            Logger.LogVerbose("Checking browser locations for " + browser.browsername, Logger.Verbosity.debug);
+            Logger.LogVerbose("Checking browser locations for " + browser.browsername, Logger.Verbosity.Debug);
             if (browser.browserType != BrowserType.chromiumbased) { return firefoxBrowserCheck(browser); }
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {

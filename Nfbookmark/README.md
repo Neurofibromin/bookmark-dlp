@@ -39,7 +39,7 @@ using System;
 using bookmark_dlp;
 
 //set verbosity
-bookmark_dlp.Logger.verbostiy = Logger.Verbosity.Warning;
+bookmark_dlp.Logger.verbosity = Logger.Verbosity.Warning;
 //get list of places where browser might be installed
 List<BrowserLocations> maybeLocations = Import.GetBrowserLocations();
 //get list of places where browsers are actually installed
