@@ -124,8 +124,8 @@ namespace bookmark_dlp
         public static string QueryChosenBookmarksFile(List<BrowserLocations> browserLocations)
         {
             if (browserLocations.Count == 0) { return null; }
-            string filePath;
-            List<string> filepaths = new List<string>();
+            string chosenFilePath;
+            List<string> possibleFilePaths = new List<string>();
             Logger.LogVerbose("Which browser bookmarks would you like to use?\nWrite the number");
             int m = 1;
             foreach (BrowserLocations browser in browserLocations)
@@ -133,7 +133,7 @@ namespace bookmark_dlp
                 foreach (string path in browser.foundProfiles)
                 {
                     Logger.LogVerbose(m + ". path: " + path);
-                    filepaths.Add(path);
+                    possibleFilePaths.Add(path);
                     m++;
                 }
             }
@@ -154,15 +154,15 @@ namespace bookmark_dlp
                     continue;
                 }
             }
-            filePath = filepaths.ElementAt(chosenindexInt - 1);
-            Logger.LogVerbose("Chosen path: " + filePath);
-            return filePath;
+            chosenFilePath = possibleFilePaths.ElementAt(chosenindexInt - 1);
+            Logger.LogVerbose("Chosen path: " + chosenFilePath);
+            return chosenFilePath;
         }
 
         /// <summary>
         /// Checks for existing profiles in the default places for a browser. Supports GNU/Linux, OSX, Windows.
         /// </summary>
-        /// <param name="browser"></param>
+        /// <param name="browser">The browser to be examined for profile folders. Expects BroserLocations object with profilespaths filled in already.</param>
         /// <returns>Browserlocations object that has foundfiles and linksfound filled. If no profiles are found then the BrowserLocations object is returned as it was.</returns>
         private static BrowserLocations BrowserCheck(BrowserLocations browser)
         {

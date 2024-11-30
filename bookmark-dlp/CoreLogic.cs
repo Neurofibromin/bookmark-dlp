@@ -16,7 +16,7 @@ namespace bookmark_dlp
         public static void CoreLogicMain(string[] args)
         {
 #if DEBUG
-            Logger.verbosity = Logger.Verbosity.critical;
+            Logger.verbosity = Logger.Verbosity.Critical;
             // Functions.PrintToConsole(Import.SmartImport(Import.GetBrowserBookmarkFilesPaths()[0].foundProfiles[0]));
             Console.WriteLine("starting");
             Functions.PrintToConsole(Import.SmartImport("test1.html"));
@@ -46,7 +46,7 @@ namespace bookmark_dlp
                 ///    Interactive
                 ///======
                 ///
-                Logger.verbosity = Logger.Verbosity.debug;
+                Logger.verbosity = Logger.Verbosity.Debug;
                 bool downloadPlaylists = false;
                 bool downloadShorts = false;
                 bool downloadChannels = false;
@@ -112,7 +112,7 @@ namespace bookmark_dlp
                         if (String.IsNullOrEmpty(readOutputFolder)) { setOptions.Outputfolder = rootdir; break; }
                         if (Directory.Exists(readOutputFolder)) { setOptions.Outputfolder = readOutputFolder; break; }
                         try { Directory.CreateDirectory(readOutputFolder); }
-                        catch { Logger.LogVerbose($"Could not create directory {readOutputFolder}.", Logger.Verbosity.error); }
+                        catch { Logger.LogVerbose($"Could not create directory {readOutputFolder}.", Logger.Verbosity.Error); }
                     }
                 }
 
@@ -123,7 +123,7 @@ namespace bookmark_dlp
                     while (true)
                     {
                         Logger.LogVerbose("yt-dlp not found, add path now? Y/N");
-                        if (Console.ReadKey().ToString().ToLower().Equals("n")) { Logger.LogVerbose("Cannnot continue", Logger.Verbosity.error); Environment.Exit(2); }
+                        if (Console.ReadKey().ToString().ToLower().Equals("n")) { Logger.LogVerbose("Cannnot continue", Logger.Verbosity.Error); Environment.Exit(2); }
                         Logger.LogVerbose("Choose path. e.g.: /usr/bin/yt-dlp");
                         string readYtdlpPath = Console.ReadLine();
                         if (Directory.Exists(readYtdlpPath)) { ytdlp_path = readYtdlpPath; }
@@ -140,9 +140,9 @@ namespace bookmark_dlp
                     // Intake for both html and sql and json
                     folders = Import.SmartImport(filePath);
                 }
-                else { Logger.LogVerbose("No source file!", Logger.Verbosity.error); Environment.Exit(1); }
+                else { Logger.LogVerbose("No source file!", Logger.Verbosity.Error); Environment.Exit(1); }
                 //now import is finished
-                Logger.LogVerbose("Import finished", Logger.Verbosity.info);
+                Logger.LogVerbose("Import finished", Logger.Verbosity.Info);
 
                 int deepestdepth = 0; //Finding the deepest folder depth
                 for (int q = 0; q < folders.Count; q++)
@@ -175,8 +175,8 @@ namespace bookmark_dlp
                 ///======
                 ///
 
-                Logger.LogVerbose("Non-Interactive CLI session", Logger.Verbosity.info);
-                Logger.verbosity = Logger.Verbosity.warning;
+                Logger.LogVerbose("Non-Interactive CLI session", Logger.Verbosity.Info);
+                Logger.verbosity = Logger.Verbosity.Warning;
 
                 bool downloadPlaylists = setOptions.DownloadPlaylists;
                 bool downloadShorts = setOptions.DownloadShorts;
@@ -188,11 +188,11 @@ namespace bookmark_dlp
                 if (setOptions.HtmlFileLocation != null) { localhtml = setOptions.HtmlFileLocation; }
                 string ytdlp_path = AppMethods.Yt_dlp_pathfinder(rootdir);
                 if (String.IsNullOrEmpty(ytdlp_path)) { ytdlp_path = AppMethods.Yt_dlp_pathfinder(setOptions.Outputfolder); }
-                if (String.IsNullOrEmpty(ytdlp_path)) { Logger.LogVerbose("yt-dlp not found", Logger.Verbosity.error); Environment.Exit(1); }
+                if (String.IsNullOrEmpty(ytdlp_path)) { Logger.LogVerbose("yt-dlp not found", Logger.Verbosity.Error); Environment.Exit(1); }
 
                 if (File.Exists(localhtml))
                 {
-                    Logger.LogVerbose($"{localhtml} is the html import file", Logger.Verbosity.info);
+                    Logger.LogVerbose($"{localhtml} is the html import file", Logger.Verbosity.Info);
                     importSourceFound = true;
                     ishtml = true;
                 }
@@ -215,7 +215,7 @@ namespace bookmark_dlp
                 }
                 else { throw new FileNotFoundException("No source file!"); }
                 //now import is finished
-                Logger.LogVerbose("Import finished", Logger.Verbosity.debug);
+                Logger.LogVerbose("Import finished", Logger.Verbosity.Debug);
 
                 int deepestdepth = 0; //Finding the deepest folder depth
                 for (int q = 0; q < folders.Count; q++)
@@ -270,7 +270,7 @@ namespace bookmark_dlp
                     }
                     catch (Exception)
                     {
-                        Logger.LogVerbose("Could not create directory: " + options.Outputfolder, Logger.Verbosity.error);
+                        Logger.LogVerbose("Could not create directory: " + options.Outputfolder, Logger.Verbosity.Error);
                         return 1;
                     }
                 }

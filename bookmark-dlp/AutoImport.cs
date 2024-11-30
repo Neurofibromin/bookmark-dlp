@@ -140,7 +140,7 @@ internal class AutoImport
             if (new FileInfo(Path.Combine(folders[j].folderpath, folders[j].name + ".txt")).Length == 0) //if the txt remained empty it is deleted
             {
                 File.Delete(Path.Combine(folders[j].folderpath, folders[j].name + ".txt"));
-                Logger.LogVerbose($"Deleted txt of {folders[j].name}", Logger.Verbosity.trace);
+                Logger.LogVerbose($"Deleted txt of {folders[j].name}", Logger.Verbosity.Trace);
             }
             /*if (!wantcomplex)
             {
@@ -149,7 +149,7 @@ internal class AutoImport
         }
         temp.Flush();
         temp.Close();
-        Logger.LogVerbose("Total number of youtube links found: " + totalyoutubelinknumber, Logger.Verbosity.info);
+        Logger.LogVerbose("Total number of youtube links found: " + totalyoutubelinknumber, Logger.Verbosity.Info);
         return totalyoutubelinknumber;
     }
 

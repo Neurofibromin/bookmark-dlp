@@ -32,7 +32,7 @@ internal class AppMethods
                         bool contains = Directory.EnumerateFiles(Directory.GetCurrentDirectory()).Any(f => f.Contains(youtubeid));
                         if (!contains)
                         {
-                            Logger.LogVerbose($"{youtubeid} in folder: {folder.name} not found.", Logger.Verbosity.warning);
+                            Logger.LogVerbose($"{youtubeid} in folder: {folder.name} not found.", Logger.Verbosity.Warning);
                             notfoundbookmarks.Add(new Bookmark() { url = link });
                         }
                     }
@@ -49,14 +49,14 @@ internal class AppMethods
                             bool contains = Directory.EnumerateFiles(Directory.GetCurrentDirectory()).Any(f => f.Contains(youtubeid));
                             if (!contains)
                             {
-                                Logger.LogVerbose($"{youtubeid} in folder: {folder.name} not found, despite it being present in archive.txt.", Logger.Verbosity.warning);
+                                Logger.LogVerbose($"{youtubeid} in folder: {folder.name} not found, despite it being present in archive.txt.", Logger.Verbosity.Warning);
                                 notfoundbookmarks.Add(new Bookmark() { url = link });
                             }
                         }
                     }
                     checkspassed++;
                 }
-                if (checkspassed == 0) { Logger.LogVerbose($"No checks for directory content passed for {folder.name}.", Logger.Verbosity.warning); }
+                if (checkspassed == 0) { Logger.LogVerbose($"No checks for directory content passed for {folder.name}.", Logger.Verbosity.Warning); }
                 folder.numberofmissinglinks = notfoundbookmarks.Distinct().Count();
                 Logger.LogVerbose($"Number of missing links in directory {folder.name}: {folder.numberofmissinglinks}");
             }
@@ -199,9 +199,9 @@ internal class AppMethods
                     writer1.Flush();
                     writer1.Close();
                 }
-                Logger.LogVerbose(q + "/" + folders.Count + " folder bat file writing finished.", Logger.Verbosity.trace);
+                Logger.LogVerbose(q + "/" + folders.Count + " folder bat file writing finished.", Logger.Verbosity.Trace);
             }
-            Logger.LogVerbose(folders.Count + " folder bat file writing finished.", Logger.Verbosity.info);
+            Logger.LogVerbose(folders.Count + " folder bat file writing finished.", Logger.Verbosity.Info);
         }
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
         {
@@ -217,9 +217,9 @@ internal class AppMethods
                     writer1.Flush();
                     writer1.Close();
                 }
-                Logger.LogVerbose(q + "/" + folders.Count + " folder sh file writing finished.", Logger.Verbosity.trace);
+                Logger.LogVerbose(q + "/" + folders.Count + " folder sh file writing finished.", Logger.Verbosity.Trace);
             }
-            Logger.LogVerbose(folders.Count + " folder sh file writing finished", Logger.Verbosity.info);
+            Logger.LogVerbose(folders.Count + " folder sh file writing finished", Logger.Verbosity.Info);
         }
         if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
         {
@@ -235,11 +235,11 @@ internal class AppMethods
                     writer1.Flush();
                     writer1.Close();
                 }
-                Logger.LogVerbose(q + "/" + folders.Count + " folder sh file writing finished.", Logger.Verbosity.trace);
+                Logger.LogVerbose(q + "/" + folders.Count + " folder sh file writing finished.", Logger.Verbosity.Trace);
             }
-            Logger.LogVerbose(folders.Count + " folder sh file writing finished", Logger.Verbosity.info);
+            Logger.LogVerbose(folders.Count + " folder sh file writing finished", Logger.Verbosity.Info);
         }
-        if (Logger.verbosity >= Logger.Verbosity.info)
+        if (Logger.verbosity >= Logger.Verbosity.Info)
         {
             Logger.LogVerbose("Waiting for enter to confirm");
             Console.Read();
@@ -288,8 +288,8 @@ internal class AppMethods
                 }
             }
         }
-        Logger.LogVerbose("Empty folders deleted", Logger.Verbosity.info);
-        if (Logger.verbosity >= Logger.Verbosity.info)
+        Logger.LogVerbose("Empty folders deleted", Logger.Verbosity.Info);
+        if (Logger.verbosity >= Logger.Verbosity.Info)
         {
             Logger.LogVerbose("Waiting for enter to confirm");
             Console.Read();
@@ -298,9 +298,9 @@ internal class AppMethods
 
     public static void Runningthescripts(List<Folderclass> folders)
     {
-        if (Logger.verbosity >= Logger.Verbosity.info)
+        if (Logger.verbosity >= Logger.Verbosity.Info)
         {
-            Logger.LogVerbose("Running the scripts, press enter to confirm.", Logger.Verbosity.info);
+            Logger.LogVerbose("Running the scripts, press enter to confirm.", Logger.Verbosity.Info);
             Console.Read();
         }
         string extensionforscript = ""; //writing scripts
@@ -413,7 +413,7 @@ internal class AppMethods
         bool downloadPlaylists = false;
         bool downloadShorts = false;
         bool downloadChannels = false;
-        if (Logger.verbosity >= Logger.Verbosity.info)
+        if (Logger.verbosity >= Logger.Verbosity.Info)
         {
             if (Console.ReadKey().ToString().ToLower().Equals("y"))
             {

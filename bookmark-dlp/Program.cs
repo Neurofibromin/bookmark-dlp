@@ -15,22 +15,22 @@ namespace bookmark_dlp
         {
 #if CLIMODE
 #if DEBUG
-            Logger.verbosity = Logger.Verbosity.trace;
+            Logger.verbosity = Logger.Verbosity.Trace;
             Logger.LogVerbose("Program started in DEBUG mode");
 #else
-            Logger.verbosity = Logger.Verbosity.warning;
+            Logger.verbosity = Logger.Verbosity.Warning;
 #endif
             AppMethods.programUI = AppMethods.ProgramUI.CLI;
             Logger.LogVerbose("Program started in CLI mode");
             CoreLogic.CoreLogicMain(args); }
 #else
 #if DEBUG
-            Logger.verbosity = Logger.Verbosity.trace;
+            Logger.verbosity = Logger.Verbosity.Trace;
             Logger.LogVerbose("Program started in DEBUG mode");
 #else
-            Logger.verbosity = Logger.Verbosity.warning;
+            Logger.verbosity = Logger.Verbosity.Warning;
 #endif
-            Logger.LogVerbose("Program started in GUI mode", Logger.Verbosity.debug);
+            Logger.LogVerbose("Program started in GUI mode", Logger.Verbosity.Debug);
             if (args.Length == 0)
             {
                 //
