@@ -25,10 +25,10 @@ namespace NfLogger
             /// </summary>
             Critical = 0,
             Error = 1,
-            /// <summary>
-            /// Default is warning
-            /// </summary>
             Warning = 2,
+            /// <summary>
+            /// Default is Info
+            /// </summary>
             Info = 3,
             Debug = 4,
             Trace = 5

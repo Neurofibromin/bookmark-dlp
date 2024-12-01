@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "bookmark-dlp", "bookmark-dl
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Nfbookmark", "Nfbookmark\Nfbookmark.csproj", "{7B4F79E4-7E8D-4B1F-9832-633752C71374}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nfbookmark.Tests", "Tests\Nfbookmark.Tests\Nfbookmark.Tests.csproj", "{3BB41101-B80A-43FE-A37A-18E4E3B9A059}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{7B4F79E4-7E8D-4B1F-9832-633752C71374}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7B4F79E4-7E8D-4B1F-9832-633752C71374}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7B4F79E4-7E8D-4B1F-9832-633752C71374}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3BB41101-B80A-43FE-A37A-18E4E3B9A059}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3BB41101-B80A-43FE-A37A-18E4E3B9A059}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3BB41101-B80A-43FE-A37A-18E4E3B9A059}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3BB41101-B80A-43FE-A37A-18E4E3B9A059}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

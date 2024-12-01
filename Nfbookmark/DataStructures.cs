@@ -12,8 +12,8 @@ namespace bookmark_dlp
         public List<Folderclass> folders = new List<Folderclass>();
         public int numberofurlbookmarks;
         public int numberofbookmarks;
-
-        Bookmarks() { numberofbookmarks = numberofurlbookmarks + folders.Count; }
+        
+        public Bookmarks() { numberofbookmarks = numberofurlbookmarks + folders.Count; }
     }
 
     /// <summary>

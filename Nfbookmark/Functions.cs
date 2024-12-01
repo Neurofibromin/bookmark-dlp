@@ -121,11 +121,11 @@ namespace Nfbookmark
         /// <param name="folders">The bookmark folders to operate on</param>
         public static void FoldernameValidation(ref List<Folderclass> folders)
         {
-            string[] forbiddencharacters = { "/", ":", "?", "<", ">", "*", "|" , "\\" , "\"" };
+            string[] forbiddenCharacters = {"/", ":", "?", "<", ">", "*", "|" , "\\" , "\""};
             // If name empty
             foreach (Folderclass folder in folders)
             {
-                foreach (string ch in forbiddencharacters)
+                foreach (string ch in forbiddenCharacters)
                 {
                     if (folder.name.Contains(ch))
                     {
@@ -154,15 +154,16 @@ namespace Nfbookmark
                     folder.name = newfoldername;
                 }
             }
-
-            int deepestdepth = 0; //Finding the deepest folder depth
-            for (int q = 0; q < folders.Count; q++)
-            {
-                if (deepestdepth < folders[q].depth)
-                {
-                    deepestdepth = folders[q].depth;
-                }
-            }
+            /* int deepestdepth = 0; //Finding the deepest folder depth
+               for (int q = 0; q < folders.Count; q++)
+               {
+                   if (deepestdepth < folders[q].depth)
+                   {
+                       deepestdepth = folders[q].depth;
+                   }
+               }
+             */
+            int deepestdepth = folders.Select(t => t.depth).Prepend(0).Max(); //Finding the deepest folder depth
             // If two folders have the same name and same depth and same parent
             for (int depth = 0; depth < deepestdepth + 1; depth++)
             {
@@ -170,7 +171,9 @@ namespace Nfbookmark
                 {
                     for (int j = 0; j < folders.Count; j++)
                     {
-                        if (folders[i].name.ToLower() == folders[j].name.ToLower() && folders[i].depth == folders[j].depth && folders[i].parent == folders[j].parent)
+                        if (string.Equals(folders[i].name, folders[j].name, StringComparison.CurrentCultureIgnoreCase) &&
+                            folders[i].depth == folders[j].depth &&
+                            folders[i].parent == folders[j].parent)
                         {
                             folders[j].name = folders[j].name + $"ID{folders[j].id}";
                             folders[i].name = folders[i].name + $"ID{folders[i].id}";
