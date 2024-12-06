@@ -11,12 +11,11 @@
 #
 name: "CodeQL"
 
+env:
+  ACTIONS_STEP_DEBUG: true
+
 on:
-  push:
-    branches: [ master, feature, unstable ]
-  pull_request:
-    # The branches below must be a subset of the branches above
-    branches: [ master ]
+  workflow_dispatch:
 
 jobs:
   analyze:

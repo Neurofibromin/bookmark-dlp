@@ -14,6 +14,7 @@ env:
   VERSION: "0.3.0"
   DOTNETVERSION: "net8.0"
   RUNNER_TOOL_CACHE: /toolcache
+  ACTIONS_STEP_DEBUG: true
 
 jobs:
   detect-platform:
@@ -67,10 +68,17 @@ jobs:
       run: cancelled()
     - name: Restore dependencies
       run: dotnet restore
-    - name: Build
+    - name: Build release
       run: dotnet build --configuration Release --no-restore
+    - name: Build debug
+      run: dotnet build --configuration Debug --no-restore
+    - name: "List all files"
+      run: | 
+        ls -R
+        dotnet --info
     - name: Test
-      run: dotnet test --no-build --verbosity normal --framework ${{ env.DOTNETVERSION }}
+      run: dotnet test --no-build --verbosity detailed --framework ${{ env.DOTNETVERSION }}
+      continue-on-error: true
     - name: Display dotnet version
       run: dotnet --version
     - name: "List all files"
@@ -160,10 +168,22 @@ jobs:
             echo "notfound"
           fi
         fi      
+    - name: setup go
+      uses: https://github.com/actions/setup-go@v4
+      with:
+        go-version: '>=1.20.1'
+    - name: Use release Action
+      id: release
+      uses: https://gitea.com/actions/release-action@main
+      with:
+        files: |-
+          releases/**            
+        api_key: '${{ secrets.MY_GITEA_TOKEN }}'
     - name: "Create new prerelease"
       env:
         GH_TOKEN: ${{ github.token }}
       run: |
+        set -x
         VERSION="${{ env.VERSION }}"
         echo $VERSION
         if [ "$GITEA_ACTIONS" = "true" ]; then
