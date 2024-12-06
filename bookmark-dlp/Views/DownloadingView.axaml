@@ -73,16 +73,31 @@
                 Background="Chartreuse"
                 BorderBrush="Gray"
                 BorderThickness="1"
+                ColumnWidth="auto"
                 CanUserReorderColumns="True"
                 CanUserResizeColumns="True"
                 CanUserSortColumns="False"
                 GridLinesVisibility="All"
                 IsReadOnly="False"
-                ItemsSource="{Binding FolderCollection}">
+                ItemsSource="{Binding FolderCollection}"
+                AutoGenerateColumns="False">
+                <DataGrid.Styles>
+                    <Style Selector="DataGridCell">
+                        <Setter Property="FontSize" Value="8" />
+                    </Style>
+                    <Style Selector="DataGridColumnHeader">
+                        <Setter Property="FontSize" Value="8" />
+                        <Setter Property="Margin" Value="0"/>
+                        <Setter Property="Padding" Value="0"/>
+                    </Style>
+                </DataGrid.Styles>
                 <DataGrid.Columns>
-                    <DataGridTextColumn Binding="{Binding Name}" Header="Folder Name" />
-                    <DataGridTextColumn Binding="{Binding Numberoflinks}" Header="Number of links" />
-                    <DataGridCheckBoxColumn Binding="{Binding Wantdownloaded}" Header="Want downloaded" />
+                    <DataGridTextColumn Binding="{Binding Name}" Header="Folder Name" Width="auto"/>
+                    <DataGridTextColumn Binding="{Binding Numberoflinks}" Header="Number of links" Width="*"/>
+                    <DataGridTextColumn Binding="{Binding Numberoflinks}" Header="Videos wanted" Width="*"/>
+                    <DataGridTextColumn Binding="{Binding Numberoflinks}" Header="Wanted videos found" Width="*"/>
+                    <DataGridTextColumn Binding="{Binding Numberoflinks}" Header="Other videos found" Width="*"/>
+                    <DataGridCheckBoxColumn Binding="{Binding Wantdownloaded}" Header="Want downloaded" Width="*"/>
                 </DataGrid.Columns>
             </DataGrid>
 
