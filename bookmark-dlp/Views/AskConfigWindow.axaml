@@ -35,7 +35,8 @@
                 Margin="7"
                 HorizontalAlignment="Center"
                 Command="{Binding ButtonCommand}"
-                CommandParameter="{Binding Content, RelativeSource={RelativeSource Self}}">
+                CommandParameter="{Binding Content, RelativeSource={RelativeSource Self}}"
+                ToolTip.Tip="The config file will be saved in the config files of the user. On Linux ~/.config on Windows Appdata/Local">
                 Appdata/local
             </Button>
             <Button
@@ -43,7 +44,8 @@
                 Margin="7"
                 HorizontalAlignment="Center"
                 Command="{Binding ButtonCommand}"
-                CommandParameter="{Binding Content, RelativeSource={RelativeSource Self}}">
+                CommandParameter="{Binding Content, RelativeSource={RelativeSource Self}}"
+                ToolTip.Tip="The config file will be saved in the current directory the program is started from.">
                 local dir
             </Button>
             <Button
@@ -51,7 +53,8 @@
                 Margin="7"
                 HorizontalAlignment="Center"
                 Command="{Binding ButtonCommand}"
-                CommandParameter="{Binding Content, RelativeSource={RelativeSource Self}}">
+                CommandParameter="{Binding Content, RelativeSource={RelativeSource Self}}"
+                ToolTip.Tip="No config file will be saved, prompt will appear at next program startup.">
                 No config
             </Button>
 

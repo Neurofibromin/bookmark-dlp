@@ -138,15 +138,15 @@ namespace bookmark_dlp
                     m++;
                 }
             }
-            string chosenindex;
+            
             int chosenindexInt;
             while (true)
             {
-                chosenindex = Console.ReadLine();
+                string chosenindex = Console.ReadLine();
                 try
                 {
-                    chosenindexInt = int.Parse(chosenindex);
-                    if (chosenindexInt < 1 || chosenindexInt >= m) { throw new Exception(); }
+                    chosenindexInt = int.Parse(chosenindex ?? throw new InvalidOperationException());
+                    if (chosenindexInt < 1 || chosenindexInt >= m) { throw new IndexOutOfRangeException(); }
                     else { break; }
                 }
                 catch (Exception)

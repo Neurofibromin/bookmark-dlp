@@ -10,6 +10,9 @@ using NfLogger;
 
 namespace bookmark_dlp.ViewModels
 {
+    /// <summary>
+    /// Separate window to ask the user where to save the config file for the bookmark-dlp application.
+    /// </summary>
     internal partial class AskConfigWindowViewModel : ViewModelBase
     {
 
@@ -27,7 +30,7 @@ namespace bookmark_dlp.ViewModels
 
         private readonly CancellationTokenSource _cts = new();
 
-        public CancellationToken CancellationToken => _cts.Token;
+        private CancellationToken CancellationToken => _cts.Token;
 
 
         public AsyncRelayCommand<string> ButtonCommand { get; }
@@ -49,7 +52,7 @@ namespace bookmark_dlp.ViewModels
             }
             catch (OperationCanceledException)
             {
-                // Handle cancellation
+                // Handle cancellation: nothing to do
             }
         }
 

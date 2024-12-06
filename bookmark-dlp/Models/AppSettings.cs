@@ -1,9 +1,14 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using System.Text;
+using CommunityToolkit.Mvvm.ComponentModel;
 using System.Text.Json;
 using NfLogger;
 
 namespace bookmark_dlp.Models
 {
+    /// <summary>
+    /// Stores a global AppSettings state. ViewModels build their own from the global state and return their changes to the global state.
+    /// Built from config file if present. Otherwise defaults are loaded.
+    /// </summary>
     public sealed class AppSettings
     {
         /// <summary>
@@ -65,23 +70,28 @@ namespace bookmark_dlp.Models
         public static void SaveToFile()
         {
             //if configloc already exists overwrite it, if not create it
-            string jsonstringexport = JsonSerializer.Serialize(_settings);
             if (configloc != null) //only save to file if a config file is present or was chosen
             {
+                string jsonstringexport = JsonSerializer.Serialize(_settings);
                 File.Delete(configloc);
-                StreamWriter write = new StreamWriter(configloc);
+                StreamWriter write = new StreamWriter(configloc, append:false, encoding:Encoding.UTF8);
                 write.Write(jsonstringexport);
                 write.Close();
             }
         }
 
-        //Finalizer
+        /// <summary>
+        /// Finalizer
+        /// </summary>
         ~AppSettings()
         {
             if(configloc != null){ SaveToFile(); } //only save to file if a config file is present or was chosen
-            
         }
         
+        /// <summary>
+        /// Gets JSON string representation of whole AppSettings state in current form. Used by ViewModels to build local Settings state.
+        /// </summary>
+        /// <returns>Json string of settings.</returns>
         public static string GetJsonStringRepresentation()
         {
             string a = JsonSerializer.Serialize(_settings);
