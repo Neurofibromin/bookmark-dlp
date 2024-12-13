@@ -15,11 +15,32 @@ namespace bookmark_dlp
         
         public Bookmarks() { numberofbookmarks = numberofurlbookmarks + folders.Count; }
     }
+    
+    public enum Linktype 
+    {
+        Video, //regular video, default
+        Channel_user, // if (linkthatisbeingexamined.Substring(24, 4) == "user")
+        Channel_channel, // if (linkthatisbeingexamined.Substring(24, 7) == "channel")
+        Channel_at, // if (linkthatisbeingexamined.Substring(24, 1) == "@")
+        Channel_c, // if (linkthatisbeingexamined.Substring(24, 2) == "c/")
+        Short, // if (linkthatisbeingexamined.Substring(24, 6) == "shorts")
+        Playlist,
+        Search // if (linkthatisbeingexamined.Substring(24, 7) == "results") //youtube search result was bookmarked
+    }
+
+    /// <summary>
+    /// Youtube links
+    /// </summary>
+    public struct YTLink
+    {
+        string url;
+        Linktype linktype;
+    }
 
     /// <summary>
     /// The main datatype used by the library, represents one bookmarks folder.
     /// </summary>
-    public class Folderclass //defining the folderclass class to create an object array from it
+    public class Folderclass //defining the folderclass class to create an object list from it
     {
         /// <summary>
         /// For HTML: the line number in which the folder starts in the html. <br/>
@@ -43,6 +64,7 @@ namespace bookmark_dlp
         /// List of all the URLs in the given folder. May be empty.
         /// </summary>
         public List<string> urls = new List<string>();
+        public List<YTLink> links = new List<YTLink>();
         public int id; //same as array index
         /// <summary>
         /// the id of the parent folder of current folder
@@ -52,7 +74,17 @@ namespace bookmark_dlp
         /// the id of children folders of current folder
         /// </summary>
         public List<int> children = new List<int>();
-
+        
+        /// <summary>
+        /// fields used by the observable class mostly
+        /// </summary>
+        public bool wantDownloaded = true;
+        public int numberOfVideosWanted;
+        public int numberOfWantedVideosFound;
+        public int numberOfOtherVideosFound;
+        public int numberOfAllVideosFound;
+        
+        
         public override string ToString()
         {
             return $"Name:{name}, id:{id}, depth:{depth}, number of urls:{urls.Count}";

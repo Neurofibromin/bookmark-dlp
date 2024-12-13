@@ -216,6 +216,30 @@ internal class AutoImport
         public static int numberoflinks;
         public static List<Folderclass> folderclasses = new List<Folderclass>();
     }*/
+    
+    /// <summary>
+    /// Searches for all wanted default videos (not playlists and channels) and
+    /// fills Folderclass fields for object.
+    /// The folderclass objects should already have their filesystem paths (folderpath) filled.
+    /// </summary>
+    /// <param name="folders">The list of folders that is being checked</param>
+    public void CheckCurrentFilesystemState(ref List<Folderclass> folders)
+    {
+        foreach (Folderclass folder in folders)
+        {
+            if (Directory.Exists(folder.folderpath))
+            { //todo: continue this
+                   
+            }
+            else
+            {
+                folder.numberofmissinglinks = folder.numberoflinks;
+                folder.numberOfWantedVideosFound = 0;
+                folder.numberOfOtherVideosFound = 0;
+                folder.numberOfAllVideosFound = 0;
+            }
+        }
+    }
 }
 
 
@@ -223,34 +247,46 @@ internal class AutoImport
 public partial class ObsFolderclass : ObservableObject
 {
     [ObservableProperty]
-    public int _startline; //for html: the line number in which the folder starts in the html. json(autoimport intake chrome): the folder id, same as the folder[totalyoutubelinknumber] index. firefox-sql: the bookmark id of the folder in the sql db
+    private int _startline; //for html: the line number in which the folder starts in the html. json(autoimport intake chrome): the folder id, same as the folder[totalyoutubelinknumber] index. firefox-sql: the bookmark id of the folder in the sql db
     [ObservableProperty]
-    public string _name;
+    private string _name;
     [ObservableProperty]
-    public int _depth;
+    private int _depth;
     [ObservableProperty]
-    public int _endingline;
+    private int _endingline;
     [ObservableProperty]
-    public string _folderpath;
+    private string _folderpath;
     [ObservableProperty]
-    public int _numberoflinks;
+    private int _numberoflinks;
     [ObservableProperty]
-    public int _numberofmissinglinks;
+    private int _numberofmissinglinks;
     [ObservableProperty]
-    public List<string> _urls = new List<string>();
+    private List<string> _urls;
     [ObservableProperty]
-    public int _id; //same as array index
+    private int _id; //same as array index
     [ObservableProperty]
-    public int _parent;
-
+    private int _parent;
+    [ObservableProperty]
+    private bool _wantDownloaded;
+    [ObservableProperty]
+    private int _numberOfVideosWanted;
+    [ObservableProperty]
+    private int _numberOfWantedVideosFound;
+    [ObservableProperty]
+    private int _numberOfOtherVideosFound;
+    [ObservableProperty]
+    private int _numberOfAllVideosFound;
+    
+    /// <summary>
+    /// From now on only members of the observable class
+    /// </summary>
     public ObservableCollection<ObsFolderclass> Children = new ObservableCollection<ObsFolderclass>();
-    [ObservableProperty]
-    public bool _wantdownloaded = true;
+    
 
-
+    // ReSharper disable once ConvertToPrimaryConstructor
     public ObsFolderclass(Folderclass other) 
     {
-        _startline = other.startline;
+        _startline =                    other.startline;
         _name = other.name;
         _depth = other.depth;
         _endingline = other.endingline;
@@ -261,5 +297,10 @@ public partial class ObsFolderclass : ObservableObject
         _id = other.id;
         _parent = other.parent;
         // children = new ObservableCollection<Folderclass>();
+        _wantDownloaded =                other.wantDownloaded;
+        _numberOfVideosWanted =          other.numberOfVideosWanted;
+        _numberOfWantedVideosFound =     other.numberOfWantedVideosFound;
+        _numberOfOtherVideosFound =      other.numberOfOtherVideosFound;
+        _numberOfAllVideosFound =        other.numberOfAllVideosFound;
     }
 }

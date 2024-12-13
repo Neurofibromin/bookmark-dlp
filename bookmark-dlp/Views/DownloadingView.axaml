@@ -53,15 +53,15 @@
                     Orientation="Horizontal">
                     <TextBlock
                         DockPanel.Dock="Bottom"
-                        FontSize="6"
+                        FontSize="12"
                         TextWrapping="WrapWithOverflow">
                         Source:
                     </TextBlock>
                     <TextBlock
-                        FontSize="6"
+                        FontSize="8"
                         Text="{Binding FileSource}"
-                        TextWrapping="WrapWithOverflow">
-                        C:/something
+                        ToolTip.Tip="{Binding FileSource}"
+                        TextWrapping="NoWrap">
                     </TextBlock>
                 </StackPanel>
             </Grid>
@@ -94,10 +94,10 @@
                 <DataGrid.Columns>
                     <DataGridTextColumn Binding="{Binding Name}" Header="Folder Name" Width="auto"/>
                     <DataGridTextColumn Binding="{Binding Numberoflinks}" Header="Number of links" Width="*"/>
-                    <DataGridTextColumn Binding="{Binding Numberoflinks}" Header="Videos wanted" Width="*"/>
-                    <DataGridTextColumn Binding="{Binding Numberoflinks}" Header="Wanted videos found" Width="*"/>
-                    <DataGridTextColumn Binding="{Binding Numberoflinks}" Header="Other videos found" Width="*"/>
-                    <DataGridCheckBoxColumn Binding="{Binding Wantdownloaded}" Header="Want downloaded" Width="*"/>
+                    <DataGridTextColumn Binding="{Binding NumberOfVideosWanted}" Header="Videos wanted" Width="*"/>
+                    <DataGridTextColumn Binding="{Binding NumberOfWantedVideosFound}" Header="Wanted videos found" Width="*"/>
+                    <DataGridTextColumn Binding="{Binding NumberOfOtherVideosFound}" Header="Other videos found" Width="*"/>
+                    <DataGridCheckBoxColumn Binding="{Binding WantDownloaded}" Header="Want downloaded" Width="*"/>
                 </DataGrid.Columns>
             </DataGrid>
 
