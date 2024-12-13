@@ -33,8 +33,11 @@ namespace bookmark_dlp
     /// </summary>
     public struct YTLink
     {
-        string url;
-        Linktype linktype;
+        public string url;
+        public Linktype linktype;
+        public string? yt_id;
+        public string? channel_id;
+        public string? playlist_id;
     }
 
     /// <summary>
@@ -52,36 +55,98 @@ namespace bookmark_dlp
         /// The name of the folder. Can be empty.
         /// </summary>
         public string name;
+        /// <summary>
+        /// Depth of folder compared to other folders. Root has a depth of 0.
+        /// </summary>
         public int depth;
+        /// <summary>
+        /// Should only be used in html intake.
+        /// </summary>
         public int endingline;
         /// <summary>
         /// The filesystem folder representing the bookmark folder. Not used by default
         /// </summary>
         public string folderpath;
+        /// <summary>
+        /// = urls.Count()
+        /// </summary>
         public int numberoflinks;
+        /// <summary>
+        /// All links count: video and yt-short links and playlist and channel
+        /// Channel is missing if a single video from channel is missing.
+        /// Playlist is missing if a single video from playlist is missing.
+        /// </summary>
         public int numberofmissinglinks;
+        /// <summary>
+        /// Only video and yt-short links, no playlist or channel links count
+        /// </summary>
+        public List<YTLink> missinglinks = new List<YTLink>();
+        /// <summary>
+        /// Only video and yt-short links, no playlist or channel links count
+        /// </summary>
+        public List<string> missingurls = new List<string>();
+        /// <summary>
+        /// Only video and yt-short links, no playlist or channel links count
+        /// </summary>
+        public List<YTLink> foundlinks = new List<YTLink>();
+        /// <summary>
+        /// Only video and yt-short links, no playlist or channel links count
+        /// </summary>
+        public List<string> foundurls = new List<string>();
         /// <summary>
         /// List of all the URLs in the given folder. May be empty.
         /// </summary>
         public List<string> urls = new List<string>();
+        /// <summary>
+        /// YTLink list from urls that contains the link type.
+        /// </summary>
         public List<YTLink> links = new List<YTLink>();
+        /// <summary>
+        /// The id of current folder
+        /// </summary>
         public int id; //same as array index
         /// <summary>
-        /// the id of the parent folder of current folder
+        /// The id of the parent folder of current folder
         /// </summary>
         public int parent;
         /// <summary>
-        /// the id of children folders of current folder
+        /// The ids of children folders of current folder
         /// </summary>
         public List<int> children = new List<int>();
-        
         /// <summary>
-        /// fields used by the observable class mostly
+        /// Field used by the observable class mostly,
+        /// checks if user wants the direct content of the folder downloaded.
+        /// Children folders are unaffected.
         /// </summary>
         public bool wantDownloaded = true;
-        public int numberOfVideosWanted;
+        /// <summary>
+        /// Only video and yt-short links, no playlist or channel links count
+        /// </summary>
+        public int numberOfVideosDirectlyWanted;
+        /// <summary>
+        /// Only playlist or channel links count, no video and yt-short links
+        /// </summary>
+        public int numberOfVideosIndirectlyWanted;
+        /// <summary>
+        /// All wanted videos count, be it playlist or channel links or video or yt-short
+        /// </summary>
+        public int numberOfVideosAllWanted;
+        /// <summary>
+        /// All wanted videos count, be it playlist or channel links or video or yt-short
+        /// </summary>
         public int numberOfWantedVideosFound;
+        /// <summary>
+        /// Only video files not found in want list now count.
+        /// Eg.
+        ///     videos downloaded from channel earlier that have since been deleted, (only channel was bookmarked)
+        ///     videos that were downloaded but later unbookmarked
+        /// But not:
+        ///     videos that were bookmarked and downloaded and are still bookmarked, but no longer can be downloaded because they were removed from youtube 
+        /// </summary>
         public int numberOfOtherVideosFound;
+        /// <summary>
+        /// Every video file in directory counts towards this.
+        /// </summary>
         public int numberOfAllVideosFound;
         
         
@@ -113,7 +178,8 @@ namespace bookmark_dlp
     }
 
     /// <summary>
-    /// Representing the default locations (filepaths) where one browser might store its user profiles.
+    /// Representing the default locations (filepaths) where one browser might store its
+    /// user profiles.
     /// </summary>
     public partial class BrowserLocations
     {
@@ -143,7 +209,9 @@ namespace bookmark_dlp
     /// </summary>
     public enum BrowserType { none, chromiumbased, firefoxbased }
 
-    // Legacy code
+    /// <summary>
+    /// Legacy code, but still used. Basically globaly variables but in a struct that is passed to functions as necessary.
+    /// </summary>
     struct GlobalState
     {
         public int folderid; //used a lot instead of numberoffolders, maybe not ideal?

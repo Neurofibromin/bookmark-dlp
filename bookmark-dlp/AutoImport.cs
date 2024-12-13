@@ -216,30 +216,6 @@ internal class AutoImport
         public static int numberoflinks;
         public static List<Folderclass> folderclasses = new List<Folderclass>();
     }*/
-    
-    /// <summary>
-    /// Searches for all wanted default videos (not playlists and channels) and
-    /// fills Folderclass fields for object.
-    /// The folderclass objects should already have their filesystem paths (folderpath) filled.
-    /// </summary>
-    /// <param name="folders">The list of folders that is being checked</param>
-    public void CheckCurrentFilesystemState(ref List<Folderclass> folders)
-    {
-        foreach (Folderclass folder in folders)
-        {
-            if (Directory.Exists(folder.folderpath))
-            { //todo: continue this
-                   
-            }
-            else
-            {
-                folder.numberofmissinglinks = folder.numberoflinks;
-                folder.numberOfWantedVideosFound = 0;
-                folder.numberOfOtherVideosFound = 0;
-                folder.numberOfAllVideosFound = 0;
-            }
-        }
-    }
 }
 
 
@@ -269,13 +245,25 @@ public partial class ObsFolderclass : ObservableObject
     [ObservableProperty]
     private bool _wantDownloaded;
     [ObservableProperty]
-    private int _numberOfVideosWanted;
+    private int _numberOfVideosDirectlyWanted;
+    [ObservableProperty]
+    private int _numberOfVideosIndirectlyWanted;
+    [ObservableProperty]
+    private int _numberOfVideosAllWanted;
     [ObservableProperty]
     private int _numberOfWantedVideosFound;
     [ObservableProperty]
     private int _numberOfOtherVideosFound;
     [ObservableProperty]
     private int _numberOfAllVideosFound;
+    [ObservableProperty]
+    private List<YTLink> _missinglinks;
+    [ObservableProperty]
+    private List<string> _missingurls;
+    [ObservableProperty]
+    private List<YTLink> _foundlinks;
+    [ObservableProperty]
+    private List<string> _foundurls;
     
     /// <summary>
     /// From now on only members of the observable class
@@ -286,21 +274,27 @@ public partial class ObsFolderclass : ObservableObject
     // ReSharper disable once ConvertToPrimaryConstructor
     public ObsFolderclass(Folderclass other) 
     {
-        _startline =                    other.startline;
-        _name = other.name;
-        _depth = other.depth;
-        _endingline = other.endingline;
-        _folderpath = other.folderpath;
-        _numberoflinks = other.numberoflinks;
-        _numberofmissinglinks = other.numberofmissinglinks;
-        _urls = other.urls;
-        _id = other.id;
-        _parent = other.parent;
+        _startline =                           other.startline;
+        _name =                                other.name;
+        _depth =                               other.depth;
+        _endingline =                          other.endingline;
+        _folderpath =                          other.folderpath;
+        _numberoflinks =                       other.numberoflinks;
+        _numberofmissinglinks =                other.numberofmissinglinks;
+        _urls =                                other.urls;
+        _id =                                  other.id;
+        _parent =                              other.parent;
+        _wantDownloaded =                      other.wantDownloaded;
+        _numberOfVideosDirectlyWanted =        other.numberOfVideosDirectlyWanted;
+        _numberOfVideosIndirectlyWanted =      other.numberOfVideosIndirectlyWanted;
+        _numberOfVideosAllWanted =             other.numberOfVideosAllWanted;
+        _numberOfWantedVideosFound =           other.numberOfWantedVideosFound;
+        _numberOfOtherVideosFound =            other.numberOfOtherVideosFound;
+        _numberOfAllVideosFound =              other.numberOfAllVideosFound;
+        _missinglinks =                        other.missinglinks;
+        _missingurls =                         other.missingurls;
+        _foundlinks =                          other.foundlinks;
+        _foundurls =                           other.foundurls;
         // children = new ObservableCollection<Folderclass>();
-        _wantDownloaded =                other.wantDownloaded;
-        _numberOfVideosWanted =          other.numberOfVideosWanted;
-        _numberOfWantedVideosFound =     other.numberOfWantedVideosFound;
-        _numberOfOtherVideosFound =      other.numberOfOtherVideosFound;
-        _numberOfAllVideosFound =        other.numberOfAllVideosFound;
     }
 }

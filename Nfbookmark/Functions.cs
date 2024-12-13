@@ -239,5 +239,97 @@ namespace Nfbookmark
                 }
             }
         }
+
+        public YTLink? UrlsToYTLinks(string _url)
+        {
+            // TODO: finish this, substring exmaples missing
+            if (!_url.Contains("www.youtube.com")) //only write lines that are youtube links
+            {return null;}
+            
+            YTLink link = new YTLink();
+            link.url = _url;
+            if (_url.Substring(24, 8) == "playlist") //filtering the links with the consecutive ifs to find if they are for videos or else (channels, playlists, etc.)
+            {
+                //playlist
+                link.linktype = Linktype.Playlist;
+                link.playlist_id = ; //todo
+            }
+            else if (_url.Substring(24, 4) == "user")
+            {
+                //channel
+                link.linktype = Linktype.Channel_user;
+                link.channel_id = ; //todo
+            }
+            else if (_url.Substring(24, 7) == "channel")
+            {
+                //channel
+                link.linktype = Linktype.Channel_channel;
+                link.channel_id = ; //todo
+            }
+            else if (_url.Substring(24, 7) == "results") //youtube search result was bookmarked
+            {
+                //not saving search results
+                link.linktype = Linktype.Search; //todo
+            }
+            else if (_url.Substring(24, 1) == "@")
+            {
+                //channel
+                link.linktype = Linktype.Channel_at;
+                link.channel_id = ; //todo
+            }
+            else if (_url.Substring(24, 2) == "c/")
+            {
+                //channel
+                link.linktype = Linktype.Channel_c;
+                link.channel_id = ; //todo
+            }
+            else if (_url.Substring(24, 6) == "shorts")
+            {
+                //shorts
+                link.linktype = Linktype.Short;
+                link.yt_id = ; //todo
+            }
+            else
+            {
+                link.linktype = Linktype.Video;
+                link.yt_id = ; //todo
+            }
+            return link;
+        }
+        
+        /// <summary>
+        /// Searches for all wanted default videos (not playlists and channels) and
+        /// fills Folderclass fields for object.
+        /// The folderclass objects should already have their filesystem paths (folderpath) filled.
+        /// </summary>
+        /// <param name="folders">The list of folders that is being checked</param>
+        public void CheckCurrentFilesystemState(ref List<Folderclass> folders)
+        {
+            foreach (Folderclass folder in folders)
+            {
+                if (Directory.Exists(folder.folderpath))
+                { //todo: continue this
+                    foreach (YTLink link in folder.links)
+                    {
+                        if ( (!string.IsNullOrEmpty(link.yt_id)) && Directory.GetFiles(folder.folderpath).Contains(link.yt_id))
+                        {
+                            // file found
+                            folder.foundlinks.Add(link);
+                            folder.foundurls.Add(link.url);
+                        }
+                    }
+                }
+                else
+                {
+                    folder.numberofmissinglinks = folder.numberoflinks;
+                    folder.numberOfWantedVideosFound = 0;
+                    folder.numberOfOtherVideosFound = 0;
+                    folder.numberOfAllVideosFound = 0;
+                    folder.missingurls = folder.urls;
+                    folder.missinglinks = folder.links;
+                }
+                
+            }
+        }
     }
 }

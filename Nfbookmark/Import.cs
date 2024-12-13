@@ -18,6 +18,7 @@ namespace Nfbookmark
         /// <summary>
         /// Smart import, give file path and will automatically select import function
         /// </summary>
+        /// <param name="filePath">Path to the html/json file containing the bookmarks.</param>
         /// <returns>List Folderclass or null </returns>
         public static List<Folderclass> SmartImport(string filePath)
         {
@@ -36,7 +37,8 @@ namespace Nfbookmark
                 default:
                     break;
             }
-            if (Path.GetFileName(filePath) == "Bookmarks") { return JsonIntake(filePath); } //Chrome-based does not use extension for the Bookmarks file
+            if (Path.GetFileName(filePath) == "Bookmarks") 
+            { return JsonIntake(filePath); } //Chrome-based does not use extension for the Bookmarks file
             return null;
         }
 
@@ -47,7 +49,7 @@ namespace Nfbookmark
         /// </summary>
         /// <param name="filePath"></param>
         /// <returns>List of bookmark folders containing all the bookmarks</returns>
-        public static List<Folderclass> JsonIntake(string filePath)
+        private static List<Folderclass> JsonIntake(string filePath)
         {
             string text = "";
             Bookmark bookmark_bar;
@@ -69,11 +71,10 @@ namespace Nfbookmark
                     Logger.LogVerbose("Invalid JSON: 'roots' property missing.", Logger.Verbosity.Error);
                     return null;
                 }
-
+                
                 JsonElement bookmarks_bar_Element;
                 JsonElement other_Element;
                 JsonElement synced_Element;
-
                 if (!roots_Element.TryGetProperty("bookmark_bar", out bookmarks_bar_Element) ||
                     !roots_Element.TryGetProperty("other", out other_Element) ||
                     !roots_Element.TryGetProperty("synced", out synced_Element))
@@ -81,8 +82,6 @@ namespace Nfbookmark
                     Logger.LogVerbose("Invalid JSON: Required bookmark properties are missing.", Logger.Verbosity.Error);
                     return null;
                 }
-
-
                 var options = new JsonSerializerOptions { IncludeFields = true, NumberHandling = JsonNumberHandling.AllowReadingFromString }; //by default no fields only properties, by default no num from string conversion
                 bookmark_bar = System.Text.Json.JsonSerializer.Deserialize<Bookmark>(bookmarks_bar_Element, options);
                 other = System.Text.Json.JsonSerializer.Deserialize<Bookmark>(other_Element, options);
@@ -93,22 +92,16 @@ namespace Nfbookmark
                 Logger.LogVerbose($"Parsing the Json failed: {ex.Message}", Logger.Verbosity.Error);
                 return null;
             }
-
-
             /*
              * Newtonsoft.Json:
             Bookmark bookmark_bar = JObject.Parse(text)["roots"]["bookmark_bar"].ToObject<Bookmark>();
             Bookmark other = JObject.Parse(text)["roots"]["other"].ToObject<Bookmark>();
             Bookmark synced = JObject.Parse(text)["roots"]["synced"].ToObject<Bookmark>();*/
-
-
-
-
+            
             synced.name = "Synced Bookmarks"; //has to be renamed, because google puts "Mobile bookmarks" in json and "Synced Bookmarks" in html
             other.name = "Other Bookmarks"; //has to be renamed, because google puts "Other bookmarks" in json and "Other Bookmarks" in html (diff: capitalisation!)
             bookmark_bar.name = "Bookmark Bar"; //has to be renamed, because google puts "Bookmarks bar" in json and "Bookmark Bar" in html (diff: capitalisation!, plural)
                                                 //note: the naming MUST be consistent, so if html and autoimport are both used in the same directory videos will not get downloaded twice
-
             Bookmark root = new Bookmark
             // the root is not actually a bookmark json object, it just contains the 3 json objects of other, synced and bookmarks_bar
             // as such here a root json object is created, which will contain those three as children
@@ -161,15 +154,18 @@ namespace Nfbookmark
                  "version": 1
                }
                 */
-
-
+                
             List<Folderclass> folders = new List<Folderclass>();
             GlobalState globalState = new GlobalState();
 
             Bookmark bookmarkroot = root;
-            Folderclass thisBookmark = new Folderclass();
-            thisBookmark.startline = 0;
-            thisBookmark.urls = new List<string>();
+            Folderclass thisBookmark = new Folderclass
+            {
+                startline = 0,
+                urls = new List<string>(),
+                name = bookmarkroot.name,
+                depth = 0
+            };
             int numberoflinks = 0;
             int depth = 0;
             folders.Add(thisBookmark); //later overwritten with the complete version of root, but necessary(?) so the first one is the root
@@ -187,10 +183,8 @@ namespace Nfbookmark
                     folders.Add(Childfinder(child, depth + 1, ref globalState, ref folders));
                 }
             }
-
-            thisBookmark.name = bookmarkroot.name;
+            
             thisBookmark.numberoflinks = numberoflinks;
-            thisBookmark.depth = 0;
             thisBookmark.endingline = globalState.endingline;
             globalState.endingline++;
             folders[0] = thisBookmark;
@@ -218,11 +212,15 @@ namespace Nfbookmark
         /// <returns></returns>
         private static Folderclass Childfinder(Bookmark current, int depth, ref GlobalState globalState, ref List<Folderclass> folders)
         {
-            Folderclass thisBookmark = new Folderclass();
             globalState.folderid++;
-            thisBookmark.startline = globalState.folderid;
-            thisBookmark.id = globalState.folderid;
-            thisBookmark.urls = new List<string>();
+            Folderclass thisBookmark = new Folderclass
+            {
+                startline = globalState.folderid,
+                id = globalState.folderid,
+                urls = new List<string>(),
+                name = current.name,
+                depth = depth
+            };
             //Console.WriteLine("Started childfinder with current folder: {1}, id:{0}, depth:{2}", globals.folderid, current.name, depth);
             int numberoflinks = 0;
             foreach (Bookmark child in current.children)
@@ -239,9 +237,7 @@ namespace Nfbookmark
                     folders.Add(Childfinder(child, depth + 1, ref globalState, ref folders));
                 }
             }
-            thisBookmark.name = current.name;
             thisBookmark.numberoflinks = numberoflinks;
-            thisBookmark.depth = depth;
             thisBookmark.endingline = globalState.endingline;
             globalState.endingline++;
             //Console.WriteLine("{0} has {1} links. Folderid: {2} depth: {3}", current.name, numberoflinks, globals.folderid, depth);
@@ -258,7 +254,6 @@ namespace Nfbookmark
         private static List<Folderclass> Bookmarktofolderclasses(List<Bookmark> bookmarks, Dictionary<int, int> parentid)
         {
             // only folders remain in the sql_list
-
             if (bookmarks.Count == 0)
             {
                 return null;
@@ -271,12 +266,14 @@ namespace Nfbookmark
             int folderid = 0;
             foreach (Bookmark bookmark in bookmarks)
             {
-                Folderclass currentfolder = new Folderclass();
-                currentfolder.id = folderid;
-                currentfolder.name = bookmark.name;
-                currentfolder.startline = bookmark.id;
-                currentfolder.numberoflinks = bookmark.children.Count();
-                currentfolder.urls = new List<string>();
+                Folderclass currentfolder = new Folderclass
+                {
+                    id = folderid,
+                    name = bookmark.name,
+                    startline = bookmark.id,
+                    numberoflinks = bookmark.children.Count(),
+                    urls = new List<string>()
+                };
 
                 foreach (Bookmark urlbookmark in bookmark.children)
                 {
