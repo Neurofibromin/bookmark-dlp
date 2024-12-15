@@ -5,7 +5,8 @@ using NfLogger;
 namespace bookmark_dlp
 {
     /// <summary>
-    /// Not used for now. A more refined wrapper around just a list of folders, intended to represent all bookmarks found in a single browser profile
+    /// Not used for now. A more refined wrapper around just a list of folders, intended to represent all bookmarks found in a single browser profile.
+    /// Feels a bit redundant when Bookmark already exists.
     /// </summary>
     public class Bookmarks
     {
@@ -24,7 +25,7 @@ namespace bookmark_dlp
         Channel_at, // if (linkthatisbeingexamined.Substring(24, 1) == "@")
         Channel_c, // if (linkthatisbeingexamined.Substring(24, 2) == "c/")
         Short, // if (linkthatisbeingexamined.Substring(24, 6) == "shorts")
-        Playlist,
+        Playlist, // if (linkthatisbeingexamined.Substring(24, 8) == "playlist")
         Search // if (linkthatisbeingexamined.Substring(24, 7) == "results") //youtube search result was bookmarked
     }
 
@@ -38,6 +39,10 @@ namespace bookmark_dlp
         public string? yt_id;
         public string? channel_id;
         public string? playlist_id;
+        /// <summary>
+        /// Contains yt ids of videos in the playlist or uploaded by the channel. Only used it linktype is Channel_* or Playlist. 
+        /// </summary>
+        public List<string>? member_ids;
     }
 
     /// <summary>

@@ -61,6 +61,9 @@ accepted filenames for the yt-dlp binary:
 - windows: "yt-dlp.exe"
 
 #### yt-dlp.config is sought in the following locations:
+
+https://github.com/yt-dlp/yt-dlp?tab=readme-ov-file#configuration
+
 1. program is called from
 2. program executable is found in
 3. chosen output folder

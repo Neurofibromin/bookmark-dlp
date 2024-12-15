@@ -17,7 +17,7 @@ namespace Nfbookmark
         /// Pretty prints the folder structure to console
         /// </summary>
         /// <param name="folders">The folder structure to be printed</param>
-        public static void PrintToConsole(List<Folderclass> folders)
+        internal static void PrintToConsole(List<Folderclass> folders)
         {
             if (folders == null || folders.Count == 0)
             {
@@ -308,15 +308,19 @@ namespace Nfbookmark
             foreach (Folderclass folder in folders)
             {
                 if (Directory.Exists(folder.folderpath))
-                { //todo: continue this
+                {
                     foreach (YTLink link in folder.links)
                     {
+                        // checking for direct video links
                         if ( (!string.IsNullOrEmpty(link.yt_id)) && Directory.GetFiles(folder.folderpath).Contains(link.yt_id))
                         {
                             // file found
                             folder.foundlinks.Add(link);
                             folder.foundurls.Add(link.url);
                         }
+                        // checking for channels
+                        // checking for playlists
+                        //todo: continue this
                     }
                 }
                 else
