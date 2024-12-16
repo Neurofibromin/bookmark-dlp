@@ -94,7 +94,9 @@
                 <DataGrid.Columns>
                     <DataGridTextColumn Binding="{Binding Name}" Header="Folder Name" Width="auto"/>
                     <DataGridTextColumn Binding="{Binding Numberoflinks}" Header="Number of links" Width="*"/>
-                    <DataGridTextColumn Binding="{Binding NumberOfVideosWanted}" Header="Videos wanted" Width="*"/>
+                    <DataGridTextColumn Binding="{Binding NumberOfVideosAllWanted}" Header="Videos all wanted" Width="*"/>
+                    <DataGridTextColumn Binding="{Binding NumberOfVideosDirectlyWanted}" Header="Videos directly wanted" Width="*"/>
+                    <DataGridTextColumn Binding="{Binding NumberOfVideosIndirectlyWanted}" Header="Videos indirectly wanted" Width="*"/>
                     <DataGridTextColumn Binding="{Binding NumberOfWantedVideosFound}" Header="Wanted videos found" Width="*"/>
                     <DataGridTextColumn Binding="{Binding NumberOfOtherVideosFound}" Header="Other videos found" Width="*"/>
                     <DataGridCheckBoxColumn Binding="{Binding WantDownloaded}" Header="Want downloaded" Width="*"/>

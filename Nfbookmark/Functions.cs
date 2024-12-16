@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using bookmark_dlp;
 using NfLogger;
 
@@ -17,7 +18,7 @@ namespace Nfbookmark
         /// Pretty prints the folder structure to console
         /// </summary>
         /// <param name="folders">The folder structure to be printed</param>
-        internal static void PrintToConsole(List<Folderclass> folders)
+        public static void PrintToConsole(List<Folderclass> folders)
         {
             if (folders == null || folders.Count == 0)
             {
@@ -251,20 +252,43 @@ namespace Nfbookmark
             if (_url.Substring(24, 8) == "playlist") //filtering the links with the consecutive ifs to find if they are for videos or else (channels, playlists, etc.)
             {
                 //playlist
+                int start = _url.IndexOf("playlist?list=", StringComparison.Ordinal) + "playlist?list=".Length;
+                string temp = _url.Substring(start);
+                int end = temp.IndexOf('/');
+                if (end == -1)
+                  end = _url.Length;
                 link.linktype = Linktype.Playlist;
-                link.playlist_id = ; //todo
+                link.playlist_id = _url.Substring(start, end);
             }
             else if (_url.Substring(24, 4) == "user")
             {
                 //channel
+                string pattern = @"youtube\.com/user/([a-zA-Z0-9_-]+)";
+                Match match = Regex.Match(_url, pattern);
+                if (match.Success && match.Groups.Count > 1)
+                {
+                    link.channel_id = match.Groups[1].Value;
+                }
+                else
+                {
+                    throw new Exception($"Invalid URL: {_url}, regex pattern: {pattern}");
+                }
                 link.linktype = Linktype.Channel_user;
-                link.channel_id = ; //todo
             }
             else if (_url.Substring(24, 7) == "channel")
             {
                 //channel
+                string pattern = @"youtube\.com/channel/([a-zA-Z0-9_-]+)";
+                Match match = Regex.Match(_url, pattern);
+                if (match.Success && match.Groups.Count > 1)
+                {
+                    link.channel_id = match.Groups[1].Value;
+                }
+                else
+                {
+                    throw new Exception($"Invalid URL: {_url}, regex pattern: {pattern}");
+                }
                 link.linktype = Linktype.Channel_channel;
-                link.channel_id = ; //todo
             }
             else if (_url.Substring(24, 7) == "results") //youtube search result was bookmarked
             {
@@ -274,25 +298,79 @@ namespace Nfbookmark
             else if (_url.Substring(24, 1) == "@")
             {
                 //channel
+                string pattern = @"youtube\.com/@([a-zA-Z0-9_-]+)";
+                Match match = Regex.Match(_url, pattern);
+                if (match.Success && match.Groups.Count > 1)
+                {
+                    link.channel_id = match.Groups[1].Value;
+                }
+                else
+                {
+                    throw new Exception($"Invalid URL: {_url}, regex pattern: {pattern}");
+                }
                 link.linktype = Linktype.Channel_at;
-                link.channel_id = ; //todo
             }
             else if (_url.Substring(24, 2) == "c/")
             {
                 //channel
+                string pattern = @"youtube\.com/c/([a-zA-Z0-9_-]+)";
+                Match match = Regex.Match(_url, pattern);
+                if (match.Success && match.Groups.Count > 1)
+                {
+                    link.channel_id = match.Groups[1].Value;
+                }
+                else
+                {
+                    throw new Exception($"Invalid URL: {_url}, regex pattern: {pattern}");
+                }
                 link.linktype = Linktype.Channel_c;
-                link.channel_id = ; //todo
             }
             else if (_url.Substring(24, 6) == "shorts")
             {
                 //shorts
+                string pattern = @"youtube\.com/shorts/([a-zA-Z0-9_-]+)";
+                Match match = Regex.Match(_url, pattern);
+                if (match.Success && match.Groups.Count > 1)
+                {
+                    link.yt_id = match.Groups[1].Value;
+                }
+                else
+                {
+                    throw new Exception($"Invalid URL: {_url}, regex pattern: {pattern}");
+                }
                 link.linktype = Linktype.Short;
-                link.yt_id = ; //todo
             }
             else
             {
-                link.linktype = Linktype.Video;
-                link.yt_id = ; //todo
+                string regexed, manparsed;
+                string pattern = @"youtube\.com/watch\?v=([a-zA-Z0-9_-]+)";
+                Match match = Regex.Match(_url, pattern);
+                if (match.Success && match.Groups.Count > 1)
+                {
+                    regexed = match.Groups[1].Value;
+                }
+                else
+                {
+                    throw new Exception($"Invalid URL: {_url}, regex pattern: {pattern}");
+                }
+                int start = _url.IndexOf("watch?v=", StringComparison.Ordinal) + "watch?v=".Length;
+                string temp = _url.Substring(start);
+                int end = temp.IndexOf('&');
+                if (end == -1)
+                    end = _url.Length;
+                manparsed = _url.Substring(start, end);
+                if (manparsed.Length == 11 && regexed.Length == 11 &&
+                    String.Equals(manparsed, regexed, StringComparison.CurrentCultureIgnoreCase))
+                {
+                    link.linktype = Linktype.Video;
+                    link.yt_id = manparsed;    
+                }
+                else
+                {
+                    Logger.LogVerbose($"Invalid URL: {_url}, REGEX conflict. Regex pattern: {pattern}, manparsed: {manparsed}, regexed: {regexed}.", Logger.Verbosity.Error);
+                    link.linktype = Linktype.Video;
+                    link.yt_id = manparsed;
+                }
             }
             return link;
         }

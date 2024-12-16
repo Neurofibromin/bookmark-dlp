@@ -10,9 +10,23 @@ namespace NfLogger
     /// </summary>
     public static class Logger
     {
-        private static List<Stream> LogStreams;
-        private static List<string> LogFiles;
-        private static List<StreamWriter> LogWriters;
+        /*
+         For making every Log destination independently verbose:
+         internal struct StreamWithVerbosity
+        {
+            public Stream Stream;
+            public Verbosity Verbosity;
+
+            StreamWithVerbosity(Stream stream, Verbosity verbosity)
+            {
+                Stream = stream;
+                Verbosity = verbosity;
+            }
+        }*/
+        
+        private static List<Stream> _logStreams;
+        private static List<string> _logFiles;
+        private static List<StreamWriter> _logWriters;
         public static event EventHandler ProcessExit;
         
         /// <summary>
@@ -41,13 +55,13 @@ namespace NfLogger
         static Logger()
         {
             // Initialize lists
-            LogStreams = new List<Stream>();
-            LogFiles = new List<string>();
-            LogWriters = new List<StreamWriter>();
+            _logStreams = new List<Stream>();
+            _logFiles = new List<string>();
+            _logWriters = new List<StreamWriter>();
 
             // Add standard output as a default log stream
             Stream stdout = Console.OpenStandardOutput();
-            LogStreams.Add(stdout);
+            _logStreams.Add(stdout);
 
             // Attach the ProcessExit event handler
             AppDomain.CurrentDomain.ProcessExit += OnProcessExit;
@@ -58,14 +72,14 @@ namespace NfLogger
         private static void OnProcessExit(object sender, EventArgs e)
         {
             // Flush and close all StreamWriter objects
-            foreach (StreamWriter writer in LogWriters)
+            foreach (StreamWriter writer in _logWriters)
             {
                 writer.Flush();
                 writer.Close();
             }
 
             // Dispose all streams
-            foreach (Stream stream in LogStreams)
+            foreach (Stream stream in _logStreams)
             {
                 stream.Dispose();
             }
@@ -86,7 +100,7 @@ namespace NfLogger
 
             if (messageUrgency <= verbosity)
             {
-                foreach (StreamWriter writer in LogWriters)
+                foreach (StreamWriter writer in _logWriters)
                 {
                     writer.WriteLine($"{messageUrgency}: {message}");
                 }
@@ -99,9 +113,9 @@ namespace NfLogger
         /// <param name="stream">stream to be added</param>
         public static void AddStream(Stream stream)
         {
-            if (!LogStreams.Contains(stream))
+            if (!_logStreams.Contains(stream))
             {
-                LogStreams.Add(stream);
+                _logStreams.Add(stream);
                 GenerateStreamWriters();    
             }
         }
@@ -112,9 +126,9 @@ namespace NfLogger
         /// <param name="file">file to be added</param>
         public static void AddFile(string file)
         {
-            if (!LogFiles.Contains(file))
+            if (!_logFiles.Contains(file))
             {
-                LogFiles.Add(file);
+                _logFiles.Add(file);
                 GenerateStreamWriters();
             }
         }
@@ -124,25 +138,25 @@ namespace NfLogger
         /// </summary>
         private static void GenerateStreamWriters()
         {
-            foreach (StreamWriter writer in LogWriters)
+            foreach (StreamWriter writer in _logWriters)
             {
                 writer.Flush();
                 writer.Close();
             }
-            LogWriters.Clear();
+            _logWriters.Clear();
 
-            foreach (string file in LogFiles)
+            foreach (string file in _logFiles)
             {
                 StreamWriter writer = new StreamWriter(file, append: true);
                 writer.AutoFlush = true;
-                LogWriters.Add(writer);
+                _logWriters.Add(writer);
             }
 
-            foreach (Stream stream in LogStreams)
+            foreach (Stream stream in _logStreams)
             {
                 StreamWriter writer = new StreamWriter(stream);
                 writer.AutoFlush = true;
-                LogWriters.Add(writer);
+                _logWriters.Add(writer);
             }
         }
     }

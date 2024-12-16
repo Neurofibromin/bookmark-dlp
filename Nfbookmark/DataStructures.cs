@@ -36,13 +36,13 @@ namespace bookmark_dlp
     {
         public string url;
         public Linktype linktype;
-        public string? yt_id;
-        public string? channel_id;
-        public string? playlist_id;
+        public string yt_id;
+        public string channel_id;
+        public string playlist_id;
         /// <summary>
         /// Contains yt ids of videos in the playlist or uploaded by the channel. Only used it linktype is Channel_* or Playlist. 
         /// </summary>
-        public List<string>? member_ids;
+        public List<string> member_ids;
     }
 
     /// <summary>
