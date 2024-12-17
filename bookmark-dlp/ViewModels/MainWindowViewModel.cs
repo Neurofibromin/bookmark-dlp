@@ -39,13 +39,11 @@ namespace bookmark_dlp.ViewModels
         SettingsViewModel mySettingsViewModel;
         // public SettingsViewModel MySettingsViewModel { get; set; }
         
-
         [ObservableProperty]
         public ViewModelBase? contentViewModel;
         [ObservableProperty]
         public ViewModelBase? previousViewModel;
-
-
+        
         public MainWindowViewModel()
         {
             // Console.WriteLine("In orig at mwvm: " + JsonConvert.SerializeObject(AppSettings._settings));
