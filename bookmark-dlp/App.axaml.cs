@@ -71,7 +71,7 @@ namespace bookmark_dlp
                             
                         }
                         
-                        if (false)
+                        if (true)
                         {
                             var mainWindowVM = new MainWindowViewModel();
                             var MainWindow = new MainWindow
@@ -83,13 +83,13 @@ namespace bookmark_dlp
                         }
                         else
                         {
-                            var TabsWindowVM = new TabsMainWindowViewModel();
-                            var TabsMainWindow = new TabsMainWindow()
+                            var pageWindowViewModel = new PageMainWindowViewModel();
+                            var PageMainWindow = new PageMainWindow()
                             {
-                                DataContext = TabsWindowVM,
+                                DataContext = pageWindowViewModel,
                             };
-                            desktop.MainWindow = TabsMainWindow;
-                            TabsMainWindow.Show();
+                            desktop.MainWindow = PageMainWindow;
+                            PageMainWindow.Show();
                         }
                         
                         askConfigWindow.Close();
@@ -99,7 +99,7 @@ namespace bookmark_dlp
                 {
                     Console.WriteLine("Config was found");
                     Console.WriteLine("Location: " + AppMethods.ConfigFileLocation());
-                    if (false)
+                    if (true)
                     {
                         var mainWindowVM = new MainWindowViewModel();
                         var MainWindow = new MainWindow
@@ -111,13 +111,13 @@ namespace bookmark_dlp
                     }
                     else
                     {
-                        var TabsWindowVM = new TabsMainWindowViewModel();
-                        var TabsMainWindow = new TabsMainWindow()
+                        var pageWindowViewModel = new PageMainWindowViewModel();
+                        var PageMainWindow = new PageMainWindow()
                         {
-                            DataContext = TabsWindowVM,
+                            DataContext = pageWindowViewModel,
                         };
-                        desktop.MainWindow = TabsMainWindow;
-                        TabsMainWindow.Show();
+                        desktop.MainWindow = PageMainWindow;
+                        PageMainWindow.Show();
                     }
                 }
             }

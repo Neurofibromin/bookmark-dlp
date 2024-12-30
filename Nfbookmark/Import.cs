@@ -23,6 +23,18 @@ namespace Nfbookmark
         public static List<Folderclass> SmartImport(string filePath)
         {
             if (!File.Exists(filePath)) { return null; }
+            try
+            {
+                StreamReader sr = new StreamReader(filePath);
+                string tryread = sr.ReadToEnd();
+                sr.Close();
+                Logger.LogVerbose("Parsing SmartImport: " + filePath);
+            }
+            catch (Exception e)
+            {
+                Logger.LogVerbose(e + " File:" + filePath + "could not be read.");
+                throw;
+            }
             switch (Path.GetExtension(filePath))
             {
                 case ".json":
@@ -324,9 +336,10 @@ namespace Nfbookmark
             // https://stackoverflow.com/questions/11769524/how-can-i-restore-firefox-bookmark-files-from-sqlite-files
             Dictionary<int, int> parentid = new Dictionary<int, int>(); //parentid[i] = the id of the parent folder of the bookmark with the id i
             List<Bookmark> bookmarks = new List<Bookmark>();
-            using (var connection = new SqliteConnection("Data Source=" + filePath))
+            using (var connection = new SqliteConnection("Data Source=" + filePath + ";mode=ReadOnly"))
             {
                 connection.Open();
+                Logger.LogVerbose("SQL database opened", Logger.Verbosity.Trace);
                 var command = connection.CreateCommand();
                 command.CommandText =
                 @"
@@ -386,6 +399,7 @@ namespace Nfbookmark
                     }
                 }
             }
+            Logger.LogVerbose("SQL Read finished", Logger.Verbosity.Trace);
             //sqlite3 places.sqlite "select '<a href=''' || url || '''>' || moz_bookmarks.title || '</a><br/>' as ahref from moz_bookmarks left join moz_places on fk=moz_places.id where url<>'' and moz_bookmarks.title<>''" > t1.html
             //trying to place the data from the Bookmark object into a Folderclass[] object
             //in the sql only parent ids are given, not children, so the process has to be reversed compared to the json

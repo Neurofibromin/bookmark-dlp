@@ -30,80 +30,88 @@ namespace bookmark_dlp.ViewModels
 {
     public partial class MainWindowViewModel : ViewModelBase
     {
-        StartPageViewModel myStartPageViewModel;
-        // public StartPageViewModel MyStartPageViewModel { get; set; }
-
-        DownloadingViewModel myDownloadingViewModel;
-        // public DownloadingViewModel MyDownloadingViewModel { get; set; }
-
-        SettingsViewModel mySettingsViewModel;
-        // public SettingsViewModel MySettingsViewModel { get; set; }
+        [ObservableProperty] private ViewModelBase _selectedTab;
+        [ObservableProperty] private ViewModelBase? previousViewModel;
         
-        [ObservableProperty]
-        public ViewModelBase? contentViewModel;
-        [ObservableProperty]
-        public ViewModelBase? previousViewModel;
+        [ObservableProperty] private StartPageViewModel myStartPageViewModel;
+        [ObservableProperty] private SettingsViewModel mySettingsViewModel;
+        [ObservableProperty] private LogViewModel myLogViewModel;
+        [ObservableProperty] private DownloadingViewModel myDownloadingViewModel;
+        
+        [ObservableProperty] private bool _startPageEnabled = true;
+        [ObservableProperty] private bool _settingsEnabled = true;
+        [ObservableProperty] private bool _logEnabled = true;
+        [ObservableProperty] private bool _downloadingEnabled = false;
         
         public MainWindowViewModel()
         {
-            // Logger.LogVerbose("In orig at mwvm: " + JsonSerializer.Serialize(AppSettings._settings));
+            // Initialize ViewModels
             mySettingsViewModel = new SettingsViewModel();
             myStartPageViewModel = new StartPageViewModel();
             myDownloadingViewModel = new DownloadingViewModel();
+            myLogViewModel = new LogViewModel();
+            
+            PreviousViewModel = MyStartPageViewModel;
 
-            ContentViewModel = myStartPageViewModel;
-            PreviousViewModel = myStartPageViewModel;
+            // Set initial selected tab
+            SelectedTab = MyStartPageViewModel;
         }
-        /*
-        public StartPageViewModel StartPage { get ; set; }
-        public DownloadingViewModel Downloading { get; set; }
-        public SettingsViewModel Settings { get; set; }*/
-        public void GoBack() //also Bound by the savesettingsbutton
+
+        public void GoBack()
         {
-            (PreviousViewModel, ContentViewModel) = (ContentViewModel, PreviousViewModel);
-            if (PreviousViewModel == mySettingsViewModel)
+            (PreviousViewModel, SelectedTab) = (SelectedTab, PreviousViewModel);
+            if (PreviousViewModel == MySettingsViewModel)
             {
-                mySettingsViewModel.SaveActiveSettings();
+                MySettingsViewModel.SaveActiveSettings();
                 AppSettings.SaveToFile();
-                myStartPageViewModel.ReBindSettings(); //TODO: should raise some propertychanged event instead
-                myDownloadingViewModel.ReBindSettings();
+                MyStartPageViewModel.ReBindSettings(); //TODO: should raise some propertychanged event instead
+                MyDownloadingViewModel.ReBindSettings();
             }
+        }
+        
+        public void SaveSettings()
+        {
+                MySettingsViewModel.SaveActiveSettings();
+                AppSettings.SaveToFile();
+                MyStartPageViewModel.ReBindSettings(); //TODO: should raise some propertychanged event instead
+                MyDownloadingViewModel.ReBindSettings();
         }
 
         public async Task SettingsCommand()
         {
-            PreviousViewModel = ContentViewModel;
-            ContentViewModel = mySettingsViewModel;
-            if (PreviousViewModel == myStartPageViewModel)
+            PreviousViewModel = SelectedTab;
+            SelectedTab = MySettingsViewModel;
+            if (PreviousViewModel == MyStartPageViewModel)
             {
-                await myStartPageViewModel.SaveActiveSettings();
-                mySettingsViewModel.ReBindSettings();
+                await MyStartPageViewModel.SaveActiveSettings();
+                MySettingsViewModel.ReBindSettings();
             }
         }
 
         public async Task GoForward()
         {
-            PreviousViewModel = ContentViewModel;
+            PreviousViewModel = SelectedTab;
             
-            await myStartPageViewModel.SaveActiveSettings();
-            myDownloadingViewModel.ReBindSettings();
+            await MyStartPageViewModel.SaveActiveSettings();
+            MyDownloadingViewModel.ReBindSettings();
             //TODO: make the goforwardbutton disabled when no file is selected
             if (AppSettings._settings.HtmlImportUsed)
             {
-                myDownloadingViewModel.FileSource = AppSettings._settings.Htmlfilelocation;
+                MyDownloadingViewModel.FileSource = AppSettings._settings.Htmlfilelocation;
             }
             else
             {
-                myDownloadingViewModel.FileSource = myStartPageViewModel.ChosenBrowser;
+                MyDownloadingViewModel.FileSource = MyStartPageViewModel.ChosenBrowser;
             }
-            await myDownloadingViewModel.LoadFoldersFromFile();
-            ContentViewModel = myDownloadingViewModel;
+            await MyDownloadingViewModel.LoadFoldersFromFile();
+            DownloadingEnabled = true;
+            SelectedTab = MyDownloadingViewModel;
         }
 
         public void BackToStartPage()
         {
-            PreviousViewModel = ContentViewModel;
-            ContentViewModel = myStartPageViewModel;
+            PreviousViewModel = SelectedTab;
+            SelectedTab = MyStartPageViewModel;
         }
     }
 }

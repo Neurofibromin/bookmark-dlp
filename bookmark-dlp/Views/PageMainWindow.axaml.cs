@@ -2,9 +2,9 @@ using Avalonia.Controls;
 
 namespace bookmark_dlp.Views
 {
-    public partial class TabsMainWindow : Window
+    public partial class PageMainWindow : Window
     {
-        public TabsMainWindow()
+        public PageMainWindow()
         {
             InitializeComponent();
         }

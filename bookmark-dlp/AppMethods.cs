@@ -129,7 +129,7 @@ internal class AppMethods
             if (ytdlp_path == "")
             {
                 // check for yt-dlp binary on path
-                Console.WriteLine(Path.Combine(rootdir, "yt-dlp") + " not found, searching PATH.");
+                Logger.LogVerbose(Path.Combine(rootdir, "yt-dlp") + " not found, searching PATH.", Logger.Verbosity.Info);
                 string command = $"-c \"if (which yt-dlp); then echo \"true\"; else echo \"false\"; fi\"";
                 command = $"-c \"which yt-dlp\"";
                 Process process = new Process();
@@ -349,7 +349,7 @@ internal class AppMethods
                             RedirectStandardOutput = true
                         }
                     };
-                    Console.WriteLine($"cmd.exe /c {command}");
+                    Logger.LogVerbose($"cmd.exe /c {command}", Logger.Verbosity.Debug);
                 }
                 else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                 {
@@ -366,7 +366,7 @@ internal class AppMethods
                         }
                     };
                 }
-                else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) //maybe it does not work, not tested?
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) //TODO: maybe it does not work, not tested?
                 {
                     string command = "\"" + Path.Combine(targetDir, folders[j].name + extensionforscript) + "\"";
                     process = new Process
@@ -389,7 +389,7 @@ internal class AppMethods
                         {
                         }
                     };
-                    Console.WriteLine("Error");
+                    Logger.LogVerbose("Error", Logger.Verbosity.Error);
                     System.Environment.Exit(1);
                 }
                 //processInfo.FileName = path.extension;
