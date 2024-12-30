@@ -6,6 +6,7 @@ releases.txt
 todo.txt
 /.idea
 doxygen-generated/
+bookmark-dlp.sln.DotSettings.user
 
 ################################################################################
 # This .gitignore file was automatically created by Microsoft(R) Visual Studio.

@@ -15,19 +15,10 @@ namespace bookmark_dlp.Models
         /// Singleton!
         /// </summary>
         public static SettingsStruct _settings = new SettingsStruct();
-        public static readonly SettingsStruct defaultsettings = new SettingsStruct
-        {
-            htmlImportUsed = false,
-            htmlfilelocation = "",       
-            outputfolder = Directory.GetCurrentDirectory(),
-            ytdlp_executable_not_found = true,        
-            downloadPlaylists = false,        
-            downloadShorts = false,        
-            downloadChannels = false,        
-            concurrent_downloads = false,        
-            cookies_autoextract = false,
-            yt_dlp_binary_path = AppMethods.Yt_dlp_pathfinder(Directory.GetCurrentDirectory()),
-        };
+        public static readonly SettingsStruct defaultsettings = new SettingsStruct(htmlImportUsed: false,
+            htmlfilelocation: "", outputfolder: Directory.GetCurrentDirectory(), ytdlpExecutableNotFound: true,
+            downloadPlaylists: false, downloadShorts: false, downloadChannels: false, concurrentDownloads: false,
+            cookiesAutoextract: false, ytDlpBinaryPath: AppMethods.Yt_dlp_pathfinder(Directory.GetCurrentDirectory()));
         public static string? configloc = AppMethods.ConfigFileLocation();
         private static AppSettings _instance = new AppSettings();
         
@@ -168,5 +159,19 @@ namespace bookmark_dlp.Models
         public bool cookies_autoextract;
         [ObservableProperty]
         public string? yt_dlp_binary_path;
+
+        public SettingsStruct(bool htmlImportUsed, string htmlfilelocation, string outputfolder, bool ytdlpExecutableNotFound, bool downloadPlaylists, bool downloadShorts, bool downloadChannels, bool concurrentDownloads, bool cookiesAutoextract, string? ytDlpBinaryPath) : this()
+        {
+            this.htmlImportUsed = htmlImportUsed;
+            this.htmlfilelocation = htmlfilelocation;
+            this.outputfolder = outputfolder;
+            ytdlp_executable_not_found = ytdlpExecutableNotFound;
+            this.downloadPlaylists = downloadPlaylists;
+            this.downloadShorts = downloadShorts;
+            this.downloadChannels = downloadChannels;
+            concurrent_downloads = concurrentDownloads;
+            cookies_autoextract = cookiesAutoextract;
+            yt_dlp_binary_path = ytDlpBinaryPath;
+        }
     }
 }
