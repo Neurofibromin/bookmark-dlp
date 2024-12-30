@@ -7,6 +7,7 @@ using Avalonia.Markup.Xaml;
 using bookmark_dlp.Models;
 using bookmark_dlp.ViewModels;
 using bookmark_dlp.Views;
+using NfLogger;
 
 namespace bookmark_dlp
 {
@@ -70,14 +71,27 @@ namespace bookmark_dlp
                             
                         }
                         
-                        var mainWindowVM = new MainWindowViewModel();
-                        var MainWindow = new MainWindow
+                        if (false)
                         {
-                            DataContext = mainWindowVM,
-                        };
-
-                        desktop.MainWindow = MainWindow;
-                        MainWindow.Show();
+                            var mainWindowVM = new MainWindowViewModel();
+                            var MainWindow = new MainWindow
+                            {
+                                DataContext = mainWindowVM,
+                            };
+                            desktop.MainWindow = MainWindow;
+                            MainWindow.Show();
+                        }
+                        else
+                        {
+                            var TabsWindowVM = new TabsMainWindowViewModel();
+                            var TabsMainWindow = new TabsMainWindow()
+                            {
+                                DataContext = TabsWindowVM,
+                            };
+                            desktop.MainWindow = TabsMainWindow;
+                            TabsMainWindow.Show();
+                        }
+                        
                         askConfigWindow.Close();
                     };
                 }
@@ -85,15 +99,31 @@ namespace bookmark_dlp
                 {
                     Console.WriteLine("Config was found");
                     Console.WriteLine("Location: " + AppMethods.ConfigFileLocation());
-                    var mainWindowVM = new MainWindowViewModel();
-                    var MainWindow = new MainWindow
+                    if (false)
                     {
-                        DataContext = mainWindowVM,
-                    };
-
-                    desktop.MainWindow = MainWindow;
-                    MainWindow.Show();
+                        var mainWindowVM = new MainWindowViewModel();
+                        var MainWindow = new MainWindow
+                        {
+                            DataContext = mainWindowVM,
+                        };
+                        desktop.MainWindow = MainWindow;
+                        MainWindow.Show();
+                    }
+                    else
+                    {
+                        var TabsWindowVM = new TabsMainWindowViewModel();
+                        var TabsMainWindow = new TabsMainWindow()
+                        {
+                            DataContext = TabsWindowVM,
+                        };
+                        desktop.MainWindow = TabsMainWindow;
+                        TabsMainWindow.Show();
+                    }
                 }
+            }
+            else
+            {
+                Logger.LogVerbose("App not desktop, unable to initialize");
             }
             base.OnFrameworkInitializationCompleted();
         }

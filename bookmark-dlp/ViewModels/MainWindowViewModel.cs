@@ -46,7 +46,7 @@ namespace bookmark_dlp.ViewModels
         
         public MainWindowViewModel()
         {
-            // Console.WriteLine("In orig at mwvm: " + JsonConvert.SerializeObject(AppSettings._settings));
+            // Logger.LogVerbose("In orig at mwvm: " + JsonSerializer.Serialize(AppSettings._settings));
             mySettingsViewModel = new SettingsViewModel();
             myStartPageViewModel = new StartPageViewModel();
             myDownloadingViewModel = new DownloadingViewModel();

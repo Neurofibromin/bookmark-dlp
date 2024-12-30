@@ -61,7 +61,7 @@
             Margin="4"
             Command="{Binding RestoreDefaultSettingsCommand}"
             FontSize="9">
-            Restore Defauls
+            Restore Defaults
         </Button>
         <Button
             Margin="4"

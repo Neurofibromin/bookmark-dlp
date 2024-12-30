@@ -64,7 +64,7 @@ namespace bookmark_dlp.ViewModels
             _logStream.Read(buffer, 0, buffer.Length);
 
             // Convert the new data to a string and update logs
-            var newData = Encoding.UTF8.GetString(buffer) + '\n';
+            var newData = Encoding.UTF8.GetString(buffer);
             Logs += newData;
 
             // Update the read position

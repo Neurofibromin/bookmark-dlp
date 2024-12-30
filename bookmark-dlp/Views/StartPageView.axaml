@@ -36,7 +36,7 @@
                 Import from browser: Choose source (and profile)
             </TextBlock>
             <ListBox
-                Name="browsers"
+                Name="Browsers"
                 Grid.Column="1"
                 Margin="0"
                 Background="LightGoldenrodYellow"
@@ -51,12 +51,11 @@
             Grid.Row="2"
             Margin="20,0,20,0"
             Orientation="Horizontal">
-
             <Label Margin="4">
                 or choose html file
             </Label>
             <Label
-                Name="chosenfilelabel"
+                Name="ChosenfileLabel"
                 Margin="4"
                 IsVisible="{Binding ActiveSettings.HtmlImportUsed}">
                 Chosen file:
@@ -75,8 +74,6 @@
                     <Label>Select file</Label>
                 </StackPanel>
             </Button>
-
-
         </StackPanel>
 
         <!--  Folder  -->
@@ -119,7 +116,7 @@
                 Settings
             </Button>
             <StackPanel Grid.Column="1">
-                <Label Content="{Binding ActiveSettings.Yt_dlp_binary_path}">not used yet</Label>
+                <Label Content="{Binding ActiveSettings.Yt_dlp_binary_path}" />
                 <TextBlock
                     Margin="4"
                     HorizontalAlignment="Center"
