@@ -15,17 +15,27 @@ namespace Nfbookmark
     {
 
         /// <summary>
-        /// Pretty prints the folder structure to console
+        /// Pretty prints the folder structure to console <br/>
+        /// Requires:
+        /// Name
+        /// Depth
+        /// Startline
+        /// Endingline
+        /// numberoflinks
+        /// Parent
+        /// Id
         /// </summary>
         /// <param name="folders">The folder structure to be printed</param>
         public static void PrintToConsole(List<Folderclass> folders)
         {
             if (folders == null || folders.Count == 0)
             {
-                Console.WriteLine("No folders to display.");
+                Logger.LogVerbose("No folders to display.");
                 return;
             }
-
+            // int deepestdepth = folders.Select(t => t.depth).Prepend(0).Max(); //Finding the deepest folder depth
+            // int maxnamelength = folders.Select(t => t.name.Length).Prepend(0).Max();
+            // int maxidlength = folders.Select(folder => folder.id.ToString().Length).Max();
             int deepestdepth = 0;
             int deepestdepthlength = 0;
             int maxstartlinelength = 0;
@@ -45,7 +55,7 @@ namespace Nfbookmark
                 maxidlength = Math.Max(maxidlength, folder.id.ToString().Length);
             }
 
-            Console.WriteLine("The following folders were found");
+            Logger.LogVerbose("The following folders were found");
 
             /* for (int m = 0; m < folders.Count; m++)
                 Folderclass currentFolder = folders[m];
@@ -56,10 +66,7 @@ namespace Nfbookmark
             Folderclass previousFolder = null;
             foreach (Folderclass folder in folders.OrderBy(a => a.id).ToList()) //writing the depth, the starting line, the ending line, name, and number of links of all the folders
             {
-                /*Console.WriteLine(folder.id + " " + folders.IndexOf(folder));
-                continue;*/
                 Folderclass currentFolder = folder;
-                
                 int m = folder.id;
                 //if (m>0) { previousFolder = folders.Single(a => a.id == m-1); } else { previousFolder = null; }
 
@@ -80,15 +87,13 @@ namespace Nfbookmark
                 }               // string.Concat(Enumerable.Repeat("_", Math.Abs(depthsymbolcounter - deepestdepthlength)))
                 else { } //at first folder the depth does not change
                 Console.Write(string.Concat(Enumerable.Repeat("-", depthsymbolcounter)));
-                // Console.Write("-" + depthsymbolcounter.ToString());
                 string write = $"{currentFolder.depth.ToString().PadRight(deepestdepthlength, '_')}" + new string('_', deepestdepth - depthsymbolcounter) +
                     $" is the depth of {currentFolder.startline.ToString().PadLeft(maxstartlinelength, '_')}/{currentFolder.endingline.ToString().PadLeft(maxendlinelength, '_')} " +
                     $"[{currentFolder.name.Replace(' ', '_').PadRight(maxnamelength, '_')}] folder, which contains [{currentFolder.numberoflinks.ToString().PadLeft(maxnumberoflinklength, '_')}] links. " +
                     $"id:\"{currentFolder.id.ToString().PadLeft(maxidlength, '_')}\" parent:\"{currentFolder.parent.ToString().PadLeft(maxidlength, '_')}";
                 //Console.ForegroundColor = ConsoleColor.Red;
                 //Console.ResetColor();
-
-
+                
                 string[] words = write.Split(' ');
 
                 for (int i = 0; i < words.Length; i++)
@@ -105,21 +110,20 @@ namespace Nfbookmark
                     Console.Write(word.Replace('_', ' ') + " ");
                     Console.ResetColor();
                 }
-                Console.WriteLine();
+                Logger.LogVerbose("");
                 previousFolder = currentFolder;
             }
-            Console.WriteLine("Alltogether " + folders.Count + " folders were found.");
-            /*if (totalyoutubelinknumber != 0)
-            {
-                Console.WriteLine(totalyoutubelinknumber + " youtube links were found, written into " + folders.Count + " folders.");
-            }*/
+            Logger.LogVerbose("Alltogether " + folders.Count + " folders were found.");
         }
 
         /// <summary>
         /// Attempt to make sure all bookmark folder names are good for filesystems folder names. If needed, changes the folder.name value<br/>
-        /// Neccessary because bookmark folders can have 1) empty names 2) the same names 3) contain not allowed characters or character combinations
+        /// Neccessary because bookmark folders can have 1) empty names 2) the same names 3) contain not allowed characters or character combinations<br/>
+        /// Requires:
+        /// Name
+        /// Parent
         /// </summary>
-        /// <param name="folders">The bookmark folders to operate on</param>
+        /// <param name="folders">The bookmark folders to operate on, folder names may be changed</param>
         public static void FoldernameValidation(ref List<Folderclass> folders)
         {
             string[] forbiddenCharacters = {"/", ":", "?", "<", ">", "*", "|" , "\\" , "\""};
@@ -155,52 +159,100 @@ namespace Nfbookmark
                     folder.name = newfoldername;
                 }
             }
-            /* int deepestdepth = 0; //Finding the deepest folder depth
-               for (int q = 0; q < folders.Count; q++)
-               {
-                   if (deepestdepth < folders[q].depth)
-                   {
-                       deepestdepth = folders[q].depth;
-                   }
-               }
-             */
-            int deepestdepth = folders.Select(t => t.depth).Prepend(0).Max(); //Finding the deepest folder depth
-            // If two folders have the same name and same depth and same parent
-            for (int depth = 0; depth < deepestdepth + 1; depth++)
+            // If two folders have the same name and same parent (and same depth)
+            for (int i = 0; i < folders.Count-1; i++)
             {
-                for (int i = 0; i < folders.Count; i++)
+                for (int j = i+1; j < folders.Count; j++)
                 {
-                    for (int j = 0; j < folders.Count; j++)
+                    if (string.Equals(folders[i].name, folders[j].name, StringComparison.CurrentCultureIgnoreCase) &&
+                        folders[i].depth == folders[j].depth &&
+                        folders[i].parent == folders[j].parent)
                     {
-                        if (string.Equals(folders[i].name, folders[j].name, StringComparison.CurrentCultureIgnoreCase) &&
-                            folders[i].depth == folders[j].depth &&
-                            folders[i].parent == folders[j].parent)
-                        {
-                            folders[j].name = folders[j].name + $"ID{folders[j].id}";
-                            folders[i].name = folders[i].name + $"ID{folders[i].id}";
-                        }
+                        folders[j].name = folders[j].name + $"ID{folders[j].id}";
+                        folders[i].name = folders[i].name + $"ID{folders[i].id}";
                     }
                 }
             }
         }
 
         /// <summary>
-        /// Creating the folder structure on filesystems and storing the access paths to folders[].folderpath
+        /// Creating the folder structure on filesystems and storing the access paths to folders[].folderpath <br/>
+        /// Requires:
+        /// Name
+        /// Depth
+        /// Parent<br/>
+        /// Fills:
+        /// Folderpath
         /// </summary>
         /// <param name="folders">Bookmark folders to be made into filesystem folders</param>
         /// <param name="rootdir">Fiilesystems directory to contain all the folders</param>
         public static void Createfolderstructure(ref List<Folderclass> folders, string rootdir)
         {
+            //TODO: rewrite this to use parent property
             FoldernameValidation(ref folders);
             if (!Directory.Exists(rootdir)) { Directory.CreateDirectory(rootdir); }
             Directory.SetCurrentDirectory(rootdir);
             System.IO.Directory.CreateDirectory("Bookmarks");
             Directory.SetCurrentDirectory("Bookmarks");
-            for (int m = 0; m < folders.Count; m++)
+            string bookmarkroot = Directory.GetCurrentDirectory();
+            string parentdir;
+            List<Folderclass> ordered = new List<Folderclass>(folders);
+            foreach (Folderclass folder in ordered.OrderBy(f => f.depth))
+            {
+                try
+                {
+                    if (folder.depth != 0 && folder.depth != folders[folder.parent].depth + 1)
+                    {
+                        Logger.LogVerbose(
+                            $"Depth of folder {folder.name} is {folder.depth}, not 1 more than its parent's {folders[folder.parent].name} depth: {folders[folder.parent].depth}", Logger.Verbosity.Error);
+                        throw new InvalidDataException(
+                            $"Depth of folder {folder.name} is {folder.depth}, not 1 more than its parent's {folders[folder.parent].name} depth: {folders[folder.parent].depth}");
+                    }
+                }
+                catch (IndexOutOfRangeException e)
+                {
+                    Logger.LogVerbose($"Folder has no parent? Folder name: {folder.name}, parent id: {folder.parent}, number of folders: {folders.Count}", Logger.Verbosity.Error);
+                    throw;
+                }
+                if (folder.depth == 0)
+                {
+                    parentdir = bookmarkroot;
+                    System.IO.Directory.CreateDirectory(Path.Combine(parentdir, folder.name));
+                    folder.folderpath = Path.Combine(parentdir, folder.name); //path
+                    Logger.LogVerbose($"Folderpath created for folder {folder.name} is {folder.folderpath}", Logger.Verbosity.Trace);
+                }
+                else
+                {
+                    try
+                    {
+                        parentdir = folders[folder.parent].folderpath;
+                    }
+                    catch (IndexOutOfRangeException e)
+                    {
+                        Logger.LogVerbose($"Folder has no parent? Folder name: {folder.name}, parent id: {folder.parent}, number of folders: {folders.Count}", Logger.Verbosity.Error);
+                        throw;
+                    }
+                    if (!Directory.Exists(parentdir))
+                    {
+                        if (folder.depth <= folders[folder.parent].depth)
+                        {
+                            Logger.LogVerbose($"Folder's parent has not lower depth than folder. Folder name: {folder.name}, depth: {folder.depth}," +
+                                              $" parent name: {folders[folder.parent].name} parent depth: {folders[folder.parent].depth}", Logger.Verbosity.Error);
+                        }
+                        throw new InvalidDataException("Folder's parent directory does not exist. Folder: " + folder.name +
+                                                       " Parent: " + folders[folder.parent].name + " Parent dir: " + parentdir);
+                    }
+                    System.IO.Directory.CreateDirectory(Path.Combine(parentdir, folder.name));
+                    folder.folderpath = Path.Combine(parentdir, folder.name); //path
+                    Logger.LogVerbose($"Folderpath created for folder {folder.name} is {folder.folderpath}", Logger.Verbosity.Trace);
+                }
+            }
+
+            /* Old method, did not take parent into account, assumed only the element in the list directly before the folder may be its parent
+             for (int m = 0; m < folders.Count; m++)
             {
                 if (m > 0)
                 {
-
                     if (folders[m].depth > folders[m - 1].depth) //more depth than previous folder
                     {
                         Directory.SetCurrentDirectory(folders[m - 1].name);
@@ -238,12 +290,13 @@ namespace Nfbookmark
                     folders[m].folderpath = Directory.GetCurrentDirectory(); //path
                     Directory.SetCurrentDirectory(Path.Combine(Directory.GetCurrentDirectory(), "..")); //coming out of the folder
                 }
-            }
+            }*/
         }
 
         public YTLink? UrlsToYTLinks(string _url)
         {
             // TODO: finish this, substring exmaples missing
+            throw new NotImplementedException();
             if (!_url.Contains("www.youtube.com")) //only write lines that are youtube links
             {return null;}
             
@@ -376,9 +429,18 @@ namespace Nfbookmark
         }
         
         /// <summary>
-        /// Searches for all wanted default videos (not playlists and channels) and
-        /// fills Folderclass fields for object.
-        /// The folderclass objects should already have their filesystem paths (folderpath) filled.
+        /// Searches for all wanted default videos (not playlists and channels) and fills Folderclass fields for object. <br/>
+        /// Requires:
+        /// Folderpath
+        /// Links
+        /// Urls<br/>
+        /// Fills:
+        /// numberofmissinglinks
+        /// numberOfWantedVideosFound
+        /// numberOfOtherVideosFound
+        /// numberOfAllVideosFound
+        /// missingurls
+        /// missinglinks
         /// </summary>
         /// <param name="folders">The list of folders that is being checked</param>
         public void CheckCurrentFilesystemState(ref List<Folderclass> folders)
@@ -396,6 +458,8 @@ namespace Nfbookmark
                             folder.foundlinks.Add(link);
                             folder.foundurls.Add(link.url);
                         }
+
+                        throw new NotImplementedException();
                         // checking for channels
                         // checking for playlists
                         //todo: continue this

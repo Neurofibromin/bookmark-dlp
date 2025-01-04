@@ -19,14 +19,14 @@ namespace Nfbookmark
         /// Smart import, give file path and will automatically select import function
         /// </summary>
         /// <param name="filePath">Path to the html/json file containing the bookmarks.</param>
-        /// <returns>List Folderclass or null </returns>
+        /// <returns>List Folderclass or null with the below listed fields filled.</returns>
         public static List<Folderclass> SmartImport(string filePath)
         {
             if (!File.Exists(filePath)) { return null; }
             try
             {
                 StreamReader sr = new StreamReader(filePath);
-                string tryread = sr.ReadToEnd();
+                string tryread = sr.ReadLine();
                 sr.Close();
                 Logger.LogVerbose("Parsing SmartImport: " + filePath);
             }

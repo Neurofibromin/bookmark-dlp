@@ -1,8 +1,10 @@
-﻿using bookmark_dlp;
+﻿using System.Collections.ObjectModel;
+using bookmark_dlp;
 using Microsoft.Data.Sqlite;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using bookmark_dlp.Models;
 using NfLogger;
 
 internal class AppMethods
@@ -493,6 +495,45 @@ internal class AppMethods
         {
             return true;
         }
+    }
+    
+    /// <summary>
+    /// Generating Hierarchical Observable FolderCollection from folders
+    /// </summary>
+    /// <param name="folders"></param>
+    /// <returns></returns>
+    public static ObservableCollection<HierarchicalFolderclass> GenerateHierarchicalFolderclassesFromList(List<Folderclass> folders)
+    {
+        ObservableCollection<HierarchicalFolderclass> hierarchicalFolderclasses = new ObservableCollection<HierarchicalFolderclass>();
+        
+        foreach (Folderclass folder in folders.Where(a => a.depth == 0))
+        {
+            hierarchicalFolderclasses.Add(new HierarchicalFolderclass(folder) { IsExpanded = true });
+            Logger.LogVerbose("added root: " + folder.name, Logger.Verbosity.Trace);
+        }
+        foreach (Folderclass folder in folders.Where(a => a.depth != 0).OrderBy(a => a.depth))
+        {
+            Logger.LogVerbose("examining " + folder.name + " " + folder.id + " parent:" + folder.parent, Logger.Verbosity.Trace);
+            bool foundparent = false;
+            foreach (HierarchicalFolderclass parent in hierarchicalFolderclasses)
+            {
+                if (parent.Id == folder.parent) { 
+                    Logger.LogVerbose("Found parent: " + parent.Name, Logger.Verbosity.Trace);
+                    parent._children.Add(new HierarchicalFolderclass(folder));
+                    parent.HasChildren = true;
+                    foundparent = true;
+                    break;
+                }
+            }
+            if (!foundparent)
+            {
+                hierarchicalFolderclasses.Add(new HierarchicalFolderclass(folder));
+                Logger.LogVerbose("The following folder has no parent despite depth != 0: " + folder.name, Logger.Verbosity.Error);
+            }
+            // HierarchcalFolderCollection.Single(parent => parent.Id == folder.parent).Children.Add(onefolder);
+            Logger.LogVerbose("added: " + folder.name, Logger.Verbosity.Trace);
+        }
+        return hierarchicalFolderclasses;
     }
 
     public enum ProgramUI { GUI, CLI }

@@ -106,7 +106,7 @@ namespace NfLogger
                 }
             }
         }
-
+        
         /// <summary>
         /// Adds stream to logging targets, if stream was already present among them does nothing.
         /// </summary>

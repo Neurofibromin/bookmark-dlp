@@ -159,6 +159,30 @@ namespace bookmark_dlp
         {
             return $"Name:{name}, id:{id}, depth:{depth}, number of urls:{urls.Count}";
         }
+        
+        // int startline
+        // string name
+        // int depth
+        // int endingline
+        // string folderpath
+        // int numberoflinks
+        // int numberofmissinglinks
+        // List<YTLink> missinglinks
+        // List<string> missingurls
+        // List<YTLink> foundlinks
+        // List<string> foundurls
+        // List<string> urls
+        // List<YTLink> links
+        // int id
+        // int parent
+        // List<int> children
+        // bool wantDownloaded
+        // int numberOfVideosDirectlyWanted
+        // int numberOfVideosIndirectlyWanted
+        // int numberOfVideosAllWanted
+        // int numberOfWantedVideosFound
+        // int numberOfOtherVideosFound
+        // int numberOfAllVideosFound
     }
 
     /// <summary>

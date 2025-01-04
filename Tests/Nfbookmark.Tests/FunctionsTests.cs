@@ -1,0 +1,202 @@
+using bookmark_dlp;
+using NfLogger;
+using Nfbookmark;
+using Xunit;
+
+namespace Nfbookmark.Tests
+{
+    public class FunctionsTests
+    {
+        #region FoldernameValidationFunctionTests
+
+        [Fact]
+        public void FoldernameValidation_RemovesForbiddenCharacters()
+        {
+            var folders = new List<Folderclass>
+            {
+                new Folderclass { name = "folder/1", id = 1, depth = 0, parent = 0 },
+                new Folderclass { name = "folder?2", id = 2, depth = 0, parent = 0 }
+            };
+            Functions.FoldernameValidation(ref folders);
+            Assert.Equal("folder1", folders[0].name);
+            Assert.Equal("folder2", folders[1].name);
+        }
+        [Fact]
+        public void FoldernameValidation_HandlesEmptyNames()
+        {
+            var folders = new List<Folderclass>
+            {
+                new Folderclass { name = "", id = 1, depth = 0, parent = 0 }
+            };
+            Functions.FoldernameValidation(ref folders);
+            Assert.Equal("ID1", folders[0].name);
+        }
+
+        [Fact]
+        public void FoldernameValidation_HandlesSpacesAndPeriods()
+        {
+            var folders = new List<Folderclass>
+            {
+                new Folderclass { name = " . ", id = 1, depth = 0, parent = 0 }
+            };
+            Functions.FoldernameValidation(ref folders);
+            Assert.Equal("ID1", folders[0].name);
+        }
+
+        [Fact]
+        public void FoldernameValidation_HandlesNamesStartingWithPeriods()
+        {
+            var folders = new List<Folderclass>
+            {
+                new Folderclass { name = ".hidden", id = 1, depth = 0, parent = 0 }
+            };
+            Functions.FoldernameValidation(ref folders);
+            Assert.Equal("ID1", folders[0].name);
+        }
+
+        [Fact]
+        public void FoldernameValidation_HandlesDuplicateNamesAtSameDepthAndParent()
+        {
+            var folders = new List<Folderclass>
+            {
+                new Folderclass { name = "duplicate", id = 1, depth = 0, parent = 0 },
+                new Folderclass { name = "duplicate", id = 2, depth = 0, parent = 0 }
+            };
+            Functions.FoldernameValidation(ref folders);
+            Assert.Equal("duplicateID1", folders[0].name);
+            Assert.Equal("duplicateID2", folders[1].name);
+        }
+
+        #endregion FoldernameValidationFunctionTests
+
+        #region CreatefolderstructureFunctionTests
+
+        [Fact]
+        public void CreateFolderStructure_CreatesFoldersCorrectly()
+        {
+            // Arrange
+            var folders = new List<Folderclass>
+            {
+                new Folderclass { name = "Folder1", depth = 0, parent = 0 },
+                new Folderclass { name = "SubFolder1", depth = 1, parent = 0 },
+                new Folderclass { name = "SubFolder2", depth = 1, parent = 0 },
+                new Folderclass { name = "SubSubSubFolder1", depth = 3, parent = 5},
+                new Folderclass { name = "SubSubFolder1-1", depth = 2, parent = 2},
+                new Folderclass { name = "SubSubFolder2", depth = 2, parent = 1},
+                new Folderclass { name = "SubSubFolder1-2", depth = 2, parent = 2}
+            };
+            Assert.Equal(7, folders.Count);
+            string rootDir = Path.Combine(Path.GetTempPath(), "RootTestDir");
+            Directory.CreateDirectory(rootDir);
+            try
+            {
+                // Act
+                Functions.Createfolderstructure(ref folders, rootDir);
+
+                // Assert
+                string expectedPath1 = Path.Combine(rootDir, "Bookmarks", "Folder1");
+                string expectedPath2 = Path.Combine(rootDir, "Bookmarks", "Folder1", "SubFolder1");
+                string expectedPath3 = Path.Combine(rootDir, "Bookmarks", "Folder1", "SubFolder2");
+                string expectedPath4 = Path.Combine(rootDir, "Bookmarks", "Folder1", "SubFolder2", "SubSubFolder1-1");
+                string expectedPath5 = Path.Combine(rootDir, "Bookmarks", "Folder1", "SubFolder2", "SubSubFolder1-2");
+                string expectedPath6 = Path.Combine(rootDir, "Bookmarks", "Folder1", "SubFolder1", "SubSubFolder2");
+                string expectedPath7 = Path.Combine(rootDir, "Bookmarks", "Folder1", "SubFolder1", "SubSubFolder2" , "SubSubSubFolder1");
+                
+                
+                Assert.True(Directory.Exists(expectedPath1));
+                Assert.True(Directory.Exists(expectedPath2));
+                Assert.True(Directory.Exists(expectedPath3));
+                Assert.True(Directory.Exists(expectedPath4));
+                Assert.True(Directory.Exists(expectedPath5));
+                Assert.True(Directory.Exists(expectedPath6));
+                Assert.True(Directory.Exists(expectedPath7));
+
+                Assert.Equal(expectedPath1, folders[0].folderpath);
+                Assert.Equal(expectedPath2, folders[1].folderpath);
+                Assert.Equal(expectedPath3, folders[2].folderpath);
+                Assert.Equal(expectedPath4, folders[4].folderpath);
+                Assert.Equal(expectedPath5, folders[6].folderpath);
+                Assert.Equal(expectedPath6, folders[5].folderpath);
+                Assert.Equal(expectedPath7, folders[3].folderpath);
+            }
+            finally
+            {
+                // Cleanup
+                Directory.Delete(rootDir, true);
+            }
+        }
+
+        [Fact]
+        public void CreateFolderStructure_HandlesEmptyRootDirectory()
+        {
+            // Arrange
+            var folders = new List<Folderclass>
+            {
+                new Folderclass { name = "Folder1", depth = 0 }
+            };
+
+            string rootDir = Path.Combine(Path.GetTempPath(), "RootTestDir2");
+
+            try
+            {
+                // Act
+                Functions.Createfolderstructure(ref folders, rootDir);
+
+                // Assert
+                string expectedPath = Path.Combine(rootDir, "Bookmarks", "Folder1");
+
+                Assert.True(Directory.Exists(expectedPath));
+                Assert.Equal(expectedPath, folders[0].folderpath);
+            }
+            finally
+            {
+                // Cleanup
+                Directory.Delete(rootDir, true);
+            }
+        }
+
+        [Fact]
+        public void CreateFolderStructure_HandlesDepthChangesCorrectly()
+        {
+            // Arrange
+            var folders = new List<Folderclass>
+            {
+                new Folderclass { name = "RootFolder", depth = 0 },
+                new Folderclass { name = "ChildFolder", depth = 1 , parent = 0},
+                new Folderclass { name = "SiblingFolder", depth = 1 , parent = 0},
+                new Folderclass { name = "ChildOfSibling", depth = 2 , parent = 2}
+            };
+
+            string rootDir = Path.Combine(Path.GetTempPath(), "RootTestDir3");
+            Directory.CreateDirectory(rootDir);
+
+            try
+            {
+                // Act
+                Functions.Createfolderstructure(ref folders, rootDir);
+
+                // Assert
+                string expectedPathRoot = Path.Combine(rootDir, "Bookmarks", "RootFolder");
+                string expectedPathChild = Path.Combine(rootDir, "Bookmarks", "RootFolder", "ChildFolder");
+                string expectedPathSibling = Path.Combine(rootDir, "Bookmarks", "RootFolder", "SiblingFolder");
+                string expectedPathChildOfSibling = Path.Combine(rootDir, "Bookmarks", "RootFolder", "SiblingFolder", "ChildOfSibling");
+
+                Assert.True(Directory.Exists(expectedPathRoot));
+                Assert.True(Directory.Exists(expectedPathChild));
+                Assert.True(Directory.Exists(expectedPathSibling));
+                Assert.True(Directory.Exists(expectedPathChildOfSibling));
+
+                Assert.Equal(expectedPathRoot, folders[0].folderpath);
+                Assert.Equal(expectedPathChild, folders[1].folderpath);
+                Assert.Equal(expectedPathSibling, folders[2].folderpath);
+                Assert.Equal(expectedPathChildOfSibling, folders[3].folderpath);
+            }
+            finally
+            {
+                // Cleanup
+                Directory.Delete(rootDir, true);
+            }
+        }
+        #endregion CreatefolderstructureFunctionTests
+    }
+}

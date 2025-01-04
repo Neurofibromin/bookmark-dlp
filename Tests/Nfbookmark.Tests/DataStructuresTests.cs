@@ -9,14 +9,14 @@ namespace Nfbookmark.Tests
         public void Bookmarks_folders_empty_at_start()
         {
             Bookmarks bookmark = new Bookmarks();
-            Assert.Equal(bookmark.folders.Count, 0);
+            Assert.Empty(bookmark.folders);
         }
         
         [Fact]
         public void Folderclass_children_empty_at_start()
         {
             Folderclass folder = new Folderclass();
-            Assert.Equal(folder.children.Count, 0);
+            Assert.Empty(folder.children);
         }
         
         [Fact]

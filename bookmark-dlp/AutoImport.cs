@@ -304,13 +304,13 @@ namespace bookmark_dlp
     }
 
 
-
+/*
     public partial class ObsFolderclass : ObservableObject
     {
-        [ObservableProperty]
-        private int
-            _startline; //for html: the line number in which the folder starts in the html. json(autoimport intake chrome): the folder id, same as the folder[totalyoutubelinknumber] index. firefox-sql: the bookmark id of the folder in the sql db
-
+        //NOTE: Not in agreement with Folderclass, eg. Children and children are different types. 
+        [ObservableProperty] private int _startline; //for html: the line number in which the folder starts in the html.
+                        //json(autoimport intake chrome): the folder id, same as the folder[totalyoutubelinknumber] index.
+                        //firefox-sql: the bookmark id of the folder in the sql db
         [ObservableProperty] private string _name;
         [ObservableProperty] private int _depth;
         [ObservableProperty] private int _endingline;
@@ -365,4 +365,5 @@ namespace bookmark_dlp
             // children = new ObservableCollection<Folderclass>();
         }
     }
+*/
 }
