@@ -72,10 +72,11 @@ namespace bookmark_dlp
                 browsername = "Microsoft Edge",
                 browserType = BrowserType.chromiumbased,
                 windows_profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Microsoft\\Edge\\User Data"),
-                linux_profilespath = new List<string> { Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "microsoft-edge") }, 
+                linux_profilespath = new List<string> { Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "microsoft-edge") },
+                osx_profilespath = new List<string> { Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.Personal), "Library/Application Support/Microsoft Edge") }
                 //.config/microsoft-edge/Default/Bookmarks
+                // OSX:  /Users/username/Library/Application Support/Microsoft Edge/profilefolder/
                 // C:\Users\<Current-user>\AppData\Local\Microsoft\Edge\User Data\Default.
-                //TODO: osx
             };
             BrowserLocations Opera = new BrowserLocations()
             {
@@ -83,19 +84,18 @@ namespace bookmark_dlp
                 browserType = BrowserType.chromiumbased,
                 //C:\Users\%username%\AppData\Roaming\Opera Software\Opera Stable\Bookmarks is the Bookmarks file
                 windows_profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Opera Software"),
-                //opera: .config/opera/Bookmarks
+                linux_profilespath = new List<string> { Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "opera") },
+                osx_profilespath = new List<string> { Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.Personal), "Library/Application Support/Opera Software") },
                 hardcodedpaths = new List<string>()
                 {
                     Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "opera/Bookmarks"),
                 }
-                //TODO: osx and linux
             };
             BrowserLocations Firefox = new BrowserLocations
             {
                 browsername = "Firefox",
                 browserType = BrowserType.firefoxbased,
                 windows_profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Mozilla\\Firefox\\Profiles\\"),
-                //linksfound = "",
                 linux_profilespath = new List<string> { 
                     Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "snap/firefox/common/.mozilla/firefox/"),
                     Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".mozilla/firefox"),
