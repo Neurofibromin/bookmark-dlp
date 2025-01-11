@@ -19,22 +19,15 @@ namespace bookmark_dlp.Models
         [ObservableProperty] private int _depth;
         [ObservableProperty] private int _endingline;
         [ObservableProperty] private string _folderpath;
-        [ObservableProperty] private int _numberoflinks;
-        [ObservableProperty] private int _numberofmissinglinks;
         [ObservableProperty] private List<string> _urls;
         [ObservableProperty] private int _id; //same as array index
         [ObservableProperty] private int _parent;
         [ObservableProperty] private bool _wantDownloaded;
         [ObservableProperty] private int _numberOfVideosDirectlyWanted;
         [ObservableProperty] private int _numberOfVideosIndirectlyWanted;
-        [ObservableProperty] private int _numberOfVideosAllWanted;
-        [ObservableProperty] private int _numberOfWantedVideosFound;
         [ObservableProperty] private int _numberOfOtherVideosFound;
-        [ObservableProperty] private int _numberOfAllVideosFound;
         [ObservableProperty] private List<YTLink> _missinglinks;
-        [ObservableProperty] private List<string> _missingurls;
         [ObservableProperty] private List<YTLink> _foundlinks;
-        [ObservableProperty] private List<string> _foundurls;
         
         [ObservableProperty] private bool _hasChildren = false;
         [ObservableProperty] private bool _isExpanded = false;
@@ -53,22 +46,15 @@ namespace bookmark_dlp.Models
             _depth = other.depth;
             _endingline = other.endingline;
             _folderpath = other.folderpath;
-            _numberoflinks = other.numberoflinks;
-            _numberofmissinglinks = other.numberofmissinglinks;
             _urls = other.urls;
             _id = other.id;
             _parent = other.parent;
             _wantDownloaded = other.wantDownloaded;
             _numberOfVideosDirectlyWanted = other.numberOfVideosDirectlyWanted;
             _numberOfVideosIndirectlyWanted = other.numberOfVideosIndirectlyWanted;
-            _numberOfVideosAllWanted = other.numberOfVideosAllWanted;
-            _numberOfWantedVideosFound = other.numberOfWantedVideosFound;
             _numberOfOtherVideosFound = other.numberOfOtherVideosFound;
-            _numberOfAllVideosFound = other.numberOfAllVideosFound;
-            _missinglinks = other.missinglinks;
-            _missingurls = other.missingurls;
-            _foundlinks = other.foundlinks;
-            _foundurls = other.foundurls;
+            _missinglinks = other.LinksWithMissingVideos;
+            _foundlinks = other.LinksWithNoMissingVideos;
             _children = new ObservableCollection<HierarchicalFolderclass>();
         }
         

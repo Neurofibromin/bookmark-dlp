@@ -1,83 +1,26 @@
 ﻿using System.Collections.ObjectModel;
-using bookmark_dlp;
-using Microsoft.Data.Sqlite;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using bookmark_dlp.Models;
 using NfLogger;
 
-internal class AppMethods
-{
-    /// <summary>
-    /// Check whether the youtube links that were on the list are now dowloaded into the appripriate directories. Good for finding rotten links.
-    /// Only checks the filenames for the yt-id (11 characters): if yt-dlp config is set to not include such id in the filename it will not work.
-    /// yt-dlp logs could also be parsed for the same info, although if a video was downloaded in the past and no longer available on the net, it would still be flagged (?) - depends on the archive.txt usage setting
-    /// </summary>
-    /// <param name="rootdir">Filesystem directory path to find videos in</param>
-    /// <param name="folders"></param>
-    public static void Checkformissing(string rootdir, List<Folderclass> folders)
-    {
-        //TODO: handle channels
-        List<Bookmark> notfoundbookmarks = new List<Bookmark>();
-        foreach (Folderclass folder in folders)
-        {
-            if (Directory.Exists(folder.folderpath))
-            {
-                Directory.SetCurrentDirectory(folder.folderpath);
-                int checkspassed = 0;
-                if (File.Exists(folder.name + ".txt"))
-                {
-                    string[] linkcheckerlist = File.ReadAllLines(folder.name + ".txt");
-                    foreach (string link in linkcheckerlist)
-                    {
-                        string youtubeid = link.Substring(32, 11);
-                        bool contains = Directory.EnumerateFiles(Directory.GetCurrentDirectory()).Any(f => f.Contains(youtubeid));
-                        if (!contains)
-                        {
-                            Logger.LogVerbose($"{youtubeid} in folder: {folder.name} not found.", Logger.Verbosity.Warning);
-                            notfoundbookmarks.Add(new Bookmark() { url = link });
-                        }
-                    }
-                    checkspassed++;
-                }
-                if (File.Exists("archive.txt")) //checks the archive.txt written by yt-dlp if the config is used there
-                {
-                    string[] archivecheckerlist = File.ReadAllLines("archive.txt");
-                    foreach (string link in archivecheckerlist)
-                    {
-                        if (link.StartsWith("youtube")) //only check for youtube videos downloaded by yt-dlp in the given folder
-                        {
-                            string youtubeid = link.Substring(8, 11); //start at coloumn 8 because archive.txt does not store links, rather only the platform name and the video id
-                            bool contains = Directory.EnumerateFiles(Directory.GetCurrentDirectory()).Any(f => f.Contains(youtubeid));
-                            if (!contains)
-                            {
-                                Logger.LogVerbose($"{youtubeid} in folder: {folder.name} not found, despite it being present in archive.txt.", Logger.Verbosity.Warning);
-                                notfoundbookmarks.Add(new Bookmark() { url = link });
-                            }
-                        }
-                    }
-                    checkspassed++;
-                }
-                if (checkspassed == 0) { Logger.LogVerbose($"No checks for directory content passed for {folder.name}.", Logger.Verbosity.Warning); }
-                folder.numberofmissinglinks = notfoundbookmarks.Distinct().Count();
-                Logger.LogVerbose($"Number of missing links in directory {folder.name}: {folder.numberofmissinglinks}");
-            }
-        }
-    }
+namespace bookmark_dlp;
 
+public static class AppMethods
+{
     /// <summary>
     /// Finds yt-dlp binary. Checks multiple places. More details in project Readme.
     /// </summary>
     /// <param name="rootdir">The rootdir where bookmark-dlp is called from.</param>
     /// <returns>String containing the yt-dlp binary filepath.</returns>
     /// <exception cref="Exception">yt-dlp is not installed! Cannot proceed.</exception>
-    public static string Yt_dlp_pathfinder(string rootdir)
+    public static string Yt_dlp_pathfinder(string rootdir = "")
     {
         string ytdlp_path = ""; //checks is yt-dlp binary is present in root or if it is on path, returns ytdlp_path so it can be written into the script files
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
-            if (rootdir != null && File.Exists(Path.Combine(rootdir, "yt-dlp.exe")))
+            if (!String.IsNullOrWhiteSpace(rootdir) && File.Exists(Path.Combine(rootdir, "yt-dlp.exe")))
             {
                 //Console.WriteLine(Path.Combine(rootdir, "yt-dlp.exe") + " found");
                 ytdlp_path = Path.Combine(rootdir, "yt-dlp.exe");
@@ -121,9 +64,9 @@ internal class AppMethods
             foreach (string filename in filenames)
             {
                 // check for yt-dlp executable in working rootdir
-                if (rootdir != null && File.Exists(Path.Combine(rootdir, filename)))
+                if (!String.IsNullOrWhiteSpace(rootdir) && File.Exists(Path.Combine(rootdir, filename)))
                 {
-                    // Console.WriteLine(Path.Combine(rootdir, filename) + " found");
+                    Logger.LogVerbose("yt-dlp binary found at: " + Path.Combine(rootdir, filename), Logger.Verbosity.Debug);
                     ytdlp_path = Path.Combine(rootdir, filename);
                     break;
                 }
@@ -165,9 +108,6 @@ internal class AppMethods
                 }
                 // Console.WriteLine("ExitCode: {0}", process.ExitCode);
                 process.Close();
-                //Console.WriteLine("Is it on the path? Y/N");
-                //if(Console.ReadLine().Contains("Y")) { ytdlp_path = "yt-dlp"; }
-                //else { throw new Exception($"yt-dlp not found in path or in rootdir, install it before continuing."); }
             }
         }
         if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
@@ -175,146 +115,175 @@ internal class AppMethods
             string[] filenames = { "yt-dlp", "yt-dlp_macos", "yt-dlp_macos_legacy" };
             foreach (string filename in filenames)
             {
-                if (rootdir != null && File.Exists(Path.Combine(rootdir, filename)))
+                if (!String.IsNullOrWhiteSpace(rootdir) && File.Exists(Path.Combine(rootdir, filename)))
                 {
                     // Console.WriteLine(Path.Combine(rootdir, filename) + " found");
                     ytdlp_path = Path.Combine(rootdir, filename);
+                    break;
                 }
             }
             if (ytdlp_path == "")
             {
+                throw new NotImplementedException();
                 // TODO check OSX path for yt-dlp
                 /*Console.WriteLine(Path.Combine(rootdir, "yt-dlp") + " not found, searching PATH.");
-                Console.WriteLine("Is it on the path? Y/N");
-                if (Console.ReadLine().Contains("Y")) { ytdlp_path = "yt-dlp"; }
-                else { throw new Exception($"yt-dlp not found in path or in rootdir, install it before continuing."); }*/
-                return null;
+            Console.WriteLine("Is it on the path? Y/N");
+            if (Console.ReadLine().Contains("Y")) { ytdlp_path = "yt-dlp"; }
+            else { throw new Exception($"yt-dlp not found in path or in rootdir, install it before continuing."); }*/
             }
         }
         return ytdlp_path;
     }
 
     /// <summary>
-    /// Creates the scripts in every filesystem folder where they are necessary. Operating system aware.
+    /// Creates the scripts in every filesystem folder where they are necessary. Operating system aware. <br/>
+    /// Requires:
+    /// <list type="bullet">
+    /// <item> urls </item>
+    /// <item> name </item>
+    /// <item> folderpath </item>
+    /// <item> id </item>
+    /// </list>
     /// </summary>
     /// <param name="folders">The bookmark folder structure, where every bookmark folder already has the folderpath field filled with the correct filesystem folder path.</param>
     /// <param name="ytdlp_path">Path to the yt-dlp binary which will be called by the scripts.</param>
+    /// <exception cref="DirectoryNotFoundException">If folder.folderpath does not exist for any one folder.</exception>
     public static void Scriptwriter(List<Folderclass> folders, string ytdlp_path)
     {
+        if (!File.Exists(ytdlp_path))
+        {
+            Logger.LogVerbose(
+                $"Writing scripts with faulty yt-dlp binary path! The binary does not exist: {ytdlp_path}.",
+                Logger.Verbosity.Warning);
+        }
+
+        bool foldersok = true;
+        foreach (Folderclass folder in folders)
+        {
+            if (!Directory.Exists(folder.folderpath))
+            {
+                Logger.LogVerbose(
+                    $"Directory does not exist for the folder {folder.name}: {folder.folderpath}. Cannot write scripts!",
+                    Logger.Verbosity.Error);
+                foldersok = false;
+            }
+        }
+        if (!foldersok)
+        {
+            throw new DirectoryNotFoundException("The directories for scriptwriting could not be found for one or more folders.");
+        }
+
         string extensionforscript = ""; //writing scripts
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
             extensionforscript = ".bat";
-            for (int q = 0; q < folders.Count; q++) //writing bat files for every folder
+            foreach (Folderclass folder in folders) //writing bat files for every folder
             {
-                if (folders[q].numberoflinks > 0)
+                if (folder.urls.Count > 0)
                 {
-                    StreamWriter writer1 = new StreamWriter(Path.Combine(folders[q].folderpath, folders[q].name + extensionforscript), append: true);
+                    StreamWriter writer1 = new StreamWriter(Path.Combine(folder.folderpath, folder.name + extensionforscript), append: true);
                     writer1.WriteLine("chcp 65001"); //uft8 charset in commandline - it will not work without this if there are special characters in access path
-                    writer1.WriteLine("\"" + ytdlp_path + "\" -a \"" + Path.Combine(folders[q].folderpath, folders[q].name + ".txt") + "\"");
+                    writer1.WriteLine("\"" + ytdlp_path + "\" -a \"" + Path.Combine(folder.folderpath, folder.name + ".txt") + "\"");
                     //writer1.WriteLine("pause");
                     writer1.Flush();
                     writer1.Close();
                 }
-                Logger.LogVerbose(q + "/" + folders.Count + " folder bat file writing finished.", Logger.Verbosity.Trace);
+                Logger.LogVerbose(folder.id + "/" + folders.Count + " folder bat file writing finished.", Logger.Verbosity.Trace);
             }
             Logger.LogVerbose(folders.Count + " folder bat file writing finished.", Logger.Verbosity.Info);
         }
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
         {
             extensionforscript = ".sh";
-            for (int q = 0; q < folders.Count; q++) //writing sh files for every folder
+            foreach (Folderclass folder in folders) //writing sh files for every folder
             {
-                if (folders[q].numberoflinks > 0)
+                if (folder.urls.Count > 0)
                 {
-                    StreamWriter writer1 = new StreamWriter(Path.Combine(folders[q].folderpath, folders[q].name + extensionforscript), append: true);
+                    StreamWriter writer1 = new StreamWriter(Path.Combine(folder.folderpath, folder.name + extensionforscript), append: true);
                     writer1.WriteLine("#! /bin/bash");
-                    writer1.WriteLine("\"" + ytdlp_path + "\" -a \"" + Path.Combine(folders[q].folderpath, folders[q].name + ".txt") + "\"");
+                    writer1.WriteLine("\"" + ytdlp_path + "\" -a \"" + Path.Combine(folder.folderpath, folder.name + ".txt") + "\"");
                     //writer1.WriteLine("pause");
                     writer1.Flush();
                     writer1.Close();
                 }
-                Logger.LogVerbose(q + "/" + folders.Count + " folder sh file writing finished.", Logger.Verbosity.Trace);
+                Logger.LogVerbose(folder.id + "/" + folders.Count + " folder sh file writing finished.", Logger.Verbosity.Trace);
             }
             Logger.LogVerbose(folders.Count + " folder sh file writing finished", Logger.Verbosity.Info);
         }
         if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
         {
             extensionforscript = ".sh";
-            for (int q = 0; q < folders.Count; q++) //writing sh files for every folder
+            foreach (Folderclass folder in folders) //writing sh files for every folder
             {
-                if (folders[q].numberoflinks > 0)
+                if (folder.urls.Count > 0)
                 {
-                    StreamWriter writer1 = new StreamWriter(Path.Combine(folders[q].folderpath, folders[q].name + extensionforscript), append: true);
+                    StreamWriter writer1 = new StreamWriter(Path.Combine(folder.folderpath, folder.name + extensionforscript), append: true);
                     writer1.WriteLine("#!/usr/bin/env bash");
-                    writer1.WriteLine("\"" + ytdlp_path + "\" -a \"" + Path.Combine(folders[q].folderpath, folders[q].name + ".txt") + "\"");
+                    writer1.WriteLine("\"" + ytdlp_path + "\" -a \"" + Path.Combine(folder.folderpath, folder.name + ".txt") + "\"");
                     //writer1.WriteLine("pause");
                     writer1.Flush();
                     writer1.Close();
                 }
-                Logger.LogVerbose(q + "/" + folders.Count + " folder sh file writing finished.", Logger.Verbosity.Trace);
+                Logger.LogVerbose(folder.id + "/" + folders.Count + " folder sh file writing finished.", Logger.Verbosity.Trace);
             }
             Logger.LogVerbose(folders.Count + " folder sh file writing finished", Logger.Verbosity.Info);
-        }
-        if (Logger.verbosity >= Logger.Verbosity.Info)
-        {
-            Logger.LogVerbose("Waiting for enter to confirm");
-            Console.Read();
         }
     }
 
     /// <summary>
     /// Delete filesystem folders that are associated with bookmark folders if 
     /// 1) filesystems folder has no files AND
-    /// 2) filesystem folder has no folders
+    /// 2) filesystem folder has no folders <br/>
+    /// Requires:
+    /// <list type="bullet">
+    /// <item> name </item>
+    /// <item> depth </item>
+    /// <item> parent </item>
+    /// <item> folderpath </item>
+    /// </list>
     /// </summary>
     /// <param name="folders"></param>
     public static void Deleteemptyfolders(List<Folderclass> folders)
     {
-        int deepestdepth = 0; //Finding the deepest folder depth
-        for (int q = 0; q < folders.Count; q++)
-        {
-            if (deepestdepth < folders[q].depth)
-            {
-                deepestdepth = folders[q].depth;
-            }
-        }
+        int a = 0;
+        var deepestdepth = folders.Select(f => f.depth).Prepend(0).Max(); //Finding the deepest folder depth
         for (int q = deepestdepth; q > 0; q--) //deleting empty folders from the deepest layer upwards
         {
-            for (int j = 0; j < folders.Count; j++)
+            foreach (var t in folders)
             {
-                if (folders[j].depth == q) //only check folders with the given depth
+                if (t.depth == q) //only check folders with the given depth
                 {
                     bool thisfolderisempty = true;
-                    string path = folders[j].folderpath;
+                    string path = t.folderpath;
                     if (Directory.Exists(path))
                     {
                         if (Directory.GetDirectories(@path).Length != 0) //check if the given directory has any children directories
                         {
                             thisfolderisempty = false;
                         }
-                        if (Directory.GetFiles(folders[j].folderpath).Length != 0) //check if the given directory has any files
+                        if (Directory.GetFiles(t.folderpath).Length != 0) //check if the given directory has any files
                         {
                             thisfolderisempty = false;
                         }
                         if (thisfolderisempty == true)
                         {
-                            Directory.Delete(folders[j].folderpath);
+                            Directory.Delete(t.folderpath);
+                            a++;
                         }
                     }
                 }
             }
         }
-        Logger.LogVerbose("Empty folders deleted", Logger.Verbosity.Info);
-        if (Logger.verbosity >= Logger.Verbosity.Info)
-        {
-            Logger.LogVerbose("Waiting for enter to confirm");
-            Console.Read();
-        }
+        Logger.LogVerbose($"{a} empty folders deleted", Logger.Verbosity.Info);
     }
 
     /// <summary>
-    /// Executes the batch or bash scripts in every folder. The scripts had to be written before (by Scriptwriter()) and the Folderclass folderpaths must be correct.
+    /// Executes the batch or bash scripts in every folder. The scripts had to be written before (by Scriptwriter()). <br/>
+    /// Requires:
+    /// <list type="bullet">
+    /// <item> folderpath </item>
+    /// <item> urls </item>
+    /// </list>
     /// </summary>
     /// <param name="folders">List containing all the bookmark folders, their folderpath has the filesystem path to the folder representing them.</param>
     public static void Runningthescripts(List<Folderclass> folders)
@@ -329,17 +298,16 @@ internal class AppMethods
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux)) { extensionforscript = ".sh"; }
         if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) { extensionforscript = ".sh"; }
 
-        //running the script files one after another, in the order of folders[].startline
-        for (int j = 0; j < folders.Count; j++)
+        foreach (Folderclass folder in folders)
         {
-            if (folders[j].numberoflinks > 0)
+            if (folder.urls.Count > 0)
             {
                 int downloadserialnumber = 1;
-                string targetDir = string.Format(@folders[j].folderpath);
+                string targetDir = string.Format(@folder.folderpath);
                 Process process;
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
-                    string command = "\"" + Path.Combine(targetDir, folders[j].name + extensionforscript) + "\"";
+                    string command = "\"" + Path.Combine(targetDir, folder.name + extensionforscript) + "\"";
                     process = new Process
                     {
                         StartInfo = new ProcessStartInfo("cmd.exe", $"/c {command}")
@@ -355,7 +323,7 @@ internal class AppMethods
                 }
                 else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                 {
-                    string command = "\"" + Path.Combine(targetDir, folders[j].name + extensionforscript) + "\"";
+                    string command = "\"" + Path.Combine(targetDir, folder.name + extensionforscript) + "\"";
                     process = new Process
                     {
                         StartInfo = new ProcessStartInfo("bash", command)
@@ -370,7 +338,7 @@ internal class AppMethods
                 }
                 else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) //TODO: maybe it does not work, not tested?
                 {
-                    string command = "\"" + Path.Combine(targetDir, folders[j].name + extensionforscript) + "\"";
+                    string command = "\"" + Path.Combine(targetDir, folder.name + extensionforscript) + "\"";
                     process = new Process
                     {
                         StartInfo = new ProcessStartInfo("bash", command)
@@ -400,11 +368,11 @@ internal class AppMethods
                 process.OutputDataReceived += new DataReceivedEventHandler((sender, e) =>
                 {
                     Console.WriteLine("output :: " + e.Data);
-                    File.AppendAllText(Path.Combine(folders[j].folderpath, "log" + DateTime.Now.ToString("yyyy’-‘MM’-‘dd’-’HH’h’mm’m’ss") + ".txt"), e.Data + Environment.NewLine);
+                    File.AppendAllText(Path.Combine(folder.folderpath, "log" + DateTime.Now.ToString("yyyy’-‘MM’-‘dd’-’HH’h’mm’m’ss") + ".txt"), e.Data + Environment.NewLine);
                     if (e.Data != null && e.Data.Contains("[youtube] Extracting URL:"))
                     {
                         Console.ForegroundColor = ConsoleColor.Red;
-                        Console.WriteLine("FILE " + downloadserialnumber + " / " + folders[j].numberoflinks + "---------------------------" + "Folder: " + folders[j].name + "(" + j + "out of " + folders.Count + ")");
+                        Console.WriteLine("FILE " + downloadserialnumber + " / " + folder.urls.Count + "---------------------------" + "Folder: " + folder.name + "(" + folders.IndexOf(folder) + "out of " + folders.Count + ")");
                         downloadserialnumber++;
                         Console.ResetColor();
                     }
@@ -416,11 +384,11 @@ internal class AppMethods
                 process.WaitForExit();
                 Console.WriteLine("ExitCode: {0}", process.ExitCode);
                 process.Close();
-                File.Delete(Path.Combine(folders[j].folderpath, folders[j].name + extensionforscript));
+                File.Delete(Path.Combine(folder.folderpath, folder.name + extensionforscript));
             }
-            Console.Write("{0} Folder was downloaded. ", folders[j].name);
+            Console.Write("{0} Folder was downloaded. ", folder.name);
             Console.ForegroundColor = ConsoleColor.Red;
-            Console.Write((j + 1) + "/" + folders.Count);
+            Console.Write((folders.IndexOf(folder) + 1) + "/" + folders.Count);
             Console.ResetColor();
             Console.Write(" folders are finished\n");
         }
@@ -460,7 +428,6 @@ internal class AppMethods
     public static string? ConfigFileLocation()
     {
         string configpath_local = Path.Combine(Directory.GetCurrentDirectory(), "bookmark-dlp.conf");
-
         if (File.Exists(configpath_local))
         {
             return configpath_local;
@@ -468,17 +435,17 @@ internal class AppMethods
 
         if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
         {
-            string configpath_osx = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.Personal), "bookmark-dlp/bookmark-dlp.conf");
+            string configpath_osx = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.Personal), "bookmark-dlp", "bookmark-dlp.conf");
             if (File.Exists(configpath_osx)) { return configpath_osx; }
         }
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
-            string configpath_windows = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "bookmark-dlp\\bookmark-dlp.conf");
+            string configpath_windows = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "bookmark-dlp", "bookmark-dlp.conf");
             if (File.Exists(configpath_windows)) { return configpath_windows; }
         }
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
         {
-            string configpath_linux = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "bookmark-dlp/bookmark-dlp.conf");
+            string configpath_linux = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "bookmark-dlp", "bookmark-dlp.conf");
             if (File.Exists(configpath_linux)) { return configpath_linux; }
         }
 
@@ -498,7 +465,7 @@ internal class AppMethods
     }
     
     /// <summary>
-    /// Generating Hierarchical Observable FolderCollection from folders
+    /// Generating Hierarchical Observable FolderCollection from folders, used when displaying the list of folders in the TreeDataGrid.
     /// </summary>
     /// <param name="folders"></param>
     /// <returns></returns>
@@ -538,5 +505,174 @@ internal class AppMethods
 
     public enum ProgramUI { GUI, CLI }
     public static ProgramUI programUI;
+
+    /// <summary>
+    /// Count how many videos are wanted directly or indirectly. <br/>
+    /// Requires:
+    /// <list type="bullet">
+    /// <item> links </item>
+    /// </list>
+    /// Fills:
+    /// <list type="bullet"> 
+    /// <item> numberOfVideosDirectlyWanted </item>
+    /// <item> numberOfVideosIndirectlyWanted </item>
+    /// </list>    
+    /// </summary>
+    /// <param name="folder"></param>
+    public static void CountWantedVideos(ref Folderclass folder)
+    {
+        foreach (YTLink link in folder.links)
+        {
+            if (link.linktype == Linktype.Video || link.linktype == Linktype.Short)
+            {
+                folder.numberOfVideosDirectlyWanted++;
+            }
+            else if (link.linktype == Linktype.Channel_channel ||
+                     link.linktype == Linktype.Channel_at ||
+                     link.linktype == Linktype.Channel_user ||
+                     link.linktype == Linktype.Channel_c ||
+                     link.linktype == Linktype.Playlist)
+            {
+                folder.numberOfVideosIndirectlyWanted += link.member_ids.Count;
+            }
+        }
+    }
     
+    
+    /// <summary>
+    /// Checks if wanted videos are found on the filesystem (are/were downloaded) and fills Folderclass fields for object accordingly.
+    /// Only checks the filenames for the yt-id (11 characters): if yt-dlp config is set to not include such id in the filename it will not work.<br/>
+    /// Requires:
+    /// <list type="bullet">
+    /// <item> folderpath </item>
+    /// <item> links </item>
+    /// </list>
+    /// Fills:
+    /// <list type="bullet"> 
+    /// <item> numberOfDirectlyWantedVideosFound </item>
+    /// <item> numberOfIndirectlyWantedVideosFound </item>
+    /// <item> numberOfOtherVideosFound </item>
+    /// <item> LinksWithNoMissingVideos </item>
+    /// <item> LinksWithMissingVideos </item>
+    /// </list>  
+    /// </summary>
+    /// <param name="folders">The list of folders that is being checked</param>
+    public static void CheckCurrentFilesystemState(ref List<Folderclass> folders)
+    {
+        foreach (Folderclass folder in folders)
+        {
+            folder.numberOfDirectlyWantedVideosFound = 0;
+            folder.numberOfIndirectlyWantedVideosFound = 0;
+            folder.numberOfOtherVideosFound = 0;
+            if (Directory.Exists(folder.folderpath))
+            {
+                var files = Directory.GetFiles(folder.folderpath);
+                HashSet<string>? ytIdsFoundInArchive = null;
+                if (File.Exists(Path.Combine(folder.folderpath, "archive.txt"))) //checks the archive.txt written by yt-dlp if the config is used there
+                {
+                    string[] archivecheckerlist = File.ReadAllLines(Path.Combine(folder.folderpath, "archive.txt"));
+                    string[] ytIdsFoundInArchiveTxt = archivecheckerlist.Where(f => f.StartsWith("youtube")).Select(t => t.Substring(8, 11)).ToArray();
+                    ytIdsFoundInArchive = new HashSet<string>(ytIdsFoundInArchiveTxt);
+                    /*foreach (string link in archivecheckerlist)
+                    {
+                        if (link.StartsWith("youtube")) //only check for youtube videos downloaded by yt-dlp in the given folder
+                        {
+                            string youtubeid = link.Substring(8, 11); //start at coloumn 8 because archive.txt does not store links, rather only the platform name and the video id
+                        }
+                    }*/
+                }
+                foreach (YTLink link in folder.links)
+                {
+                    List<string>? idsToCheck = null;
+                    bool found = true;
+                    if (link.linktype == Linktype.Short ||
+                        link.linktype == Linktype.Video)
+                    {
+                        if (ytIdsFoundInArchive != null)
+                        {
+                            if (ytIdsFoundInArchive.Contains(link.yt_id)) // in archive.txt
+                            {
+                                folder.LinksWithNoMissingVideos.Add(link);
+                                Logger.LogVerbose($"In folder {folder.folderpath} video {link.url} found in archive.txt", Logger.Verbosity.Trace);
+                                continue;
+                            }
+                        }
+                        if (files.Any(s => s.Contains(link.yt_id)))
+                        {
+                            folder.LinksWithNoMissingVideos.Add(link);
+                            Logger.LogVerbose($"In folder {folder.folderpath} video {link.url} found in files list", Logger.Verbosity.Trace);
+                        }
+                        else
+                        {
+                            folder.LinksWithMissingVideos.Add(link);
+                            Logger.LogVerbose($"In folder {folder.folderpath} video {link.url} not found", Logger.Verbosity.Trace);
+                        }
+                        continue;
+                    }
+                    else if (link.linktype == Linktype.Channel_channel ||
+                             link.linktype == Linktype.Channel_at ||
+                             link.linktype == Linktype.Channel_user ||
+                             link.linktype == Linktype.Channel_c ||
+                             link.linktype == Linktype.Playlist)
+                    {
+                        idsToCheck = link.member_ids;
+                    }
+                    else //link.linktype == Linktype.Search
+                    {
+                        continue;
+                    }
+                    if (idsToCheck == null)
+                    {
+                        Logger.LogVerbose($"Could not ascertain which videos are wanted by link {link}. May be a network error", Logger.Verbosity.Error);
+                        found = false;
+                        folder.LinksWithMissingVideos.Add(link);
+                        continue;
+                    }
+                    foreach (string id in idsToCheck)
+                    {
+                        if (ytIdsFoundInArchive != null)
+                        {
+                            if (ytIdsFoundInArchive.Contains(id)) // in archive.txt
+                            {
+                                link.member_ids_found.Add(id);
+                                Logger.LogVerbose($"In folder {folder.folderpath} member id {id} for link {link.url} found in archive.txt", Logger.Verbosity.Trace);
+                                continue;
+                            }
+                        }
+                        //NOTE: this may be a slow operation
+                        if (files.Any(s => s.Contains(id)))
+                        {
+                            link.member_ids_found.Add(id);
+                            Logger.LogVerbose($"In folder {folder.folderpath} member id {id} for link {link.url} found in files list", Logger.Verbosity.Trace);
+                        }
+                        else
+                        {
+                            link.member_ids_not_found.Add(id);
+                            Logger.LogVerbose($"In folder {folder.folderpath} member id {id} for link {link.url} not found", Logger.Verbosity.Trace);
+                            found = false;
+                        }
+                    }
+                    if (found)
+                    {
+                        folder.LinksWithNoMissingVideos.Add(link);
+                        Logger.LogVerbose($"All members were found for {link.url} in folder {folder.folderpath}", Logger.Verbosity.Trace);
+                    }
+                    else
+                    {
+                        folder.LinksWithMissingVideos.Add(link);
+                        Logger.LogVerbose($"Not all members were found for {link.url} in folder {folder.folderpath}", Logger.Verbosity.Trace);
+                    }
+                }
+            }
+            else
+            {
+                continue;
+            }
+            // folder.numberOfIndirectlyWantedVideosNotFound = folder.links.Select(f => f.member_ids_not_found).ToList().Select(f => f.Count()).Sum();
+            // folder.numberOfDirectlyWantedVideosNotFound = folder.LinksWithMissingVideos.Count(f => f.linktype is Linktype.Video or Linktype.Short);
+            // folder.numberOfDirectlyWantedVideosNotFound = folder.numberOfVideosDirectlyWanted - folder.numberOfDirectlyWantedVideosFound;
+            folder.numberOfIndirectlyWantedVideosFound = folder.links.Select(f => f.member_ids_found.Count).Sum();
+            folder.numberOfDirectlyWantedVideosFound = folder.LinksWithNoMissingVideos.Count(f => f.linktype is Linktype.Video or Linktype.Short);
+        }
+    }
 }

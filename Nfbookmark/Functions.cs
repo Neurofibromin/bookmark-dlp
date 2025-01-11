@@ -21,7 +21,7 @@ namespace Nfbookmark
         /// Depth
         /// Startline
         /// Endingline
-        /// numberoflinks
+        /// urls
         /// Parent
         /// Id
         /// </summary>
@@ -51,7 +51,7 @@ namespace Nfbookmark
                 maxstartlinelength = Math.Max(maxstartlinelength, folder.startline.ToString().Length);
                 maxendlinelength = Math.Max(maxendlinelength, folder.endingline.ToString().Length);
                 maxnamelength = Math.Max(maxnamelength, folder.name.Length);
-                maxnumberoflinklength = Math.Max(maxnumberoflinklength, folder.numberoflinks.ToString().Length);
+                maxnumberoflinklength = Math.Max(maxnumberoflinklength, folder.urls.Count.ToString().Length);
                 maxidlength = Math.Max(maxidlength, folder.id.ToString().Length);
             }
 
@@ -64,7 +64,8 @@ namespace Nfbookmark
             
             int depthsymbolcounter = 0;
             Folderclass previousFolder = null;
-            foreach (Folderclass folder in folders.OrderBy(a => a.id).ToList()) //writing the depth, the starting line, the ending line, name, and number of links of all the folders
+            List<Folderclass> sorted = new List<Folderclass>(folders);
+            foreach (Folderclass folder in sorted.OrderBy(a => a.id).ToList()) //writing the depth, the starting line, the ending line, name, and number of links of all the folders
             {
                 Folderclass currentFolder = folder;
                 int m = folder.id;
@@ -89,7 +90,7 @@ namespace Nfbookmark
                 Console.Write(string.Concat(Enumerable.Repeat("-", depthsymbolcounter)));
                 string write = $"{currentFolder.depth.ToString().PadRight(deepestdepthlength, '_')}" + new string('_', deepestdepth - depthsymbolcounter) +
                     $" is the depth of {currentFolder.startline.ToString().PadLeft(maxstartlinelength, '_')}/{currentFolder.endingline.ToString().PadLeft(maxendlinelength, '_')} " +
-                    $"[{currentFolder.name.Replace(' ', '_').PadRight(maxnamelength, '_')}] folder, which contains [{currentFolder.numberoflinks.ToString().PadLeft(maxnumberoflinklength, '_')}] links. " +
+                    $"[{currentFolder.name.Replace(' ', '_').PadRight(maxnamelength, '_')}] folder, which contains [{currentFolder.urls.Count.ToString().PadLeft(maxnumberoflinklength, '_')}] links. " +
                     $"id:\"{currentFolder.id.ToString().PadLeft(maxidlength, '_')}\" parent:\"{currentFolder.parent.ToString().PadLeft(maxidlength, '_')}";
                 //Console.ForegroundColor = ConsoleColor.Red;
                 //Console.ResetColor();
@@ -118,7 +119,7 @@ namespace Nfbookmark
 
         /// <summary>
         /// Attempt to make sure all bookmark folder names are good for filesystems folder names. If needed, changes the folder.name value<br/>
-        /// Neccessary because bookmark folders can have 1) empty names 2) the same names 3) contain not allowed characters or character combinations<br/>
+        /// Necessary because bookmark folders can have 1) empty names 2) the same names 3) contain not allowed characters or character combinations<br/>
         /// Requires:
         /// Name
         /// Parent
@@ -188,7 +189,6 @@ namespace Nfbookmark
         /// <param name="rootdir">Fiilesystems directory to contain all the folders</param>
         public static void Createfolderstructure(ref List<Folderclass> folders, string rootdir)
         {
-            //TODO: rewrite this to use parent property
             FoldernameValidation(ref folders);
             if (!Directory.Exists(rootdir)) { Directory.CreateDirectory(rootdir); }
             Directory.SetCurrentDirectory(rootdir);
@@ -293,16 +293,28 @@ namespace Nfbookmark
             }*/
         }
 
-        public YTLink? UrlsToYTLinks(string _url)
+        /// <summary>
+        /// Parses url to YTLink object and fills:
+        /// url
+        /// linktype
+        /// optionally:
+        /// channel_id
+        /// playlist_id
+        /// yt_id
+        /// </summary>
+        /// <param name="_url">Url to parse, must contain youtube.com. Usually FQDN, like https://www.youtube.com/watch?v=12345678912</param>
+        /// <returns>YTLink with parameters filled or null if url is not a youtube link</returns>
+        /// <exception cref="InvalidLinkException">If link parsing encounters unexpected characters</exception>
+        public YTLink? UrlToYTLink(string _url)
         {
-            // TODO: finish this, substring exmaples missing
-            throw new NotImplementedException();
-            if (!_url.Contains("www.youtube.com")) //only write lines that are youtube links
-            {return null;}
+            // TODO: test this
+            if (!_url.Contains("www.youtube.com")) //only work with youtube links
+                return null;
             
             YTLink link = new YTLink();
             link.url = _url;
-            if (_url.Substring(24, 8) == "playlist") //filtering the links with the consecutive ifs to find if they are for videos or else (channels, playlists, etc.)
+            //filtering the links with the consecutive ifs to find if they are for videos or else (channels, playlists, etc.)
+            if (_url.Substring(24, 8) == "playlist") 
             {
                 //playlist
                 int start = _url.IndexOf("playlist?list=", StringComparison.Ordinal) + "playlist?list=".Length;
@@ -324,7 +336,7 @@ namespace Nfbookmark
                 }
                 else
                 {
-                    throw new Exception($"Invalid URL: {_url}, regex pattern: {pattern}");
+                    throw new InvalidLinkException($"Invalid URL: {_url}, regex pattern: {pattern}");
                 }
                 link.linktype = Linktype.Channel_user;
             }
@@ -339,14 +351,14 @@ namespace Nfbookmark
                 }
                 else
                 {
-                    throw new Exception($"Invalid URL: {_url}, regex pattern: {pattern}");
+                    throw new InvalidLinkException($"Invalid URL: {_url}, regex pattern: {pattern}");
                 }
                 link.linktype = Linktype.Channel_channel;
             }
             else if (_url.Substring(24, 7) == "results") //youtube search result was bookmarked
             {
                 //not saving search results
-                link.linktype = Linktype.Search; //todo
+                link.linktype = Linktype.Search;
             }
             else if (_url.Substring(24, 1) == "@")
             {
@@ -359,7 +371,7 @@ namespace Nfbookmark
                 }
                 else
                 {
-                    throw new Exception($"Invalid URL: {_url}, regex pattern: {pattern}");
+                    throw new InvalidLinkException($"Invalid URL: {_url}, regex pattern: {pattern}");
                 }
                 link.linktype = Linktype.Channel_at;
             }
@@ -374,7 +386,7 @@ namespace Nfbookmark
                 }
                 else
                 {
-                    throw new Exception($"Invalid URL: {_url}, regex pattern: {pattern}");
+                    throw new InvalidLinkException($"Invalid URL: {_url}, regex pattern: {pattern}");
                 }
                 link.linktype = Linktype.Channel_c;
             }
@@ -389,7 +401,7 @@ namespace Nfbookmark
                 }
                 else
                 {
-                    throw new Exception($"Invalid URL: {_url}, regex pattern: {pattern}");
+                    throw new InvalidLinkException($"Invalid URL: {_url}, regex pattern: {pattern}");
                 }
                 link.linktype = Linktype.Short;
             }
@@ -404,7 +416,7 @@ namespace Nfbookmark
                 }
                 else
                 {
-                    throw new Exception($"Invalid URL: {_url}, regex pattern: {pattern}");
+                    throw new InvalidLinkException($"Invalid URL: {_url}, regex pattern: {pattern}");
                 }
                 int start = _url.IndexOf("watch?v=", StringComparison.Ordinal) + "watch?v=".Length;
                 string temp = _url.Substring(start);
@@ -425,57 +437,9 @@ namespace Nfbookmark
                     link.yt_id = manparsed;
                 }
             }
+            Logger.LogVerbose($"Url {_url} was parsed to ytlink {link}", Logger.Verbosity.Trace);
             return link;
         }
         
-        /// <summary>
-        /// Searches for all wanted default videos (not playlists and channels) and fills Folderclass fields for object. <br/>
-        /// Requires:
-        /// Folderpath
-        /// Links
-        /// Urls<br/>
-        /// Fills:
-        /// numberofmissinglinks
-        /// numberOfWantedVideosFound
-        /// numberOfOtherVideosFound
-        /// numberOfAllVideosFound
-        /// missingurls
-        /// missinglinks
-        /// </summary>
-        /// <param name="folders">The list of folders that is being checked</param>
-        public void CheckCurrentFilesystemState(ref List<Folderclass> folders)
-        {
-            foreach (Folderclass folder in folders)
-            {
-                if (Directory.Exists(folder.folderpath))
-                {
-                    foreach (YTLink link in folder.links)
-                    {
-                        // checking for direct video links
-                        if ( (!string.IsNullOrEmpty(link.yt_id)) && Directory.GetFiles(folder.folderpath).Contains(link.yt_id))
-                        {
-                            // file found
-                            folder.foundlinks.Add(link);
-                            folder.foundurls.Add(link.url);
-                        }
-
-                        throw new NotImplementedException();
-                        // checking for channels
-                        // checking for playlists
-                        //todo: continue this
-                    }
-                }
-                else
-                {
-                    folder.numberofmissinglinks = folder.numberoflinks;
-                    folder.numberOfWantedVideosFound = 0;
-                    folder.numberOfOtherVideosFound = 0;
-                    folder.numberOfAllVideosFound = 0;
-                    folder.missingurls = folder.urls;
-                    folder.missinglinks = folder.links;
-                }
-                
-            }
-        }
     }
 }

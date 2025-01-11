@@ -66,6 +66,7 @@ namespace bookmark_dlp.ViewModels
                 AppSettings.SaveToFile();
                 MyStartPageViewModel.ReBindSettings(); //TODO: should raise some propertychanged event instead
                 MyDownloadingViewModel.ReBindSettings();
+                YtdlpInterfacing.SetYtdlpPath(MyDownloadingViewModel.ActiveSettings.Outputfolder);
             }
         }
         
@@ -75,6 +76,7 @@ namespace bookmark_dlp.ViewModels
                 AppSettings.SaveToFile();
                 MyStartPageViewModel.ReBindSettings(); //TODO: should raise some propertychanged event instead
                 MyDownloadingViewModel.ReBindSettings();
+                YtdlpInterfacing.SetYtdlpPath(MyDownloadingViewModel.ActiveSettings.Outputfolder);
         }
 
         public async Task SettingsCommand()
@@ -85,6 +87,7 @@ namespace bookmark_dlp.ViewModels
             {
                 await MyStartPageViewModel.SaveActiveSettings();
                 MySettingsViewModel.ReBindSettings();
+                YtdlpInterfacing.SetYtdlpPath(MySettingsViewModel.ActiveSettings.Outputfolder);
             }
         }
 
@@ -104,6 +107,7 @@ namespace bookmark_dlp.ViewModels
                 MyDownloadingViewModel.FileSource = MyStartPageViewModel.ChosenBrowser;
             }
             await MyDownloadingViewModel.LoadFoldersFromFile();
+            YtdlpInterfacing.SetYtdlpPath(MyDownloadingViewModel.ActiveSettings.Outputfolder);
             DownloadingEnabled = true;
             SelectedTab = MyDownloadingViewModel;
         }

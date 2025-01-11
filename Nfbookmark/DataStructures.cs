@@ -17,6 +17,9 @@ namespace bookmark_dlp
         public Bookmarks() { numberofbookmarks = numberofurlbookmarks + folders.Count; }
     }
     
+    /// <summary>
+    /// Denotes what kind of youtube structure is linked.
+    /// </summary>
     public enum Linktype 
     {
         Video, //regular video, default
@@ -30,7 +33,7 @@ namespace bookmark_dlp
     }
 
     /// <summary>
-    /// Youtube links
+    /// Youtube links with types and ids
     /// </summary>
     public struct YTLink
     {
@@ -43,12 +46,19 @@ namespace bookmark_dlp
         /// Contains yt ids of videos in the playlist or uploaded by the channel. Only used it linktype is Channel_* or Playlist. 
         /// </summary>
         public List<string> member_ids;
+        public List<string> member_ids_found;
+        public List<string> member_ids_not_found;
+
+        public override string ToString()
+        {
+            return $"Url: {url}, linktype: {linktype.ToString()}, yt_id: {yt_id}, channel_id: {channel_id}, playlist_id: {playlist_id}";
+        }
     }
 
     /// <summary>
     /// The main datatype used by the library, represents one bookmarks folder.
     /// </summary>
-    public class Folderclass //defining the folderclass class to create an object list from it
+    public class Folderclass
     {
         /// <summary>
         /// For HTML: the line number in which the folder starts in the html. <br/>
@@ -73,31 +83,15 @@ namespace bookmark_dlp
         /// </summary>
         public string folderpath;
         /// <summary>
-        /// = urls.Count()
-        /// </summary>
-        public int numberoflinks;
-        /// <summary>
-        /// All links count: video and yt-short links and playlist and channel
-        /// Channel is missing if a single video from channel is missing.
+        /// All links count: video and yt-short links and playlist and channel <br/>
+        /// Channel is missing if a single video from channel is missing. <br/>
         /// Playlist is missing if a single video from playlist is missing.
         /// </summary>
-        public int numberofmissinglinks;
+        public List<YTLink> LinksWithMissingVideos = new List<YTLink>();
         /// <summary>
         /// Only video and yt-short links, no playlist or channel links count
         /// </summary>
-        public List<YTLink> missinglinks = new List<YTLink>();
-        /// <summary>
-        /// Only video and yt-short links, no playlist or channel links count
-        /// </summary>
-        public List<string> missingurls = new List<string>();
-        /// <summary>
-        /// Only video and yt-short links, no playlist or channel links count
-        /// </summary>
-        public List<YTLink> foundlinks = new List<YTLink>();
-        /// <summary>
-        /// Only video and yt-short links, no playlist or channel links count
-        /// </summary>
-        public List<string> foundurls = new List<string>();
+        public List<YTLink> LinksWithNoMissingVideos = new List<YTLink>();
         /// <summary>
         /// List of all the URLs in the given folder. May be empty.
         /// </summary>
@@ -109,7 +103,7 @@ namespace bookmark_dlp
         /// <summary>
         /// The id of current folder
         /// </summary>
-        public int id; //same as array index
+        public int id; //same as list index in the List<Folderclass>
         /// <summary>
         /// The id of the parent folder of current folder
         /// </summary>
@@ -135,54 +129,25 @@ namespace bookmark_dlp
         /// <summary>
         /// All wanted videos count, be it playlist or channel links or video or yt-short
         /// </summary>
-        public int numberOfVideosAllWanted;
+        public int numberOfDirectlyWantedVideosFound;
         /// <summary>
         /// All wanted videos count, be it playlist or channel links or video or yt-short
         /// </summary>
-        public int numberOfWantedVideosFound;
+        public int numberOfIndirectlyWantedVideosFound;
         /// <summary>
-        /// Only video files not found in want list now count.
+        /// Only video files not found in want list now count. <br/>
         /// Eg.
         ///     videos downloaded from channel earlier that have since been deleted, (only channel was bookmarked)
-        ///     videos that were downloaded but later unbookmarked
+        ///     videos that were downloaded but later unbookmarked <br/>
         /// But not:
         ///     videos that were bookmarked and downloaded and are still bookmarked, but no longer can be downloaded because they were removed from youtube 
         /// </summary>
         public int numberOfOtherVideosFound;
-        /// <summary>
-        /// Every video file in directory counts towards this.
-        /// </summary>
-        public int numberOfAllVideosFound;
-        
         
         public override string ToString()
         {
             return $"Name:{name}, id:{id}, depth:{depth}, number of urls:{urls.Count}";
         }
-        
-        // int startline
-        // string name
-        // int depth
-        // int endingline
-        // string folderpath
-        // int numberoflinks
-        // int numberofmissinglinks
-        // List<YTLink> missinglinks
-        // List<string> missingurls
-        // List<YTLink> foundlinks
-        // List<string> foundurls
-        // List<string> urls
-        // List<YTLink> links
-        // int id
-        // int parent
-        // List<int> children
-        // bool wantDownloaded
-        // int numberOfVideosDirectlyWanted
-        // int numberOfVideosIndirectlyWanted
-        // int numberOfVideosAllWanted
-        // int numberOfWantedVideosFound
-        // int numberOfOtherVideosFound
-        // int numberOfAllVideosFound
     }
 
     /// <summary>
@@ -216,7 +181,6 @@ namespace bookmark_dlp
         public string windows_profilespath = "";
         public List<string> linux_profilespath = new List<string>();
         public List<string> osx_profilespath = new List<string>();
-        //public Int16 profilesfound = 0;
         public List<string> hardcodedpaths = new List<string>();
         /// <summary>
         /// List of paths to FILES containing bookmarks (one file for one browser profile usually)
@@ -248,5 +212,22 @@ namespace bookmark_dlp
         //public int startline;
         //public int depth;
         public int endingline;
+    }
+    
+    public class InvalidLinkException : Exception
+    {
+        public InvalidLinkException()
+        {
+        }
+
+        public InvalidLinkException(string message)
+            : base(message)
+        {
+        }
+
+        public InvalidLinkException(string message, Exception inner)
+            : base(message, inner)
+        {
+        }
     }
 }

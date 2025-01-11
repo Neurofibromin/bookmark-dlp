@@ -254,11 +254,11 @@ namespace bookmark_dlp.ViewModels
                         x => x.IsExpanded),
                     new TextColumn<HierarchicalFolderclass, int?>(
                         "NumberofLinks",
-                        x => x.Numberoflinks,
+                        x => x.Urls.Count,
                         options: new()
                         {
-                            CompareAscending = HierarchicalFolderclass.SortAscending(x => x.Numberoflinks),
-                            CompareDescending = HierarchicalFolderclass.SortDescending(x => x.Numberoflinks),
+                            CompareAscending = HierarchicalFolderclass.SortAscending(x => x.Urls.Count),
+                            CompareDescending = HierarchicalFolderclass.SortDescending(x => x.Urls.Count),
                         }),
                     new TextColumn<HierarchicalFolderclass, string?>(
                         "Folderpath",

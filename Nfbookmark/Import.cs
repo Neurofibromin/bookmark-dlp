@@ -178,7 +178,6 @@ namespace Nfbookmark
                 name = bookmarkroot.name,
                 depth = 0
             };
-            int numberoflinks = 0;
             int depth = 0;
             folders.Add(thisBookmark); //later overwritten with the complete version of root, but necessary(?) so the first one is the root
             foreach (Bookmark child in bookmarkroot.children)
@@ -187,7 +186,6 @@ namespace Nfbookmark
                 {
                     thisBookmark.urls.Add(child.url);
                     //Console.WriteLine("URL: " + child.url);
-                    numberoflinks++;
                 }
                 else if (child.type == "folder")
                 {
@@ -196,7 +194,6 @@ namespace Nfbookmark
                 }
             }
             
-            thisBookmark.numberoflinks = numberoflinks;
             thisBookmark.endingline = globalState.endingline;
             globalState.endingline++;
             folders[0] = thisBookmark;
@@ -234,14 +231,12 @@ namespace Nfbookmark
                 depth = depth
             };
             //Console.WriteLine("Started childfinder with current folder: {1}, id:{0}, depth:{2}", globals.folderid, current.name, depth);
-            int numberoflinks = 0;
             foreach (Bookmark child in current.children)
             {
                 if (child.type == "url")
                 {
                     thisBookmark.urls.Add(child.url);
                     //Console.WriteLine("Child URL: " + child.url);
-                    numberoflinks++;
                 }
                 else if (child.type == "folder")
                 {
@@ -249,7 +244,6 @@ namespace Nfbookmark
                     folders.Add(Childfinder(child, depth + 1, ref globalState, ref folders));
                 }
             }
-            thisBookmark.numberoflinks = numberoflinks;
             thisBookmark.endingline = globalState.endingline;
             globalState.endingline++;
             //Console.WriteLine("{0} has {1} links. Folderid: {2} depth: {3}", current.name, numberoflinks, globals.folderid, depth);
@@ -283,10 +277,8 @@ namespace Nfbookmark
                     id = folderid,
                     name = bookmark.name,
                     startline = bookmark.id,
-                    numberoflinks = bookmark.children.Count(),
                     urls = new List<string>()
                 };
-
                 foreach (Bookmark urlbookmark in bookmark.children)
                 {
                     currentfolder.urls.Add(urlbookmark.url); //adding the url of each child to the url list of their parent

@@ -29,8 +29,7 @@ namespace Nfbookmark.Tests
                 depth = 3,
                 endingline = 10,
                 folderpath = "/one/two/three/four",
-                numberoflinks = 100,
-                numberofmissinglinks = 2,
+                urls = new List<string>(),
                 id = 0,
                 parent = 0
             };

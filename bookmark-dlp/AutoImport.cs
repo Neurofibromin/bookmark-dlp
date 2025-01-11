@@ -89,6 +89,7 @@ namespace bookmark_dlp
         public static int WritelinkstotxtFromFolderclasses(ref List<Folderclass> folders, string rootdir,
             bool downloadPlaylists = false, bool downloadShorts = false, bool downloadChannels = false)
         {
+            //TODO: Deprecate this, use YTLinks instead
             StreamWriter
                 temp = new StreamWriter(Path.Combine(rootdir, "temp.txt"),
                     append: true); //writing into temp.txt all the youtube links that are not for videos (but for channels, playlists, etc.)
@@ -211,8 +212,6 @@ namespace bookmark_dlp
                 writer.Close();
                 complexnotsimple.Flush();
                 complexnotsimple.Close();
-                folders[j].numberoflinks =
-                    linknumbercounter; //gives count of how many youtube links were found in this folder
                 totalyoutubelinknumber +=
                     linknumbercounter; //increase total link number by number of links found in this folder
                 if (new FileInfo(Path.Combine(folders[j].folderpath, folders[j].name + ".complex.txt")).Length ==
@@ -358,9 +357,9 @@ namespace bookmark_dlp
             _numberOfWantedVideosFound = other.numberOfWantedVideosFound;
             _numberOfOtherVideosFound = other.numberOfOtherVideosFound;
             _numberOfAllVideosFound = other.numberOfAllVideosFound;
-            _missinglinks = other.missinglinks;
+            _missinglinks = other.LinksWithMissingVideos;
             _missingurls = other.missingurls;
-            _foundlinks = other.foundlinks;
+            _foundlinks = other.LinksWithNoMissingVideos;
             _foundurls = other.foundurls;
             // children = new ObservableCollection<Folderclass>();
         }
