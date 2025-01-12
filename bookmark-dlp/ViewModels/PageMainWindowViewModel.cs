@@ -88,9 +88,9 @@ namespace bookmark_dlp.ViewModels
             await myStartPageViewModel.SaveActiveSettings();
             myDownloadingViewModel.ReBindSettings();
             //TODO: make the goforwardbutton disabled when no file is selected
-            if (AppSettings._settings.HtmlImportUsed)
+            if (AppSettings._settings.ManualImportUsed)
             {
-                myDownloadingViewModel.FileSource = AppSettings._settings.Htmlfilelocation;
+                myDownloadingViewModel.FileSource = AppSettings._settings.Manualimportfilelocation;
             }
             else
             {

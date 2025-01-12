@@ -15,8 +15,8 @@ namespace bookmark_dlp.Models
         /// Singleton!
         /// </summary>
         public static SettingsStruct _settings = new SettingsStruct();
-        public static readonly SettingsStruct defaultsettings = new SettingsStruct(htmlImportUsed: false,
-            htmlfilelocation: "", outputfolder: Directory.GetCurrentDirectory(), ytdlpExecutableNotFound: true,
+        public static readonly SettingsStruct defaultsettings = new SettingsStruct(manualImportUsed: false,
+            manualimportfilelocation: "", outputfolder: Directory.GetCurrentDirectory(), ytdlpExecutableNotFound: true,
             downloadPlaylists: false, downloadShorts: false, downloadChannels: false, concurrentDownloads: false,
             cookiesAutoextract: false, ytDlpBinaryPath: AppMethods.Yt_dlp_pathfinder(Directory.GetCurrentDirectory()));
         public static string? configloc = AppMethods.ConfigFileLocation();
@@ -93,11 +93,11 @@ namespace bookmark_dlp.Models
 
     public partial class SettingsStruct : ObservableObject
     {
-        public SettingsStruct(string chtmlfilelocation, bool chtmlImportUsed, string coutputfolder, bool cytdlp_executable_not_found, 
+        public SettingsStruct(string cmanualimportfilelocation, bool cmanualImportUsed, string coutputfolder, bool cytdlp_executable_not_found, 
             bool cdownloadPlaylists, bool cdownloadShorts, bool cdownloadChannels, bool cconcurrent_downloads, bool ccookies_autoextract, string cyt_dlp_binary_path)
         {
-            htmlfilelocation = chtmlfilelocation;
-            htmlImportUsed = chtmlImportUsed;
+            manualimportfilelocation = cmanualimportfilelocation;
+            manualImportUsed = cmanualImportUsed;
             outputfolder = coutputfolder;
             ytdlp_executable_not_found = cytdlp_executable_not_found;
             downloadPlaylists = cdownloadPlaylists;
@@ -110,8 +110,8 @@ namespace bookmark_dlp.Models
         
         public SettingsStruct(SettingsStruct other)
         {
-            htmlfilelocation = other.htmlfilelocation;
-            htmlImportUsed = other.htmlImportUsed;
+            manualimportfilelocation = other.manualimportfilelocation;
+            manualImportUsed = other.manualImportUsed;
             outputfolder = other.outputfolder;
             ytdlp_executable_not_found = other.ytdlp_executable_not_found;
             downloadPlaylists = other.downloadPlaylists;
@@ -124,8 +124,8 @@ namespace bookmark_dlp.Models
 
         public SettingsStruct()
         {
-            htmlfilelocation = null;
-            htmlImportUsed = false;
+            manualimportfilelocation = null;
+            manualImportUsed = false;
             outputfolder = null;
             ytdlp_executable_not_found = true;
             downloadPlaylists = false;
@@ -138,9 +138,9 @@ namespace bookmark_dlp.Models
         
         
         [ObservableProperty]
-        public string htmlfilelocation;
+        public string manualimportfilelocation;
         [ObservableProperty]
-        public bool htmlImportUsed;
+        public bool manualImportUsed;
         [ObservableProperty]
         public string outputfolder;
 
@@ -160,10 +160,10 @@ namespace bookmark_dlp.Models
         [ObservableProperty]
         public string? yt_dlp_binary_path;
 
-        public SettingsStruct(bool htmlImportUsed, string htmlfilelocation, string outputfolder, bool ytdlpExecutableNotFound, bool downloadPlaylists, bool downloadShorts, bool downloadChannels, bool concurrentDownloads, bool cookiesAutoextract, string? ytDlpBinaryPath) : this()
+        public SettingsStruct(bool manualImportUsed, string manualimportfilelocation, string outputfolder, bool ytdlpExecutableNotFound, bool downloadPlaylists, bool downloadShorts, bool downloadChannels, bool concurrentDownloads, bool cookiesAutoextract, string? ytDlpBinaryPath) : this()
         {
-            this.htmlImportUsed = htmlImportUsed;
-            this.htmlfilelocation = htmlfilelocation;
+            this.manualImportUsed = manualImportUsed;
+            this.manualimportfilelocation = manualimportfilelocation;
             this.outputfolder = outputfolder;
             ytdlp_executable_not_found = ytdlpExecutableNotFound;
             this.downloadPlaylists = downloadPlaylists;

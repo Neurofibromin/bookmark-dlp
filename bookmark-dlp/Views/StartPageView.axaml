@@ -46,37 +46,35 @@
         </Grid>
 
 
-        <!--  HTML  -->
-        <StackPanel
+        <!--  Manual file choosing  -->
+        <Grid
             Grid.Row="2"
             Margin="20,0,20,0"
-            Orientation="Horizontal">
-            <Label Margin="4">
-                or choose html file
-            </Label>
-            <Label
-                Name="ChosenfileLabel"
-                Margin="4"
-                IsVisible="{Binding ActiveSettings.HtmlImportUsed}">
-                Chosen file:
-            </Label>
-            <TextBox
-                Margin="4"
-                IsVisible="{Binding ActiveSettings.HtmlImportUsed}"
-                Text="{Binding ActiveSettings.Htmlfilelocation, Mode=TwoWay}" />
-            <Button
+            ColumnDefinitions="*, 5*, *">
+            <StackPanel Orientation="Vertical" Margin="0,20,0,0">
+                <TextBlock TextWrapping="Wrap">Or choose file manually.</TextBlock>
+                <TextBlock TextWrapping="Wrap" FontSize="8">Supported file types: json, mysql, html</TextBlock>
+            </StackPanel>
+            <StackPanel Grid.Column="1" Margin="0,0,0,0"
+                        IsVisible="{Binding ActiveSettings.ManualImportUsed}">
+                <Label Name="ChosenfileLabel" Margin="0">
+                    Chosen file:
+                </Label>
+                <TextBox Text="{Binding ActiveSettings.Manualimportfilelocation, Mode=TwoWay}" />
+            </StackPanel>
+            <Button Grid.Column="2"
                 Name="OpenFileButton"
                 HorizontalAlignment="Left"
-                VerticalAlignment="Center"
+                Margin="0,10,0,0"
                 Command="{Binding OpenFileCommand}">
                 <StackPanel Orientation="Horizontal">
                     <PathIcon Data="{StaticResource copy_add_regular}" />
                     <Label>Select file</Label>
                 </StackPanel>
             </Button>
-        </StackPanel>
+        </Grid>
 
-        <!--  Folder  -->
+        <!-- Output Folder  -->
         <Grid
             Grid.Row="3"
             Margin="20,20,20,0"

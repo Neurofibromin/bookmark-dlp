@@ -80,15 +80,14 @@ namespace bookmark_dlp.ViewModels
         [RelayCommand]
         public async Task OpenFile(CancellationToken token)
         {
-            ActiveSettings.HtmlImportUsed = true;
+            ActiveSettings.ManualImportUsed = true;
             ErrorMessages?.Clear();
             try
             {
                 var file = await DoOpenFilePickerAsync();
                 if (file != null)
                 {
-                    ActiveSettings.Htmlfilelocation = file.TryGetLocalPath();
-                    // AppSettings._settings.Htmlfilelocation = ActiveSettings.Htmlfilelocation;
+                    ActiveSettings.Manualimportfilelocation = file.TryGetLocalPath();
                 }
                 else { }
             }
