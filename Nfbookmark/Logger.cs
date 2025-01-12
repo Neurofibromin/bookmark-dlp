@@ -10,7 +10,6 @@ namespace NfLogger
     /// </summary>
     public static class Logger
     {
-        //TODO: make it possible to remove stream and file from log targets
         /*
          For making every Log destination independently verbose:
          internal struct StreamWithVerbosity
@@ -120,6 +119,19 @@ namespace NfLogger
                 GenerateStreamWriters();    
             }
         }
+        
+        /// <summary>
+        /// Removes stream from logging targets, if stream was not present among them does nothing.
+        /// </summary>
+        /// <param name="stream">stream to be removed</param>
+        public static void RemoveStream(Stream stream)
+        {
+            if (_logStreams.Contains(stream))
+            {
+                _logStreams.Remove(stream);
+                GenerateStreamWriters();    
+            }
+        }
 
         /// <summary>
         /// Adds file to logging targets, if file was already present among them does nothing.
@@ -130,6 +142,19 @@ namespace NfLogger
             if (!_logFiles.Contains(file))
             {
                 _logFiles.Add(file);
+                GenerateStreamWriters();
+            }
+        }
+        
+        /// <summary>
+        /// Removes file from logging targets, if file was not present among them does nothing.
+        /// </summary>
+        /// <param name="file">file to be removed</param>
+        public static void RemoveFile(string file)
+        {
+            if (_logFiles.Contains(file))
+            {
+                _logFiles.Remove(file);
                 GenerateStreamWriters();
             }
         }

@@ -161,11 +161,11 @@ namespace bookmark_dlp
                 totalyoutubelinksnumber = AutoImport.WritelinkstotxtFromFolderclasses(ref folders, rootdir, downloadPlaylists, downloadShorts, downloadChannels);
                 
                 Functions.PrintToConsole(folders); //dump all the folder info to console
-                AppMethods.Scriptwriter(folders, ytdlp_path); //writing the scripts that call yt-dlp and add .txt with the links in the arguments //NOT the method that creates the .txt files
-                AppMethods.Deleteemptyfolders(folders); //deletes the folders from the folder structure that are empty (no youtube links were written into them)
+                AutoImport.Scriptwriter(folders, ytdlp_path); //writing the scripts that call yt-dlp and add .txt with the links in the arguments //NOT the method that creates the .txt files
+                Functions.Deleteemptyfolders(folders); //deletes the folders from the folder structure that are empty (no youtube links were written into them)
                 Console.WriteLine("Running the scripts after ENTER.");
                 Console.ReadKey();
-                AppMethods.Runningthescripts(folders);
+                AutoImport.Runningthescripts(folders);
                 //AppMethods.Checkformissing //checking if all the desired links have indeed been downloaded, archive.txt integrity as well
                 Functions.PrintToConsole(folders);
                 Console.WriteLine("Press enter to exit");
@@ -239,9 +239,9 @@ namespace bookmark_dlp
                 /////////////////////////////////////////
 
 
-                AppMethods.Scriptwriter(folders, ytdlp_path); //writing the scripts that call yt-dlp and add .txt with the links in the arguments //NOT the method that creates the .txt files
-                AppMethods.Deleteemptyfolders(folders); //deletes the folders from the folder structure that are empty (no youtube links were written into them)
-                AppMethods.Runningthescripts(folders);
+                AutoImport.Scriptwriter(folders, ytdlp_path); //writing the scripts that call yt-dlp and add .txt with the links in the arguments //NOT the method that creates the .txt files
+                Functions.Deleteemptyfolders(folders); //deletes the folders from the folder structure that are empty (no youtube links were written into them)
+                AutoImport.Runningthescripts(folders);
                 //Functions.Checkformissing
                 Environment.Exit(0); //leaving the program, so it does not contiue running according to Program.cs
             }

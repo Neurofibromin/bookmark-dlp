@@ -117,6 +117,8 @@ namespace Nfbookmark
             Logger.LogVerbose("Alltogether " + folders.Count + " folders were found.");
         }
 
+        #region FolderFunctions
+
         /// <summary>
         /// Attempt to make sure all bookmark folder names are good for filesystems folder names. If needed, changes the folder.name value<br/>
         /// Necessary because bookmark folders can have 1) empty names 2) the same names 3) contain not allowed characters or character combinations<br/>
@@ -292,6 +294,54 @@ namespace Nfbookmark
                 }
             }*/
         }
+
+        /// <summary>
+        /// Delete filesystem folders that are associated with bookmark folders if 
+        /// 1) filesystems folder has no files AND
+        /// 2) filesystem folder has no folders <br/>
+        /// Requires:
+        /// <list type="bullet">
+        /// <item> name </item>
+        /// <item> depth </item>
+        /// <item> parentId </item>
+        /// <item> folderpath </item>
+        /// </list>
+        /// </summary>
+        /// <param name="folders"></param>
+        public static void Deleteemptyfolders(List<Folderclass> folders)
+        {
+            int a = 0;
+            var deepestdepth = folders.Select(f => f.depth).Prepend(0).Max(); //Finding the deepest folder depth
+            for (int q = deepestdepth; q > 0; q--) //deleting empty folders from the deepest layer upwards
+            {
+                foreach (var t in folders)
+                {
+                    if (t.depth == q) //only check folders with the given depth
+                    {
+                        bool thisfolderisempty = true;
+                        string path = t.folderpath;
+                        if (Directory.Exists(path))
+                        {
+                            if (Directory.GetDirectories(@path).Length != 0) //check if the given directory has any children directories
+                            {
+                                thisfolderisempty = false;
+                            }
+                            if (Directory.GetFiles(t.folderpath).Length != 0) //check if the given directory has any files
+                            {
+                                thisfolderisempty = false;
+                            }
+                            if (thisfolderisempty == true)
+                            {
+                                Directory.Delete(t.folderpath);
+                                a++;
+                            }
+                        }
+                    }
+                }
+            }
+            Logger.LogVerbose($"{a} empty folders deleted", Logger.Verbosity.Info);
+        }
         
+        #endregion FolderFunctions
     }
 }

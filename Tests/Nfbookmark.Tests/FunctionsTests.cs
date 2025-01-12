@@ -198,5 +198,52 @@ namespace Nfbookmark.Tests
             }
         }
         #endregion CreatefolderstructureFunctionTests
+
+        #region DeleteEmtpyFoldersFunctionTests
+
+        [Fact]
+        public void DeleteemptyfoldersFunctionTest()
+        {
+            var rootPath = Path.Combine(Path.GetTempPath(), "testing_now");
+
+            try
+            {
+                // Arrange: Create test folder structure
+                var folders = new List<Folderclass>
+                {
+                    new Folderclass { name = "Root", depth = 0, parentId = -1 },
+                    new Folderclass { name = "Alfa", depth = 1, parentId = 0 },
+                    new Folderclass { name = "Bravo", depth = 1, parentId = 0 },
+                    new Folderclass { name = "Charlie", depth = 2, parentId = 2 },
+                    new Folderclass { name = "Delta", depth = 3, parentId = 3 },
+                };
+                Functions.Createfolderstructure(ref folders, rootPath);
+                rootPath = Path.Combine(rootPath, "Bookmarks");
+                File.Create(Path.Combine(folders[0].folderpath, "test.txt"));
+                File.Create(Path.Combine(folders[1].folderpath, "test.txt"));
+                Assert.True(Directory.Exists(Path.Combine(rootPath, "Root")));
+                Assert.True(Directory.Exists(Path.Combine(rootPath, "Root", "Alfa")));
+                Assert.True(Directory.Exists(Path.Combine(rootPath, "Root", "Bravo")));
+                Assert.True(Directory.Exists(Path.Combine(rootPath, "Root", "Bravo", "Charlie")));
+                Assert.True(Directory.Exists(Path.Combine(rootPath, "Root", "Bravo", "Charlie", "Delta")));
+                
+                
+                // Act
+                Functions.Deleteemptyfolders(folders);
+
+                // Assert
+                Assert.True(Directory.Exists(Path.Combine(rootPath, "Root")));
+                Assert.True(Directory.Exists(Path.Combine(rootPath, "Root", "Alfa")));
+                Assert.False(Directory.Exists(Path.Combine(rootPath, "Root", "Bravo")));
+                Assert.False(Directory.Exists(Path.Combine(rootPath, "Root", "Bravo", "Charlie")));
+                Assert.False(Directory.Exists(Path.Combine(rootPath, "Root", "Bravo", "Charlie", "Delta")));
+            }
+            finally
+            {
+                Directory.Delete(Path.Combine(rootPath, "../"), true);
+            }
+        }
+
+        #endregion DeleteEmtpyFoldersFunctionTests
     }
 }
