@@ -11,7 +11,6 @@ namespace bookmark_dlp.Models
 {
     public partial class HierarchicalFolderclass : ObservableObject
     {
-        //TODO: Not in agreement with Folderclass, eg. Children and children are different types. 
         [ObservableProperty] private int _startline; //for html: the line number in which the folder starts in the html.
                         //json(autoimport intake chrome): the folder id, same as the folder[totalyoutubelinknumber] index.
                         //firefox-sql: the bookmark id of the folder in the sql db
@@ -19,17 +18,21 @@ namespace bookmark_dlp.Models
         [ObservableProperty] private int _depth;
         [ObservableProperty] private int _endingline;
         [ObservableProperty] private string _folderpath;
+        [ObservableProperty] private List<YTLink> _linksWithMissingVideos;
+        [ObservableProperty] private List<YTLink> _linksWithNoMissingVideos;
         [ObservableProperty] private List<string> _urls;
+        [ObservableProperty] private List<YTLink> _links;
         [ObservableProperty] private int _id; //same as array index
-        [ObservableProperty] private int _parent;
+        [ObservableProperty] private int _parentId;
+        [ObservableProperty] private List<int> _childrenIds;
         [ObservableProperty] private bool _wantDownloaded;
         [ObservableProperty] private int _numberOfVideosDirectlyWanted;
         [ObservableProperty] private int _numberOfVideosIndirectlyWanted;
+        [ObservableProperty] private int _numberOfDirectlyWantedVideosFound;
+        [ObservableProperty] private int _numberOfIndirectlyWantedVideosFound;
         [ObservableProperty] private int _numberOfOtherVideosFound;
-        [ObservableProperty] private List<YTLink> _missinglinks;
-        [ObservableProperty] private List<YTLink> _foundlinks;
         
-        [ObservableProperty] private bool _hasChildren = false;
+        [ObservableProperty] private bool _hasChildren;
         [ObservableProperty] private bool _isExpanded = false;
         internal ObservableCollection<HierarchicalFolderclass>? _children;
         public IReadOnlyList<HierarchicalFolderclass>? Children => _children;
@@ -46,16 +49,21 @@ namespace bookmark_dlp.Models
             _depth = other.depth;
             _endingline = other.endingline;
             _folderpath = other.folderpath;
+            _linksWithMissingVideos = other.LinksWithMissingVideos;
+            _linksWithNoMissingVideos = other.LinksWithNoMissingVideos;
             _urls = other.urls;
+            _links = other.links;
             _id = other.id;
-            _parent = other.parent;
+            _parentId = other.parentId;
+            _childrenIds = other.childrenIds;
             _wantDownloaded = other.wantDownloaded;
             _numberOfVideosDirectlyWanted = other.numberOfVideosDirectlyWanted;
             _numberOfVideosIndirectlyWanted = other.numberOfVideosIndirectlyWanted;
+            _numberOfDirectlyWantedVideosFound = other.numberOfDirectlyWantedVideosFound;
+            _numberOfIndirectlyWantedVideosFound = other.numberOfIndirectlyWantedVideosFound;
             _numberOfOtherVideosFound = other.numberOfOtherVideosFound;
-            _missinglinks = other.LinksWithMissingVideos;
-            _foundlinks = other.LinksWithNoMissingVideos;
             _children = new ObservableCollection<HierarchicalFolderclass>();
+            _hasChildren = other.childrenIds.Count > 0;
         }
         
         public static Comparison<HierarchicalFolderclass?> SortAscending<T>(Func<HierarchicalFolderclass, T> selector)

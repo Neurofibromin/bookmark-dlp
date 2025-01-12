@@ -204,7 +204,7 @@ namespace Nfbookmark
                 {
                     if (parent.depth == child.depth - 1 && parent.startline < child.startline && child.endingline < parent.endingline)
                     {
-                        child.parent = parent.id;
+                        child.parentId = parent.id;
                     }
                 }
             }
@@ -300,7 +300,7 @@ namespace Nfbookmark
                 if (parent != null)
                 {
                     currentfolder.depth = parent.depth + 1; //the given folders depth is the depth of their parent folder + 1
-                    currentfolder.parent = parent.id; // parentid[bookmark.id] should be the same?
+                    currentfolder.parentId = parent.id; // parentid[bookmark.id] should be the same?
                 }
                 else // the folder has no parent
                 {
@@ -399,7 +399,7 @@ namespace Nfbookmark
             {
                 if (bookmark.type == "url") //urls have no children, it is safe to add them to their parent folders (even if they are not at the deepest depth
                 {
-                    bookmarks.Single(a => a.id == parentid[bookmark.id]).children.Add(bookmark); //bookmark added to their parent's .children list
+                    bookmarks.Single(a => a.id == parentid[bookmark.id]).children.Add(bookmark); //bookmark added to their parent's .childrenIds list
                     bookmarks.Remove(bookmark); //bookmark is removed from the sql_list (as it is already in its parent's list
                 }
                 //only folders remain in the sql_list

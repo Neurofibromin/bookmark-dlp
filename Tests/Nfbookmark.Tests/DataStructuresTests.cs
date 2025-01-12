@@ -16,7 +16,7 @@ namespace Nfbookmark.Tests
         public void Folderclass_children_empty_at_start()
         {
             Folderclass folder = new Folderclass();
-            Assert.Empty(folder.children);
+            Assert.Empty(folder.childrenIds);
         }
         
         [Fact]
@@ -31,7 +31,7 @@ namespace Nfbookmark.Tests
                 folderpath = "/one/two/three/four",
                 urls = new List<string>(),
                 id = 0,
-                parent = 0
+                parentId = 0
             };
             string strrepr = folder.ToString();
             Assert.Equal("Name:test, id:0, depth:3, number of urls:0", strrepr);

@@ -16,7 +16,7 @@ public class AppMethodsTests
                 id = 0,
                 name = "RootFolder",
                 depth = 0,
-                parent = -1, // Root folder has no parent
+                parentId = -1, // Root folder has no parent
                 urls = new List<string> { "https://root.example.com" }
             },
             new Folderclass
@@ -24,7 +24,7 @@ public class AppMethodsTests
                 id = 1,
                 name = "SubFolder1",
                 depth = 1,
-                parent = 0,
+                parentId = 0,
                 urls = new List<string> { "https://sub1.example.com", "https://sub1.docs.example.com" }
             },
             new Folderclass
@@ -32,7 +32,7 @@ public class AppMethodsTests
                 id = 2,
                 name = "SubFolder2",
                 depth = 1,
-                parent = 0,
+                parentId = 0,
                 urls = new List<string>() // No URLs for this folder
             },
             new Folderclass
@@ -40,7 +40,7 @@ public class AppMethodsTests
                 id = 3,
                 name = "SubSubFolder1",
                 depth = 2,
-                parent = 1,
+                parentId = 1,
                 urls = new List<string> { "https://subsub1.example.com" }
             },
             new Folderclass
@@ -48,7 +48,7 @@ public class AppMethodsTests
                 id = 4,
                 name = "SubSubFolder2",
                 depth = 2,
-                parent = 1,
+                parentId = 1,
                 urls = new List<string> { "https://subsub2.example.com" }
             },
             new Folderclass
@@ -56,7 +56,7 @@ public class AppMethodsTests
                 id = 5,
                 name = "EmptyFolder",
                 depth = 1,
-                parent = 0,
+                parentId = 0,
                 urls = new List<string>()
             }
         };
@@ -74,11 +74,11 @@ public class AppMethodsTests
             // Arrange: Create test folder structure
             var folders = new List<Folderclass>
             {
-                new Folderclass { name = "Root", depth = 0, parent = -1 },
-                new Folderclass { name = "Alfa", depth = 1, parent = 0 },
-                new Folderclass { name = "Bravo", depth = 1, parent = 0 },
-                new Folderclass { name = "Charlie", depth = 2, parent = 2 },
-                new Folderclass { name = "Delta", depth = 3, parent = 3 },
+                new Folderclass { name = "Root", depth = 0, parentId = -1 },
+                new Folderclass { name = "Alfa", depth = 1, parentId = 0 },
+                new Folderclass { name = "Bravo", depth = 1, parentId = 0 },
+                new Folderclass { name = "Charlie", depth = 2, parentId = 2 },
+                new Folderclass { name = "Delta", depth = 3, parentId = 3 },
             };
             Functions.Createfolderstructure(ref folders, rootPath);
             rootPath = Path.Combine(rootPath, "Bookmarks");

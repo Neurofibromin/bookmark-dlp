@@ -107,11 +107,11 @@ namespace bookmark_dlp
         /// <summary>
         /// The id of the parent folder of current folder
         /// </summary>
-        public int parent;
+        public int parentId;
         /// <summary>
         /// The ids of children folders of current folder
         /// </summary>
-        public List<int> children = new List<int>();
+        public List<int> childrenIds = new List<int>();
         /// <summary>
         /// Field used by the observable class mostly,
         /// checks if user wants the direct content of the folder downloaded.

@@ -238,7 +238,7 @@ public static class AppMethods
     /// <list type="bullet">
     /// <item> name </item>
     /// <item> depth </item>
-    /// <item> parent </item>
+    /// <item> parentId </item>
     /// <item> folderpath </item>
     /// </list>
     /// </summary>
@@ -480,11 +480,11 @@ public static class AppMethods
         }
         foreach (Folderclass folder in folders.Where(a => a.depth != 0).OrderBy(a => a.depth))
         {
-            Logger.LogVerbose("examining " + folder.name + " " + folder.id + " parent:" + folder.parent, Logger.Verbosity.Trace);
+            Logger.LogVerbose("examining " + folder.name + " " + folder.id + " parentId:" + folder.parentId, Logger.Verbosity.Trace);
             bool foundparent = false;
             foreach (HierarchicalFolderclass parent in hierarchicalFolderclasses)
             {
-                if (parent.Id == folder.parent) { 
+                if (parent.Id == folder.parentId) { 
                     Logger.LogVerbose("Found parent: " + parent.Name, Logger.Verbosity.Trace);
                     parent._children.Add(new HierarchicalFolderclass(folder));
                     parent.HasChildren = true;

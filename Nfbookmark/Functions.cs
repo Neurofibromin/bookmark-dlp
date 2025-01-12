@@ -91,7 +91,7 @@ namespace Nfbookmark
                 string write = $"{currentFolder.depth.ToString().PadRight(deepestdepthlength, '_')}" + new string('_', deepestdepth - depthsymbolcounter) +
                     $" is the depth of {currentFolder.startline.ToString().PadLeft(maxstartlinelength, '_')}/{currentFolder.endingline.ToString().PadLeft(maxendlinelength, '_')} " +
                     $"[{currentFolder.name.Replace(' ', '_').PadRight(maxnamelength, '_')}] folder, which contains [{currentFolder.urls.Count.ToString().PadLeft(maxnumberoflinklength, '_')}] links. " +
-                    $"id:\"{currentFolder.id.ToString().PadLeft(maxidlength, '_')}\" parent:\"{currentFolder.parent.ToString().PadLeft(maxidlength, '_')}";
+                    $"id:\"{currentFolder.id.ToString().PadLeft(maxidlength, '_')}\" parentId:\"{currentFolder.parentId.ToString().PadLeft(maxidlength, '_')}";
                 //Console.ForegroundColor = ConsoleColor.Red;
                 //Console.ResetColor();
                 
@@ -167,7 +167,7 @@ namespace Nfbookmark
                 {
                     if (string.Equals(folders[i].name, folders[j].name, StringComparison.CurrentCultureIgnoreCase) &&
                         folders[i].depth == folders[j].depth &&
-                        folders[i].parent == folders[j].parent)
+                        folders[i].parentId == folders[j].parentId)
                     {
                         folders[j].name = folders[j].name + $"ID{folders[j].id}";
                         folders[i].name = folders[i].name + $"ID{folders[i].id}";
@@ -201,17 +201,17 @@ namespace Nfbookmark
             {
                 try
                 {
-                    if (folder.depth != 0 && folder.depth != folders[folder.parent].depth + 1)
+                    if (folder.depth != 0 && folder.depth != folders[folder.parentId].depth + 1)
                     {
                         Logger.LogVerbose(
-                            $"Depth of folder {folder.name} is {folder.depth}, not 1 more than its parent's {folders[folder.parent].name} depth: {folders[folder.parent].depth}", Logger.Verbosity.Error);
+                            $"Depth of folder {folder.name} is {folder.depth}, not 1 more than its parent's {folders[folder.parentId].name} depth: {folders[folder.parentId].depth}", Logger.Verbosity.Error);
                         throw new InvalidDataException(
-                            $"Depth of folder {folder.name} is {folder.depth}, not 1 more than its parent's {folders[folder.parent].name} depth: {folders[folder.parent].depth}");
+                            $"Depth of folder {folder.name} is {folder.depth}, not 1 more than its parent's {folders[folder.parentId].name} depth: {folders[folder.parentId].depth}");
                     }
                 }
                 catch (IndexOutOfRangeException e)
                 {
-                    Logger.LogVerbose($"Folder has no parent? Folder name: {folder.name}, parent id: {folder.parent}, number of folders: {folders.Count}", Logger.Verbosity.Error);
+                    Logger.LogVerbose($"Folder has no parent? Folder name: {folder.name}, parent id: {folder.parentId}, number of folders: {folders.Count}", Logger.Verbosity.Error);
                     throw;
                 }
                 if (folder.depth == 0)
@@ -225,22 +225,22 @@ namespace Nfbookmark
                 {
                     try
                     {
-                        parentdir = folders[folder.parent].folderpath;
+                        parentdir = folders[folder.parentId].folderpath;
                     }
                     catch (IndexOutOfRangeException e)
                     {
-                        Logger.LogVerbose($"Folder has no parent? Folder name: {folder.name}, parent id: {folder.parent}, number of folders: {folders.Count}", Logger.Verbosity.Error);
+                        Logger.LogVerbose($"Folder has no parent? Folder name: {folder.name}, parent id: {folder.parentId}, number of folders: {folders.Count}", Logger.Verbosity.Error);
                         throw;
                     }
                     if (!Directory.Exists(parentdir))
                     {
-                        if (folder.depth <= folders[folder.parent].depth)
+                        if (folder.depth <= folders[folder.parentId].depth)
                         {
                             Logger.LogVerbose($"Folder's parent has not lower depth than folder. Folder name: {folder.name}, depth: {folder.depth}," +
-                                              $" parent name: {folders[folder.parent].name} parent depth: {folders[folder.parent].depth}", Logger.Verbosity.Error);
+                                              $" parent name: {folders[folder.parentId].name} parent depth: {folders[folder.parentId].depth}", Logger.Verbosity.Error);
                         }
                         throw new InvalidDataException("Folder's parent directory does not exist. Folder: " + folder.name +
-                                                       " Parent: " + folders[folder.parent].name + " Parent dir: " + parentdir);
+                                                       " Parent: " + folders[folder.parentId].name + " Parent dir: " + parentdir);
                     }
                     System.IO.Directory.CreateDirectory(Path.Combine(parentdir, folder.name));
                     folder.folderpath = Path.Combine(parentdir, folder.name); //path
