@@ -34,21 +34,21 @@ namespace bookmark_dlp.ViewModels
         [ObservableProperty]
         public List<string> availableBrowserBookmarkPaths; //= (List<string>)(from browser in AutoImport.FindBrowserBookmarkFilesPaths() select browser.foundFiles)
 
-        [ObservableProperty]
-        public string[] browserlist = { "Firefox", "Chrome", "Safari" };
-        [ObservableProperty]
-        public string? chosenBrowser;
-
+        [ObservableProperty] public string[] browserlist = { "Firefox", "Chrome", "Safari" };
+        [ObservableProperty] public string? chosenBrowser;
         [ObservableProperty] public string[] _errorMessage = { "No browsers found", };
-
-        [ObservableProperty]
-        private SettingsStruct _activeSettings;
-
+        [ObservableProperty] private SettingsStruct _activeSettings;
+        [ObservableProperty] private string? _fileText;
 
 
         public StartPageViewModel()
         {
-            var temp = new List<string>();
+            AvailableBrowserBookmarkPaths = BrowserLocations.GetBrowserBookmarkFilesPaths()?
+                .SelectMany(browser => browser.foundProfiles)
+                .ToList() ?? new List<string>();
+
+            
+            /*var temp = new List<string>();
             List<BrowserLocations> temp2 = BrowserLocations.GetBrowserBookmarkFilesPaths();
 
             if (temp2 != null)
@@ -61,8 +61,7 @@ namespace bookmark_dlp.ViewModels
                     }
                 }
             }
-            
-            AvailableBrowserBookmarkPaths = temp;
+            AvailableBrowserBookmarkPaths = temp;*/
             
             if (AppMethods.Yt_dlp_pathfinder(Directory.GetCurrentDirectory()) != null) { AppSettings._settings.Ytdlp_executable_not_found = false; }
             ActiveSettings = new SettingsStruct(AppSettings._settings);
@@ -77,10 +76,7 @@ namespace bookmark_dlp.ViewModels
         {
             AppSettings._settings = new SettingsStruct(ActiveSettings);
         }
-
-        [ObservableProperty] private string? _fileText;
-
-
+        
         [RelayCommand]
         public async Task OpenFile(CancellationToken token)
         {
@@ -101,8 +97,7 @@ namespace bookmark_dlp.ViewModels
                 ErrorMessages?.Add(e.Message);
             }
         }
-
-
+        
         private async Task<IStorageFile?> DoOpenFilePickerAsync()
         {
 
@@ -118,7 +113,6 @@ namespace bookmark_dlp.ViewModels
 
             return files?.Count >= 1 ? files[0] : null;
         }
-
 
         [RelayCommand]
         public async Task OpenFolder(CancellationToken token)
@@ -146,7 +140,6 @@ namespace bookmark_dlp.ViewModels
             }
         }
 
-
         private async Task<IStorageFolder?> DoOpenFolderPickerAsync()
         {
 
@@ -168,8 +161,5 @@ namespace bookmark_dlp.ViewModels
                 return null;
             }
         }
-
-
-
     }
 }

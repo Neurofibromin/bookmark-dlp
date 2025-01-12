@@ -20,7 +20,7 @@ namespace bookmark_dlp
         public static void CoreLogicMain(string[] args)
         {
 #if DEBUG
-            Logger.verbosity = Logger.Verbosity.Critical;
+            Logger.verbosity = Logger.Verbosity.Debug;
             // Functions.PrintToConsole(Import.SmartImport(Import.GetBrowserBookmarkFilesPaths()[0].foundProfiles[0]));
             Console.WriteLine("starting");
             Functions.PrintToConsole(Import.SmartImport("test1.html"));

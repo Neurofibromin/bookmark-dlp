@@ -22,58 +22,58 @@ namespace bookmark_dlp
             {
                 browsername = "Chrome",
                 browserType = BrowserType.chromiumbased,
-                windows_profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Google\\Chrome\\User Data\\"),
+                windows_profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Google", "Chrome", "User Data"),
                 linux_profilespath = new List<string> { Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "google-chrome") },
-                osx_profilespath = new List<string> { Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.Personal), "Library/Application Support/Google/Chrome") },
+                osx_profilespath = new List<string> { Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.Personal), "Library", "Application Support", "Google", "Chrome") },
             };
             BrowserLocations Chrome_beta = new BrowserLocations
             {
                 browsername = "Chrome-beta",
                 browserType = BrowserType.chromiumbased,
-                windows_profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Google\\Chrome Beta\\User Data\\"),
+                windows_profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Google", "Chrome Beta", "User Data"),
                 linux_profilespath = new List<string> { Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "google-chrome-beta") },
-                osx_profilespath = new List<string> { Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.Personal), "Library/Application Support/Google/Chrome Beta") }
+                osx_profilespath = new List<string> { Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.Personal), "Library", "Application Support", "Google", "Chrome Beta") }
             };
             BrowserLocations Chrome_canary = new BrowserLocations
             {
                 browsername = "Chrome-canary",
                 browserType = BrowserType.chromiumbased,
-                windows_profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Google\\Chrome SxS\\User Data\\"),
+                windows_profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Google", "Chrome SxS", "User Data"),
                 linux_profilespath = new List<string> { Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "google-chrome-unstable") }, //technically its called chrome unstable on linux, but its the same thing
-                osx_profilespath = new List<string> { Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.Personal), "Library/Application Support/Google/Chrome Canary") }
+                osx_profilespath = new List<string> { Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.Personal), "Library", "Application Support", "Google", "Chrome Canary") }
             };
             BrowserLocations Brave = new BrowserLocations
             {
                 browsername = "Brave-browser",
                 browserType = BrowserType.chromiumbased,
-                windows_profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "BraveSoftware\\Brave-Browser\\User Data\\"),
-                linux_profilespath = new List<string> { Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "BraveSoftware/Brave-Browser/") },
-                osx_profilespath = new List<string> { Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.Personal), "Library/Application Support/BraveSoftware/Brave-Browser") }
+                windows_profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "BraveSoftware", "Brave-Browser", "User Data"),
+                linux_profilespath = new List<string> { Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "BraveSoftware", "Brave-Browser") },
+                osx_profilespath = new List<string> { Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.Personal), "Library", "Application Support", "BraveSoftware", "Brave-Browser") }
             };
             BrowserLocations Chromium = new BrowserLocations
             {
                 //great docs: https://chromium.googlesource.com/chromium/src/+/master/docs/user_data_dir.md
                 browsername = "chromium",
                 browserType = BrowserType.chromiumbased,
-                windows_profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Chromium\\User Data"),
+                windows_profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Chromium", "User Data"),
                 linux_profilespath = new List<string> { Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "chromium") },
-                osx_profilespath = new List<string> { Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.Personal), "Library/Application Support/Chromium") }
+                osx_profilespath = new List<string> { Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.Personal), "Library", "Application Support", "Chromium") }
             };
             BrowserLocations Vivaldi = new BrowserLocations()
             {
                 browsername = "Vivaldi",
                 browserType = BrowserType.chromiumbased,
-                windows_profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Vivaldi\\User Data"),
+                windows_profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Vivaldi", "User Data"),
                 linux_profilespath = new List<string> { Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "vivaldi") },
-                osx_profilespath = new List<string> { Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.Personal), "Library/Application Support/Vivaldi") }
+                osx_profilespath = new List<string> { Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.Personal), "Library", "Application Support", "Vivaldi") }
             };
             BrowserLocations Edge = new BrowserLocations()
             {
                 browsername = "Microsoft Edge",
                 browserType = BrowserType.chromiumbased,
-                windows_profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Microsoft\\Edge\\User Data"),
+                windows_profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Microsoft", "Edge", "User Data"),
                 linux_profilespath = new List<string> { Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "microsoft-edge") },
-                osx_profilespath = new List<string> { Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.Personal), "Library/Application Support/Microsoft Edge") }
+                osx_profilespath = new List<string> { Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.Personal), "Library", "Application Support", "Microsoft Edge") }
                 //.config/microsoft-edge/Default/Bookmarks
                 // OSX:  /Users/username/Library/Application Support/Microsoft Edge/profilefolder/
                 // C:\Users\<Current-user>\AppData\Local\Microsoft\Edge\User Data\Default.
@@ -85,22 +85,22 @@ namespace bookmark_dlp
                 //C:\Users\%username%\AppData\Roaming\Opera Software\Opera Stable\Bookmarks is the Bookmarks file
                 windows_profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Opera Software"),
                 linux_profilespath = new List<string> { Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "opera") },
-                osx_profilespath = new List<string> { Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.Personal), "Library/Application Support/Opera Software") },
+                osx_profilespath = new List<string> { Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.Personal), "Library", "Application Support", "Opera Software") },
                 hardcodedpaths = new List<string>()
                 {
-                    Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "opera/Bookmarks"),
+                    Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "opera", "Bookmarks"),
                 }
             };
             BrowserLocations Firefox = new BrowserLocations
             {
                 browsername = "Firefox",
                 browserType = BrowserType.firefoxbased,
-                windows_profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Mozilla\\Firefox\\Profiles\\"),
+                windows_profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Mozilla", "Firefox", "Profiles"),
                 linux_profilespath = new List<string> { 
-                    Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "snap/firefox/common/.mozilla/firefox/"),
-                    Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".mozilla/firefox"),
+                    Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "snap", "firefox", "common", ".mozilla", "firefox"),
+                    Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".mozilla", "firefox"),
                 },
-                osx_profilespath = new List<string> { Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.Personal), "Library/Application Support/Firefox/Profiles") },
+                osx_profilespath = new List<string> { Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.Personal), "Library", "Application Support", "Firefox", "Profiles") },
             };
             List<BrowserLocations> browserLocations = new List<BrowserLocations>
                 {
@@ -350,13 +350,16 @@ namespace bookmark_dlp
         public static List<BrowserLocations> GetBrowserBookmarkFilesPaths()
         {
             List<BrowserLocations> browserLocations = GetBrowserLocations(); //gets list of supported browsers
-            List<BrowserLocations> completeBrowserLocations = new List<BrowserLocations>();
+            return browserLocations
+                .Select(browser => BrowserCheck(browser)) // Check each browser
+                .Where(browser => browser.foundProfiles.Count != 0) // Filter browsers with profiles
+                .ToList();
+            /*List<BrowserLocations> completeBrowserLocations = new List<BrowserLocations>();
             foreach (BrowserLocations browser in browserLocations)
             {
                 completeBrowserLocations.Add(BrowserCheck(browser)); //Checks for every browser if it is installed and has profiles in it
             }
             browserLocations = completeBrowserLocations; //completeBrowserLocations had to be introduced because: cannot assign to foreach variable
-
             //count how many links were found
             int TotalLinksFoundCount = 0;
             completeBrowserLocations = new List<BrowserLocations>();
@@ -369,7 +372,7 @@ namespace bookmark_dlp
             {
                 return null;
             }
-            return completeBrowserLocations;
+            return completeBrowserLocations;*/
         }
     }
 }

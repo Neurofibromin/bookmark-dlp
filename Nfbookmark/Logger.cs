@@ -5,11 +5,12 @@ using System.IO;
 namespace NfLogger
 {
     /// <summary>
-    /// Used for logging to console or optionally to files.
+    /// Used for logging to streams and to files.
     /// Standard output is added as log target by default.
     /// </summary>
     public static class Logger
     {
+        //TODO: make it possible to remove stream and file from log targets
         /*
          For making every Log destination independently verbose:
          internal struct StreamWithVerbosity

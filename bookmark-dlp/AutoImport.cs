@@ -12,67 +12,74 @@ using System.Text.Json;
 using System.Threading.Channels;
 using System.Collections.ObjectModel;
 using System.Net;
+using Nfbookmark;
+using NfLogger;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text.RegularExpressions;
+using bookmark_dlp;
 using NfLogger;
 
 namespace bookmark_dlp
 {
-    internal class AutoImport
+    /// <summary>
+    /// Used in the import process
+    /// </summary>
+    /// <example>
+    /// <code>
+    /// var folders = Import.SmartImport(somefile);
+    /// AutoImport.LinksFromUrls(folders);
+    /// AppMethods.CountWantedVideos(folders)
+    /// AppMethods.CheckCurrentFilesystemState(folders)
+    /// Functions.FoldernameValidation(folders);
+    /// Functions.Createfolderstructure(folders, rootdir);
+    /// AppMethods.Deleteemptyfolders(folders);
+    /// </code>
+    /// </example>
+    internal static class AutoImport
     {
         /// <summary>
-        /// Fills the member_ids field of a YTLink. Queries channel and playlist data mostly.
+        /// Fills links from urls. If not youtube url no link is generated.
+        /// If link parsing throws exception no link is generated,
+        /// and log message is written, but no exception will be thrown. Wrapper around LinkFromUrl. <br/>
+        /// Requires:
+        /// <list type="bullet">
+        /// <item> urls </item>
+        /// </list>
+        /// Fills:
+        /// <list type="bullet">
+        /// <item> links </item>
+        /// </list>
         /// </summary>
-        /// <param name="link">Link being checked for "children" - eg. channel asked for its videos. If called on a single video and the video does not have its yt-id filled, it gets corrected. But yt-id should already have been filled by Functions.UrlsToYTLinks()</param>
-        public static void GetVideoIds(ref YTLink link)
+        /// <param name="folders">The folders that are filled</param>
+        public static void LinksFromUrls(List<Folderclass> folders)
         {
-            // TODO: GetVideoIds from channel and playlist urls
-            if (link.linktype == Linktype.Video)
+            foreach (Folderclass folder in folders)
             {
-            }
-
-            if (link.linktype == Linktype.Short)
-            {
-            }
-
-            if (link.linktype == Linktype.Search)
-            {
-                return;
-            }
-
-            // yt-dlp --flat-playlist "https://www.youtube.com/@channelname/" --get-id
-            /* Error:
-             * WARNING: [youtube:tab] HTTP Error 404: Not Found. Retrying (1/3)...
-               WARNING: [youtube:tab] HTTP Error 404: Not Found. Retrying (2/3)...
-               WARNING: [youtube:tab] HTTP Error 404: Not Found. Retrying (3/3)...
-               WARNING: [youtube:tab] Unable to download webpage: HTTP Error 404: Not Found (caused by <HTTPError 404: Not Found>). Giving up after 3 retries
-               WARNING: [youtube:tab] YouTube said: ERROR - Requested entity was not found.
-               WARNING: [youtube:tab] HTTP Error 404: Not Found. Retrying (1/3)...
-               WARNING: [youtube:tab] YouTube said: ERROR - Requested entity was not found.
-               WARNING: [youtube:tab] HTTP Error 404: Not Found. Retrying (2/3)...
-               WARNING: [youtube:tab] YouTube said: ERROR - Requested entity was not found.
-               WARNING: [youtube:tab] HTTP Error 404: Not Found. Retrying (3/3)...
-               WARNING: [youtube:tab] YouTube said: ERROR - Requested entity was not found.
-               Good output:
-               the ids, one in each line.
-             */
-            List<string> videoIds = new List<string>();
-            if (link.linktype == Linktype.Playlist)
-            {
-            }
-
-            if (link.linktype == Linktype.Channel_c)
-            {
-            }
-
-            if (link.linktype == Linktype.Channel_user)
-            {
-            }
-
-            if (link.linktype == Linktype.Channel_channel)
-            {
-            }
-
-            if (link.linktype == Linktype.Channel_at)
-            {
+                foreach (string url in folder.urls)
+                {
+                    YTLink? link;
+                    try
+                    {
+                        link = AutoImport.LinkFromUrl(url);
+                    }
+                    catch (InvalidLinkException e)
+                    {
+                        Logger.LogVerbose(e.Message, Logger.Verbosity.Error);
+                        continue;
+                    }
+                    if (link is not null)
+                    {
+                        folder.links.Add(link.Value);
+                        //already logged in LinkFromUrl(): Logger.LogVerbose($"Link from {url} successfully converted to {link.Value}.", Logger.Verbosity.Trace);
+                    }
+                    else // link is null, it was not a youtube link
+                    {
+                        continue;
+                    }
+                }
             }
         }
 
@@ -238,131 +245,175 @@ namespace bookmark_dlp
             return totalyoutubelinknumber;
         }
 
-
-        /*
-        public static Folderclass[] Convertlisttoarray(List<Folderclass> folderclasses)
-        {
-            Folderclass[] folders = new Folderclass[Globals.folderid + 1];
-            for (int q = 0; q < Globals.folderid + 1; q++)
-            {
-                folders[q] = new Folderclass();
-            }
-            for (int i = 0; i < Globals.folderid + 1; i++)
-            {
-                foreach (Folderclass folderclass in folderclasses)
-                {
-                    if (folderclass.startline == i)
-                    {
-                        folders[i].name = folderclass.name;
-                        folders[i].depth = folderclass.depth;
-                        folders[i].startline = folderclass.startline;
-                        folders[i].endingline = folderclass.endingline;
-                        folders[i].numberoflinks = folderclass.numberoflinks;
-                        folders[i].urls = folderclass.urls;
-                        folders[i].id = folderclass.id;
-                        folders[i].parent = folderclass.parent;
-                        folders[i].children = folderclass.children;
-                    }
-                }
-            }
-            return folders;
-        }
-
-        public static List<Folderclass> Convertarraytolist(Folderclass[] folderclasses)
-        {
-            List<Folderclass> folderlist = new List<Folderclass>();
-            for (int i = 0; i < folderclasses.Length; i++)
-            {
-                try
-                {
-                    if (folderclasses[i].id != null)
-                    {
-                        folderlist.Add(folderclasses[i]);
-                    }
-                }
-                catch
-                {
-                    continue;
-                }
-            }
-            return folderlist;
-        }
-
-        public static class Globals
-        {
-            public static int folderid = 0; //used a lot instead of numberoffolders, maybe not ideal?
-            public static int totalyoutubelinknumber;
-            public static int startline;
-            public static string name;
-            public static int depth = 0;
-            public static int endingline = 0;
-            public static string folderpath;
-            public static int numberoflinks;
-            public static List<Folderclass> folderclasses = new List<Folderclass>();
-        }*/
-    }
-
-
-/*
-    public partial class ObsFolderclass : ObservableObject
-    {
-        //NOTE: Not in agreement with Folderclass, eg. Children and children are different types. 
-        [ObservableProperty] private int _startline; //for html: the line number in which the folder starts in the html.
-                        //json(autoimport intake chrome): the folder id, same as the folder[totalyoutubelinknumber] index.
-                        //firefox-sql: the bookmark id of the folder in the sql db
-        [ObservableProperty] private string _name;
-        [ObservableProperty] private int _depth;
-        [ObservableProperty] private int _endingline;
-        [ObservableProperty] private string _folderpath;
-        [ObservableProperty] private int _numberoflinks;
-        [ObservableProperty] private int _numberofmissinglinks;
-        [ObservableProperty] private List<string> _urls;
-        [ObservableProperty] private int _id; //same as array index
-        [ObservableProperty] private int _parent;
-        [ObservableProperty] private bool _wantDownloaded;
-        [ObservableProperty] private int _numberOfVideosDirectlyWanted;
-        [ObservableProperty] private int _numberOfVideosIndirectlyWanted;
-        [ObservableProperty] private int _numberOfVideosAllWanted;
-        [ObservableProperty] private int _numberOfWantedVideosFound;
-        [ObservableProperty] private int _numberOfOtherVideosFound;
-        [ObservableProperty] private int _numberOfAllVideosFound;
-        [ObservableProperty] private List<YTLink> _missinglinks;
-        [ObservableProperty] private List<string> _missingurls;
-        [ObservableProperty] private List<YTLink> _foundlinks;
-        [ObservableProperty] private List<string> _foundurls;
-
+        
         /// <summary>
-        /// From now on only members of the observable class
+        /// Parses url to YTLink object and fills:<br/>
+        /// <list type="bullet">
+        /// <item> url </item>
+        /// <item> linktype </item>
+        /// <item> channel_id </item>
+        /// <item> playlist_id </item>
+        /// <item> yt_id </item>
+        /// <item> member_ids </item>
+        /// </list>
         /// </summary>
-        public ObservableCollection<ObsFolderclass> Children = new ObservableCollection<ObsFolderclass>();
-
-
-        // ReSharper disable once ConvertToPrimaryConstructor
-        public ObsFolderclass(Folderclass other)
+        /// <param name="_url">Url to parse, must contain youtube.com. Usually FQDN, like https://www.youtube.com/watch?v=12345678912</param>
+        /// <returns>YTLink with parameters filled or null if url is not a youtube link</returns>
+        /// <exception cref="InvalidLinkException">If link parsing encounters unexpected characters</exception>
+        public static YTLink? LinkFromUrl(string _url)
         {
-            _startline = other.startline;
-            _name = other.name;
-            _depth = other.depth;
-            _endingline = other.endingline;
-            _folderpath = other.folderpath;
-            _numberoflinks = other.numberoflinks;
-            _numberofmissinglinks = other.numberofmissinglinks;
-            _urls = other.urls;
-            _id = other.id;
-            _parent = other.parent;
-            _wantDownloaded = other.wantDownloaded;
-            _numberOfVideosDirectlyWanted = other.numberOfVideosDirectlyWanted;
-            _numberOfVideosIndirectlyWanted = other.numberOfVideosIndirectlyWanted;
-            _numberOfVideosAllWanted = other.numberOfVideosAllWanted;
-            _numberOfWantedVideosFound = other.numberOfWantedVideosFound;
-            _numberOfOtherVideosFound = other.numberOfOtherVideosFound;
-            _numberOfAllVideosFound = other.numberOfAllVideosFound;
-            _missinglinks = other.LinksWithMissingVideos;
-            _missingurls = other.missingurls;
-            _foundlinks = other.LinksWithNoMissingVideos;
-            _foundurls = other.foundurls;
-            // children = new ObservableCollection<Folderclass>();
+            // TODO: test this
+            if (!_url.Contains("www.youtube.com")) //only work with youtube links
+                return null;
+            YTLink link = new YTLink();
+            link.url = _url;
+            //filtering the links with the consecutive ifs to find if they are for videos or else (channels, playlists, etc.)
+            if (_url.Substring(24, 8) == "playlist") 
+            {
+                //playlist
+                int start = _url.IndexOf("playlist?list=", StringComparison.Ordinal) + "playlist?list=".Length;
+                string temp = _url.Substring(start);
+                int end = temp.IndexOf('/');
+                if (end == -1)
+                  end = _url.Length;
+                link.linktype = Linktype.Playlist;
+                link.playlist_id = _url.Substring(start, end);
+            }
+            else if (_url.Substring(24, 4) == "user")
+            {
+                //channel
+                string pattern = @"youtube\.com/user/([a-zA-Z0-9_-]+)";
+                Match match = Regex.Match(_url, pattern);
+                if (match.Success && match.Groups.Count > 1)
+                {
+                    link.channel_id = match.Groups[1].Value;
+                }
+                else
+                {
+                    throw new InvalidLinkException($"Invalid URL: {_url}, regex pattern: {pattern}");
+                }
+                link.linktype = Linktype.Channel_user;
+            }
+            else if (_url.Substring(24, 7) == "channel")
+            {
+                //channel
+                string pattern = @"youtube\.com/channel/([a-zA-Z0-9_-]+)";
+                Match match = Regex.Match(_url, pattern);
+                if (match.Success && match.Groups.Count > 1)
+                {
+                    link.channel_id = match.Groups[1].Value;
+                }
+                else
+                {
+                    throw new InvalidLinkException($"Invalid URL: {_url}, regex pattern: {pattern}");
+                }
+                link.linktype = Linktype.Channel_channel;
+            }
+            else if (_url.Substring(24, 7) == "results") //youtube search result was bookmarked
+            {
+                //not saving search results
+                link.linktype = Linktype.Search;
+            }
+            else if (_url.Substring(24, 1) == "@")
+            {
+                //channel
+                string pattern = @"youtube\.com/@([a-zA-Z0-9_-]+)";
+                Match match = Regex.Match(_url, pattern);
+                if (match.Success && match.Groups.Count > 1)
+                {
+                    link.channel_id = match.Groups[1].Value;
+                }
+                else
+                {
+                    throw new InvalidLinkException($"Invalid URL: {_url}, regex pattern: {pattern}");
+                }
+                link.linktype = Linktype.Channel_at;
+            }
+            else if (_url.Substring(24, 2) == "c/")
+            {
+                //channel
+                string pattern = @"youtube\.com/c/([a-zA-Z0-9_-]+)";
+                Match match = Regex.Match(_url, pattern);
+                if (match.Success && match.Groups.Count > 1)
+                {
+                    link.channel_id = match.Groups[1].Value;
+                }
+                else
+                {
+                    throw new InvalidLinkException($"Invalid URL: {_url}, regex pattern: {pattern}");
+                }
+                link.linktype = Linktype.Channel_c;
+            }
+            else if (_url.Substring(24, 6) == "shorts")
+            {
+                //shorts
+                string pattern = @"youtube\.com/shorts/([a-zA-Z0-9_-]+)";
+                Match match = Regex.Match(_url, pattern);
+                if (match.Success && match.Groups.Count > 1)
+                {
+                    link.yt_id = match.Groups[1].Value;
+                }
+                else
+                {
+                    throw new InvalidLinkException($"Invalid URL: {_url}, regex pattern: {pattern}");
+                }
+                link.linktype = Linktype.Short;
+            }
+            else
+            {
+                string regexed, manparsed;
+                string pattern = @"youtube\.com/watch\?v=([a-zA-Z0-9_-]+)";
+                Match match = Regex.Match(_url, pattern);
+                if (match.Success && match.Groups.Count > 1)
+                {
+                    regexed = match.Groups[1].Value;
+                }
+                else
+                {
+                    throw new InvalidLinkException($"Invalid URL: {_url}, regex pattern: {pattern}");
+                }
+                int start = _url.IndexOf("watch?v=", StringComparison.Ordinal) + "watch?v=".Length;
+                string temp = _url.Substring(start);
+                int end = temp.IndexOf('&');
+                if (end == -1)
+                    end = _url.Length;
+                manparsed = _url.Substring(start, end);
+                if (manparsed.Length == 11 && regexed.Length == 11 &&
+                    String.Equals(manparsed, regexed, StringComparison.CurrentCultureIgnoreCase))
+                {
+                    link.linktype = Linktype.Video;
+                    link.yt_id = manparsed;    
+                }
+                else
+                {
+                    Logger.LogVerbose($"Invalid URL: {_url}, REGEX conflict. Regex pattern: {pattern}, manparsed: {manparsed}, regexed: {regexed}.", Logger.Verbosity.Error);
+                    link.linktype = Linktype.Video;
+                    link.yt_id = manparsed;
+                }
+            }
+            switch (link.linktype)
+            {
+                case Linktype.Video:
+                case Linktype.Short:
+                    if (string.IsNullOrEmpty(link.yt_id))
+                    {
+                        Logger.LogVerbose($"{link} does not have yt_id filled!", Logger.Verbosity.Warning);
+                    }
+                    break;
+                case Linktype.Search:
+                    break;
+                case Linktype.Playlist:
+                    link.member_ids = YtdlpInterfacing.GetVideoIdsFromPlaylistUrl(link.url);
+                    break;
+                case Linktype.Channel_c:
+                case Linktype.Channel_user:
+                case Linktype.Channel_channel:
+                case Linktype.Channel_at:
+                    link.member_ids = YtdlpInterfacing.GetVideoIdsFromChannelUrl(link.url);
+                    break;
+            }
+            Logger.LogVerbose($"Url {_url} was parsed to ytlink {link}", Logger.Verbosity.Trace);
+            return link;
         }
     }
-*/
 }
