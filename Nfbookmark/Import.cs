@@ -32,7 +32,10 @@ namespace Nfbookmark
             }
             catch (Exception e)
             {
-                Logger.LogVerbose(e + " File:" + filePath + "could not be read.");
+                if (e is FileNotFoundException || e is IOException || e is UnauthorizedAccessException)
+                {
+                    Logger.LogVerbose(e + " File:" + filePath + "could not be read.");    
+                }
                 throw;
             }
             switch (Path.GetExtension(filePath))
@@ -46,18 +49,26 @@ namespace Nfbookmark
                 case ".html":
                     return HtmlTakeoutIntake(filePath);
                     break;
-                default:
-                    break;
+                default: //Chrome-based does not use extension for the Bookmarks file
+                    if (Path.GetFileName(filePath) == "Bookmarks")  
+                        return JsonIntake(filePath);
+                    return null;
             }
-            if (Path.GetFileName(filePath) == "Bookmarks") 
-            { return JsonIntake(filePath); } //Chrome-based does not use extension for the Bookmarks file
-            return null;
         }
 
         
 
         /// <summary>
-        /// Imports bookmarks from a json file. Used for chromium based browsers
+        /// Imports bookmarks from a json file. Used for chromium based browsers <br/>
+        /// Fills:
+        /// <list type="bullet">
+        /// <item> startline </item>
+        /// <item> url </item>
+        /// <item> name </item>
+        /// <item> depth </item>
+        /// <item> parentId </item>
+        /// <item> endingline </item>
+        /// </list>
         /// </summary>
         /// <param name="filePath"></param>
         /// <returns>List of bookmark folders containing all the bookmarks</returns>
@@ -67,7 +78,7 @@ namespace Nfbookmark
             Bookmark bookmark_bar;
             Bookmark other;
             Bookmark synced;
-            Logger.LogVerbose("Autoimport intake start", Logger.Verbosity.Info);
+            Logger.LogVerbose("Autoimport intake start", Logger.Verbosity.Debug);
             try { text = File.ReadAllText(filePath); }
             catch (FileLoadException ex) { Logger.LogVerbose($"Json file could not be accessed: {ex.Message}", Logger.Verbosity.Error); return null; }
             catch (FileNotFoundException ex) { Logger.LogVerbose($"Json file could not found: {ex.Message}", Logger.Verbosity.Error); return null; }
@@ -212,7 +223,16 @@ namespace Nfbookmark
         }
 
         /// <summary>
-        /// Helper function for finding the children of a given folder
+        /// Helper function for finding the children of a given folder <br/>
+        /// Fills:
+        /// <list type="bullet">
+        /// <item> startline </item>
+        /// <item> url </item>
+        /// <item> name </item>
+        /// <item> depth </item>
+        /// <item> id </item>
+        /// <item> endingline </item>
+        /// </list>
         /// </summary>
         /// <param name="current">The folder whose children we are searching for</param>
         /// <param name="depth">How deeply nested the current folder is</param>
@@ -252,7 +272,16 @@ namespace Nfbookmark
         }
 
         /// <summary>
-        /// Gets List of Bookmarks that only has folder bookmarks in it and fills the appropriate values. Only for SqlIntake
+        /// Gets List of Bookmarks that only has folder bookmarks in it and fills the appropriate values. Only for SqlIntake <br/>
+        /// Fills:
+        /// <list type="bullet">
+        /// <item> id </item>
+        /// <item> depth </item>
+        /// <item> parentId </item>
+        /// <item> name </item>
+        /// <item> startline </item>
+        /// <item> urls </item>
+        /// </list>
         /// </summary>
         /// <param name="bookmarks">Contains only folders</param>
         /// <param name="parentid">parentid[i] = the sql id of the parent folder of the bookmark with the id i</param>
