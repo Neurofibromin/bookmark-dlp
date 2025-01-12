@@ -42,8 +42,6 @@ namespace bookmark_dlp
             bool importSourceFound = false;
             bool ishtml = false;
             string filePath = ""; //if not html
-            int totalyoutubelinksnumber;
-
             if (setOptions.Interactive)
             {
                 ///======
@@ -157,8 +155,8 @@ namespace bookmark_dlp
                     }
                 }
                 
-                Functions.Createfolderstructure(ref folders, rootdir);
-                totalyoutubelinksnumber = AutoImport.WritelinkstotxtFromFolderclasses(ref folders, rootdir, downloadPlaylists, downloadShorts, downloadChannels);
+                Functions.Createfolderstructure(folders, rootdir);
+                AutoImport.WritelinkstotxtFromFolderclasses(folders, downloadPlaylists, downloadChannels, downloadShorts, rootdir);
                 
                 Functions.PrintToConsole(folders); //dump all the folder info to console
                 AutoImport.Scriptwriter(folders, ytdlp_path); //writing the scripts that call yt-dlp and add .txt with the links in the arguments //NOT the method that creates the .txt files
@@ -230,8 +228,8 @@ namespace bookmark_dlp
                     }
                 }
                 
-                Functions.Createfolderstructure(ref folders, rootdir);
-                totalyoutubelinksnumber = AutoImport.WritelinkstotxtFromFolderclasses(ref folders, rootdir, downloadPlaylists, downloadShorts, downloadChannels);
+                Functions.Createfolderstructure(folders, rootdir);
+                AutoImport.WritelinkstotxtFromFolderclasses(folders,  downloadPlaylists, downloadChannels, downloadShorts, rootdir);
                 
                 
                 /////////////////////////////////////////

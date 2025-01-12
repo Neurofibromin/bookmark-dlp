@@ -127,7 +127,7 @@ namespace Nfbookmark
         /// Parent
         /// </summary>
         /// <param name="folders">The bookmark folders to operate on, folder names may be changed</param>
-        public static void FoldernameValidation(ref List<Folderclass> folders)
+        public static void FoldernameValidation(List<Folderclass> folders)
         {
             string[] forbiddenCharacters = {"/", ":", "?", "<", ">", "*", "|" , "\\" , "\""};
             // If name empty
@@ -189,9 +189,9 @@ namespace Nfbookmark
         /// </summary>
         /// <param name="folders">Bookmark folders to be made into filesystem folders</param>
         /// <param name="rootdir">Fiilesystems directory to contain all the folders</param>
-        public static void Createfolderstructure(ref List<Folderclass> folders, string rootdir)
+        public static void Createfolderstructure(List<Folderclass> folders, string rootdir)
         {
-            FoldernameValidation(ref folders);
+            FoldernameValidation(folders);
             if (!Directory.Exists(rootdir)) { Directory.CreateDirectory(rootdir); }
             Directory.SetCurrentDirectory(rootdir);
             System.IO.Directory.CreateDirectory("Bookmarks");

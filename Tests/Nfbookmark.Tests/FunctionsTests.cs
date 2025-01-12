@@ -17,7 +17,7 @@ namespace Nfbookmark.Tests
                 new Folderclass { name = "folder/1", id = 1, depth = 0, parentId = 0 },
                 new Folderclass { name = "folder?2", id = 2, depth = 0, parentId = 0 }
             };
-            Functions.FoldernameValidation(ref folders);
+            Functions.FoldernameValidation(folders);
             Assert.Equal("folder1", folders[0].name);
             Assert.Equal("folder2", folders[1].name);
         }
@@ -28,7 +28,7 @@ namespace Nfbookmark.Tests
             {
                 new Folderclass { name = "", id = 1, depth = 0, parentId = 0 }
             };
-            Functions.FoldernameValidation(ref folders);
+            Functions.FoldernameValidation(folders);
             Assert.Equal("ID1", folders[0].name);
         }
 
@@ -39,7 +39,7 @@ namespace Nfbookmark.Tests
             {
                 new Folderclass { name = " . ", id = 1, depth = 0, parentId = 0 }
             };
-            Functions.FoldernameValidation(ref folders);
+            Functions.FoldernameValidation(folders);
             Assert.Equal("ID1", folders[0].name);
         }
 
@@ -50,7 +50,7 @@ namespace Nfbookmark.Tests
             {
                 new Folderclass { name = ".hidden", id = 1, depth = 0, parentId = 0 }
             };
-            Functions.FoldernameValidation(ref folders);
+            Functions.FoldernameValidation(folders);
             Assert.Equal("ID1", folders[0].name);
         }
 
@@ -62,7 +62,7 @@ namespace Nfbookmark.Tests
                 new Folderclass { name = "duplicate", id = 1, depth = 0, parentId = 0 },
                 new Folderclass { name = "duplicate", id = 2, depth = 0, parentId = 0 }
             };
-            Functions.FoldernameValidation(ref folders);
+            Functions.FoldernameValidation(folders);
             Assert.Equal("duplicateID1", folders[0].name);
             Assert.Equal("duplicateID2", folders[1].name);
         }
@@ -91,7 +91,7 @@ namespace Nfbookmark.Tests
             try
             {
                 // Act
-                Functions.Createfolderstructure(ref folders, rootDir);
+                Functions.Createfolderstructure(folders, rootDir);
 
                 // Assert
                 string expectedPath1 = Path.Combine(rootDir, "Bookmarks", "Folder1");
@@ -140,7 +140,7 @@ namespace Nfbookmark.Tests
             try
             {
                 // Act
-                Functions.Createfolderstructure(ref folders, rootDir);
+                Functions.Createfolderstructure(folders, rootDir);
 
                 // Assert
                 string expectedPath = Path.Combine(rootDir, "Bookmarks", "Folder1");
@@ -173,7 +173,7 @@ namespace Nfbookmark.Tests
             try
             {
                 // Act
-                Functions.Createfolderstructure(ref folders, rootDir);
+                Functions.Createfolderstructure(folders, rootDir);
 
                 // Assert
                 string expectedPathRoot = Path.Combine(rootDir, "Bookmarks", "RootFolder");
@@ -217,7 +217,7 @@ namespace Nfbookmark.Tests
                     new Folderclass { name = "Charlie", depth = 2, parentId = 2 },
                     new Folderclass { name = "Delta", depth = 3, parentId = 3 },
                 };
-                Functions.Createfolderstructure(ref folders, rootPath);
+                Functions.Createfolderstructure(folders, rootPath);
                 rootPath = Path.Combine(rootPath, "Bookmarks");
                 File.Create(Path.Combine(folders[0].folderpath, "test.txt"));
                 File.Create(Path.Combine(folders[1].folderpath, "test.txt"));

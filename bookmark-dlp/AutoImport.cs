@@ -85,164 +85,87 @@ namespace bookmark_dlp
 
 
         /// <summary>
-        /// Writes the links found in the bookmark folder into the filesystem folder in a $foldername.txt file. Id sequencial writing is NOT GUARANTEED.
+        /// Writes the links found in the bookmark folder into the filesystem folder in a $foldername.txt file. Id sequencial writing is NOT GUARANTEED.<br/>
+        /// Requires:
+        /// <list type="bullet">
+        /// <item> folderpath </item>
+        /// <item> url </item>
+        /// </list>
         /// </summary>
         /// <param name="folders">the bookmark folders containing the links</param>
-        /// <param name="rootdir">the filesystem directory (not really used)</param>
+        /// <param name="debugdirectory">the filesystem directory (only used for writing debug)</param>
         /// <param name="downloadPlaylists">options</param>
         /// <param name="downloadShorts">options</param>
         /// <param name="downloadChannels">options</param>
         /// <returns></returns>
-        public static int WritelinkstotxtFromFolderclasses(ref List<Folderclass> folders, string rootdir,
-            bool downloadPlaylists = false, bool downloadShorts = false, bool downloadChannels = false)
+        public static void WritelinkstotxtFromFolderclasses(List<Folderclass> folders,
+            bool downloadPlaylists = false, bool downloadChannels = false, bool downloadShorts = false, string debugdirectory = "")
         {
-            //TODO: Deprecate this, use YTLinks instead
-            StreamWriter
-                temp = new StreamWriter(Path.Combine(rootdir, "temp.txt"),
-                    append: true); //writing into temp.txt all the youtube links that are not for videos (but for channels, playlists, etc.)
-            int totalyoutubelinknumber = 0;
-            for (int j = 0; j < folders.Count; j++)
+            Functions.FoldernameValidation(folders);
+            StreamWriter temp = null;
+            if (!string.IsNullOrEmpty(debugdirectory))
             {
-                StreamWriter writer = new StreamWriter(Path.Combine(folders[j].folderpath, folders[j].name + ".txt"),
-                    append: false);
+                //writing into temp.txt all the youtube links that are not for videos (but for channels, playlists, etc.)
+                temp = new StreamWriter(Path.Combine(debugdirectory, "temp.txt"), append: true);
+            }
+            foreach (Folderclass folder in folders)
+            {
+                StreamWriter writer = new StreamWriter(Path.Combine(folder.folderpath, folder.name + ".txt"), append: false);
+                //writing all the youtube links that are not for videos (but for channels, playlists, etc.) in the given folder
                 StreamWriter complexnotsimple =
-                    new StreamWriter(Path.Combine(folders[j].folderpath, folders[j].name + ".complex.txt"),
-                        append: true); //writing all the youtube links that are not for videos (but for channels, playlists, etc.) in the given folder
-                int linknumbercounter = 0; //counts links in one folder
-                foreach (string url in folders[j].urls)
+                    new StreamWriter(Path.Combine(folder.folderpath, folder.name + ".complex.txt"), append: true);
+                foreach (YTLink link in folder.links)
                 {
-                    string linkthatisbeingexamined = url;
-                    if (linkthatisbeingexamined.Contains("www.youtube.com")) //only write lines that are youtube links
+                    switch (link.linktype)
                     {
-                        bool iscomplicated = false;
-                        bool isShort = false;
-                        bool isChannel = false;
-                        bool isPlaylist = false;
-                        if (linkthatisbeingexamined.Substring(24, 8) ==
-                            "playlist") //filtering the links with the consecutive ifs to find if they are for videos or else (channels, playlists, etc.)
-                        {
-                            //playlist
-                            complexnotsimple.WriteLine(linkthatisbeingexamined);
-                            temp.WriteLine(linkthatisbeingexamined);
-                            isPlaylist = true;
-                        }
-
-                        if (linkthatisbeingexamined.Substring(24, 4) == "user")
-                        {
-                            //channel
-                            complexnotsimple.WriteLine(linkthatisbeingexamined);
-                            temp.WriteLine(linkthatisbeingexamined);
-                            isChannel = true;
-                        }
-
-                        if (linkthatisbeingexamined.Substring(24, 7) == "channel")
-                        {
-                            //channel
-                            complexnotsimple.WriteLine(linkthatisbeingexamined);
-                            temp.WriteLine(linkthatisbeingexamined);
-                            isChannel = true;
-                        }
-
-                        if (linkthatisbeingexamined.Substring(24, 7) ==
-                            "results") //youtube search result was bookmarked
-                        {
-                            //not saving search results
-                            temp.WriteLine(linkthatisbeingexamined);
-                            iscomplicated = true;
-                        }
-
-                        if (linkthatisbeingexamined.Substring(24, 1) == "@")
-                        {
-                            //channel
-                            complexnotsimple.WriteLine(linkthatisbeingexamined);
-                            temp.WriteLine(linkthatisbeingexamined);
-                            isChannel = true;
-                        }
-
-                        if (linkthatisbeingexamined.Substring(24, 2) == "c/")
-                        {
-                            //channel
-                            complexnotsimple.WriteLine(linkthatisbeingexamined);
-                            temp.WriteLine(linkthatisbeingexamined);
-                            isChannel = true;
-                        }
-
-                        if (linkthatisbeingexamined.Substring(24, 6) == "shorts")
-                        {
-                            //shorts
-                            complexnotsimple.WriteLine(linkthatisbeingexamined);
-                            temp.WriteLine(linkthatisbeingexamined);
-                            isShort = true;
-                        }
-
-                        if (!(isShort || isChannel || isPlaylist)) //its normal
-                        {
-                            writer.WriteLine(linkthatisbeingexamined);
-                            linknumbercounter++;
-                        }
-
-                        if (isShort && downloadShorts)
-                        {
-                            writer.WriteLine(linkthatisbeingexamined);
-                            linknumbercounter++;
-                        }
-
-                        if (isPlaylist && downloadPlaylists)
-                        {
-                            writer.WriteLine(linkthatisbeingexamined);
-                            linknumbercounter++;
-                        }
-
-                        if (isChannel && downloadChannels)
-                        {
-                            writer.WriteLine(linkthatisbeingexamined);
-                            linknumbercounter++;
-                        }
-                        /*if (iscomplicated == false)
-                           {
-                               writer.WriteLine(linkthatisbeingexamined);
-                               if (!wantcomplex)
-                               {
-                                   totalyoutubelinknumber++;
-                                   linknumbercounter++;
-                               }
-                           }
-                           if (wantcomplex)
-                           {
-                               totalyoutubelinknumber++;
-                               linknumbercounter++;
-                           }*/
+                        case Linktype.Video:
+                            writer.WriteLine(link.url);
+                            break;
+                        case Linktype.Short:
+                            if(downloadShorts)
+                                writer.WriteLine(link.url);
+                            break;
+                        case Linktype.Search:
+                            break;
+                        case Linktype.Playlist:
+                            complexnotsimple.WriteLine(link.url);
+                            temp?.WriteLine(link.url);
+                            if (downloadPlaylists)
+                                writer.WriteLine(link.url);
+                            break;
+                        case Linktype.Channel_c:
+                        case Linktype.Channel_user:
+                        case Linktype.Channel_channel:
+                        case Linktype.Channel_at:
+                            complexnotsimple.WriteLine(link.url);
+                            temp?.WriteLine(link.url);
+                            if (downloadChannels)
+                                writer.WriteLine(link.url);
+                            break;
                     }
                 }
-
                 writer.Flush();
                 writer.Close();
                 complexnotsimple.Flush();
                 complexnotsimple.Close();
-                totalyoutubelinknumber +=
-                    linknumbercounter; //increase total link number by number of links found in this folder
-                if (new FileInfo(Path.Combine(folders[j].folderpath, folders[j].name + ".complex.txt")).Length ==
+                if (new FileInfo(Path.Combine(folder.folderpath, folder.name + ".complex.txt")).Length ==
                     0) //if the txt reamined empty it is deleted
                 {
-                    File.Delete(Path.Combine(folders[j].folderpath, folders[j].name + ".complex.txt"));
+                    File.Delete(Path.Combine(folder.folderpath, folder.name + ".complex.txt"));
                 }
 
-                if (new FileInfo(Path.Combine(folders[j].folderpath, folders[j].name + ".txt")).Length ==
+                if (new FileInfo(Path.Combine(folder.folderpath, folder.name + ".txt")).Length ==
                     0) //if the txt remained empty it is deleted
                 {
-                    File.Delete(Path.Combine(folders[j].folderpath, folders[j].name + ".txt"));
-                    Logger.LogVerbose($"Deleted txt of {folders[j].name}", Logger.Verbosity.Trace);
+                    File.Delete(Path.Combine(folder.folderpath, folder.name + ".txt"));
+                    Logger.LogVerbose($"Deleted txt of {folder.name}", Logger.Verbosity.Trace);
                 }
-                /*if (!wantcomplex)
-                {
-                    File.Delete(Path.Combine(folders[j].folderpath, folders[j].name + ".complex.txt"));
-                }*/
             }
-
-            temp.Flush();
-            temp.Close();
-            Logger.LogVerbose("Total number of youtube links found: " + totalyoutubelinknumber, Logger.Verbosity.Info);
-            return totalyoutubelinknumber;
+            if (temp != null)
+            {
+                temp.Flush();
+                temp.Close();
+            }
         }
 
         
@@ -416,6 +339,8 @@ namespace bookmark_dlp
             return link;
         }
 
+        #region Scripts
+        
         /// <summary>
         /// Creates the scripts in every filesystem folder where they are necessary. Operating system aware. <br/>
         /// Requires:
@@ -627,5 +552,8 @@ namespace bookmark_dlp
                 Console.Write(" folders are finished\n");
             }
         }
+        
+        #endregion Scripts
+        
     }
 }
