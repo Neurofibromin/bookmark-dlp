@@ -4,19 +4,15 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Text.Json;
+using Avalonia.Controls.ApplicationLifetimes;
+using CommunityToolkit.Mvvm.ComponentModel;
 using NfLogger;
 
 namespace bookmark_dlp
 {
     public static class YtdlpInterfacing
     {
-        public static string ytdlppath = AppMethods.Yt_dlp_pathfinder();
-        
-        public static void SetYtdlpPath(string rootdir)
-        {
-            ytdlppath = AppMethods.Yt_dlp_pathfinder(rootdir);
-            Logger.LogVerbose("Ytdlp path in YtdlpInterfacing set to: " + ytdlppath, Logger.Verbosity.Trace);
-        }
+        public static string YtdlpPath;
         
         /// <summary>
         /// Gets list of video ids from a given channel. Requires internet.
@@ -25,8 +21,17 @@ namespace bookmark_dlp
         /// <returns>List of 11 char long youtube ids for the videos uploaded by the channel. Or null if channel does not exist or no internet.</returns>
         public static List<string>? GetVideoIdsFromChannelUrl(string url)
         {
+            if (string.IsNullOrEmpty(YtdlpPath))
+            {
+                Logger.LogVerbose($"YtdlpPath is not set in YtdlpInterfacing::GetVideoIdsFromChannelUrl()", Logger.Verbosity.Error);
+                return null;
+            }
+            if (string.IsNullOrEmpty(url))
+            {
+                return null;
+            }
             string channelUrl = url;
-            string ytDlpPath = ytdlppath;
+            string ytDlpPath = YtdlpPath;
             List<string> videoIds = new List<string>();
             // Run yt-dlp
             Process process = new Process

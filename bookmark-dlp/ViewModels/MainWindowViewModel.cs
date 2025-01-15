@@ -42,6 +42,7 @@ namespace bookmark_dlp.ViewModels
         [ObservableProperty] private bool _settingsEnabled = true;
         [ObservableProperty] private bool _logEnabled = true;
         [ObservableProperty] private bool _downloadingEnabled = false;
+        [ObservableProperty] private bool _importSuccess = false;
         
         public MainWindowViewModel()
         {
@@ -97,19 +98,20 @@ namespace bookmark_dlp.ViewModels
             
             await MyStartPageViewModel.SaveActiveSettings();
             MyDownloadingViewModel.ReBindSettings();
-            //TODO: make the goforwardbutton disabled when no file is selected
-            if (AppSettings._settings.ManualImportUsed)
+            MyDownloadingViewModel.FileSource = AppSettings._settings.ManualImportUsed
+                ? AppSettings._settings.Manualimportfilelocation
+                : MyStartPageViewModel.ChosenBrowser;
+            ImportSuccess = await MyDownloadingViewModel.LoadFoldersFromFile();
+            if (ImportSuccess)
             {
-                MyDownloadingViewModel.FileSource = AppSettings._settings.Manualimportfilelocation;
+                DownloadingEnabled = true;
+                SelectedTab = MyDownloadingViewModel;
             }
             else
             {
-                MyDownloadingViewModel.FileSource = MyStartPageViewModel.ChosenBrowser;
+                MyStartPageViewModel.EnableImportButton = false;
+                MyStartPageViewModel.ImportButtonToolTip = "Import Failed";
             }
-            await MyDownloadingViewModel.LoadFoldersFromFile();
-            YtdlpInterfacing.SetYtdlpPath(MyDownloadingViewModel.ActiveSettings.Outputfolder);
-            DownloadingEnabled = true;
-            SelectedTab = MyDownloadingViewModel;
         }
 
         public void BackToStartPage()

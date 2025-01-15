@@ -34,11 +34,13 @@ namespace bookmark_dlp.ViewModels
         [ObservableProperty]
         public List<string> availableBrowserBookmarkPaths; //= (List<string>)(from browser in AutoImport.FindBrowserBookmarkFilesPaths() select browser.foundFiles)
 
-        [ObservableProperty] public string[] browserlist = { "Firefox", "Chrome", "Safari" };
-        [ObservableProperty] public string? chosenBrowser;
-        [ObservableProperty] public string[] _errorMessage = { "No browsers found", };
+        [ObservableProperty] private string[] _browserList = { "Firefox", "Chrome", "Safari" };
+        [ObservableProperty] private string? _chosenBrowser;
+        [ObservableProperty] private string[] _errorMessage = { "No browsers found", };
         [ObservableProperty] private SettingsStruct _activeSettings;
         [ObservableProperty] private string? _fileText;
+        [ObservableProperty] private string? _importButtonToolTip = "No source selected";
+        [ObservableProperty] private bool _enableImportButton;
 
 
         public StartPageViewModel()
@@ -46,22 +48,6 @@ namespace bookmark_dlp.ViewModels
             AvailableBrowserBookmarkPaths = BrowserLocations.GetBrowserBookmarkFilesPaths()?
                 .SelectMany(browser => browser.foundProfiles)
                 .ToList() ?? new List<string>();
-
-            
-            /*var temp = new List<string>();
-            List<BrowserLocations> temp2 = BrowserLocations.GetBrowserBookmarkFilesPaths();
-
-            if (temp2 != null)
-            {
-                foreach (BrowserLocations browser in temp2)
-                {
-                    foreach (string path in browser.foundProfiles)
-                    {
-                        temp.Add(path);
-                    }
-                }
-            }
-            AvailableBrowserBookmarkPaths = temp;*/
             
             if (AppMethods.Yt_dlp_pathfinder(Directory.GetCurrentDirectory()) != null) { AppSettings._settings.Ytdlp_executable_not_found = false; }
             ActiveSettings = new SettingsStruct(AppSettings._settings);

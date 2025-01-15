@@ -70,28 +70,13 @@ namespace bookmark_dlp
                                 Environment.Exit(1);
                             
                         }
-                        
-                        if (true)
+                        var mainWindowVm = new MainWindowViewModel();
+                        var mainWindow = new MainWindow
                         {
-                            var mainWindowVM = new MainWindowViewModel();
-                            var MainWindow = new MainWindow
-                            {
-                                DataContext = mainWindowVM,
-                            };
-                            desktop.MainWindow = MainWindow;
-                            MainWindow.Show();
-                        }
-                        else
-                        {
-                            var pageWindowViewModel = new PageMainWindowViewModel();
-                            var PageMainWindow = new PageMainWindow()
-                            {
-                                DataContext = pageWindowViewModel,
-                            };
-                            desktop.MainWindow = PageMainWindow;
-                            PageMainWindow.Show();
-                        }
-                        
+                            DataContext = mainWindowVm,
+                        };
+                        desktop.MainWindow = mainWindow;
+                        mainWindow.Show();
                         askConfigWindow.Close();
                     };
                 }
@@ -99,26 +84,13 @@ namespace bookmark_dlp
                 {
                     Console.WriteLine("Config was found");
                     Console.WriteLine("Location: " + AppMethods.ConfigFileLocation());
-                    if (true)
+                    var mainWindowVm = new MainWindowViewModel();
+                    var mainWindow = new MainWindow
                     {
-                        var mainWindowVM = new MainWindowViewModel();
-                        var MainWindow = new MainWindow
-                        {
-                            DataContext = mainWindowVM,
-                        };
-                        desktop.MainWindow = MainWindow;
-                        MainWindow.Show();
-                    }
-                    else
-                    {
-                        var pageWindowViewModel = new PageMainWindowViewModel();
-                        var PageMainWindow = new PageMainWindow()
-                        {
-                            DataContext = pageWindowViewModel,
-                        };
-                        desktop.MainWindow = PageMainWindow;
-                        PageMainWindow.Show();
-                    }
+                        DataContext = mainWindowVm,
+                    };
+                    desktop.MainWindow = mainWindow;
+                    mainWindow.Show();
                 }
             }
             else

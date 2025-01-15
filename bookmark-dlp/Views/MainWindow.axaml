@@ -51,11 +51,11 @@
                 <views:SettingsView/>
             </DataTemplate>
         </TabControl.DataTemplates>
-        <TabItem Header="Sources" Content="{Binding MyStartPageViewModel }" IsEnabled="{Binding StartPageEnabled}"/>
-        <TabItem Header="Imported" Content="{Binding MyDownloadingViewModel}" IsEnabled="{Binding DownloadingEnabled}"/>
+        <TabItem Name="Sources" Header="Sources" Content="{Binding MyStartPageViewModel }" IsEnabled="{Binding StartPageEnabled}"/>
+        <TabItem Name="Imported" Header="Imported" Content="{Binding MyDownloadingViewModel}" IsEnabled="{Binding DownloadingEnabled}"/>
         <!--<TabItem Header="Progress" Content="{Binding }" />-->
-        <TabItem Header="Log" Content="{Binding MyLogViewModel}" IsEnabled="{Binding LogEnabled}"/>
-        <TabItem Header="Settings" Content="{Binding MySettingsViewModel}" IsEnabled="{Binding SettingsEnabled}"/>
+        <TabItem Name="Log" Header="Log" Content="{Binding MyLogViewModel}" IsEnabled="{Binding LogEnabled}"/>
+        <TabItem Name="Settings" Header="Settings" Content="{Binding MySettingsViewModel}" IsEnabled="{Binding SettingsEnabled}"/>
     </TabControl>
     
 </Window>

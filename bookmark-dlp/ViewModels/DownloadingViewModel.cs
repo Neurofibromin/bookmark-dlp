@@ -76,45 +76,24 @@ namespace bookmark_dlp.ViewModels
             ActiveSettings = AppSettings._settings;
         }
         
-        public async Task LoadFoldersFromFile()
+        public async Task<bool> LoadFoldersFromFile()
         {
             if(FileSource == null)
                 throw new ArgumentNullException(nameof(FileSource));
-            _folders = Import.SmartImport(FileSource);
-            /*FolderCollection ??= new ObservableCollection<ObsFolderclass>();
-            OldHierarchicalFolderCollection = new ObservableCollection<ObsFolderclass>();
-
-            // Generating Observable FolderCollection from folders
-            foreach (Folderclass folder in _folders)
+            try
             {
-                ObsFolderclass onefolder = new ObsFolderclass(folder);
-                FolderCollection.Add(onefolder);
+                _folders = Import.SmartImport(FileSource);
             }
-
-            // Generating Hierarchical Observable FolderCollection from folders
-            foreach (Folderclass folder in _folders.Where(a => a.depth == 0))
+            catch (Exception e)
             {
-                ObsFolderclass onefolder = new ObsFolderclass(folder);
-                OldHierarchicalFolderCollection.Add(onefolder);
-                Logger.LogVerbose("added: " + folder.name, Logger.Verbosity.Trace);
+                Logger.LogVerbose(e.Message, Logger.Verbosity.Critical);
+                throw;
             }
-            foreach (Folderclass folder in _folders.Where(a => a.depth != 0).OrderBy(a => a.depth))
-            {
-                Logger.LogVerbose("examining " + folder.name + " " + folder.id + " parent:" + folder.parent, Logger.Verbosity.Trace);
-                ObsFolderclass onefolder = new ObsFolderclass(folder);
-                foreach (ObsFolderclass parent in OldHierarchicalFolderCollection)
-                {
-                    if (parent.Id == folder.parent) { 
-                        Logger.LogVerbose("Found parent: " + parent.Name, Logger.Verbosity.Trace);
-                        parent.Children.Add(onefolder);
-                    }
-                }
-                // HierarchcalFolderCollection.Single(parent => parent.Id == folder.parent).Children.Add(onefolder);
-                Logger.LogVerbose("added: " + folder.name, Logger.Verbosity.Trace);
-            }*/
-            
+            if (_folders == null)
+                return false;
             HierarchicalFolderCollection = AppMethods.GenerateHierarchicalFolderclassesFromList(_folders);
             _treeSource = CreateTreeSource();
+            return true;
         }
 
         public void ReBindSettings()
