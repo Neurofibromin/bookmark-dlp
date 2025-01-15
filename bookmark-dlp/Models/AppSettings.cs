@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.ComponentModel;
+using System.Text;
 using CommunityToolkit.Mvvm.ComponentModel;
 using System.Text.Json;
 using NfLogger;
@@ -15,10 +16,16 @@ namespace bookmark_dlp.Models
         /// Singleton!
         /// </summary>
         public static SettingsStruct _settings = new SettingsStruct();
-        public static readonly SettingsStruct defaultsettings = new SettingsStruct(manualImportUsed: false,
-            manualimportfilelocation: "", outputfolder: Directory.GetCurrentDirectory(), ytdlpExecutableNotFound: true,
-            downloadPlaylists: false, downloadShorts: false, downloadChannels: false, concurrentDownloads: false,
-            cookiesAutoextract: false, ytDlpBinaryPath: AppMethods.Yt_dlp_pathfinder(Directory.GetCurrentDirectory()));
+
+        public static readonly SettingsStruct defaultsettings = new SettingsStruct(
+            cmanualimportfilelocation: "", cmanualImportUsed: false,
+            coutputfolder: Directory.GetCurrentDirectory(),
+            cytdlp_executable_not_found: true,
+            cdownloadPlaylists: false, cdownloadShorts: false,
+            cdownloadChannels: false,
+            cconcurrent_downloads: false, ccookies_autoextract: false,
+            cyt_dlp_binary_path: AppMethods.Yt_dlp_pathfinder(Directory.GetCurrentDirectory()),
+            ccanChangeSettings: true);
         public static string? configloc = AppMethods.ConfigFileLocation();
         private static AppSettings _instance = new AppSettings();
         
@@ -49,11 +56,36 @@ namespace bookmark_dlp.Models
                 _settings = defaultsettings; //no config file, so set configs to default value
                 configloc = null;
             }
+            _settings.PropertyChanged += SettingsOnPropertyChanged;
         }
-        
+
+        private void SettingsOnPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(_settings.Yt_dlp_binary_path) && _settings.Yt_dlp_binary_path != null)
+            {
+                YtdlpInterfacing.YtdlpPath = _settings.Yt_dlp_binary_path;
+                Logger.LogVerbose("Ytdlp path changed in YtdlpInterfacing");
+            }
+            SaveToFile();
+        }
+
         public static AppSettings GetAppSettings()
         {
             return _instance;
+        }
+
+        public static void ResetSettingsToDefault()
+        {
+            _settings.ManualImportUsed = false;
+            _settings.Manualimportfilelocation = "";
+            _settings.Outputfolder = Directory.GetCurrentDirectory();
+            _settings.Ytdlp_executable_not_found = true;
+            _settings.DownloadPlaylists = false; 
+            _settings.DownloadShorts = false; 
+            _settings.DownloadChannels = false; 
+            _settings.Concurrent_downloads = false;
+            _settings.Cookies_autoextract = false; 
+            _settings.Yt_dlp_binary_path = AppMethods.Yt_dlp_pathfinder(Directory.GetCurrentDirectory());
         }
 
         
@@ -93,8 +125,17 @@ namespace bookmark_dlp.Models
 
     public partial class SettingsStruct : ObservableObject
     {
-        public SettingsStruct(string cmanualimportfilelocation, bool cmanualImportUsed, string coutputfolder, bool cytdlp_executable_not_found, 
-            bool cdownloadPlaylists, bool cdownloadShorts, bool cdownloadChannels, bool cconcurrent_downloads, bool ccookies_autoextract, string cyt_dlp_binary_path)
+        public SettingsStruct(string cmanualimportfilelocation,
+            bool cmanualImportUsed,
+            string coutputfolder,
+            bool cytdlp_executable_not_found,
+            bool cdownloadPlaylists,
+            bool cdownloadShorts,
+            bool cdownloadChannels,
+            bool cconcurrent_downloads,
+            bool ccookies_autoextract,
+            string cyt_dlp_binary_path,
+            bool ccanChangeSettings)
         {
             manualimportfilelocation = cmanualimportfilelocation;
             manualImportUsed = cmanualImportUsed;
@@ -106,7 +147,32 @@ namespace bookmark_dlp.Models
             concurrent_downloads = cconcurrent_downloads;
             cookies_autoextract = ccookies_autoextract;
             yt_dlp_binary_path = cyt_dlp_binary_path;
+            canChangeSettings = ccanChangeSettings;
         }
+        /*public SettingsStruct(bool manualImportUsed,
+            string cmanualimportfilelocation,
+            string outputfolder,
+            bool ytdlpExecutableNotFound,
+            bool downloadPlaylists,
+            bool downloadShorts,
+            bool downloadChannels,
+            bool concurrentDownloads,
+            bool cookiesAutoextract,
+            string? ytDlpBinaryPath,
+            bool ccanChangeSettings) : this()
+        {
+            this.manualImportUsed = manualImportUsed;
+            manualimportfilelocation = cmanualimportfilelocation;
+            this.outputfolder = outputfolder;
+            ytdlp_executable_not_found = ytdlpExecutableNotFound;
+            this.downloadPlaylists = downloadPlaylists;
+            this.downloadShorts = downloadShorts;
+            this.downloadChannels = downloadChannels;
+            concurrent_downloads = concurrentDownloads;
+            cookies_autoextract = cookiesAutoextract;
+            yt_dlp_binary_path = ytDlpBinaryPath;
+            canChangeSettings = ccanChangeSettings;
+        }*/
         
         public SettingsStruct(SettingsStruct other)
         {
@@ -120,6 +186,7 @@ namespace bookmark_dlp.Models
             concurrent_downloads = other.concurrent_downloads;
             cookies_autoextract = other.cookies_autoextract;
             yt_dlp_binary_path = other.yt_dlp_binary_path;
+            canChangeSettings = other.canChangeSettings;
         }
 
         public SettingsStruct()
@@ -134,6 +201,7 @@ namespace bookmark_dlp.Models
             concurrent_downloads = false;
             cookies_autoextract = false;
             yt_dlp_binary_path = null;
+            canChangeSettings = true;
         }
         
         
@@ -159,19 +227,9 @@ namespace bookmark_dlp.Models
         public bool cookies_autoextract;
         [ObservableProperty]
         public string? yt_dlp_binary_path;
+        [ObservableProperty]
+        public bool canChangeSettings;
 
-        public SettingsStruct(bool manualImportUsed, string manualimportfilelocation, string outputfolder, bool ytdlpExecutableNotFound, bool downloadPlaylists, bool downloadShorts, bool downloadChannels, bool concurrentDownloads, bool cookiesAutoextract, string? ytDlpBinaryPath) : this()
-        {
-            this.manualImportUsed = manualImportUsed;
-            this.manualimportfilelocation = manualimportfilelocation;
-            this.outputfolder = outputfolder;
-            ytdlp_executable_not_found = ytdlpExecutableNotFound;
-            this.downloadPlaylists = downloadPlaylists;
-            this.downloadShorts = downloadShorts;
-            this.downloadChannels = downloadChannels;
-            concurrent_downloads = concurrentDownloads;
-            cookies_autoextract = cookiesAutoextract;
-            yt_dlp_binary_path = ytDlpBinaryPath;
-        }
+        
     }
 }

@@ -53,51 +53,30 @@ namespace bookmark_dlp.ViewModels
             myLogViewModel = new LogViewModel();
             
             PreviousViewModel = MyStartPageViewModel;
-
+            /*MySettingsViewModel.ActiveSettings.PropertyChanged += ActiveSettingsOnPropertyChanged;
+            MyStartPageViewModel.ActiveSettings.PropertyChanged += ActiveSettingsOnPropertyChanged;*/
             // Set initial selected tab
             SelectedTab = MyStartPageViewModel;
         }
 
-        public void GoBack()
+        /*private void ActiveSettingsOnPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            (PreviousViewModel, SelectedTab) = (SelectedTab, PreviousViewModel);
-            if (PreviousViewModel == MySettingsViewModel)
-            {
-                MySettingsViewModel.SaveActiveSettings();
-                AppSettings.SaveToFile();
-                MyStartPageViewModel.ReBindSettings(); //TODO: should raise some propertychanged event instead
-                MyDownloadingViewModel.ReBindSettings();
-                YtdlpInterfacing.SetYtdlpPath(MyDownloadingViewModel.ActiveSettings.Outputfolder);
-            }
-        }
-        
-        public void SaveSettings()
-        {
-                MySettingsViewModel.SaveActiveSettings();
-                AppSettings.SaveToFile();
-                MyStartPageViewModel.ReBindSettings(); //TODO: should raise some propertychanged event instead
-                MyDownloadingViewModel.ReBindSettings();
-                YtdlpInterfacing.SetYtdlpPath(MyDownloadingViewModel.ActiveSettings.Outputfolder);
-        }
+            // MySettingsViewModel.ReBindSettings();
+            // MyStartPageViewModel.ReBindSettings();
+            // MyDownloadingViewModel.ReBindSettings();
+            //Logger.LogVerbose("Active settings changed, rebinding from MainWindowViewModel", Logger.Verbosity.Trace);
+        }*/
 
         public async Task SettingsCommand()
         {
             PreviousViewModel = SelectedTab;
             SelectedTab = MySettingsViewModel;
-            if (PreviousViewModel == MyStartPageViewModel)
-            {
-                await MyStartPageViewModel.SaveActiveSettings();
-                MySettingsViewModel.ReBindSettings();
-                YtdlpInterfacing.SetYtdlpPath(MySettingsViewModel.ActiveSettings.Outputfolder);
-            }
         }
 
         public async Task GoForward()
         {
             PreviousViewModel = SelectedTab;
-            
-            await MyStartPageViewModel.SaveActiveSettings();
-            MyDownloadingViewModel.ReBindSettings();
+            // MyDownloadingViewModel.ReBindSettings();
             MyDownloadingViewModel.FileSource = AppSettings._settings.ManualImportUsed
                 ? AppSettings._settings.Manualimportfilelocation
                 : MyStartPageViewModel.ChosenBrowser;

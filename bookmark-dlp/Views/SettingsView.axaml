@@ -9,7 +9,7 @@
     d:DesignWidth="800"
     x:DataType="vm:SettingsViewModel"
     mc:Ignorable="d">
-    <StackPanel>
+    <StackPanel IsEnabled="{Binding ActiveSettings.CanChangeSettings}">
         <TextBox
             HorizontalAlignment="Center"
             VerticalAlignment="Top"
@@ -44,7 +44,6 @@
                 FontSize="9">
                 Select executable file
             </Button>
-
         </Grid>
         <DockPanel Margin="4">
             <Label FontSize="9">Current output folder:</Label>
@@ -63,12 +62,5 @@
             FontSize="9">
             Restore Defaults
         </Button>
-        <Button
-            Margin="4"
-            Command="{ReflectionBinding $parent[Window].DataContext.GoBack}"
-            FontSize="9">
-            Save settings
-        </Button>
-
     </StackPanel>
 </UserControl>

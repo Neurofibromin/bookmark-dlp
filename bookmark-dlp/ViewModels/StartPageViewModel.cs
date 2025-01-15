@@ -50,18 +50,66 @@ namespace bookmark_dlp.ViewModels
                 .ToList() ?? new List<string>();
             
             if (AppMethods.Yt_dlp_pathfinder(Directory.GetCurrentDirectory()) != null) { AppSettings._settings.Ytdlp_executable_not_found = false; }
-            ActiveSettings = new SettingsStruct(AppSettings._settings);
+            ActiveSettings = AppSettings._settings;
+            ActiveSettings.PropertyChanged += ActiveSettings_PropertyChanged;
+        }
+        
+        partial void OnChosenBrowserChanged(string? value)
+        {
+            if (value != null)
+            {
+                ActiveSettings.ManualImportUsed = false;
+                ActiveSettings.Manualimportfilelocation = null;    
+            }
+            ShouldEnableImportButton();
         }
 
-        public void ReBindSettings()
+        private void ActiveSettings_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            ActiveSettings = new SettingsStruct(AppSettings._settings);
+            if (e.PropertyName == nameof(SettingsStruct.Manualimportfilelocation))
+            {
+                if (!string.IsNullOrWhiteSpace(ActiveSettings.Manualimportfilelocation))
+                {
+                    ChosenBrowser = null;
+                    ShouldEnableImportButton();
+                }
+            }
+            /*AppSettings._settings.Manualimportfilelocation = ActiveSettings.Manualimportfilelocation;
+            AppSettings._settings.ManualImportUsed = ActiveSettings.ManualImportUsed;
+            AppSettings._settings.Outputfolder = ActiveSettings.Outputfolder;
+            AppSettings._settings.Ytdlp_executable_not_found = ActiveSettings.Ytdlp_executable_not_found;
+            AppSettings._settings.DownloadPlaylists = ActiveSettings.DownloadPlaylists;
+            AppSettings._settings.DownloadShorts = ActiveSettings.DownloadShorts;
+            AppSettings._settings.DownloadChannels = ActiveSettings.DownloadChannels;
+            AppSettings._settings.Concurrent_downloads = ActiveSettings.Concurrent_downloads;
+            AppSettings._settings.Cookies_autoextract = ActiveSettings.Cookies_autoextract;
+            AppSettings._settings.Yt_dlp_binary_path = ActiveSettings.Yt_dlp_binary_path;*/
         }
 
-        public async Task SaveActiveSettings()
+        private void ShouldEnableImportButton()
         {
-            AppSettings._settings = new SettingsStruct(ActiveSettings);
+            EnableImportButton = ActiveSettings.ManualImportUsed || !string.IsNullOrEmpty(ChosenBrowser);
+            if (!EnableImportButton)
+            {
+                ImportButtonToolTip = "No source selected";
+            }
         }
+        
+
+        /*public void ReBindSettings()
+        {
+            ActiveSettings.Manualimportfilelocation = AppSettings._settings.Manualimportfilelocation;
+            ActiveSettings.ManualImportUsed = AppSettings._settings.ManualImportUsed;
+            ActiveSettings.Outputfolder = AppSettings._settings.Outputfolder;
+            ActiveSettings.Ytdlp_executable_not_found = AppSettings._settings.Ytdlp_executable_not_found;
+            ActiveSettings.DownloadPlaylists = AppSettings._settings.DownloadPlaylists;
+            ActiveSettings.DownloadShorts = AppSettings._settings.DownloadShorts;
+            ActiveSettings.DownloadChannels = AppSettings._settings.DownloadChannels;
+            ActiveSettings.Concurrent_downloads = AppSettings._settings.Concurrent_downloads;
+            ActiveSettings.Cookies_autoextract = AppSettings._settings.Cookies_autoextract;
+            ActiveSettings.Yt_dlp_binary_path = AppSettings._settings.Yt_dlp_binary_path;
+        }*/
+        
         
         [RelayCommand]
         public async Task OpenFile(CancellationToken token)

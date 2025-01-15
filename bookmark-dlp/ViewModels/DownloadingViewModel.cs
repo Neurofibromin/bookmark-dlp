@@ -96,10 +96,19 @@ namespace bookmark_dlp.ViewModels
             return true;
         }
 
-        public void ReBindSettings()
+        /*public void ReBindSettings()
         {
-            ActiveSettings = AppSettings._settings;
-        }
+            ActiveSettings.Manualimportfilelocation = AppSettings._settings.Manualimportfilelocation;
+            ActiveSettings.ManualImportUsed = AppSettings._settings.ManualImportUsed;
+            ActiveSettings.Outputfolder = AppSettings._settings.Outputfolder;
+            ActiveSettings.Ytdlp_executable_not_found = AppSettings._settings.Ytdlp_executable_not_found;
+            ActiveSettings.DownloadPlaylists = AppSettings._settings.DownloadPlaylists;
+            ActiveSettings.DownloadShorts = AppSettings._settings.DownloadShorts;
+            ActiveSettings.DownloadChannels = AppSettings._settings.DownloadChannels;
+            ActiveSettings.Concurrent_downloads = AppSettings._settings.Concurrent_downloads;
+            ActiveSettings.Cookies_autoextract = AppSettings._settings.Cookies_autoextract;
+            ActiveSettings.Yt_dlp_binary_path = AppSettings._settings.Yt_dlp_binary_path;
+        }*/
 
         #region IconConverter
 

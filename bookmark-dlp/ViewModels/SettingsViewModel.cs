@@ -47,30 +47,62 @@ namespace bookmark_dlp.ViewModels
         public bool cookies_autoextract = false;
         public string? yt_dlp_binary_path = "";*/
 
-        [ObservableProperty]
-        private SettingsStruct _activeSettings;
+        [ObservableProperty] private SettingsStruct _activeSettings;
 
         public SettingsViewModel() {
             // Console.WriteLine("jsonrepr: " + AppSettings.GetJsonStringRepresentation());
             // Console.WriteLine("In orig at vmcreation: " + JsonConvert.SerializeObject(AppSettings._settings));
-            ActiveSettings = new SettingsStruct(AppSettings._settings);
+            //TODO: which?
+            //ActiveSettings = new SettingsStruct(AppSettings._settings);
+            ActiveSettings = AppSettings._settings;
             // Console.WriteLine("In settingsviewmodel at creation: " + JsonConvert.SerializeObject(ActiveSettings));
+            // ActiveSettings.PropertyChanged += ActiveSettingsOnPropertyChanged;
         }
 
-        public async Task SaveActiveSettings()
+        /*private void ActiveSettingsOnPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            AppSettings._settings = new SettingsStruct(ActiveSettings);
+            AppSettings._settings.Manualimportfilelocation = ActiveSettings.Manualimportfilelocation;
+            AppSettings._settings.ManualImportUsed = ActiveSettings.ManualImportUsed;
+            AppSettings._settings.Outputfolder = ActiveSettings.Outputfolder;
+            AppSettings._settings.Ytdlp_executable_not_found = ActiveSettings.Ytdlp_executable_not_found;
+            AppSettings._settings.DownloadPlaylists = ActiveSettings.DownloadPlaylists;
+            AppSettings._settings.DownloadShorts = ActiveSettings.DownloadShorts;
+            AppSettings._settings.DownloadChannels = ActiveSettings.DownloadChannels;
+            AppSettings._settings.Concurrent_downloads = ActiveSettings.Concurrent_downloads;
+            AppSettings._settings.Cookies_autoextract = ActiveSettings.Cookies_autoextract;
+            AppSettings._settings.Yt_dlp_binary_path = ActiveSettings.Yt_dlp_binary_path;
         }
         
         public void ReBindSettings()
         {
-            ActiveSettings = new SettingsStruct(AppSettings._settings);
-        }
+            ActiveSettings.Manualimportfilelocation = AppSettings._settings.Manualimportfilelocation;
+            ActiveSettings.ManualImportUsed = AppSettings._settings.ManualImportUsed;
+            ActiveSettings.Outputfolder = AppSettings._settings.Outputfolder;
+            ActiveSettings.Ytdlp_executable_not_found = AppSettings._settings.Ytdlp_executable_not_found;
+            ActiveSettings.DownloadPlaylists = AppSettings._settings.DownloadPlaylists;
+            ActiveSettings.DownloadShorts = AppSettings._settings.DownloadShorts;
+            ActiveSettings.DownloadChannels = AppSettings._settings.DownloadChannels;
+            ActiveSettings.Concurrent_downloads = AppSettings._settings.Concurrent_downloads;
+            ActiveSettings.Cookies_autoextract = AppSettings._settings.Cookies_autoextract;
+            ActiveSettings.Yt_dlp_binary_path = AppSettings._settings.Yt_dlp_binary_path;
+        }*/
 
         [RelayCommand]
         public async Task RestoreDefaultSettings()
         {
-            ActiveSettings = new SettingsStruct(AppSettings.defaultsettings);
+            AppSettings.ResetSettingsToDefault();
+            return;
+            Logger.LogVerbose("Restoring default settings", Logger.Verbosity.Trace);
+            ActiveSettings.Manualimportfilelocation = AppSettings.defaultsettings.Manualimportfilelocation;
+            ActiveSettings.ManualImportUsed = AppSettings.defaultsettings.ManualImportUsed;
+            ActiveSettings.Outputfolder = AppSettings.defaultsettings.Outputfolder;
+            ActiveSettings.Ytdlp_executable_not_found = AppSettings.defaultsettings.Ytdlp_executable_not_found;
+            ActiveSettings.DownloadPlaylists = AppSettings.defaultsettings.DownloadPlaylists;
+            ActiveSettings.DownloadShorts = AppSettings.defaultsettings.DownloadShorts;
+            ActiveSettings.DownloadChannels = AppSettings.defaultsettings.DownloadChannels;
+            ActiveSettings.Concurrent_downloads = AppSettings.defaultsettings.Concurrent_downloads;
+            ActiveSettings.Cookies_autoextract = AppSettings.defaultsettings.Cookies_autoextract;
+            ActiveSettings.Yt_dlp_binary_path = AppSettings.defaultsettings.Yt_dlp_binary_path;
         }
         
         
