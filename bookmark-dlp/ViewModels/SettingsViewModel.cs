@@ -39,75 +39,23 @@ namespace bookmark_dlp.ViewModels
     /// </summary>
     public partial class SettingsViewModel : ViewModelBase
     {
-
-        /*public bool downloadPlaylists = false;
-        public bool downloadShorts = false;
-        public bool downloadChannels = false;
-        public bool concurrent_downloads = false;
-        public bool cookies_autoextract = false;
-        public string? yt_dlp_binary_path = "";*/
-
         [ObservableProperty] private SettingsStruct _activeSettings;
 
         public SettingsViewModel() {
             // Console.WriteLine("jsonrepr: " + AppSettings.GetJsonStringRepresentation());
             // Console.WriteLine("In orig at vmcreation: " + JsonConvert.SerializeObject(AppSettings._settings));
-            //TODO: which?
-            //ActiveSettings = new SettingsStruct(AppSettings._settings);
             ActiveSettings = AppSettings._settings;
             // Console.WriteLine("In settingsviewmodel at creation: " + JsonConvert.SerializeObject(ActiveSettings));
-            // ActiveSettings.PropertyChanged += ActiveSettingsOnPropertyChanged;
         }
-
-        /*private void ActiveSettingsOnPropertyChanged(object? sender, PropertyChangedEventArgs e)
-        {
-            AppSettings._settings.Manualimportfilelocation = ActiveSettings.Manualimportfilelocation;
-            AppSettings._settings.ManualImportUsed = ActiveSettings.ManualImportUsed;
-            AppSettings._settings.Outputfolder = ActiveSettings.Outputfolder;
-            AppSettings._settings.Ytdlp_executable_not_found = ActiveSettings.Ytdlp_executable_not_found;
-            AppSettings._settings.DownloadPlaylists = ActiveSettings.DownloadPlaylists;
-            AppSettings._settings.DownloadShorts = ActiveSettings.DownloadShorts;
-            AppSettings._settings.DownloadChannels = ActiveSettings.DownloadChannels;
-            AppSettings._settings.Concurrent_downloads = ActiveSettings.Concurrent_downloads;
-            AppSettings._settings.Cookies_autoextract = ActiveSettings.Cookies_autoextract;
-            AppSettings._settings.Yt_dlp_binary_path = ActiveSettings.Yt_dlp_binary_path;
-        }
-        
-        public void ReBindSettings()
-        {
-            ActiveSettings.Manualimportfilelocation = AppSettings._settings.Manualimportfilelocation;
-            ActiveSettings.ManualImportUsed = AppSettings._settings.ManualImportUsed;
-            ActiveSettings.Outputfolder = AppSettings._settings.Outputfolder;
-            ActiveSettings.Ytdlp_executable_not_found = AppSettings._settings.Ytdlp_executable_not_found;
-            ActiveSettings.DownloadPlaylists = AppSettings._settings.DownloadPlaylists;
-            ActiveSettings.DownloadShorts = AppSettings._settings.DownloadShorts;
-            ActiveSettings.DownloadChannels = AppSettings._settings.DownloadChannels;
-            ActiveSettings.Concurrent_downloads = AppSettings._settings.Concurrent_downloads;
-            ActiveSettings.Cookies_autoextract = AppSettings._settings.Cookies_autoextract;
-            ActiveSettings.Yt_dlp_binary_path = AppSettings._settings.Yt_dlp_binary_path;
-        }*/
 
         [RelayCommand]
-        public async Task RestoreDefaultSettings()
+        private async Task RestoreDefaultSettings()
         {
             AppSettings.ResetSettingsToDefault();
-            return;
-            Logger.LogVerbose("Restoring default settings", Logger.Verbosity.Trace);
-            ActiveSettings.Manualimportfilelocation = AppSettings.defaultsettings.Manualimportfilelocation;
-            ActiveSettings.ManualImportUsed = AppSettings.defaultsettings.ManualImportUsed;
-            ActiveSettings.Outputfolder = AppSettings.defaultsettings.Outputfolder;
-            ActiveSettings.Ytdlp_executable_not_found = AppSettings.defaultsettings.Ytdlp_executable_not_found;
-            ActiveSettings.DownloadPlaylists = AppSettings.defaultsettings.DownloadPlaylists;
-            ActiveSettings.DownloadShorts = AppSettings.defaultsettings.DownloadShorts;
-            ActiveSettings.DownloadChannels = AppSettings.defaultsettings.DownloadChannels;
-            ActiveSettings.Concurrent_downloads = AppSettings.defaultsettings.Concurrent_downloads;
-            ActiveSettings.Cookies_autoextract = AppSettings.defaultsettings.Cookies_autoextract;
-            ActiveSettings.Yt_dlp_binary_path = AppSettings.defaultsettings.Yt_dlp_binary_path;
         }
         
-        
         [RelayCommand]
-        public async Task ChooseOutputFolder(CancellationToken token)
+        private async Task ChooseOutputFolder(CancellationToken token)
         {
             ErrorMessages?.Clear();
             try
@@ -123,24 +71,25 @@ namespace bookmark_dlp.ViewModels
             {
                 ErrorMessages?.Add(e.Message);
             }
-            if (AppMethods.Yt_dlp_pathfinder(ActiveSettings.Outputfolder) != null)
+
+            if (ActiveSettings.Ytdlp_executable_not_found)
             {
-                ActiveSettings.Ytdlp_executable_not_found = false;
-                ActiveSettings.Yt_dlp_binary_path = AppMethods.Yt_dlp_pathfinder(ActiveSettings.Outputfolder);                
+                if (AppMethods.Yt_dlp_pathfinder(ActiveSettings.Outputfolder) != null)
+                {
+                    ActiveSettings.Ytdlp_executable_not_found = false;
+                    ActiveSettings.Yt_dlp_binary_path = AppMethods.Yt_dlp_pathfinder(ActiveSettings.Outputfolder);                
+                }
             }
         }
         
         private async Task<IStorageFolder?> DoOpenFolderPickerAsync()
         {
-
             if (Application.Current?.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop ||
                 desktop.MainWindow?.StorageProvider is not { } provider)
                 throw new NullReferenceException("Missing StorageProvider instance.");
-
             var result = await provider.OpenFolderPickerAsync(new FolderPickerOpenOptions()
             {
                 Title = "Choose output folder for saving the videos",
-
             });
             if (result?.Count >= 1)
             {
@@ -152,9 +101,8 @@ namespace bookmark_dlp.ViewModels
             }
         }
         
-
         [RelayCommand]
-        public async Task ChooseYtdlpBinary(CancellationToken token)
+        private async Task ChooseYtdlpBinary(CancellationToken token)
         {
             ErrorMessages?.Clear();
             try
@@ -171,25 +119,18 @@ namespace bookmark_dlp.ViewModels
                 ErrorMessages?.Add(e.Message);
             }
         }
-
-
+        
         private async Task<IStorageFile?> DoOpenFilePickerAsync()
         {
-
             if (Application.Current?.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop ||
                 desktop.MainWindow?.StorageProvider is not { } provider)
                 throw new NullReferenceException("Missing StorageProvider instance.");
-
             var files = await provider.OpenFilePickerAsync(new FilePickerOpenOptions()
             {
                 Title = "Open html file with bookmarks",
                 AllowMultiple = false
             });
-
             return files?.Count >= 1 ? files[0] : null;
         }
-
-
-
     }
 }

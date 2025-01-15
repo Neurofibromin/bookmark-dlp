@@ -45,26 +45,16 @@ namespace bookmark_dlp.ViewModels
 {
     public partial class DownloadingViewModel : ViewModelBase
     {
-        [ObservableProperty]
-        private SettingsStruct _activeSettings;
-
-        [ObservableProperty]
-        private string _fileSource;
-
+        [ObservableProperty] private SettingsStruct _activeSettings;
+        [ObservableProperty] private string _fileSource;
         private List<Folderclass> _folders;
-        /*public ObservableCollection<ObsFolderclass> FolderCollection { get; set; }
-        public ObservableCollection<ObsFolderclass> OldHierarchicalFolderCollection { get; set; }*/
         public ObservableCollection<HierarchicalFolderclass> HierarchicalFolderCollection { get; set; }
-        
         private static IconConverter? s_iconConverter;
         [ObservableProperty] private HierarchicalTreeDataGridSource<HierarchicalFolderclass>? _treeSource;
         
         // public HierarchicalTreeDataGridSource<HierarchicalFolderclass> TreeSource => _treeSource;
-
-        
         // private ITreeDataGridSource<HierarchicalFolderclass> _source;
         // private HierarchicalFolderclass? _root;
-        
         /*public ITreeDataGridSource<HierarchicalFolderclass> Source
         {
             get => _source;
@@ -95,20 +85,6 @@ namespace bookmark_dlp.ViewModels
             _treeSource = CreateTreeSource();
             return true;
         }
-
-        /*public void ReBindSettings()
-        {
-            ActiveSettings.Manualimportfilelocation = AppSettings._settings.Manualimportfilelocation;
-            ActiveSettings.ManualImportUsed = AppSettings._settings.ManualImportUsed;
-            ActiveSettings.Outputfolder = AppSettings._settings.Outputfolder;
-            ActiveSettings.Ytdlp_executable_not_found = AppSettings._settings.Ytdlp_executable_not_found;
-            ActiveSettings.DownloadPlaylists = AppSettings._settings.DownloadPlaylists;
-            ActiveSettings.DownloadShorts = AppSettings._settings.DownloadShorts;
-            ActiveSettings.DownloadChannels = AppSettings._settings.DownloadChannels;
-            ActiveSettings.Concurrent_downloads = AppSettings._settings.Concurrent_downloads;
-            ActiveSettings.Cookies_autoextract = AppSettings._settings.Cookies_autoextract;
-            ActiveSettings.Yt_dlp_binary_path = AppSettings._settings.Yt_dlp_binary_path;
-        }*/
 
         #region IconConverter
 

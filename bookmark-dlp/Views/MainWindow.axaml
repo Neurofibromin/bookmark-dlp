@@ -36,7 +36,8 @@
     -->
     <TabControl 
         SelectedItem="{Binding SelectedTab}" 
-        Margin="5">
+        Name="myTabControl"
+        Margin="5" ItemsSource="{Binding TabItems}">
         <TabControl.DataTemplates>
             <DataTemplate DataType="vm:StartPageViewModel">
                 <views:StartPageView/>
@@ -51,11 +52,6 @@
                 <views:SettingsView/>
             </DataTemplate>
         </TabControl.DataTemplates>
-        <TabItem Name="Sources" Header="Sources" Content="{Binding MyStartPageViewModel }" IsEnabled="{Binding StartPageEnabled}"/>
-        <TabItem Name="Imported" Header="Imported" Content="{Binding MyDownloadingViewModel}" IsEnabled="{Binding DownloadingEnabled}"/>
-        <!--<TabItem Header="Progress" Content="{Binding }" />-->
-        <TabItem Name="Log" Header="Log" Content="{Binding MyLogViewModel}" IsEnabled="{Binding LogEnabled}"/>
-        <TabItem Name="Settings" Header="Settings" Content="{Binding MySettingsViewModel}" IsEnabled="{Binding SettingsEnabled}"/>
     </TabControl>
     
 </Window>

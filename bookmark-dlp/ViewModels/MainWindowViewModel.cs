@@ -30,64 +30,92 @@ namespace bookmark_dlp.ViewModels
 {
     public partial class MainWindowViewModel : ViewModelBase
     {
-        [ObservableProperty] private ViewModelBase _selectedTab;
-        [ObservableProperty] private ViewModelBase? previousViewModel;
+        [ObservableProperty] private TabItem _selectedTab;
+        [ObservableProperty] private TabItem? _previousSelectedTab;
         
-        [ObservableProperty] private StartPageViewModel myStartPageViewModel;
-        [ObservableProperty] private SettingsViewModel mySettingsViewModel;
-        [ObservableProperty] private LogViewModel myLogViewModel;
-        [ObservableProperty] private DownloadingViewModel myDownloadingViewModel;
+        [ObservableProperty] private StartPageViewModel _myStartPageViewModel;
+        [ObservableProperty] private SettingsViewModel _mySettingsViewModel;
+        [ObservableProperty] private LogViewModel _myLogViewModel;
+        [ObservableProperty] private DownloadingViewModel _myDownloadingViewModel;
         
-        [ObservableProperty] private bool _startPageEnabled = true;
+        /*[ObservableProperty] private bool _startPageEnabled = true;
         [ObservableProperty] private bool _settingsEnabled = true;
         [ObservableProperty] private bool _logEnabled = true;
-        [ObservableProperty] private bool _downloadingEnabled = false;
+        [ObservableProperty] private bool _downloadingEnabled = false;*/
         [ObservableProperty] private bool _importSuccess = false;
+
+        [ObservableProperty] private List<TabItem> _tabItems;
         
         public MainWindowViewModel()
         {
             // Initialize ViewModels
-            mySettingsViewModel = new SettingsViewModel();
-            myStartPageViewModel = new StartPageViewModel();
-            myDownloadingViewModel = new DownloadingViewModel();
-            myLogViewModel = new LogViewModel();
+            _mySettingsViewModel = new SettingsViewModel();
+            _myStartPageViewModel = new StartPageViewModel();
+            _myDownloadingViewModel = new DownloadingViewModel();
+            _myLogViewModel = new LogViewModel();
             
-            PreviousViewModel = MyStartPageViewModel;
-            /*MySettingsViewModel.ActiveSettings.PropertyChanged += ActiveSettingsOnPropertyChanged;
-            MyStartPageViewModel.ActiveSettings.PropertyChanged += ActiveSettingsOnPropertyChanged;*/
-            // Set initial selected tab
-            SelectedTab = MyStartPageViewModel;
+            TabItems = GetTabItems();
+            SelectedTab = TabItems.First(x => x.Content == MyStartPageViewModel);
+            PreviousSelectedTab = SelectedTab;
         }
 
-        /*private void ActiveSettingsOnPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        private List<TabItem> GetTabItems()
         {
-            // MySettingsViewModel.ReBindSettings();
-            // MyStartPageViewModel.ReBindSettings();
-            // MyDownloadingViewModel.ReBindSettings();
-            //Logger.LogVerbose("Active settings changed, rebinding from MainWindowViewModel", Logger.Verbosity.Trace);
-        }*/
-
+            /*<TabItem Name="Sources" Header="Sources" Content="{Binding MyStartPageViewModel }" IsEnabled="{Binding StartPageEnabled}"/>
+                <TabItem Name="Imported" Header="Imported" Content="{Binding MyDownloadingViewModel}" IsEnabled="{Binding DownloadingEnabled}"/>
+                <TabItem Name="Log" Header="Log" Content="{Binding MyLogViewModel}" IsEnabled="{Binding LogEnabled}"/>
+                <TabItem Name="Settings" Header="Settings" Content="{Binding MySettingsViewModel}" IsEnabled="{Binding SettingsEnabled}"/>*/
+            List<TabItem> tabItems = new List<TabItem>()
+            {
+                new TabItem()
+                {
+                    Header = "Sources",
+                    Content = MyStartPageViewModel,
+                    IsEnabled = true
+                },
+                new TabItem()
+                {
+                    Header = "Imported",
+                    Content = MyDownloadingViewModel,
+                    IsEnabled = false
+                },
+                new TabItem()
+                {
+                    Header = "Log",
+                    Content = MyLogViewModel,
+                    IsEnabled = true
+                },
+                new TabItem()
+                {
+                    Header = "Settings",
+                    Content = MySettingsViewModel,
+                    IsEnabled = true
+                },
+            };
+            return tabItems;
+        }
+        
         public async Task SettingsCommand()
         {
-            PreviousViewModel = SelectedTab;
-            SelectedTab = MySettingsViewModel;
+            PreviousSelectedTab = SelectedTab;
+            SelectedTab = TabItems.First(x => x.Content == MySettingsViewModel);
         }
 
         public async Task GoForward()
         {
-            PreviousViewModel = SelectedTab;
-            // MyDownloadingViewModel.ReBindSettings();
+            //PreviousViewModel = SelectedTab;
             MyDownloadingViewModel.FileSource = AppSettings._settings.ManualImportUsed
                 ? AppSettings._settings.Manualimportfilelocation
                 : MyStartPageViewModel.ChosenBrowser;
             ImportSuccess = await MyDownloadingViewModel.LoadFoldersFromFile();
             if (ImportSuccess)
             {
-                DownloadingEnabled = true;
-                SelectedTab = MyDownloadingViewModel;
+                TabItems.First(x => x.Content == MyDownloadingViewModel).IsEnabled = true;
+                SelectedTab = TabItems.First(x => x.Content == MyDownloadingViewModel);
             }
             else
             {
+                TabItems.First(x => x.Content == MyDownloadingViewModel).IsEnabled = false;
                 MyStartPageViewModel.EnableImportButton = false;
                 MyStartPageViewModel.ImportButtonToolTip = "Import Failed";
             }
@@ -95,8 +123,13 @@ namespace bookmark_dlp.ViewModels
 
         public void BackToStartPage()
         {
-            PreviousViewModel = SelectedTab;
-            SelectedTab = MyStartPageViewModel;
+            PreviousSelectedTab = SelectedTab;
+            SelectedTab = TabItems.First(x => x.Content == MyStartPageViewModel);
+        }
+
+        partial void OnSelectedTabChanged(TabItem? value)
+        {
+            //Console.WriteLine(SelectedTab.Header);
         }
     }
 }

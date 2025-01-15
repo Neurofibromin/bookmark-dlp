@@ -31,9 +31,7 @@ namespace bookmark_dlp.ViewModels
 {
     public partial class StartPageViewModel : ViewModelBase
     {
-        [ObservableProperty]
-        public List<string> availableBrowserBookmarkPaths; //= (List<string>)(from browser in AutoImport.FindBrowserBookmarkFilesPaths() select browser.foundFiles)
-
+        [ObservableProperty] private List<string> availableBrowserBookmarkPaths; //= (List<string>)(from browser in AutoImport.FindBrowserBookmarkFilesPaths() select browser.foundFiles)
         [ObservableProperty] private string[] _browserList = { "Firefox", "Chrome", "Safari" };
         [ObservableProperty] private string? _chosenBrowser;
         [ObservableProperty] private string[] _errorMessage = { "No browsers found", };
@@ -52,6 +50,7 @@ namespace bookmark_dlp.ViewModels
             if (AppMethods.Yt_dlp_pathfinder(Directory.GetCurrentDirectory()) != null) { AppSettings._settings.Ytdlp_executable_not_found = false; }
             ActiveSettings = AppSettings._settings;
             ActiveSettings.PropertyChanged += ActiveSettings_PropertyChanged;
+            ShouldEnableImportButton();
         }
         
         partial void OnChosenBrowserChanged(string? value)
@@ -74,16 +73,6 @@ namespace bookmark_dlp.ViewModels
                     ShouldEnableImportButton();
                 }
             }
-            /*AppSettings._settings.Manualimportfilelocation = ActiveSettings.Manualimportfilelocation;
-            AppSettings._settings.ManualImportUsed = ActiveSettings.ManualImportUsed;
-            AppSettings._settings.Outputfolder = ActiveSettings.Outputfolder;
-            AppSettings._settings.Ytdlp_executable_not_found = ActiveSettings.Ytdlp_executable_not_found;
-            AppSettings._settings.DownloadPlaylists = ActiveSettings.DownloadPlaylists;
-            AppSettings._settings.DownloadShorts = ActiveSettings.DownloadShorts;
-            AppSettings._settings.DownloadChannels = ActiveSettings.DownloadChannels;
-            AppSettings._settings.Concurrent_downloads = ActiveSettings.Concurrent_downloads;
-            AppSettings._settings.Cookies_autoextract = ActiveSettings.Cookies_autoextract;
-            AppSettings._settings.Yt_dlp_binary_path = ActiveSettings.Yt_dlp_binary_path;*/
         }
 
         private void ShouldEnableImportButton()
@@ -95,24 +84,8 @@ namespace bookmark_dlp.ViewModels
             }
         }
         
-
-        /*public void ReBindSettings()
-        {
-            ActiveSettings.Manualimportfilelocation = AppSettings._settings.Manualimportfilelocation;
-            ActiveSettings.ManualImportUsed = AppSettings._settings.ManualImportUsed;
-            ActiveSettings.Outputfolder = AppSettings._settings.Outputfolder;
-            ActiveSettings.Ytdlp_executable_not_found = AppSettings._settings.Ytdlp_executable_not_found;
-            ActiveSettings.DownloadPlaylists = AppSettings._settings.DownloadPlaylists;
-            ActiveSettings.DownloadShorts = AppSettings._settings.DownloadShorts;
-            ActiveSettings.DownloadChannels = AppSettings._settings.DownloadChannels;
-            ActiveSettings.Concurrent_downloads = AppSettings._settings.Concurrent_downloads;
-            ActiveSettings.Cookies_autoextract = AppSettings._settings.Cookies_autoextract;
-            ActiveSettings.Yt_dlp_binary_path = AppSettings._settings.Yt_dlp_binary_path;
-        }*/
-        
-        
         [RelayCommand]
-        public async Task OpenFile(CancellationToken token)
+        private async Task OpenFile(CancellationToken token)
         {
             ActiveSettings.ManualImportUsed = true;
             ErrorMessages?.Clear();
@@ -148,7 +121,7 @@ namespace bookmark_dlp.ViewModels
         }
 
         [RelayCommand]
-        public async Task OpenFolder(CancellationToken token)
+        private async Task OpenFolder(CancellationToken token)
         {
             ErrorMessages?.Clear();
             try
@@ -165,11 +138,14 @@ namespace bookmark_dlp.ViewModels
             {
                 ErrorMessages?.Add(e.Message);
             }
-            if (AppMethods.Yt_dlp_pathfinder(ActiveSettings.Outputfolder) != null)
+            if (ActiveSettings.Ytdlp_executable_not_found)
             {
-                // await Console.Out.WriteLineAsync("thisone");
-                // AppSettings._settings.Ytdlp_executable_not_found = false;
-                ActiveSettings.Ytdlp_executable_not_found = false;
+                if (AppMethods.Yt_dlp_pathfinder(ActiveSettings.Outputfolder) != null)
+                {
+                    // await Console.Out.WriteLineAsync("thisone");
+                    // AppSettings._settings.Ytdlp_executable_not_found = false;
+                    ActiveSettings.Ytdlp_executable_not_found = false;
+                }
             }
         }
 
