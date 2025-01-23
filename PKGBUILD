@@ -23,7 +23,7 @@ optdepends=()
 options=(staticlibs)
 source=("git+${url}.git#tag=${_tag}?signed")
 md5sums=("SKIP")
-validpgpkeys=(9F9BFE94618AD26667BD28214F671AFAD8D4428B)
+validpgpkeys=('9F9BFE94618AD26667BD28214F671AFAD8D4428B')
 
 pkgver() {
   cd "${_sourceName}"

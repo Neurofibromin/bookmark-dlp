@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;netstandard2.1;netcoreapp3.1;net481;net5.0;net6.0;net7.0;net8.0</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;netstandard2.1;netcoreapp3.1;net481;net5.0;net6.0;net7.0;net8.0;net9.0</TargetFrameworks>
 	<OutputType>Library</OutputType>
 	<BuiltInComInteropSupport>true</BuiltInComInteropSupport>
 	<RootNamespace>Nfbookmark</RootNamespace>
@@ -40,8 +40,8 @@
         
 	
 	<ItemGroup>
-		<PackageReference Include="Microsoft.Data.Sqlite" Version="8.0.10" />
-		<PackageReference Include="System.Text.Json" Version="8.0.5" />
+		<PackageReference Include="Microsoft.Data.Sqlite" Version="9.0.1" />
+		<PackageReference Include="System.Text.Json" Version="9.0.1" />
 		<None Include="README.md" Pack="true" PackagePath="\"/>
 	</ItemGroup>
 	

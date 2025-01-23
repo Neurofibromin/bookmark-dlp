@@ -3,13 +3,13 @@
 2025. 01. 17
 
 # NAME
-**bookmark-dlp** - Program for downloading bookmarked youtube videos.
+**bookmark-dlp** - Program for downloading bookmarked YouTube videos.
 
 # SYNOPSIS
 |    `$ bookmark-dlp --source SOURCE --target TARGET [OPTIONS]`
 
 # DESCRIPTION
-Utility program for downloading bookmarked youtube links. A program to replicate the folder structure of your Chrome/Brave/Firefox/etc. bookmarks and download all youtube videos/playlists amongst the bookmarks.
+Utility program for downloading bookmarked YouTube links. A program to replicate the folder structure of your Chrome/Brave/Firefox/etc. bookmarks and download all YouTube videos/playlists amongst the bookmarks.
 
 # MODES
 
