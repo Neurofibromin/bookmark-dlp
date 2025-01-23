@@ -1,12 +1,12 @@
 # Maintainer: Neurofibromin <125222560+Neurofibromin@users.noreply.github.com>
-_tag=0.2.8
+_tag=0.4.0
 _sourceName="bookmark-dlp"
 _dotnet_version=8.0
 
 pkgname="bookmark-dlp-git"
-pkgver=0.2.8
+pkgver=0.4.0
 pkgrel=1
-pkgdesc="Small utility program for downloading bookmarked youtube links using yt-dlp."
+pkgdesc="Small utility program for downloading bookmarked YouTube links using yt-dlp."
 arch=("any")
 url="https://github.com/Neurofibromin/bookmark-dlp"
 license=('GPL3')
@@ -27,11 +27,11 @@ validpgpkeys=(9F9BFE94618AD26667BD28214F671AFAD8D4428B)
 
 pkgver() {
   cd "${_sourceName}"
-  git describe --tags | sed 's/^v//'
+  git describe --tags --match "v[0-9]*" | sed 's/^v//'
 }
 
 prepare() {
-  cd "$pkgname"
+  cd "${srcdir}/${_sourceName}"
   export NUGET_PACKAGES="$PWD/nuget"
   export DOTNET_NOLOGO=true
   export DOTNET_CLI_TELEMETRY_OPTOUT=true
@@ -41,55 +41,48 @@ prepare() {
 }
 
 build() {
-    cd "$pkgname-$_pkgver/TaskCore.App"
+    cd "${srcdir}/${_sourceName}"
     MSBUILDDISABLENODEREUSE=1 dotnet publish \
     --configuration Release \
-    --self-contained true \
+    --self-contained false \
     --runtime linux-x64 \
     -p:PublishTrimmed=true \
-    --output ../$pkgname \
-    ./TaskCore.App.csproj
-    
-    // or
-    
-    cd "$pkgname"
-    export NUGET_PACKAGES="$PWD/nuget"
-    export DOTNET_NOLOGO=true
-    export DOTNET_CLI_TELEMETRY_OPTOUT=true
-    dotnet publish \
-    --no-restore \
-    --framework "net$_dotnet_version" \
-    --runtime linux-x64 \
-    --no-self-contained \
-    --configuration release \
-    --output lib \
-    src/Some.Program.Cli
+    -p:PublishSingleFile=true \
+    --output "${srcdir}/${pkgname}"
+    # cd "$pkgname"
+    # export NUGET_PACKAGES="$PWD/nuget"
+    # export DOTNET_NOLOGO=true
+    # export DOTNET_CLI_TELEMETRY_OPTOUT=true
+    # dotnet publish \
+    # --no-restore \
+    # --framework "net$_dotnet_version" \
+    # --runtime linux-x64 \
+    # --no-self-contained \
+    # --configuration release \
+    # --output lib \
+    # src/Some.Program.Cli
 }
 
 check() {
-  cd "$pkgname"
+  cd "${srcdir}/${_sourceName}"
   export NUGET_PACKAGES="$PWD/nuget"
   export DOTNET_NOLOGO=true
   export DOTNET_CLI_TELEMETRY_OPTOUT=true
   dotnet test \
     --no-restore \
     --framework "net$_dotnet_version" \
-    ./src/Some.Program.Tests
+    ./bookmark-dlp.Tests
 }
 
 package() {
-    cd "${_sourceName}"
-    cd "$pkgname-$_pkgver"
-    install -d $pkgdir/usr/{bin,lib}
-    cp -r $pkgname "$pkgdir/usr/lib/"
-    ln -s "/usr/lib/$pkgname/$pkgname" "$pkgdir/usr/bin/$pkgname"
-    
-    //or
-    
-    cd "$pkgname"
-    local pkgnum=${pkgver:0:1}
-    install -dm755 "$pkgdir/usr/lib/$pkgname-$pkgnum"
-    cp --archive -t "$pkgdir/usr/lib/$pkgname-$pkgnum" lib/*
-    install -dm755 "$pkgdir/usr/bin"
-    ln -s "/usr/lib/$pkgname-$pkgnum/$pkgname" "$pkgdir/usr/bin/$pkgname"
+    cd "${srcdir}/${_sourceName}"
+    install -d "$pkgdir/usr/{bin,lib}"
+    cp -r "${srcdir}/${pkgname}" "$pkgdir/usr/lib/"
+    ln -s "/usr/lib/$pkgname/$pkgname" "$pkgdir/usr/bin/$pkgname"    
+    # cd "$pkgname"
+    # local pkgnum=${pkgver:0:1}
+    # install -dm755 "$pkgdir/usr/lib/$pkgname-$pkgnum"
+    # cp --archive -t "$pkgdir/usr/lib/$pkgname-$pkgnum" lib/*
+    # install -dm755 "$pkgdir/usr/bin"
+    # ln -s "/usr/lib/$pkgname-$pkgnum/$pkgname" "$pkgdir/usr/bin/$pkgname"
 }

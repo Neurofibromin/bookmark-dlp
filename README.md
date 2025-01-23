@@ -7,7 +7,6 @@ Utility program for downloading bookmarked youtube links using yt-dlp. It replic
 - If necessary, specify the location of the yt-dlp executable in the settings.
 - CLI usage options are available.
 
-
 ## Installation & How to get
 <em>Make sure yt-dlp is installed: If you do not have the newest version you can get it [here](https://github.com/yt-dlp/yt-dlp#installation).</em>
 Download the executable for your system from [releases](https://github.com/Neurofibromin/bookmark-dlp/releases/download/latest). Run it.
@@ -22,7 +21,7 @@ Put the Bookmarks.html and the **yt-dlp(.exe) into the same directory as the exe
 Run the executable: <br/>
 Windows: in CMD or PowerShell: `bookmark-dlp-8.0.x.exe --interactive` <br/>
 Linux: in terminal in the directory: `./bookmark-dlp-linux-x64-8.0.x --interactive`
-More flags/usage info: `bookmark-dlp-.. --help`
+More flags/usage info: `./bookmark-dlp --help`
 
 ## How it works
 1. The program checks for a Bookmarks.html file in its root directory. If not found, it searches default locations for supported browsers.
@@ -76,9 +75,10 @@ Windows and linux compatible, written in C#, builds for x86 and ARM available. F
 Build your own: this project is open source
 
 ### Status
-[![.NET](https://github.com/Neurofibromin/bookmark-dlp/actions/workflows/prerelease.yml/badge.svg)](https://github.com/Neurofibromin/bookmark-dlp/actions/workflows/prerelease.yml)
+[![Prerelease](https://github.com/Neurofibromin/bookmark-dlp/actions/workflows/prerelease.yml/badge.svg)](https://github.com/Neurofibromin/bookmark-dlp/actions/workflows/prerelease.yml)
 [![.NET](https://github.com/Neurofibromin/bookmark-dlp/actions/workflows/dotnet.yml/badge.svg)](https://github.com/Neurofibromin/bookmark-dlp/actions/workflows/dotnet.yml)
-[![.NET](https://github.com/Neurofibromin/bookmark-dlp/actions/workflows/nuget.yml/badge.svg)](https://github.com/Neurofibromin/bookmark-dlp/actions/workflows/nuget.yml)
+[![NuGet](https://github.com/Neurofibromin/bookmark-dlp/actions/workflows/nuget.yml/badge.svg)](https://github.com/Neurofibromin/bookmark-dlp/actions/workflows/nuget.yml)
+[![CodeQL](https://github.com/Neurofibromin/bookmark-dlp/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/Neurofibromin/bookmark-dlp/actions/workflows/codeql-analysis.yml)
 
 ### Aims
 <br>CI/CD<br/>
@@ -87,7 +87,7 @@ Build your own: this project is open source
 - [ ] Debian
 - [ ] Arch/AUR
 - [ ] Fedora
-- [ ] [Gitea mirror](N/A)
+- [x] [Gitea mirror](N/A)
 - [x] [sourceforge mirror](https://sourceforge.net/projects/bookmark-dlp/)
 - [x] [NuGet](https://www.nuget.org/packages/nfbookmark)
 
@@ -99,11 +99,11 @@ Build your own: this project is open source
 - [ ] systemd module
 - [ ] dot desktop file
 - [ ] add manpages
-- [ ] logging
+- [x] logging
 
 <br>Increase support<br/>
 - [ ] safari support
-- [ ] opera osx support
+- [x] opera osx support
 - [ ] bsd support
 - [ ] docker
 - [ ] netcore3.1
@@ -131,7 +131,7 @@ Linux Installers: <br/>
 
 | package      | x64                                                                                                                                                   | arm64                                                                                                                                                   |
 |--------------|-------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Flatpak	     | 		[bookmark-dlp-0.3.0.x86_64.flatpak](https://github.com/Neurofibromin/bookmark-dlp/releases/download/latest/bookmark-dlp-0.2.7-1.x86_64.flatpak)		   | 	[bookmark-dlp-0.3.0.aarch64.flatpak](https://github.com/Neurofibromin/bookmark-dlp/releases/download/latest/bookmark-dlp-0.2.7-1.aarch64.flatpak)			   |
-| RPM	         | 		[bookmark-dlp-0.3.0.x86_64.rpm](https://github.com/Neurofibromin/bookmark-dlp/releases/download/latest/bookmark-dlp_0.2.7-1.x86_64.rpm)		           | 	N/A			                                                                                                                                                 |
-| DEB	         | 		[bookmark-dlp-0.3.0.amd64.deb](https://github.com/Neurofibromin/bookmark-dlp/releases/download/latest/bookmark-dlp_0.2.7-1_amd64.deb)		             | 	[bookmark-dlp-0.3.0.arm64.deb](https://github.com/Neurofibromin/bookmark-dlp/releases/download/latest/bookmark-dlp_0.2.7-1_arm64.deb)			               |
-| AppImage	    | 		[bookmark-dlp-0.3.0.x86_64.AppImage](https://github.com/Neurofibromin/bookmark-dlp/releases/download/latest/bookmark-dlp-0.2.7-1.x86_64.AppImage)		 | 	[bookmark-dlp-0.3.0.aarch64.AppImage](https://github.com/Neurofibromin/bookmark-dlp/releases/download/latest/bookmark-dlp-0.2.7-1.aarch64.AppImage)			 |
+| Flatpak	     | 		[bookmark-dlp-0.4.0.x86_64.flatpak](https://github.com/Neurofibromin/bookmark-dlp/releases/download/latest/bookmark-dlp-0.4.0-1.x86_64.flatpak)		   | 	[bookmark-dlp-0.4.0.aarch64.flatpak](https://github.com/Neurofibromin/bookmark-dlp/releases/download/latest/bookmark-dlp-0.4.0-1.aarch64.flatpak)			   |
+| RPM	         | 		[bookmark-dlp-0.4.0.x86_64.rpm](https://github.com/Neurofibromin/bookmark-dlp/releases/download/latest/bookmark-dlp_0.4.0-1.x86_64.rpm)		           | 	N/A			                                                                                                                                                 |
+| DEB	         | 		[bookmark-dlp-0.4.0.amd64.deb](https://github.com/Neurofibromin/bookmark-dlp/releases/download/latest/bookmark-dlp_0.4.0-1_amd64.deb)		             | 	[bookmark-dlp-0.4.0.arm64.deb](https://github.com/Neurofibromin/bookmark-dlp/releases/download/latest/bookmark-dlp_0.4.0-1_arm64.deb)			               |
+| AppImage	    | 		[bookmark-dlp-0.4.0.x86_64.AppImage](https://github.com/Neurofibromin/bookmark-dlp/releases/download/latest/bookmark-dlp-0.4.0-1.x86_64.AppImage)		 | 	[bookmark-dlp-0.4.0.aarch64.AppImage](https://github.com/Neurofibromin/bookmark-dlp/releases/download/latest/bookmark-dlp-0.4.0-1.aarch64.AppImage)			 |

@@ -41,9 +41,9 @@ using bookmark_dlp;
 //set verbosity
 bookmark_dlp.Logger.verbosity = Logger.Verbosity.Warning;
 //get list of places where browser might be installed
-List<BrowserLocations> maybeLocations = Import.GetBrowserLocations();
+List<BrowserLocations> maybeLocations = BrowserLocations.GetBrowserLocations();
 //get list of places where browsers are actually installed
-List<BrowserLocations> actualLocations = Import.GetBrowserBookmarkFilesPaths();
+List<BrowserLocations> actualLocations = BrowserLocations.GetBrowserBookmarkFilesPaths();
 //list found browsers and how many profiles they have
 foreach (BrowserLocations location in actualLocations) 
 {
@@ -72,14 +72,20 @@ The main functions provided by this library are:
 * `bookmark_dlp.Import.JsonIntake`
 * `bookmark_dlp.Import.SqlIntake`
 * `bookmark_dlp.Import.HtmlTakeoutIntake`
-* `bookmark_dlp.Import.GetBrowserBookmarkFilesPaths`
-* `bookmark_dlp.Import.GetBrowserLocations`
-* `bookmark_dlp.Import.QueryChosenBookmarksFile`
+* `bookmark_dlp.BrowserLocations.GetBrowserBookmarkFilesPaths`
+* `bookmark_dlp.BrowserLocations.GetBrowserLocations`
+* `bookmark_dlp.BrowserLocations.QueryChosenBookmarksFile`
 * `bookmark_dlp.Functions.FoldernameValidation`
 * `bookmark_dlp.Functions.Createfolderstructure`
+* `bookmark_dlp.Functions.Deleteemptyfolders`
 * `bookmark_dlp.Functions.PrintToConsole`
 Additionally:
-* logging capacity at `Logger.LogVerbose()`
+* logging capacity:
+* `NfLogger.Logger.LogVerbose()`
+* `NfLogger.Logger.AddStream`
+* `NfLogger.Logger.RemoveStream`
+* `NfLogger.Logger.AddFile`
+* `NfLogger.Logger.RemoveFile`
 
 ## Main Types
 

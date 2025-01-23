@@ -1,7 +1,7 @@
 # This workflow will build a .NET project
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
 
-name: Prerelease
+name: Prerelease-Gitea
 
 on:
   push:
@@ -19,7 +19,7 @@ env:
 jobs:
   detect-platform:
     runs-on: ubuntu-latest
-    if: ${{ contains(github.server_url, 'github.com') }}
+    if: ${{ !contains(github.server_url, 'github.com') }}
     steps:
       - name: Check out the repository
         uses: actions/checkout@v3
@@ -46,6 +46,7 @@ jobs:
         run: echo "Running on GitHub Actions"
                  
   build:
+    if: ${{ !contains(github.server_url, 'github.com') }}
     env:
       RUNNER_TOOL_CACHE: /toolcache
     strategy:
@@ -54,7 +55,6 @@ jobs:
         dotnet-version: [ '8.0.x' ]
     runs-on: ${{ matrix.os }}
     needs: [detect-platform]
-    if: ${{ contains(github.server_url, 'github.com') }}
     steps:
     - name: bash-logs
       run: set -x
@@ -91,7 +91,7 @@ jobs:
       fail-fast: false
     runs-on: ${{ matrix.os }}
     needs: [build]
-    if: ${{ needs.build.result == 'success' && contains(github.server_url, 'github.com') }}
+    if: ${{ needs.build.result == 'success' && !contains(github.server_url, 'github.com') }}
     steps:
     - name: bash-logs
       run: set -x
@@ -117,7 +117,7 @@ jobs:
         ls -R
     - name: "Rename based on architecture"
       run: |
-        cd /home/runner/work/bookmark-dlp/bookmark-dlp
+        cd /workspace/def/bookmark-dlp    
         mkdir releases
         mv "./bookmark-dlp/bin/Release/net8.0/win-x64/publish/bookmark-dlp.exe" "./releases/bookmark-dlp-win-x64-${{ matrix.dotnet-version }}.exe"
         mv "./bookmark-dlp/bin/Release/net8.0/win-x86/publish/bookmark-dlp.exe" "./releases/bookmark-dlp-win-x86-${{ matrix.dotnet-version }}.exe"
@@ -131,38 +131,40 @@ jobs:
     - name: "Delete old release"
       env:
         GH_TOKEN: ${{ github.token }}
-        VERSION: ${{ env.VERSION }}
       run: |
-        echo "Running on GitHub Actions"
-        gh release list > releases.txt
+        echo "Running on Gitea Actions"
+        wget -q https://dl.gitea.com/tea/main/tea-main-linux-amd64
+        chmod a+x ./tea-main-linux-amd64
+        mv ./tea-main-linux-amd64 tea
+        ./tea login add --url ${{ github.server_url }} --token ${{ secrets.MY_GITEA_TOKEN }}
+        ./tea releases list --output simple --repo  ${{ github.repository }} > releases.txt
         cat releases.txt
-        echo "Version to delete: $VERSION"
-        if grep -w "$VERSION" releases.txt; then
-          echo "Release $VERSION found. Deleting..."
-          gh release delete "$VERSION" --yes
+        version="${{ env.VERSION }}"
+        echo $version
+        if grep $version releases.txt; then
+          echo wasfound
+          ./tea releases delete --output simple --confirm --repo ${{ github.repository }} ${{ env.VERSION }}
         else
-          echo "Release $VERSION not found. Skipping deletion."
+          echo "notfound"
         fi
-    - name: "Create new pre-release GH"
-      env:
-        GH_TOKEN: ${{ github.token }}
-        VERSION: ${{ env.VERSION }}
+    - name: setup go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '>=1.20.1'
+    - name: Use release Action
+      id: release
+      uses: https://gitea.com/actions/release-action@main
+      with:
+        files: |-
+          releases/**            
+    - name: "Create new prerelease Gitea"
       run: |
         set -x
-        echo "Creating prerelease for version: $VERSION"
-        gh release create "$VERSION" --target unstable --prerelease --title "Development build $VERSION" --generate-notes
-    - name: Upload
-      env:
-        GH_TOKEN: ${{ github.token }}
-      run: |
+        VERSION="${{ env.VERSION }}"
+        echo $VERSION          
         ls -lah ./releases/
-        gh release upload "${{ env.VERSION }}" "./releases/bookmark-dlp-win-x64-${{ matrix.dotnet-version }}.exe" --clobber
-        gh release upload "${{ env.VERSION }}" "./releases/bookmark-dlp-win-x86-${{ matrix.dotnet-version }}.exe" --clobber
-        gh release upload "${{ env.VERSION }}" "./releases/bookmark-dlp-linux-arm64-${{ matrix.dotnet-version }}" --clobber
-        gh release upload "${{ env.VERSION }}" "./releases/bookmark-dlp-linux-x64-${{ matrix.dotnet-version }}" --clobber
-        gh release upload "${{ env.VERSION }}" "./releases/bookmark-dlp-osx-x64-${{ matrix.dotnet-version }}" --clobber
-        gh release upload "${{ env.VERSION }}" "./releases/bookmark-dlp-osx-arm64" --clobber
-        gh release upload "${{ env.VERSION }}" "./releases/bookmark-dlp-win-arm64-${{ matrix.dotnet-version }}.exe" --clobber   
+        echo ./tea releases create --title "Autogen" "${{ env.VERSION }}" --target "feature" --prerelease --repo ${{ github.repository }} --asset ./releases/**
+        ./tea releases create --title "Autogen" "${{ env.VERSION }}" --target "feature" --prerelease --repo ${{ github.repository }} --asset ./releases/**
           
   pupnet:
     env:
@@ -174,7 +176,7 @@ jobs:
       fail-fast: false
     runs-on: ${{ matrix.os }}
     needs: [release]
-    if: ${{ needs.release.result == 'success' }}
+    if: false # ${{ needs.release.result == 'success' }}
     steps:
     - uses: actions/checkout@v3
     - name: Setup dotnet
@@ -184,11 +186,11 @@ jobs:
     - name: Setup dependencies
       run: |
         # dnf -y install dpkg rpmdevtools # flatpak flatpak-builder pandoc
-        sudo apt-get -y install dpkg rpm flatpak flatpak-builder pandoc libfuse2
+        sudo apt-get -y install dpkg rpm flatpak flatpak-builder pandoc
         sudo flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
         # echo  ${{ env.MULTIENV }}
         #if "${{ env.MULTIENV }}" == "true"; then
-        sudo flatpak install -y flathub org.freedesktop.Platform//24.08 org.freedesktop.Sdk//24.08
+        sudo flatpak install -y flathub org.freedesktop.Platform//23.08 org.freedesktop.Sdk//23.08
         dotnet tool install -g KuiperZone.PupNet
     - name: Restore dependencies
       run: dotnet restore

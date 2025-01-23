@@ -24,21 +24,22 @@ jobs:
     permissions:
       actions: read
       contents: read
+      packages: read
       security-events: write
-
     strategy:
       fail-fast: false
       matrix:
-        language: [ 'csharp' ]
+        include:
+          - language: csharp
+            build-mode: none
         # CodeQL supports [ 'cpp', 'csharp', 'go', 'java', 'javascript', 'python', 'ruby' ]
         # Learn more about CodeQL language support at https://git.io/codeql-language-support
-
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
+    - uses: actions/checkout@v4
     - name: Initialize CodeQL
       uses: github/codeql-action/init@v3
       with:
-        languages: 'csharp'
+        languages: csharp
+        build-mode: none
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v3
