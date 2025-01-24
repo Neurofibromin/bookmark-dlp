@@ -48,7 +48,7 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore
       - name: Pack
-        run: dotnet pack Nfbookmark/Nfbookmark.csproj
+        run: dotnet pack /p:ContinuousIntegrationBuild=true Nfbookmark/Nfbookmark.csproj
       - name: "List all files"
         run: |
           echo $PWD

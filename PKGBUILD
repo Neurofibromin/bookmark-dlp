@@ -1,4 +1,5 @@
 # Maintainer: Neurofibromin <125222560+Neurofibromin@users.noreply.github.com>
+# Contributor: Neurofibromin <125222560+Neurofibromin@users.noreply.github.com>
 _tag=0.4.0
 _sourceName="bookmark-dlp"
 _dotnet_version=8.0
@@ -7,9 +8,9 @@ pkgname="bookmark-dlp-git"
 pkgver=0.4.0
 pkgrel=1
 pkgdesc="Small utility program for downloading bookmarked YouTube links using yt-dlp."
-arch=("any")
+arch=("x86_64")
 url="https://github.com/Neurofibromin/bookmark-dlp"
-license=('GPL3')
+license=('GPL-3.0-only')
 depends=(
     "dotnet-runtime-$_dotnet_version" 
     gcc-libs
@@ -27,7 +28,8 @@ validpgpkeys=('9F9BFE94618AD26667BD28214F671AFAD8D4428B')
 
 pkgver() {
   cd "${_sourceName}"
-  git describe --tags --match "v[0-9]*" | sed 's/^v//'
+  # git describe --tags --match "[0-9]*.[0-9]*.[0-9]*"
+  git tag --list '[0-9]*.[0-9]*.[0-9]*' | sort -V | tail -n 1
 }
 
 prepare() {
@@ -35,20 +37,19 @@ prepare() {
   export NUGET_PACKAGES="$PWD/nuget"
   export DOTNET_NOLOGO=true
   export DOTNET_CLI_TELEMETRY_OPTOUT=true
-  dotnet restore --locked-mode src/Some.Program.Cli
-  dotnet restore --locked-mode src/Some.Program.Tests
+  dotnet restore --locked-mode bookmark-dlp.sln
   git remote set-url origin "$url"
 }
 
 build() {
-    cd "${srcdir}/${_sourceName}"
-    MSBUILDDISABLENODEREUSE=1 dotnet publish \
+    cd "${srcdir}/${_sourceName}" 
+    MSBUILDDISABLENODEREUSE=1 dotnet publish bookmark-dlp/bookmark-dlp.csproj \
     --configuration Release \
-    --self-contained false \
+    --no-self-contained \
     --runtime linux-x64 \
-    -p:PublishTrimmed=true \
-    -p:PublishSingleFile=true \
-    --output "${srcdir}/${pkgname}"
+    --framework net${_dotnet_version} \
+    -p:PublishSingleFile=true
+    # --output "${srcdir}/${pkgname}"
     # cd "$pkgname"
     # export NUGET_PACKAGES="$PWD/nuget"
     # export DOTNET_NOLOGO=true
@@ -65,20 +66,27 @@ build() {
 
 check() {
   cd "${srcdir}/${_sourceName}"
+  ls
   export NUGET_PACKAGES="$PWD/nuget"
   export DOTNET_NOLOGO=true
   export DOTNET_CLI_TELEMETRY_OPTOUT=true
-  dotnet test \
+  dotnet test ./Tests/bookmark-dlp.Tests/ \
     --no-restore \
-    --framework "net$_dotnet_version" \
-    ./bookmark-dlp.Tests
+    --framework "net$_dotnet_version"
 }
 
 package() {
-    cd "${srcdir}/${_sourceName}"
-    install -d "$pkgdir/usr/{bin,lib}"
-    cp -r "${srcdir}/${pkgname}" "$pkgdir/usr/lib/"
-    ln -s "/usr/lib/$pkgname/$pkgname" "$pkgdir/usr/bin/$pkgname"    
+    echo "pkgdir: $pkgdir"
+    echo "srcdir: $srcdir"
+    echo "pkgname: $pkgname"
+    echo "_sourceName: ${_sourceName}"
+    # Ensure the directories exist
+    install -d "$pkgdir/usr/bin"
+    install -d "$pkgdir/usr/lib"
+    # Copy the package files to the appropriate directory
+    cp -r "${srcdir}/bookmark-dlp/bookmark-dlp/bin/Release/net8.0/linux-x64/publish/" "$pkgdir/usr/lib/"
+    # Create the symbolic link
+    ln -s "/usr/lib/$pkgname/${_sourceName}" "$pkgdir/usr/bin/$pkgname"         
     # cd "$pkgname"
     # local pkgnum=${pkgver:0:1}
     # install -dm755 "$pkgdir/usr/lib/$pkgname-$pkgnum"
