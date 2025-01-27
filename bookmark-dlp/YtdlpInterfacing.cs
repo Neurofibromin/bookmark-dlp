@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text.Json;
+using System.Web;
 using Avalonia.Controls.ApplicationLifetimes;
 using CommunityToolkit.Mvvm.ComponentModel;
 using NfLogger;
@@ -31,6 +32,8 @@ namespace bookmark_dlp
             {
                 return null;
             }
+            if (url.ToLower().EndsWith("/videos"))
+                url = url.Substring(0, url.Length - "/videos".Length);
             string channelUrl = url;
             string ytDlpPath = YtdlpPath;
             List<string> videoIds = new List<string>();
@@ -95,26 +98,118 @@ namespace bookmark_dlp
             }
             return videoIds;
         }
-        public static List<string> GetVideoIdsFromPlaylistUrl(string url)
+        
+        /// <summary>
+        /// Extracts the playlist ID from a given YouTube URL.
+        /// </summary>
+        /// <param name="url">The YouTube URL, e.g., "https://www.youtube.com/watch?v=12345678912&amp;list=PL123456789123456789-4568789123&amp;index=1"</param>
+        /// <returns>The playlist ID if found, otherwise null.</returns>
+        public static string? ExtractPlaylistId(string url)
         {
-            throw new NotImplementedException();
-        }
-
-        public static void Testing()
-        {
-            List<string> myursl = YtdlpInterfacing.GetVideoIdsFromChannelUrl("somechannelurl");
-            if (myursl != null)
+            if (string.IsNullOrEmpty(url))
             {
-                foreach (string s in myursl)
-                {
-                    Logger.LogVerbose(s, Logger.Verbosity.Critical);
-                }
+                return null;
             }
+            try
+            {
+                // Parse the URL
+                Uri uri = new Uri(url);
+                // Extract the query parameters
+                string query = uri.Query;
+                // Parse the query parameters into a dictionary
+                var queryParameters = System.Web.HttpUtility.ParseQueryString(query);
+                // Return the value of the "list" parameter if it exists
+                return queryParameters["list"];
+            }
+            catch (Exception ex)
+            {
+                // Log error if necessary
+                Logger.LogVerbose($"Failed to extract playlist ID from URL: {url}. Error: {ex.Message}", Logger.Verbosity.Error);
+                return null;
+            }
+        }
+        
+        /// <summary>
+        /// Gets a list of video IDs from a given playlist URL. Requires internet.
+        /// </summary>
+        /// <param name="url">The FQDN of the playlist. E.g., https://www.youtube.com/playlist?list=PL123456789123456789-4568789123</param>
+        /// <returns>List of 11-character-long YouTube video IDs from the playlist. Returns null if the playlist does not exist or no internet is available.</returns>
+        public static List<string>? GetVideoIdsFromPlaylistUrl(string url)
+        {
+            if (string.IsNullOrEmpty(YtdlpPath))
+            {
+                Logger.LogVerbose("YtdlpPath is not set in YtdlpInterfacing::GetVideoIdsFromPlaylistUrl()", Logger.Verbosity.Error);
+                return null;
+            }
+            if (string.IsNullOrEmpty(url))
+            {
+                return null;
+            }
+            string oldurl = url;
+            if(ExtractPlaylistId(url) != null)
+                url = "https://www.youtube.com/playlist?list=" + ExtractPlaylistId(url);
             else
             {
-                Logger.LogVerbose("No video found", Logger.Verbosity.Critical);
+                Logger.LogVerbose($"Url was not Playlist: {url}", Logger.Verbosity.Warning);
+                return null;
+            }    
+            Logger.LogVerbose($"Parsed playlist url from {oldurl} to {url}", Logger.Verbosity.Debug);
+            
+            List<string> videoIds = new List<string>();
+            // Run yt-dlp
+            Process process = new Process
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = YtdlpPath,
+                    Arguments = $"-j --flat-playlist \"{url}\"",
+                    RedirectStandardOutput = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                    WindowStyle = ProcessWindowStyle.Hidden,
+                    RedirectStandardError = true,
+                }
+            };
+            process.Start();
+            string result = process.StandardOutput.ReadToEnd();
+            string error = process.StandardError.ReadToEnd();
+            process.WaitForExit();
+            int exitCode = process.ExitCode;
+            process.Close();
+            if (exitCode != 0)
+            {
+                if (error.Contains("Unable to download webpage: HTTP Error 404") || error.Contains("Unable to download API page") || error.Contains("Failed to establish a new connection: [Errno -3]"))
+                {
+                    Logger.LogVerbose(error, Logger.Verbosity.Error);
+                    return null;
+                }
+                if (result.Contains("Unable to download webpage: HTTP Error 404") || result.Contains("Unable to download API page") || result.Contains("Failed to establish a new connection: [Errno -3]"))
+                {
+                    Logger.LogVerbose(result, Logger.Verbosity.Error);
+                    return null;
+                }
+                Logger.LogVerbose($"yt-dlp exit code: {exitCode}, failed to query videos for playlist: {url}", Logger.Verbosity.Error);
+                return null;
             }
-            Logger.LogVerbose("num: " + myursl.Count, Logger.Verbosity.Critical);
+
+            string[] lines = result.Split('\n');
+            foreach (string line in lines)
+            {
+                try
+                {
+                    // Parse JSON for each video
+                    JsonDocument jsonDoc = JsonDocument.Parse(line);
+                    if (jsonDoc.RootElement.TryGetProperty("id", out JsonElement idElement))
+                        videoIds.Add(idElement.GetString());
+                    else
+                        Logger.LogVerbose($"No 'id' property found in JSON: {line}", Logger.Verbosity.Error);
+                }
+                catch (JsonException ex)
+                {
+                    Logger.LogVerbose($"Error parsing JSON: {ex.Message}", Logger.Verbosity.Error);
+                }
+            }
+            return videoIds;
         }
 
         /// <summary>

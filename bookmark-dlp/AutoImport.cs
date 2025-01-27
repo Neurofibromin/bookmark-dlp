@@ -196,11 +196,18 @@ namespace bookmark_dlp
                 //playlist
                 int start = _url.IndexOf("playlist?list=", StringComparison.Ordinal) + "playlist?list=".Length;
                 string temp = _url.Substring(start);
-                int end = temp.IndexOf('/');
+                int end = int.Min(temp.IndexOf('/'), temp.IndexOf('&'));
                 if (end == -1)
                   end = _url.Length;
                 link.linktype = Linktype.Playlist;
                 link.playlist_id = _url.Substring(start, end);
+                string? extracted = YtdlpInterfacing.ExtractPlaylistId(_url);
+                if (extracted == null)
+                    Logger.LogVerbose($"Could not autoextract playlist ID {_url}, manual parsing resulted in: {link.playlist_id}", Logger.Verbosity.Error);
+                else if (extracted != link.playlist_id)
+                {
+                    Logger.LogVerbose($"Manual and autoparsing resulted in different ids {link.playlist_id} and {extracted}");
+                }
             }
             else if (_url.Substring(24, 4) == "user")
             {
