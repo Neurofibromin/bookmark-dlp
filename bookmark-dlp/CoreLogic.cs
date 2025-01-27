@@ -118,8 +118,8 @@ namespace bookmark_dlp
                     }
                 }
 
-                string ytdlp_path = AppMethods.Yt_dlp_pathfinder(rootdir); //check if yt-dlp is in the root folder, on the path or not available
-                if (String.IsNullOrEmpty(ytdlp_path)) { ytdlp_path = AppMethods.Yt_dlp_pathfinder(setOptions.Outputfolder); }
+                string ytdlp_path = YtdlpInterfacing.Yt_dlp_pathfinder(rootdir); //check if yt-dlp is in the root folder, on the path or not available
+                if (String.IsNullOrEmpty(ytdlp_path)) { ytdlp_path = YtdlpInterfacing.Yt_dlp_pathfinder(setOptions.Outputfolder); }
                 if (String.IsNullOrEmpty(ytdlp_path))
                 {
                     while (true)
@@ -188,8 +188,8 @@ namespace bookmark_dlp
 
                 if (setOptions.Outputfolder == null) { setOptions.Outputfolder = Directory.GetCurrentDirectory(); }
                 if (setOptions.HtmlFileLocation != null) { localhtml = setOptions.HtmlFileLocation; }
-                string ytdlp_path = AppMethods.Yt_dlp_pathfinder(rootdir);
-                if (String.IsNullOrEmpty(ytdlp_path)) { ytdlp_path = AppMethods.Yt_dlp_pathfinder(setOptions.Outputfolder); }
+                string ytdlp_path = YtdlpInterfacing.Yt_dlp_pathfinder(rootdir);
+                if (String.IsNullOrEmpty(ytdlp_path)) { ytdlp_path = YtdlpInterfacing.Yt_dlp_pathfinder(setOptions.Outputfolder); }
                 if (String.IsNullOrEmpty(ytdlp_path)) { Logger.LogVerbose("yt-dlp not found", Logger.Verbosity.Error); Environment.Exit(1); }
 
                 if (File.Exists(localhtml))

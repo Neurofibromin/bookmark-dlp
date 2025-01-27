@@ -47,7 +47,7 @@ namespace bookmark_dlp.ViewModels
                 .SelectMany(browser => browser.foundProfiles)
                 .ToList() ?? new List<string>();
             
-            if (AppMethods.Yt_dlp_pathfinder(Directory.GetCurrentDirectory()) != null) { AppSettings._settings.Ytdlp_executable_not_found = false; }
+            if (YtdlpInterfacing.Yt_dlp_pathfinder(Directory.GetCurrentDirectory()) != null) { AppSettings._settings.Ytdlp_executable_not_found = false; }
             ActiveSettings = AppSettings._settings;
             ActiveSettings.PropertyChanged += ActiveSettings_PropertyChanged;
             ShouldEnableImportButton();
@@ -140,7 +140,7 @@ namespace bookmark_dlp.ViewModels
             }
             if (ActiveSettings.Ytdlp_executable_not_found)
             {
-                if (AppMethods.Yt_dlp_pathfinder(ActiveSettings.Outputfolder) != null)
+                if (YtdlpInterfacing.Yt_dlp_pathfinder(ActiveSettings.Outputfolder) != null)
                 {
                     // await Console.Out.WriteLineAsync("thisone");
                     // AppSettings._settings.Ytdlp_executable_not_found = false;

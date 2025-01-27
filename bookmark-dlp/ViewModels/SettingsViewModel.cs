@@ -74,10 +74,10 @@ namespace bookmark_dlp.ViewModels
 
             if (ActiveSettings.Ytdlp_executable_not_found)
             {
-                if (AppMethods.Yt_dlp_pathfinder(ActiveSettings.Outputfolder) != null)
+                if (YtdlpInterfacing.Yt_dlp_pathfinder(ActiveSettings.Outputfolder) != null)
                 {
                     ActiveSettings.Ytdlp_executable_not_found = false;
-                    ActiveSettings.Yt_dlp_binary_path = AppMethods.Yt_dlp_pathfinder(ActiveSettings.Outputfolder);                
+                    ActiveSettings.Yt_dlp_binary_path = YtdlpInterfacing.Yt_dlp_pathfinder(ActiveSettings.Outputfolder);                
                 }
             }
         }

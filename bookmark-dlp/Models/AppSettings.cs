@@ -24,7 +24,7 @@ namespace bookmark_dlp.Models
             cdownloadPlaylists: false, cdownloadShorts: false,
             cdownloadChannels: false,
             cconcurrent_downloads: false, ccookies_autoextract: false,
-            cyt_dlp_binary_path: AppMethods.Yt_dlp_pathfinder(Directory.GetCurrentDirectory()),
+            cyt_dlp_binary_path: YtdlpInterfacing.Yt_dlp_pathfinder(Directory.GetCurrentDirectory()),
             ccanChangeSettings: true);
         public static string? configloc = AppMethods.ConfigFileLocation();
         private static AppSettings _instance = new AppSettings();
@@ -85,7 +85,7 @@ namespace bookmark_dlp.Models
             _settings.DownloadChannels = false; 
             _settings.Concurrent_downloads = false;
             _settings.Cookies_autoextract = false; 
-            _settings.Yt_dlp_binary_path = AppMethods.Yt_dlp_pathfinder(Directory.GetCurrentDirectory());
+            _settings.Yt_dlp_binary_path = YtdlpInterfacing.Yt_dlp_pathfinder(Directory.GetCurrentDirectory());
         }
 
         
