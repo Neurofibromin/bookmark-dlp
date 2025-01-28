@@ -1,11 +1,12 @@
 #!/bin/bash
 
-# PKGBUILD.txt
+# PKGBUILD
 # README.md links
 # workflows on top in env
 # manpage.md
 # .csproj files
 # bookmark-dlp.pupnet.conf
+# bookmark-dlp.spec
 
 # Check if the correct number of arguments is provided
 if [ "$#" -ne 1 ]; then
@@ -14,7 +15,7 @@ if [ "$#" -ne 1 ]; then
 fi
 
 NEW_VERSION=$1
-PKGBUILD_FILE=./PKGBUILD.txt
+PKGBUILD_FILE=./PKGBUILD
 README_FILE=./README.md
 NUGET_YML_FILE=./.github/workflows/nuget.yml
 PRERELEASE_YML_FILE=./.github/workflows/prerelease.yml
@@ -24,6 +25,7 @@ NEW_DATE=$(date +'%Y. %m. %d')
 NFBOOKMARK_CSPROJ_FILE=./Nfbookmark/Nfbookmark.csproj
 BOOKMARK_DLP_CSPROJ_FILE=./bookmark-dlp/bookmark-dlp.csproj
 PUPNET_CONF_FILE=./bookmark-dlp.pupnet.conf
+SPEC_FILE=./bookmark-dlp.spec
 
 # Validate the PKGBUILD file exists
 if [ ! -f "$PKGBUILD_FILE" ]; then
@@ -112,3 +114,12 @@ fi
 # Replace the AppVersionRelease value
 sed -i -E "s/^AppVersionRelease = [0-9]+\.[0-9]+\.[0-9]+/AppVersionRelease = ${NEW_VERSION}/" "$PUPNET_CONF_FILE"
 echo "AppVersionRelease updated to $NEW_VERSION in $PUPNET_CONF_FILE."
+
+# Validate the configuration file exists
+if [ ! -f "$SPEC_FILE" ]; then
+    echo "Error: File '$SPEC_FILE' not found."
+    exit 1
+fi
+# Replace the Version value
+sed -i -E "s/^Version:        [0-9]+\.[0-9]+\.[0-9]+/Version:        ${NEW_VERSION}/" "$SPEC_FILE"
+echo "Version updated to $NEW_VERSION in $SPEC_FILE."
