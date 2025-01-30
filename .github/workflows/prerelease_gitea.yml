@@ -11,7 +11,7 @@ on:
 
 
 env:
-  VERSION: "0.4.0"
+  VERSION: "0.4.1"
   DOTNETVERSION: "net8.0"
   RUNNER_TOOL_CACHE: /toolcache
   ACTIONS_STEP_DEBUG: true

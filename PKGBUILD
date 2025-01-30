@@ -1,11 +1,11 @@
 # Maintainer: Neurofibromin <125222560+Neurofibromin@users.noreply.github.com>
 # Contributor: Neurofibromin <125222560+Neurofibromin@users.noreply.github.com>
-_tag=0.4.0
+_tag=0.4.1
 _sourceName="bookmark-dlp"
-_dotnet_version=8.0
+_dotnet_version=9.0
 
 pkgname="bookmark-dlp"
-pkgver=0.4.0
+pkgver=0.4.1
 pkgrel=1
 pkgdesc="Small utility program for downloading bookmarked YouTube links using yt-dlp."
 arch=("x86_64")
@@ -14,6 +14,7 @@ license=('GPL-3.0-only')
 depends=(
     gcc-libs
     glibc
+    yt-dlp
 )
 makedepends=(
     git

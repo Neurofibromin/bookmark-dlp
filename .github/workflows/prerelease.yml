@@ -11,10 +11,11 @@ on:
 
 
 env:
-  VERSION: "0.4.0"
-  DOTNETVERSION: "net8.0"
+  VERSION: "0.4.1"
+  DOTNETVERSION: "net9.0"
   RUNNER_TOOL_CACHE: /toolcache
   ACTIONS_STEP_DEBUG: true
+  dotnet-version: "9.0.x"
 
 jobs:
   detect-platform:
@@ -22,25 +23,9 @@ jobs:
     if: ${{ contains(github.server_url, 'github.com') }}
     steps:
       - name: Check out the repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: List all environment variables
         run: printenv | sort
-      - name: Detect if running on Gitea
-        if: ${{ !contains(github.server_url, 'github.com') }}
-        run: |
-          echo "Running on Gitea Actions"
-          # if [[ "${{ github.server_url }}" == *"github"* ]]; then
-          # if [[ "${{ github.server_url }}" == *"uva"* ]]; then
-          # echo "Running on Gitea Actions"
-          #      VERSION="${{ env.VERSION }}"
-          #      echo $VERSION
-          #      mkdir releases
-          #      echo "test3" > releases/a.txt
-          #      wget -q https://dl.gitea.com/tea/main/tea-main-linux-amd64
-          #      chmod a+x ./tea-main-linux-amd64
-          #      mv ./tea-main-linux-amd64 tea
-          #      ./tea login add --url ${{ github.server_url }} --token ${{ secrets.MY_GITEA_TOKEN }}
-          #      ./tea releases create --title "Autogen" --tag $VERSION --target "feature" --prerelease --repo ${{ github.repository }} --asset ./releases/**
       - name: Detect if running on GitHub
         if: ${{ contains(github.server_url, 'github.com') }}
         run: echo "Running on GitHub Actions"
@@ -51,30 +36,29 @@ jobs:
     strategy:
       matrix:
         os: [ ubuntu-latest ]
-        dotnet-version: [ '8.0.x' ]
     runs-on: ${{ matrix.os }}
     needs: [detect-platform]
     if: ${{ contains(github.server_url, 'github.com') }}
     steps:
     - name: bash-logs
       run: set -x
-    - uses: actions/checkout@v3
-    - name: Setup .NET Core SDK ${{ matrix.dotnet-version }}
-      uses: actions/setup-dotnet@v3
+    - uses: actions/checkout@v4
+    - name: Setup .NET Core SDK ${{ env.dotnet-version }}
+      uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: ${{ matrix.dotnet-version }}  
+        dotnet-version: ${{ env.dotnet-version }}  
     - name: Restore dependencies
       run: dotnet restore
     - name: Build release
-      run: dotnet build --configuration Release --no-restore
+      run: dotnet build --configuration Release --no-restore --verbosity quiet
     - name: Build debug
-      run: dotnet build --configuration Debug --no-restore
+      run: dotnet build --configuration Debug --no-restore --verbosity quiet
     - name: "List all files"
       run: | 
         ls -R
         dotnet --info
     - name: Test
-      run: dotnet test --no-build --verbosity detailed --framework ${{ env.DOTNETVERSION }}
+      run: dotnet test --no-build --verbosity quiet --framework ${{ env.DOTNETVERSION }}
       continue-on-error: true
     - name: Display dotnet version
       run: dotnet --version
@@ -87,7 +71,6 @@ jobs:
     strategy:
       matrix:
         os: [ ubuntu-latest ]
-        dotnet-version: [ '8.0.x' ]
       fail-fast: false
     runs-on: ${{ matrix.os }}
     needs: [build]
@@ -95,11 +78,11 @@ jobs:
     steps:
     - name: bash-logs
       run: set -x
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Setup dotnet
-      uses: actions/setup-dotnet@v3
+      uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: ${{ matrix.dotnet-version }}
+        dotnet-version: ${{ env.dotnet-version }}
     - name: Restore dependencies
       run: dotnet restore
     - name: Publish
@@ -119,13 +102,13 @@ jobs:
       run: |
         cd /home/runner/work/bookmark-dlp/bookmark-dlp
         mkdir releases
-        mv "./bookmark-dlp/bin/Release/net8.0/win-x64/publish/bookmark-dlp.exe" "./releases/bookmark-dlp-win-x64-${{ matrix.dotnet-version }}.exe"
-        mv "./bookmark-dlp/bin/Release/net8.0/win-x86/publish/bookmark-dlp.exe" "./releases/bookmark-dlp-win-x86-${{ matrix.dotnet-version }}.exe"
-        mv "./bookmark-dlp/bin/Release/net8.0/linux-arm64/publish/bookmark-dlp" "./releases/bookmark-dlp-linux-arm64-${{ matrix.dotnet-version }}"
-        mv "./bookmark-dlp/bin/Release/net8.0/linux-x64/publish/bookmark-dlp" "./releases/bookmark-dlp-linux-x64-${{ matrix.dotnet-version }}"
-        mv "./bookmark-dlp/bin/Release/net8.0/osx-x64/publish/bookmark-dlp" "./releases/bookmark-dlp-osx-x64-${{ matrix.dotnet-version }}"
-        mv "./bookmark-dlp/bin/Release/net8.0/osx-arm64/publish/bookmark-dlp" "./releases/bookmark-dlp-osx-arm64"
-        mv "./bookmark-dlp/bin/Release/net8.0/win-arm64/publish/bookmark-dlp.exe" "./releases/bookmark-dlp-win-arm64-${{ matrix.dotnet-version }}.exe"
+        mv "./bookmark-dlp/bin/Release/net9.0/win-x64/publish/bookmark-dlp.exe" "./releases/bookmark-dlp-win-x64-${{ env.VERSION }}.exe"
+        mv "./bookmark-dlp/bin/Release/net9.0/win-x86/publish/bookmark-dlp.exe" "./releases/bookmark-dlp-win-x86-${{ env.VERSION }}.exe"
+        mv "./bookmark-dlp/bin/Release/net9.0/linux-arm64/publish/bookmark-dlp" "./releases/bookmark-dlp-linux-arm64-${{ env.VERSION }}"
+        mv "./bookmark-dlp/bin/Release/net9.0/linux-x64/publish/bookmark-dlp" "./releases/bookmark-dlp-linux-x64-${{ env.VERSION }}"
+        mv "./bookmark-dlp/bin/Release/net9.0/osx-x64/publish/bookmark-dlp" "./releases/bookmark-dlp-osx-x64-${{ env.VERSION }}"
+        mv "./bookmark-dlp/bin/Release/net9.0/osx-arm64/publish/bookmark-dlp" "./releases/bookmark-dlp-osx-arm64-${{ env.VERSION }}"
+        mv "./bookmark-dlp/bin/Release/net9.0/win-arm64/publish/bookmark-dlp.exe" "./releases/bookmark-dlp-win-arm64-${{ env.VERSION }}.exe"
         cd releases
         ls -lah
     - name: "Delete old release"
@@ -156,13 +139,13 @@ jobs:
         GH_TOKEN: ${{ github.token }}
       run: |
         ls -lah ./releases/
-        gh release upload "${{ env.VERSION }}" "./releases/bookmark-dlp-win-x64-${{ matrix.dotnet-version }}.exe" --clobber
-        gh release upload "${{ env.VERSION }}" "./releases/bookmark-dlp-win-x86-${{ matrix.dotnet-version }}.exe" --clobber
-        gh release upload "${{ env.VERSION }}" "./releases/bookmark-dlp-linux-arm64-${{ matrix.dotnet-version }}" --clobber
-        gh release upload "${{ env.VERSION }}" "./releases/bookmark-dlp-linux-x64-${{ matrix.dotnet-version }}" --clobber
-        gh release upload "${{ env.VERSION }}" "./releases/bookmark-dlp-osx-x64-${{ matrix.dotnet-version }}" --clobber
-        gh release upload "${{ env.VERSION }}" "./releases/bookmark-dlp-osx-arm64" --clobber
-        gh release upload "${{ env.VERSION }}" "./releases/bookmark-dlp-win-arm64-${{ matrix.dotnet-version }}.exe" --clobber   
+        gh release upload "${{ env.VERSION }}" "./releases/bookmark-dlp-win-x64-${{ env.VERSION }}.exe" --clobber
+        gh release upload "${{ env.VERSION }}" "./releases/bookmark-dlp-win-x86-${{ env.VERSION }}.exe" --clobber
+        gh release upload "${{ env.VERSION }}" "./releases/bookmark-dlp-linux-arm64-${{ env.VERSION }}" --clobber
+        gh release upload "${{ env.VERSION }}" "./releases/bookmark-dlp-linux-x64-${{ env.VERSION }}" --clobber
+        gh release upload "${{ env.VERSION }}" "./releases/bookmark-dlp-osx-x64-${{ env.VERSION }}" --clobber
+        gh release upload "${{ env.VERSION }}" "./releases/bookmark-dlp-osx-arm64-${{ env.VERSION }}" --clobber
+        gh release upload "${{ env.VERSION }}" "./releases/bookmark-dlp-win-arm64-${{ env.VERSION }}.exe" --clobber   
           
   pupnet:
     env:
@@ -170,24 +153,23 @@ jobs:
     strategy:
       matrix:
         os: [ ubuntu-latest ]
-        dotnet-version: [ '8.0.x' ]
       fail-fast: false
     runs-on: ${{ matrix.os }}
     needs: [release]
     if: ${{ needs.release.result == 'success' }}
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Setup dotnet
-      uses: actions/setup-dotnet@v3
+      uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: ${{ matrix.dotnet-version }}
+        dotnet-version: |
+          ${{ env.dotnet-version }}
+          8.0.x
     - name: Setup dependencies
       run: |
         # dnf -y install dpkg rpmdevtools # flatpak flatpak-builder pandoc
         sudo apt-get -y install dpkg rpm flatpak flatpak-builder pandoc libfuse2
         sudo flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
-        # echo  ${{ env.MULTIENV }}
-        #if "${{ env.MULTIENV }}" == "true"; then
         sudo flatpak install -y flathub org.freedesktop.Platform//24.08 org.freedesktop.Sdk//24.08
         dotnet tool install -g KuiperZone.PupNet
     - name: Restore dependencies
@@ -226,6 +208,14 @@ jobs:
 
         gh release upload "${{ env.VERSION }}" ./pupnet/out/bookmark-dlp_${{ env.VERSION }}-1_amd64.deb --clobber
         gh release upload "${{ env.VERSION }}" ./pupnet/out/bookmark-dlp_${{ env.VERSION }}-1_arm64.deb --clobber
+    - name: Calculate hash
+      uses: thewh1teagle/checksum@v1
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        algorithm: sha256
+        tag: ${{ env.VERSION }}
+        pre-release: true
           
   
     

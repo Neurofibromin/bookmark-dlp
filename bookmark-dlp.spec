@@ -1,5 +1,5 @@
 Name:           bookmark-dlp
-Version:        0.4.0
+Version:        0.4.1
 Release:        %autorelease
 Summary:        Utility program for downloading bookmarked YouTube links using yt-dlp
 
@@ -14,11 +14,12 @@ Source2: https://www.example.com/gpgkey-0123456789ABCDEF0123456789ABCDEF.gpg
 BuildRequires:  gcc
 BuildRequires:  glibc
 BuildRequires:  git
-BuildRequires:  dotnet-sdk-8.0
+BuildRequires:  dotnet-sdk-9.0
 BuildRequires:  gnupg2
 BuildRequires:  desktop-file-utils
 Requires:       gcc-libs
 Requires:       glibc
+Requires:       yt-dlp
 %description
 Small utility program for downloading bookmarked YouTube links using yt-dlp.
 
@@ -35,7 +36,7 @@ export MSBUILDDISABLENODEREUSE=1
 dotnet publish bookmark-dlp/bookmark-dlp.csproj \
     --configuration Release \
     --runtime linux-x64 \
-    --framework net8.0 \
+    --framework net9.0 \
     -o %{_builddir}/%{name}-%{version} \
     --verbosity quiet
 
@@ -59,7 +60,7 @@ desktop-file-install                                    \
 %files
 %license LICENSE
 %doc README.md
-%{_mandir}/man1/foo.1*
+%{_mandir}/man1/bookmark-dlp.1
 %{_bindir}/%{name}
 /usr/share/applications/bookmark-dlp.desktop
 

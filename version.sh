@@ -7,6 +7,7 @@
 # .csproj files
 # bookmark-dlp.pupnet.conf
 # bookmark-dlp.spec
+# package.nix
 
 # Check if the correct number of arguments is provided
 if [ "$#" -ne 1 ]; then
@@ -26,6 +27,7 @@ NFBOOKMARK_CSPROJ_FILE=./Nfbookmark/Nfbookmark.csproj
 BOOKMARK_DLP_CSPROJ_FILE=./bookmark-dlp/bookmark-dlp.csproj
 PUPNET_CONF_FILE=./bookmark-dlp.pupnet.conf
 SPEC_FILE=./bookmark-dlp.spec
+NIX_FILE=./package.nix
 
 # Validate the PKGBUILD file exists
 if [ ! -f "$PKGBUILD_FILE" ]; then
@@ -48,6 +50,12 @@ fi
 sed -i -E "s/bookmark-dlp-[0-9]+\.[0-9]+\.[0-9]+/bookmark-dlp-${NEW_VERSION}/g" "$README_FILE"
 # Also replace occurrences like "bookmark-dlp_0.4.0" (underscores in certain links)
 sed -i -E "s/bookmark-dlp_[0-9]+\.[0-9]+\.[0-9]+/bookmark-dlp_${NEW_VERSION}/g" "$README_FILE"
+sed -i -E "s/bookmark-dlp-win-x86-[0-9]+\.[0-9]+\.[0-9]+/bookmark-dlp-win-x86-${NEW_VERSION}/g" "$README_FILE"
+sed -i -E "s/bookmark-dlp-win-arm64-[0-9]+\.[0-9]+\.[0-9]+/bookmark-dlp-win-arm64-${NEW_VERSION}/g" "$README_FILE"
+sed -i -E "s/bookmark-dlp-linux-x64-[0-9]+\.[0-9]+\.[0-9]+/bookmark-dlp-linux-x64-${NEW_VERSION}/g" "$README_FILE"
+sed -i -E "s/bookmark-dlp-linux-arm64-[0-9]+\.[0-9]+\.[0-9]+/bookmark-dlp-linux-arm64-${NEW_VERSION}/g" "$README_FILE"
+sed -i -E "s/bookmark-dlp-osx-x64-[0-9]+\.[0-9]+\.[0-9]+/bookmark-dlp-osx-x64-${NEW_VERSION}/g" "$README_FILE"
+sed -i -E "s/bookmark-dlp-osx-arm64-[0-9]+\.[0-9]+\.[0-9]+/bookmark-dlp-osx-arm64-${NEW_VERSION}/g" "$README_FILE"
 echo "Version updated to $NEW_VERSION in $README_FILE."
 
 # Validate the nuget.yml file exists
@@ -115,7 +123,7 @@ fi
 sed -i -E "s/^AppVersionRelease = [0-9]+\.[0-9]+\.[0-9]+/AppVersionRelease = ${NEW_VERSION}/" "$PUPNET_CONF_FILE"
 echo "AppVersionRelease updated to $NEW_VERSION in $PUPNET_CONF_FILE."
 
-# Validate the configuration file exists
+# Validate the spec file exists
 if [ ! -f "$SPEC_FILE" ]; then
     echo "Error: File '$SPEC_FILE' not found."
     exit 1
@@ -123,3 +131,20 @@ fi
 # Replace the Version value
 sed -i -E "s/^Version:        [0-9]+\.[0-9]+\.[0-9]+/Version:        ${NEW_VERSION}/" "$SPEC_FILE"
 echo "Version updated to $NEW_VERSION in $SPEC_FILE."
+
+# Regenerate manpages:
+if ! command -v pandoc 2>&1 >/dev/null
+then
+    echo "pandoc could not be found, not generating manpages"
+else
+    pandoc -s -f markdown -t man "$MANPAGE_FILE" -o bookmark-dlp.1  
+fi
+
+# Validate the nix file exists
+if [ ! -f "$NIX_FILE" ]; then
+    echo "Error: File '$NIX_FILE' not found."
+    exit 1
+fi
+# Replace the Version value
+sed -i -E "s/^version = "[0-9]\+\.[0-9]\+\.[0-9]\+"/version = "${NEW_VERSION}/"" "$SPEC_FILE"
+echo "Version updated to $NEW_VERSION in $NIX_FILE."
