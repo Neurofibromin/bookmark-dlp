@@ -28,6 +28,7 @@ BOOKMARK_DLP_CSPROJ_FILE=./bookmark-dlp/bookmark-dlp.csproj
 PUPNET_CONF_FILE=./bookmark-dlp.pupnet.conf
 SPEC_FILE=./bookmark-dlp.spec
 NIX_FILE=./package.nix
+PKGBUILD_SUM_UPDATER=./PKGBUILD_sum_update.sh
 
 # Validate the PKGBUILD file exists
 if [ ! -f "$PKGBUILD_FILE" ]; then
@@ -139,6 +140,16 @@ then
 else
     pandoc -s -f markdown -t man "$MANPAGE_FILE" -o bookmark-dlp.1  
 fi
+
+# Validate the PKGBUILD_SUM_UPDATER file exists
+if [ ! -f "$PKGBUILD_SUM_UPDATER" ]; then
+    echo "Error: File '$PKGBUILD_SUM_UPDATER' not found."
+    exit 1
+fi
+# Replace the Version value
+sed -i -E "s/^Version=[0-9]+\.[0-9]+\.[0-9]+/Version=${NEW_VERSION}/" "$PKGBUILD_SUM_UPDATER"
+echo "Version updated to $NEW_VERSION in $PKGBUILD_SUM_UPDATER."
+
 
 # Validate the nix file exists
 if [ ! -f "$NIX_FILE" ]; then

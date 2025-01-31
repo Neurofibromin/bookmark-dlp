@@ -9,7 +9,18 @@ Utility program for downloading bookmarked youtube links using yt-dlp. It replic
 
 ## Installation & How to get
 <em>Make sure yt-dlp is installed: If you do not have the newest version you can get it [here](https://github.com/yt-dlp/yt-dlp#installation).</em>
-Download the executable for your system from [releases](https://github.com/Neurofibromin/bookmark-dlp/releases/download/latest). Run it.
+Download the executable for your system from [releases](https://github.com/Neurofibromin/bookmark-dlp/releases/download/latest). bookmark-dlp is packaged in [some](https://repology.org/project/bookmark-dlp/versions) platforms native package distribution.
+
+### Fedora
+```shell
+sudo dnf copr enable neurofibromin/bookmark-dlp
+sudo dnf install bookmark-dlp
+```
+
+### Arch (AUR)
+```shell
+yay bookmark-dlp
+```
 
 ## Limitations
 - Currently "exports" from browsers do not work.
@@ -47,6 +58,7 @@ If the same directory is used for different profiles things can get written into
     * windows = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "bookmark-dlp\\bookmark-dlp.conf");
     * linux = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "bookmark-dlp/bookmark-dlp.conf"); 
     * osx = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.Personal), "bookmark-dlp/bookmark-dlp.conf");
+
 If no config is found at startup popup asks for location for new config file.
 
 #### yt-dlp binary locations:
@@ -79,6 +91,8 @@ Build your own: this project is open source
 [![.NET](https://github.com/Neurofibromin/bookmark-dlp/actions/workflows/dotnet.yml/badge.svg)](https://github.com/Neurofibromin/bookmark-dlp/actions/workflows/dotnet.yml)
 [![NuGet](https://github.com/Neurofibromin/bookmark-dlp/actions/workflows/nuget.yml/badge.svg)](https://github.com/Neurofibromin/bookmark-dlp/actions/workflows/nuget.yml)
 [![CodeQL](https://github.com/Neurofibromin/bookmark-dlp/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/Neurofibromin/bookmark-dlp/actions/workflows/codeql-analysis.yml)
+[![Copr build status](https://copr.fedorainfracloud.org/coprs/neurofibromin/bookmark-dlp/package/bookmark-dlp/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/neurofibromin/bookmark-dlp/package/bookmark-dlp/)
+[![Packaging status](https://repology.org/badge/vertical-allrepos/bookmark-dlp.svg)](https://repology.org/project/bookmark-dlp/versions)
 
 ### Aims
 <br>CI/CD<br/>
@@ -87,7 +101,7 @@ Build your own: this project is open source
 - [ ] Flathub
 - [ ] Debian
 - [x] [Arch/AUR](https://aur.archlinux.org/packages/bookmark-dlp)
-- [ ] Fedora Copr
+- [x] [Fedora Copr](https://copr.fedorainfracloud.org/coprs/neurofibromin/bookmark-dlp/)
 - [x] [Gitea mirror](N/A)
 - [x] [sourceforge mirror](https://sourceforge.net/projects/bookmark-dlp/)
 - [x] [NuGet](https://www.nuget.org/packages/nfbookmark)
@@ -110,6 +124,23 @@ Build your own: this project is open source
 - [x] netcore3.1
 - [ ] innosetup
 - [ ] browsers installed as flatpaks
+
+### Signatures, hashes and integrity checks
+
+The following pgp keys are valid:
+
+| Fingerprint | Description |
+| ----------- | ----------- |
+| 9F9BFE94618AD26667BD28214F671AFAD8D4428B | used in git and manually signed packages |
+| 5C85EF4F34E089A04B2063A5833E01FC62E56779 | used in CICD pipelines to autosign packages where supported |
+
+Keyservers:
+- https://keys.openpgp.org/
+- https://keyserver.ubuntu.com/
+- http://pgp.mit.edu/
+- Public keys are also distributed with the build files.
+
+SHA256 hashes for the binaries are produced in the GitHub workflow and found in checksum.txt under release assets.
 
 ### Build instructions
 Install dependencies: [dotnet](https://dotnet.microsoft.com/en-us/download)

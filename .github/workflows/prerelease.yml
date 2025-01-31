@@ -193,6 +193,24 @@ jobs:
         ls -R
         # no need to rename, pupnet names things according to conventions
         # no need to delete/create release here, it was resolved in "release" job
+    - name: Sign rpm
+      run: |
+        mkdir -p ~/.gnupg
+        chmod 700 ~/.gnupg
+        cd ~
+        cat <<EOF > ~/.rpmmacros
+        %_signature gpg
+        %_gpg_path ${PWD}/.gnupg
+        %_gpg_name Neurofibromin-CICD-Autosign
+        %_gpgbin /usr/bin/gpg
+        EOF
+        gpgconf --launch gpg-agent
+        echo "${{ secrets.GPG_KEY_AUTOSIGN_PRIVATE }}" | gpg --import
+        gpg --export -a '5C85EF4F34E089A04B2063A5833E01FC62E56779' > RPM-GPG-KEY
+        rpm --import RPM-GPG-KEY
+        rpm -q gpg-pubkey --qf '%{name}-%{version}-%{release} --> %{summary}\n'
+        cd /home/runner/work/bookmark-dlp/bookmark-dlp
+        rpm --addsign ./pupnet/out/bookmark-dlp_${{ env.VERSION }}-1.x86_64.rpm
     - name: Upload
       env:
         GH_TOKEN: ${{ github.token }}

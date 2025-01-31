@@ -9,6 +9,10 @@ on:
 
 env:
   VERSION: "0.4.1"
+  DOTNETVERSION: "net9.0"
+  RUNNER_TOOL_CACHE: /toolcache
+  ACTIONS_STEP_DEBUG: true
+  dotnet-version: "9.0.x"
 
 jobs:
   pack:
@@ -19,10 +23,10 @@ jobs:
     if: true
     steps:
     - uses: actions/checkout@v3
-    - name: Setup .NET Core SDK ${{ matrix.dotnet-version }}
-      uses: actions/setup-dotnet@v3
+    - name: Setup .NET Core SDK ${{ env.dotnet-version }}
+      uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: ${{ matrix.dotnet-version }}  
+        dotnet-version: ${{ env.dotnet-version }}  
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
@@ -40,11 +44,11 @@ jobs:
       needs: [pack]
       if: ${{ needs.pack.result == 'success' }}
       steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Setup dotnet
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: ${{ matrix.dotnet-version }}
+          dotnet-version: ${{ env.dotnet-version }}
       - name: Restore dependencies
         run: dotnet restore
       - name: Pack
