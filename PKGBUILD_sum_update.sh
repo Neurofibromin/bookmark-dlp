@@ -1,6 +1,6 @@
 #!/bin/bash
 
-PKGBUILD_FILE=./PKGBUILD
+PKGBUILD_FILE=./packaging/PKGBUILD
 VERSION=0.4.1
 SOURCE="https://github.com/Neurofibromin/bookmark-dlp/archive/refs/tags/${VERSION}.tar.gz"
 TAR_FILE=./"${VERSION}.tar.gz"

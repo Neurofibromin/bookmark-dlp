@@ -105,6 +105,9 @@ Build your own: this project is open source
 - [x] [Gitea mirror](N/A)
 - [x] [sourceforge mirror](https://sourceforge.net/projects/bookmark-dlp/)
 - [x] [NuGet](https://www.nuget.org/packages/nfbookmark)
+- [ ] innosetup
+- [ ] winget
+- [ ] chocolatey
 
 <br>new features<br/>
 - [x] start console and gui from same binary
@@ -115,6 +118,7 @@ Build your own: this project is open source
 - [x] dot desktop file
 - [ ] add manpages
 - [x] logging
+- [ ] create project icon
 
 <br>Increase support<br/>
 - [ ] safari support
@@ -122,8 +126,12 @@ Build your own: this project is open source
 - [ ] bsd support
 - [ ] docker
 - [x] netcore3.1
-- [ ] innosetup
 - [ ] browsers installed as flatpaks
+- [ ] sign appimage with pupnet
+- [ ] Add screenshots to README.md
+- [ ] Add manpage to .spec
+- [ ] Add manpage to PKGBUILD
+
 
 ### Signatures, hashes and integrity checks
 
@@ -138,7 +146,8 @@ Keyservers:
 - https://keys.openpgp.org/
 - https://keyserver.ubuntu.com/
 - http://pgp.mit.edu/
-- Public keys are also distributed with the build files.
+
+Public keys are also distributed with the build files.
 
 SHA256 hashes for the binaries are produced in the GitHub workflow and found in checksum.txt under release assets.
 

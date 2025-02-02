@@ -9,6 +9,9 @@
 # bookmark-dlp.spec
 # package.nix
 
+#TODO: nix version update fix
+#TODO: add innosetup support
+
 # Check if the correct number of arguments is provided
 if [ "$#" -ne 1 ]; then
     echo "Usage: $0 <new_version>"
@@ -16,7 +19,7 @@ if [ "$#" -ne 1 ]; then
 fi
 
 NEW_VERSION=$1
-PKGBUILD_FILE=./PKGBUILD
+PKGBUILD_FILE=./packaging/PKGBUILD
 README_FILE=./README.md
 NUGET_YML_FILE=./.github/workflows/nuget.yml
 PRERELEASE_YML_FILE=./.github/workflows/prerelease.yml
@@ -27,7 +30,7 @@ NFBOOKMARK_CSPROJ_FILE=./Nfbookmark/Nfbookmark.csproj
 BOOKMARK_DLP_CSPROJ_FILE=./bookmark-dlp/bookmark-dlp.csproj
 PUPNET_CONF_FILE=./bookmark-dlp.pupnet.conf
 SPEC_FILE=./bookmark-dlp.spec
-NIX_FILE=./package.nix
+NIX_FILE=./packaging/package.nix
 PKGBUILD_SUM_UPDATER=./PKGBUILD_sum_update.sh
 
 # Validate the PKGBUILD file exists
@@ -149,7 +152,7 @@ fi
 # Replace the Version value
 sed -i -E "s/^Version=[0-9]+\.[0-9]+\.[0-9]+/Version=${NEW_VERSION}/" "$PKGBUILD_SUM_UPDATER"
 echo "Version updated to $NEW_VERSION in $PKGBUILD_SUM_UPDATER."
-
+t
 
 # Validate the nix file exists
 if [ ! -f "$NIX_FILE" ]; then

@@ -168,6 +168,7 @@ jobs:
     - name: Setup dependencies
       run: |
         # dnf -y install dpkg rpmdevtools # flatpak flatpak-builder pandoc
+        sudo apt-get update
         sudo apt-get -y install dpkg rpm flatpak flatpak-builder pandoc libfuse2
         sudo flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
         sudo flatpak install -y flathub org.freedesktop.Platform//24.08 org.freedesktop.Sdk//24.08
@@ -226,14 +227,68 @@ jobs:
 
         gh release upload "${{ env.VERSION }}" ./pupnet/out/bookmark-dlp_${{ env.VERSION }}-1_amd64.deb --clobber
         gh release upload "${{ env.VERSION }}" ./pupnet/out/bookmark-dlp_${{ env.VERSION }}-1_arm64.deb --clobber
-    - name: Calculate hash
-      uses: thewh1teagle/checksum@v1
-      env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        algorithm: sha256
-        tag: ${{ env.VERSION }}
-        pre-release: true
+        
+  pupnet-innosetup:
+    env:
+      RUNNER_TOOL_CACHE: /toolcache
+    strategy:
+      matrix:
+        os: [ windows-latest ]
+      fail-fast: false
+    runs-on: ${{ matrix.os }}
+    needs: [ pupnet ]
+    if: ${{ needs.pupnet.result == 'success' }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            ${{ env.dotnet-version }}
+            8.0.x
+      - name: Setup PupNet
+        run: |
+          dotnet tool install -g KuiperZone.PupNet
+      - name: Restore dependencies
+        run: dotnet restore
+      - name: Publish
+        run: |
+          # dotnet publish bookmark-dlp.sln --configuration Release --runtime win-x64 --self-contained
+          # runtime: [ 'linux-x64', 'linux-arm64' ]
+          # kind: [ 'appimage', 'deb', 'rpm', 'flatpak' ]
+          pupnet --runtime win-x64 --kind setup --build Release --app-version ${{ env.VERSION }} --verbose
+          pupnet --runtime win-x86 --kind setup --build Release --app-version ${{ env.VERSION }} --verbose
+      - name: List all files
+        run: |
+          echo $PWD
+          ls -R
+      - name: Upload
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # gh release upload "${{ env.VERSION }}" "./pupnet/out/*" --clobber
+          gh release upload "${{ env.VERSION }}" ./pupnet/out/bookmark-dlpSetup-${{ env.VERSION }}-1.x64.exe --clobber
+          gh release upload "${{ env.VERSION }}" ./pupnet/out/bookmark-dlpSetup-${{ env.VERSION }}-1.x86.exe --clobber
+              
+  calculate-hash:
+    env:
+      RUNNER_TOOL_CACHE: /toolcache
+    strategy:
+      matrix:
+        os: [ ubuntu-latest ]
+      fail-fast: false
+    runs-on: ${{ matrix.os }}
+    needs: [ pupnet-innosetup ]
+    if: ${{ needs.pupnet-innosetup.result == 'success' }}
+    steps:        
+      - name: Calculate hash
+        uses: thewh1teagle/checksum@v1
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          algorithm: sha256
+          tag: ${{ env.VERSION }}
+          pre-release: true
           
   
     
