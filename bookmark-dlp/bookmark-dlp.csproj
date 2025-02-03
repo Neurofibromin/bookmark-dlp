@@ -8,6 +8,11 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <ApplicationManifest>../app.manifest</ApplicationManifest>
 	<SelfContained>true</SelfContained>
+
+      <Copyright>Copyright (C) 2023-2025 Neurofibromin</Copyright>
+      <Description>Utility program for downloading bookmarked YouTube links using yt-dlp</Description>
+      <Authors>Neurofibromin</Authors>
+      
 	<!-- Without native library self extraction the published file will not be singular.-->
 	<IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
 	<PublishSingleFile>true</PublishSingleFile>

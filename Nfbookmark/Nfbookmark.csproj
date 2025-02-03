@@ -17,6 +17,10 @@
 	<PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
 	<PackageReadmeFile>README.md</PackageReadmeFile>
 	<PackageProjectUrl>https://github.com/Neurofibromin/bookmark-dlp</PackageProjectUrl>
+	<!-- <PackageId>Nfbookmark</PackageId> -->
+	<Copyright>Copyright (C) 2023-2025 Neurofibromin</Copyright>
+	<Description>Provides general functions for importing bookmarks from different browsers across platforms.</Description>
+	<PackageTags>bookmarks;browsers;YouTube;yt-dlp;</PackageTags>
 	<RepositoryUrl>https://github.com/Neurofibromin/bookmark-dlp</RepositoryUrl>
 	<RepositoryType>git</RepositoryType>
 	<Authors>Neurofibromin</Authors>

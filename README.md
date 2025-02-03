@@ -1,5 +1,5 @@
 # bookmark-dlp
-Utility program for downloading bookmarked youtube links using yt-dlp. It replicates the folder structure of your Chrome/Brave/Firefox/etc. bookmarks and calls yt-dlp to download all YouTube videos among the bookmarks.
+Utility program for downloading bookmarked YouTube links using yt-dlp. It replicates the folder structure of your Chrome/Brave/Firefox/etc. bookmarks and calls yt-dlp to download all YouTube videos among the bookmarks.
 
 ![bookmark-dlp icon](bookmark-dlp/Assets/bookmark-dlp.256.png)
 

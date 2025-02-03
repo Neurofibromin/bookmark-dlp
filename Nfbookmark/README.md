@@ -79,9 +79,9 @@ The main functions provided by this library are:
 * `bookmark_dlp.Functions.Createfolderstructure`
 * `bookmark_dlp.Functions.Deleteemptyfolders`
 * `bookmark_dlp.Functions.PrintToConsole`
-Additionally:
-* logging capacity:
-* `NfLogger.Logger.LogVerbose()`
+
+Additionally, logging capacity:
+* `NfLogger.Logger.LogVerbose`
 * `NfLogger.Logger.AddStream`
 * `NfLogger.Logger.RemoveStream`
 * `NfLogger.Logger.AddFile`
