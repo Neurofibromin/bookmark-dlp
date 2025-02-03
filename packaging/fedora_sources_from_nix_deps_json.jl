@@ -16,6 +16,14 @@ open(output_file, "w") do io
         println(io, "Source$a: https://www.nuget.org/api/v2/package/$pname/$version")
         a += 1
     end
+    a = 1
+    for entry in data
+        pname = entry["pname"]
+        version = entry["version"]
+        println(io, "wget %{Source$a} -O $pname.$version.nupkg")
+        println(io, "unzip $pname.$version.nupkg -d $pname/$version")
+        a += 1
+    end
 end
 
 println("Conversion complete. Output saved to fedoralinks.txt")
