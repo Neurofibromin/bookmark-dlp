@@ -153,6 +153,8 @@ Public keys are also distributed with the build files.
 
 SHA256 hashes for the binaries are produced in the GitHub workflow and found in checksum.txt under release assets.
 
+The bookmark-dlp icons are licensed under [CC BY-NC-SA 4.0](http://creativecommons.org/licenses/by-nc-sa/4.0/).
+
 ### Build instructions
 Install dependencies: [dotnet](https://dotnet.microsoft.com/en-us/download)
 ```

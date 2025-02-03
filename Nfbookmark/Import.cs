@@ -353,6 +353,10 @@ namespace Nfbookmark
         public static List<Folderclass> SqlIntake(string filePath)
         {
             if (!File.Exists(filePath)) { return null; }
+            // Create a temporary copy of the database
+            string tempFilePath = Path.GetTempFileName();
+            File.Copy(filePath, tempFilePath, overwrite: true);
+            filePath = tempFilePath;
             // docs: https://kb.mozillazine.org/Places.sqlite
             // https://stackoverflow.com/questions/11769524/how-can-i-restore-firefox-bookmark-files-from-sqlite-files
             Dictionary<int, int> parentid = new Dictionary<int, int>(); //parentid[i] = the id of the parent folder of the bookmark with the id i
@@ -433,7 +437,7 @@ namespace Nfbookmark
                 }
                 //only folders remain in the sql_list
             }
-
+            File.Delete(tempFilePath);
             List<Folderclass> folders = Bookmarktofolderclasses(bookmarks, parentid); //converts the List<Bookmark> to List<Folderclasses>
             return folders;
         }

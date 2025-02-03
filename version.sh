@@ -29,7 +29,8 @@ NEW_DATE=$(date +'%Y. %m. %d')
 NFBOOKMARK_CSPROJ_FILE=./Nfbookmark/Nfbookmark.csproj
 BOOKMARK_DLP_CSPROJ_FILE=./bookmark-dlp/bookmark-dlp.csproj
 PUPNET_CONF_FILE=./bookmark-dlp.pupnet.conf
-SPEC_FILE=./bookmark-dlp.spec
+SPEC_FILE1=./packaging/bookmark-dlp_for_official.spec
+SPEC_FILE2=./packaging/bookmark-dlp_for_copr.spec
 NIX_FILE=./packaging/package.nix
 PKGBUILD_SUM_UPDATER=./PKGBUILD_sum_update.sh
 
@@ -118,7 +119,7 @@ fi
 sed -i -E "s|<Version>[0-9]+\.[0-9]+\.[0-9]+</Version>|<Version>${NEW_VERSION}</Version>|" "$BOOKMARK_DLP_CSPROJ_FILE"
 echo "Version updated to $NEW_VERSION in $BOOKMARK_DLP_CSPROJ_FILE."
 
-# Validate the configuration file exists
+# Validate the PupNet configuration file exists
 if [ ! -f "$PUPNET_CONF_FILE" ]; then
     echo "Error: File '$PUPNET_CONF_FILE' not found."
     exit 1
@@ -127,14 +128,23 @@ fi
 sed -i -E "s/^AppVersionRelease = [0-9]+\.[0-9]+\.[0-9]+/AppVersionRelease = ${NEW_VERSION}/" "$PUPNET_CONF_FILE"
 echo "AppVersionRelease updated to $NEW_VERSION in $PUPNET_CONF_FILE."
 
-# Validate the spec file exists
-if [ ! -f "$SPEC_FILE" ]; then
-    echo "Error: File '$SPEC_FILE' not found."
+# Validate the official spec file exists
+if [ ! -f "$SPEC_FILE1" ]; then
+    echo "Error: File '$SPEC_FILE1' not found."
     exit 1
 fi
 # Replace the Version value
-sed -i -E "s/^Version:        [0-9]+\.[0-9]+\.[0-9]+/Version:        ${NEW_VERSION}/" "$SPEC_FILE"
-echo "Version updated to $NEW_VERSION in $SPEC_FILE."
+sed -i -E "s/^Version:        [0-9]+\.[0-9]+\.[0-9]+/Version:        ${NEW_VERSION}/" "$SPEC_FILE1"
+echo "Version updated to $NEW_VERSION in $SPEC_FILE1."
+
+# Validate the copr spec file exists
+if [ ! -f "$SPEC_FILE2" ]; then
+    echo "Error: File '$SPEC_FILE2' not found."
+    exit 1
+fi
+# Replace the Version value
+sed -i -E "s/^Version:        [0-9]+\.[0-9]+\.[0-9]+/Version:        ${NEW_VERSION}/" "$SPEC_FILE2"
+echo "Version updated to $NEW_VERSION in $SPEC_FILE2."
 
 # Regenerate manpages:
 if ! command -v pandoc 2>&1 >/dev/null

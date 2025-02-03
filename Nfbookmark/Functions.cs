@@ -28,6 +28,7 @@ namespace Nfbookmark
         /// <param name="folders">The folder structure to be printed</param>
         public static void PrintToConsole(List<Folderclass> folders)
         {
+            //TODO: rewrite this
             if (folders == null || folders.Count == 0)
             {
                 Logger.LogVerbose("No folders to display.");
