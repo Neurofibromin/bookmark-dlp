@@ -26,7 +26,7 @@
     <TrayIcon.Icons>
         <TrayIcons>
             <!--  not yet complete  -->
-            <TrayIcon Icon="/Assets/avalonia-logo.ico" ToolTipText="bookmark-dlp">
+            <TrayIcon Icon="/Assets/bookmark-dlp.ico" ToolTipText="bookmark-dlp">
                 <TrayIcon.Menu>
                     <NativeMenu>
                         <NativeMenuItem Header="Settings">

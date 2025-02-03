@@ -12,7 +12,7 @@
     d:DesignHeight="640"
     d:DesignWidth="1000"
     x:DataType="vm:MainWindowViewModel"
-    Icon="/Assets/avalonia-logo.ico"
+    Icon="/Assets/bookmark-dlp.ico"
     mc:Ignorable="d">
     <!--
     <TabControl Margin="5">

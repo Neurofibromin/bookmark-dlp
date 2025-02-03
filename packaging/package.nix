@@ -16,6 +16,8 @@
   nativeWayland ? false,
 }:
 
+#TODO: remove unnecessary deps, add icon
+
 buildDotnetModule rec {
   pname = "bookmark-dlp";
   version = "0.4.1";

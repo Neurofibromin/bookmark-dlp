@@ -53,6 +53,38 @@ dotnet test ./Tests/bookmark-dlp.Tests/ \
 install -d %{buildroot}%{_bindir}
 install -d %{buildroot}%{_libdir}/%{name}
 cp -r %{_builddir}/%{name}-%{version}/publish/* %{buildroot}%{_libdir}/%{name}/
+
+# Install icons and create directories automatically
+install -Dm0644 %{_builddir}/%{name}-%{version}/bookmark-dlp/Assets/bookmark-dlp.16.png \
+    %{buildroot}%{_datadir}/icons/hicolor/16x16/apps/bookmark-dlp.png
+
+install -Dm0644 %{_builddir}/%{name}-%{version}/bookmark-dlp/Assets/bookmark-dlp.24.png \
+    %{buildroot}%{_datadir}/icons/hicolor/24x24/apps/bookmark-dlp.png
+
+install -Dm0644 %{_builddir}/%{name}-%{version}/bookmark-dlp/Assets/bookmark-dlp.32.png \
+    %{buildroot}%{_datadir}/icons/hicolor/32x32/apps/bookmark-dlp.png
+
+install -Dm0644 %{_builddir}/%{name}-%{version}/bookmark-dlp/Assets/bookmark-dlp.48.png \
+    %{buildroot}%{_datadir}/icons/hicolor/48x48/apps/bookmark-dlp.png
+
+install -Dm0644 %{_builddir}/%{name}-%{version}/bookmark-dlp/Assets/bookmark-dlp.64.png \
+    %{buildroot}%{_datadir}/icons/hicolor/64x64/apps/bookmark-dlp.png
+
+install -Dm0644 %{_builddir}/%{name}-%{version}/bookmark-dlp/Assets/bookmark-dlp.96.png \
+    %{buildroot}%{_datadir}/icons/hicolor/96x96/apps/bookmark-dlp.png
+
+install -Dm0644 %{_builddir}/%{name}-%{version}/bookmark-dlp/Assets/bookmark-dlp.128.png \
+    %{buildroot}%{_datadir}/icons/hicolor/128x128/apps/bookmark-dlp.png
+
+install -Dm0644 %{_builddir}/%{name}-%{version}/bookmark-dlp/Assets/bookmark-dlp.256.png \
+    %{buildroot}%{_datadir}/icons/hicolor/256x256/apps/bookmark-dlp.png
+
+install -Dm0644 %{_builddir}/%{name}-%{version}/bookmark-dlp/Assets/bookmark-dlp.512.png \
+    %{buildroot}%{_datadir}/icons/hicolor/512x512/apps/bookmark-dlp.png
+
+install -Dm0644 %{_builddir}/%{name}-%{version}/bookmark-dlp/Assets/bookmark-dlp.svg \
+    %{buildroot}%{_datadir}/icons/hicolor/scalable/apps/bookmark-dlp.svg
+
 ln -s %{_libdir}/%{name}/%{name} %{buildroot}%{_bindir}/%{name}
 install -d %{buildroot}%{_datadir}/applications
 install -d %{buildroot}%{_mandir}/man1
@@ -71,6 +103,17 @@ rm -f %{buildroot}%{_libdir}/%{name}/*.xml
 %{_bindir}/%{name}
 %{_libdir}/%{name}/bookmark-dlp
 %{_datadir}/applications/bookmark-dlp.desktop
+%{_datadir}/icons/hicolor/16x16/apps/bookmark-dlp.png
+%{_datadir}/icons/hicolor/24x24/apps/bookmark-dlp.png
+%{_datadir}/icons/hicolor/32x32/apps/bookmark-dlp.png
+%{_datadir}/icons/hicolor/48x48/apps/bookmark-dlp.png
+%{_datadir}/icons/hicolor/64x64/apps/bookmark-dlp.png
+%{_datadir}/icons/hicolor/96x96/apps/bookmark-dlp.png
+%{_datadir}/icons/hicolor/128x128/apps/bookmark-dlp.png
+%{_datadir}/icons/hicolor/256x256/apps/bookmark-dlp.png
+%{_datadir}/icons/hicolor/512x512/apps/bookmark-dlp.png
+%{_datadir}/icons/hicolor/1024x1024/apps/bookmark-dlp.png
+%{_datadir}/icons/hicolor/scalable/apps/bookmark-dlp.svg
 
 %changelog
 %autochangelog

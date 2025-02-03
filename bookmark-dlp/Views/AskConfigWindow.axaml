@@ -11,6 +11,7 @@
     d:DesignHeight="200"
     d:DesignWidth="400"
     x:DataType="vm:AskConfigWindowViewModel"
+    Icon="/Assets/bookmark-dlp.ico"
     mc:Ignorable="d">
     <StackPanel Margin="10" Spacing="7">
         <TextBlock

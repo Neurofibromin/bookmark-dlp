@@ -19,6 +19,7 @@
 	<Version>0.4.1</Version>
 	<!--      <AssemblyVersion>1.0.0.0</AssemblyVersion>   -->
 	<!--      <FileVersion>1.0.0.0</FileVersion>           -->
+      <ApplicationIcon>Assets/bookmark-dlp.ico</ApplicationIcon>
 	<AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
   </PropertyGroup>
 
