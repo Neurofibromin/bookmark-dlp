@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using NfLogger;
 
 namespace bookmark_dlp
@@ -22,14 +23,38 @@ namespace bookmark_dlp
     /// </summary>
     public enum Linktype 
     {
-        Video, //regular video, default
-        Channel_user, // if (linkthatisbeingexamined.Substring(24, 4) == "user")
-        Channel_channel, // if (linkthatisbeingexamined.Substring(24, 7) == "channel")
-        Channel_at, // if (linkthatisbeingexamined.Substring(24, 1) == "@")
-        Channel_c, // if (linkthatisbeingexamined.Substring(24, 2) == "c/")
-        Short, // if (linkthatisbeingexamined.Substring(24, 6) == "shorts")
-        Playlist, // if (linkthatisbeingexamined.Substring(24, 8) == "playlist")
-        Search // if (linkthatisbeingexamined.Substring(24, 7) == "results") //youtube search result was bookmarked
+        /// <summary>
+        /// regular video, default
+        /// </summary>
+        Video,
+        /// <summary>
+        /// if (linkthatisbeingexamined.Substring(24, 4) == "user")
+        /// </summary>
+        Channel_user,
+        /// <summary>
+        /// if (linkthatisbeingexamined.Substring(24, 7) == "channel")
+        /// </summary>
+        Channel_channel,
+        /// <summary>
+        /// if (linkthatisbeingexamined.Substring(24, 1) == "@")
+        /// </summary>
+        Channel_at,
+        /// <summary>
+        /// if (linkthatisbeingexamined.Substring(24, 2) == "c/")
+        /// </summary>
+        Channel_c,
+        /// <summary>
+        /// if (linkthatisbeingexamined.Substring(24, 6) == "shorts")
+        /// </summary>
+        Short,
+        /// <summary>
+        /// if (linkthatisbeingexamined.Substring(24, 8) == "playlist")
+        /// </summary>
+        Playlist,
+        /// <summary>
+        /// if (linkthatisbeingexamined.Substring(24, 7) == "results") //youtube search result was bookmarked
+        /// </summary>
+        Search 
     }
 
     /// <summary>
@@ -52,6 +77,46 @@ namespace bookmark_dlp
         public override string ToString()
         {
             return $"Url: {url}, linktype: {linktype.ToString()}, yt_id: {yt_id}, channel_id: {channel_id}, playlist_id: {playlist_id}";
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is YTLink other)
+            {
+                return url == other.url &&
+                       linktype == other.linktype &&
+                       yt_id == other.yt_id &&
+                       channel_id == other.channel_id &&
+                       playlist_id == other.playlist_id &&
+                       Enumerable.SequenceEqual(member_ids ?? new List<string>(), other.member_ids ?? new List<string>()) &&
+                       Enumerable.SequenceEqual(member_ids_found ?? new List<string>(), other.member_ids_found ?? new List<string>()) &&
+                       Enumerable.SequenceEqual(member_ids_not_found ?? new List<string>(), other.member_ids_not_found ?? new List<string>());
+            }
+            return false;
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(
+                url,
+                linktype,
+                yt_id,
+                channel_id,
+                playlist_id,
+                member_ids != null ? string.Join(",", member_ids).GetHashCode() : 0,
+                member_ids_found != null ? string.Join(",", member_ids_found).GetHashCode() : 0,
+                member_ids_not_found != null ? string.Join(",", member_ids_not_found).GetHashCode() : 0
+            );
+        }
+
+        public static bool operator ==(YTLink link1, YTLink link2)
+        {
+            return link1.Equals(link2);
+        }
+
+        public static bool operator !=(YTLink link1, YTLink link2)
+        {
+            return !(link1 == link2);
         }
     }
 
@@ -147,6 +212,73 @@ namespace bookmark_dlp
         public override string ToString()
         {
             return $"Name:{name}, id:{id}, depth:{depth}, number of urls:{urls.Count}";
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is Folderclass other)
+            {
+                return id == other.id &&
+                       parentId == other.parentId &&
+                       depth == other.depth &&
+                       startline == other.startline &&
+                       endingline == other.endingline &&
+                       folderpath == other.folderpath &&
+                       wantDownloaded == other.wantDownloaded &&
+                       numberOfVideosDirectlyWanted == other.numberOfVideosDirectlyWanted &&
+                       numberOfVideosIndirectlyWanted == other.numberOfVideosIndirectlyWanted &&
+                       numberOfDirectlyWantedVideosFound == other.numberOfDirectlyWantedVideosFound &&
+                       numberOfIndirectlyWantedVideosFound == other.numberOfIndirectlyWantedVideosFound &&
+                       numberOfOtherVideosFound == other.numberOfOtherVideosFound &&
+                       name == other.name &&
+                       Enumerable.SequenceEqual(urls, other.urls) &&
+                       Enumerable.SequenceEqual(childrenIds, other.childrenIds) &&
+                       Enumerable.SequenceEqual(LinksWithMissingVideos, other.LinksWithMissingVideos) &&
+                       Enumerable.SequenceEqual(LinksWithNoMissingVideos, other.LinksWithNoMissingVideos) &&
+                       Enumerable.SequenceEqual(links, other.links);
+            }
+            return false;
+        }
+
+        protected bool Equals(Folderclass other)
+        {
+            return startline == other.startline && name == other.name && depth == other.depth &&
+                   endingline == other.endingline && folderpath == other.folderpath &&
+                   Equals(LinksWithMissingVideos, other.LinksWithMissingVideos) &&
+                   Equals(LinksWithNoMissingVideos, other.LinksWithNoMissingVideos) && Equals(urls, other.urls) &&
+                   Equals(links, other.links) && id == other.id && parentId == other.parentId &&
+                   Equals(childrenIds, other.childrenIds) && wantDownloaded == other.wantDownloaded &&
+                   numberOfVideosDirectlyWanted == other.numberOfVideosDirectlyWanted &&
+                   numberOfVideosIndirectlyWanted == other.numberOfVideosIndirectlyWanted &&
+                   numberOfDirectlyWantedVideosFound == other.numberOfDirectlyWantedVideosFound &&
+                   numberOfIndirectlyWantedVideosFound == other.numberOfIndirectlyWantedVideosFound &&
+                   numberOfOtherVideosFound == other.numberOfOtherVideosFound;
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                var hashCode = startline;
+                hashCode = (hashCode * 397) ^ (name != null ? name.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ depth;
+                hashCode = (hashCode * 397) ^ endingline;
+                hashCode = (hashCode * 397) ^ (folderpath != null ? folderpath.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ (LinksWithMissingVideos != null ? LinksWithMissingVideos.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ (LinksWithNoMissingVideos != null ? LinksWithNoMissingVideos.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ (urls != null ? urls.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ (links != null ? links.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ id;
+                hashCode = (hashCode * 397) ^ parentId;
+                hashCode = (hashCode * 397) ^ (childrenIds != null ? childrenIds.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ wantDownloaded.GetHashCode();
+                hashCode = (hashCode * 397) ^ numberOfVideosDirectlyWanted;
+                hashCode = (hashCode * 397) ^ numberOfVideosIndirectlyWanted;
+                hashCode = (hashCode * 397) ^ numberOfDirectlyWantedVideosFound;
+                hashCode = (hashCode * 397) ^ numberOfIndirectlyWantedVideosFound;
+                hashCode = (hashCode * 397) ^ numberOfOtherVideosFound;
+                return hashCode;
+            }
         }
     }
 

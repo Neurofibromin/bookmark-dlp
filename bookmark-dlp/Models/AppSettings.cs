@@ -30,7 +30,7 @@ namespace bookmark_dlp.Models
         private static AppSettings _instance = new AppSettings();
         
         //Constructor
-        protected AppSettings()
+        private AppSettings()
         {
             configloc = AppMethods.ConfigFileLocation();
             if (File.Exists(configloc))
@@ -38,9 +38,8 @@ namespace bookmark_dlp.Models
                 string jsonimportstring = File.ReadAllText(configloc);
                 try
                 {
-                    SettingsStruct imported = JsonSerializer.Deserialize<SettingsStruct>(jsonimportstring);
-                    if (imported == null) { throw new NullReferenceException(); }
-                    _settings = imported;
+                    SettingsStruct? imported = JsonSerializer.Deserialize<SettingsStruct>(jsonimportstring);
+                    _settings = imported ?? throw new NullReferenceException();
                     Logger.LogVerbose("Config import successful");
                 }
                 catch
@@ -125,16 +124,28 @@ namespace bookmark_dlp.Models
 
     public partial class SettingsStruct : ObservableObject
     {
-        public SettingsStruct(string cmanualimportfilelocation,
+        [ObservableProperty] public string? manualimportfilelocation;
+        [ObservableProperty] public bool manualImportUsed;
+        [ObservableProperty] public string? outputfolder;
+        [ObservableProperty] public bool ytdlp_executable_not_found;
+        [ObservableProperty] public bool downloadPlaylists;
+        [ObservableProperty] public bool downloadShorts;
+        [ObservableProperty] public bool downloadChannels;
+        [ObservableProperty] public bool concurrent_downloads;
+        [ObservableProperty] public bool cookies_autoextract;
+        [ObservableProperty] public string? yt_dlp_binary_path;
+        [ObservableProperty] public bool canChangeSettings;
+        
+        public SettingsStruct(string? cmanualimportfilelocation,
             bool cmanualImportUsed,
-            string coutputfolder,
+            string? coutputfolder,
             bool cytdlp_executable_not_found,
             bool cdownloadPlaylists,
             bool cdownloadShorts,
             bool cdownloadChannels,
             bool cconcurrent_downloads,
             bool ccookies_autoextract,
-            string cyt_dlp_binary_path,
+            string? cyt_dlp_binary_path,
             bool ccanChangeSettings)
         {
             manualimportfilelocation = cmanualimportfilelocation;
@@ -149,30 +160,6 @@ namespace bookmark_dlp.Models
             yt_dlp_binary_path = cyt_dlp_binary_path;
             canChangeSettings = ccanChangeSettings;
         }
-        /*public SettingsStruct(bool manualImportUsed,
-            string cmanualimportfilelocation,
-            string outputfolder,
-            bool ytdlpExecutableNotFound,
-            bool downloadPlaylists,
-            bool downloadShorts,
-            bool downloadChannels,
-            bool concurrentDownloads,
-            bool cookiesAutoextract,
-            string? ytDlpBinaryPath,
-            bool ccanChangeSettings) : this()
-        {
-            this.manualImportUsed = manualImportUsed;
-            manualimportfilelocation = cmanualimportfilelocation;
-            this.outputfolder = outputfolder;
-            ytdlp_executable_not_found = ytdlpExecutableNotFound;
-            this.downloadPlaylists = downloadPlaylists;
-            this.downloadShorts = downloadShorts;
-            this.downloadChannels = downloadChannels;
-            concurrent_downloads = concurrentDownloads;
-            cookies_autoextract = cookiesAutoextract;
-            yt_dlp_binary_path = ytDlpBinaryPath;
-            canChangeSettings = ccanChangeSettings;
-        }*/
         
         public SettingsStruct(SettingsStruct other)
         {
@@ -203,33 +190,5 @@ namespace bookmark_dlp.Models
             yt_dlp_binary_path = null;
             canChangeSettings = true;
         }
-        
-        
-        [ObservableProperty]
-        public string manualimportfilelocation;
-        [ObservableProperty]
-        public bool manualImportUsed;
-        [ObservableProperty]
-        public string outputfolder;
-
-
-        [ObservableProperty]
-        public bool ytdlp_executable_not_found;
-        [ObservableProperty]
-        public bool downloadPlaylists;
-        [ObservableProperty]
-        public bool downloadShorts;
-        [ObservableProperty]
-        public bool downloadChannels;
-        [ObservableProperty]
-        public bool concurrent_downloads;
-        [ObservableProperty]
-        public bool cookies_autoextract;
-        [ObservableProperty]
-        public string? yt_dlp_binary_path;
-        [ObservableProperty]
-        public bool canChangeSettings;
-
-        
     }
 }

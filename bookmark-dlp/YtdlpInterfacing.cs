@@ -14,7 +14,7 @@ namespace bookmark_dlp
 {
     public static class YtdlpInterfacing
     {
-        public static string YtdlpPath;
+        public static string? YtdlpPath;
         
         /// <summary>
         /// Gets list of video ids from a given channel. Requires internet.
@@ -84,7 +84,9 @@ namespace bookmark_dlp
                     JsonDocument jsonDoc = JsonDocument.Parse(line);
                     if (jsonDoc.RootElement.TryGetProperty("id", out JsonElement idElement))
                     {
-                        videoIds.Add(idElement.GetString());
+                        string? a = idElement.GetString();
+                        if (a != null) 
+                            videoIds.Add(a);
                     }
                     else
                     {
@@ -200,7 +202,11 @@ namespace bookmark_dlp
                     // Parse JSON for each video
                     JsonDocument jsonDoc = JsonDocument.Parse(line);
                     if (jsonDoc.RootElement.TryGetProperty("id", out JsonElement idElement))
-                        videoIds.Add(idElement.GetString());
+                    {
+                        string? a = idElement.GetString();
+                        if (a != null) 
+                            videoIds.Add(a);
+                    }
                     else
                         Logger.LogVerbose($"No 'id' property found in JSON: {line}", Logger.Verbosity.Error);
                 }
@@ -217,8 +223,9 @@ namespace bookmark_dlp
         /// </summary>
         /// <param name="rootdir">The rootdir where bookmark-dlp is called from.</param>
         /// <returns>String containing the yt-dlp binary filepath or NULL if not installed.</returns>
-        public static string Yt_dlp_pathfinder(string rootdir = "")
+        public static string? Yt_dlp_pathfinder(string? rootdir = "")
         {
+            rootdir ??= "";
             string ytdlp_path = ""; //checks is yt-dlp binary is present in root or if it is on path, returns ytdlp_path so it can be written into the script files
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {

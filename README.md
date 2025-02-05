@@ -152,7 +152,7 @@ Build your own: this project is open source
 - [x] [Gitea mirror](N/A)
 - [x] [sourceforge mirror](https://sourceforge.net/projects/bookmark-dlp/)
 - [x] [NuGet](https://www.nuget.org/packages/nfbookmark)
-- [ ] innosetup
+- [x] innosetup
 - [ ] winget
 - [ ] chocolatey
 

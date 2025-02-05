@@ -19,8 +19,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
-using bookmark_dlp;
-using NfLogger;
 
 namespace bookmark_dlp
 {
@@ -102,7 +100,7 @@ namespace bookmark_dlp
             bool downloadPlaylists = false, bool downloadChannels = false, bool downloadShorts = false, string debugdirectory = "")
         {
             Functions.FoldernameValidation(folders);
-            StreamWriter temp = null;
+            StreamWriter? temp = null;
             if (!string.IsNullOrEmpty(debugdirectory))
             {
                 //writing into temp.txt all the youtube links that are not for videos (but for channels, playlists, etc.)

@@ -35,6 +35,9 @@ namespace bookmark_dlp.Models
         [ObservableProperty] private bool _hasChildren;
         [ObservableProperty] private bool _isExpanded = false;
         internal ObservableCollection<HierarchicalFolderclass>? _children;
+        /// <summary>
+        /// The folders that are children to the given folder are in this list. Hierarchical, tree structure.
+        /// </summary>
         public IReadOnlyList<HierarchicalFolderclass>? Children => _children;
         
         /// <summary>

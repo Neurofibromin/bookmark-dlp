@@ -23,14 +23,17 @@ public static class AppMethods
         bool downloadChannels = false;
         if (Logger.verbosity >= Logger.Verbosity.Info)
         {
-            if (Console.ReadKey().ToString().ToLower().Equals("y"))
+            if (string.Equals(Console.ReadKey().ToString() ?? "", "y", StringComparison.OrdinalIgnoreCase))
             {
                 Logger.LogVerbose("Playlists? Y/N");
-                if (Console.ReadKey().ToString().ToLower().Equals("y")) { downloadPlaylists = true; }
+                if (string.Equals(Console.ReadKey().ToString() ?? "", "y", StringComparison.OrdinalIgnoreCase))
+                    downloadPlaylists = true;
                 Logger.LogVerbose("Shorts? Y/N");
-                if (Console.ReadKey().ToString().ToLower().Equals("y")) { downloadShorts = true; }
+                if (string.Equals(Console.ReadKey().ToString() ?? "", "y", StringComparison.OrdinalIgnoreCase))
+                    downloadShorts = true; 
                 Logger.LogVerbose("Channels? Y/N");
-                if (Console.ReadKey().ToString().ToLower().Equals("y")) { downloadChannels = true; }
+                if (string.Equals(Console.ReadKey().ToString() ?? "", "y", StringComparison.OrdinalIgnoreCase))
+                    downloadChannels = true;
             }
         }
         return (downloadPlaylists, downloadShorts, downloadChannels);
@@ -101,6 +104,7 @@ public static class AppMethods
             {
                 if (parent.Id == folder.parentId) { 
                     Logger.LogVerbose("Found parent: " + parent.Name, Logger.Verbosity.Trace);
+                    parent._children ??= new ObservableCollection<HierarchicalFolderclass>();
                     parent._children.Add(new HierarchicalFolderclass(folder));
                     parent.HasChildren = true;
                     foundparent = true;
@@ -161,6 +165,7 @@ public static class AppMethods
     /// <list type="bullet">
     /// <item> folderpath </item>
     /// <item> links </item>
+    /// <item> link.member_ids </item>
     /// </list>
     /// Fills:
     /// <list type="bullet"> 
@@ -169,6 +174,8 @@ public static class AppMethods
     /// <item> numberOfOtherVideosFound </item>
     /// <item> LinksWithNoMissingVideos </item>
     /// <item> LinksWithMissingVideos </item>
+    /// <item> link.member_ids_not_found </item>
+    /// <item> link.member_ids_found </item>
     /// </list>  
     /// </summary>
     /// <param name="folders">The list of folders that is being checked</param>
@@ -289,5 +296,31 @@ public static class AppMethods
             folder.numberOfIndirectlyWantedVideosFound = folder.links.Select(f => f.member_ids_found.Count).Sum();
             folder.numberOfDirectlyWantedVideosFound = folder.LinksWithNoMissingVideos.Count(f => f.linktype is Linktype.Video or Linktype.Short);
         }
+#if DEBUG
+        foreach (Folderclass folder in folders)
+        {
+            foreach (YTLink link in folder.links)
+            {
+                if (link.linktype == Linktype.Channel_channel ||
+                    link.linktype == Linktype.Channel_at ||
+                    link.linktype == Linktype.Channel_user ||
+                    link.linktype == Linktype.Channel_c ||
+                    link.linktype == Linktype.Playlist)
+                {
+                    HashSet<string> allids = new HashSet<string>(link.member_ids);
+                    HashSet<string> found_ids = new HashSet<string>(link.member_ids_found);
+                    HashSet<string> not_found_ids = new HashSet<string>(link.member_ids_not_found);
+                    found_ids.UnionWith(not_found_ids);
+                    Debug.Assert(allids.SetEquals(found_ids));
+                }
+            }
+                
+            HashSet<YTLink> found = new HashSet<YTLink>(folder.LinksWithNoMissingVideos);
+            HashSet<YTLink> notfound = new HashSet<YTLink>(folder.LinksWithMissingVideos);
+            HashSet<YTLink> all = new HashSet<YTLink>(folder.links);
+            found.UnionWith(notfound);
+            Debug.Assert(all.SetEquals(found));
+        }
+#endif
     }
 }

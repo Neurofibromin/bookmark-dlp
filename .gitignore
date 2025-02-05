@@ -7,6 +7,7 @@ todo.txt
 /.idea
 doxygen-generated/
 bookmark-dlp.sln.DotSettings.user
+test_data_files
 
 ################################################################################
 # This .gitignore file was automatically created by Microsoft(R) Visual Studio.

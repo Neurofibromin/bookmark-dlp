@@ -212,7 +212,7 @@ namespace Nfbookmark
                             $"Depth of folder {folder.name} is {folder.depth}, not 1 more than its parent's {folders[folder.parentId].name} depth: {folders[folder.parentId].depth}");
                     }
                 }
-                catch (IndexOutOfRangeException e)
+                catch (IndexOutOfRangeException)
                 {
                     Logger.LogVerbose($"Folder has no parent? Folder name: {folder.name}, parent id: {folder.parentId}, number of folders: {folders.Count}", Logger.Verbosity.Error);
                     throw;
@@ -230,7 +230,7 @@ namespace Nfbookmark
                     {
                         parentdir = folders[folder.parentId].folderpath;
                     }
-                    catch (IndexOutOfRangeException e)
+                    catch (IndexOutOfRangeException)
                     {
                         Logger.LogVerbose($"Folder has no parent? Folder name: {folder.name}, parent id: {folder.parentId}, number of folders: {folders.Count}", Logger.Verbosity.Error);
                         throw;

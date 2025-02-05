@@ -7,10 +7,10 @@ using NfLogger;
 class CommandLineOptions()
 {
     [Option('s', "sourcehtml", Required = false, HelpText = "Input html file containing bookmarks.")]
-    public string HtmlFileLocation { get; set; }
+    public string? HtmlFileLocation { get; set; }
 
     [Option('o', "outputfolder", Required = false, HelpText = "Output directory for video files and folder structure. Default: $PWD")]
-    public string Outputfolder { get; set; }
+    public string? Outputfolder { get; set; }
 
     [Option('v', "verbose", Required = false, Default = false, HelpText = "Prints all messages to standard output.")]
     public bool Verbose { get; set; }
@@ -34,10 +34,10 @@ class CommandLineOptions()
     public bool Cookies_autoextract { get; set; }
 
     [Option('l', "yt_dlp_binary_path", Required = false, HelpText = "Set yt-dlp binary executable path. If not set some default locations are probed. See docs.")]
-    public string Yt_dlp_binary_path { get; set; }
+    public string? Yt_dlp_binary_path { get; set; }
 
     [Option('b', "browser", Required = false, HelpText = "Browser autoimport setting. Designate one browser eg. \"chrome\" or use -b 1 to autochoose. Ignored when --interactive.")]
-    public string BrowserChosenByFlag { get; set; }
+    public string? BrowserChosenByFlag { get; set; }
 
     /*Done automatically by library
      * [Option('h', "help", Required = false, Default = false, HelpText = "Displays help and usage information.")]

@@ -127,9 +127,9 @@ namespace bookmark_dlp.ViewModels
             SelectedTab = TabItems.First(x => x.Content == MyStartPageViewModel);
         }
 
-        partial void OnSelectedTabChanged(TabItem? value)
+        /*partial void OnSelectedTabChanged(TabItem? value)
         {
             //Console.WriteLine(SelectedTab.Header);
-        }
+        }*/
     }
 }

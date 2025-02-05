@@ -7,11 +7,9 @@
   makeDesktopItem,
   copyDesktopItems,
   makeWrapper,
-  alsa-lib,
   lttng-ust,
   numactl,
   xorg,
-  udev,
   yt-dlp,
   nativeWayland ? false,
 }:
@@ -31,7 +29,7 @@ buildDotnetModule rec {
 
   packNupkg = true;
   projectFile = "./bookmark-dlp/bookmark-dlp.csproj";
-  nugetDeps = ./deps.json;
+  nugetDeps = ./deps.json; #stored in the nixpkgs repo pkgs/by-name/bo/bookmark-dlp/deps.json, generated with nuget-to-json
 
   dotnet-sdk = dotnetCorePackages.sdk_9_0;
   dotnet-runtime = dotnetCorePackages.runtime_9_0;
@@ -43,11 +41,9 @@ buildDotnetModule rec {
 
   runtimeDeps = [
     yt-dlp
-    alsa-lib
     lttng-ust
     numactl
     xorg.libXi
-    udev
   ];
 
   executables = [ "bookmark-dlp" ];

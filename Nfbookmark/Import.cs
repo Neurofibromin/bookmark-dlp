@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.Data.Sqlite;
@@ -42,13 +43,10 @@ namespace Nfbookmark
             {
                 case ".json":
                     return JsonIntake(filePath);
-                    break;
                 case ".sqlite":
                     return SqlIntake(filePath);
-                    break;
                 case ".html":
                     return HtmlTakeoutIntake(filePath);
-                    break;
                 default: //Chrome-based does not use extension for the Bookmarks file
                     if (Path.GetFileName(filePath) == "Bookmarks")  
                         return JsonIntake(filePath);
@@ -72,7 +70,7 @@ namespace Nfbookmark
         /// </summary>
         /// <param name="filePath"></param>
         /// <returns>List of bookmark folders containing all the bookmarks</returns>
-        private static List<Folderclass> JsonIntake(string filePath)
+        public static List<Folderclass> JsonIntake(string filePath)
         {
             string text = "";
             Bookmark bookmark_bar;
@@ -354,7 +352,8 @@ namespace Nfbookmark
         {
             if (!File.Exists(filePath)) { return null; }
             // Create a temporary copy of the database
-            string tempFilePath = Path.GetTempFileName();
+            string tempFilePath = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? Path.Combine(Path.GetTempPath(), Guid.NewGuid() + ".txt") : Path.GetTempFileName();
+            
             File.Copy(filePath, tempFilePath, overwrite: true);
             filePath = tempFilePath;
             // docs: https://kb.mozillazine.org/Places.sqlite

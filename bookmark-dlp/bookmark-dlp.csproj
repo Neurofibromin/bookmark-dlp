@@ -8,10 +8,11 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <ApplicationManifest>../app.manifest</ApplicationManifest>
 	<SelfContained>true</SelfContained>
+    <NoWarn>1591</NoWarn>
 
-      <Copyright>Copyright (C) 2023-2025 Neurofibromin</Copyright>
-      <Description>Utility program for downloading bookmarked YouTube links using yt-dlp</Description>
-      <Authors>Neurofibromin</Authors>
+    <Copyright>Copyright (C) 2023-2025 Neurofibromin</Copyright>
+    <Description>Utility program for downloading bookmarked YouTube links using yt-dlp</Description>
+    <Authors>Neurofibromin</Authors>
       
 	<!-- Without native library self extraction the published file will not be singular.-->
 	<IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
@@ -24,7 +25,8 @@
 	<Version>0.4.1</Version>
 	<!--      <AssemblyVersion>1.0.0.0</AssemblyVersion>   -->
 	<!--      <FileVersion>1.0.0.0</FileVersion>           -->
-      <ApplicationIcon>Assets/bookmark-dlp.ico</ApplicationIcon>
+    <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
+    <ApplicationIcon>Assets/bookmark-dlp.ico</ApplicationIcon>
 	<AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
   </PropertyGroup>
 

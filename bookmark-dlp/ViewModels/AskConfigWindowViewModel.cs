@@ -42,8 +42,10 @@ namespace bookmark_dlp.ViewModels
             
         }
 
-        private async Task HandleButtonClickAsync(string buttonText)
+        private async Task HandleButtonClickAsync(string? buttonText)
         {
+            if (buttonText == null)
+                return;
             WhichButton = buttonText;
             MessageBus.RaiseButtonClicked(buttonText);
             try

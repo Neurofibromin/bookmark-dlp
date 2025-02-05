@@ -44,10 +44,8 @@ namespace bookmark_dlp
             string filePath = ""; //if not html
             if (setOptions.Interactive)
             {
-                ///======
-                ///    Interactive
-                ///======
-                ///
+                #region Interactive
+                
                 Logger.verbosity = Logger.Verbosity.Debug;
                 bool downloadPlaylists = false;
                 bool downloadShorts = false;
@@ -110,7 +108,7 @@ namespace bookmark_dlp
                     while (true)
                     {
                         Logger.LogVerbose($"Output folder? default: current directory {rootdir}");
-                        string readOutputFolder = Console.ReadLine();
+                        string? readOutputFolder = Console.ReadLine();
                         if (String.IsNullOrEmpty(readOutputFolder)) { setOptions.Outputfolder = rootdir; break; }
                         if (Directory.Exists(readOutputFolder)) { setOptions.Outputfolder = readOutputFolder; break; }
                         try { Directory.CreateDirectory(readOutputFolder); }
@@ -118,14 +116,15 @@ namespace bookmark_dlp
                     }
                 }
 
-                string ytdlp_path = YtdlpInterfacing.Yt_dlp_pathfinder(rootdir); //check if yt-dlp is in the root folder, on the path or not available
+                string? ytdlp_path = YtdlpInterfacing.Yt_dlp_pathfinder(rootdir); //check if yt-dlp is in the root folder, on the path or not available
                 if (String.IsNullOrEmpty(ytdlp_path)) { ytdlp_path = YtdlpInterfacing.Yt_dlp_pathfinder(setOptions.Outputfolder); }
                 if (String.IsNullOrEmpty(ytdlp_path))
                 {
                     while (true)
                     {
                         Logger.LogVerbose("yt-dlp not found, add path now? Y/N");
-                        if (Console.ReadKey().ToString().ToLower().Equals("n")) { Logger.LogVerbose("Cannnot continue", Logger.Verbosity.Error); Environment.Exit(2); }
+                        if (string.Equals(Console.ReadKey().ToString() ?? "", "n", StringComparison.OrdinalIgnoreCase))
+                            Logger.LogVerbose("Cannnot continue", Logger.Verbosity.Error); Environment.Exit(2);
                         Logger.LogVerbose("Choose path. e.g.: /usr/bin/yt-dlp");
                         string readYtdlpPath = Console.ReadLine();
                         if (Directory.Exists(readYtdlpPath)) { ytdlp_path = readYtdlpPath; }
@@ -169,14 +168,13 @@ namespace bookmark_dlp
                 Console.WriteLine("Press enter to exit");
                 Console.Read();
                 Environment.Exit(0);
+
+                #endregion Interactive
             }
             else
             {
-                ///======
-                ///    Non-Interactive
-                ///======
-                ///
-
+                #region Non-Interactive
+                
                 Logger.LogVerbose("Non-Interactive CLI session", Logger.Verbosity.Info);
                 Logger.verbosity = Logger.Verbosity.Warning;
 
@@ -242,6 +240,7 @@ namespace bookmark_dlp
                 AutoImport.Runningthescripts(folders);
                 //Functions.Checkformissing
                 Environment.Exit(0); //leaving the program, so it does not contiue running according to Program.cs
+                #endregion Non-Interactive
             }
         }
 

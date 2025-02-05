@@ -19,7 +19,9 @@ namespace bookmark_dlp
             AvaloniaXamlLoader.Load(this);
         }
 
-
+        /// <summary>
+        /// Show AskConfigWindow popup if no config found, then show the MainWindow
+        /// </summary>
         public override async void OnFrameworkInitializationCompleted()
         {
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
@@ -67,9 +69,7 @@ namespace bookmark_dlp
                                 break;
                             default:
                                 AppSettings.configloc = null;
-                                throw new Exception("Should not have happened");
-                                Environment.Exit(1);
-                            
+                                break;
                         }
                         var mainWindowVm = new MainWindowViewModel();
                         var mainWindow = new MainWindow

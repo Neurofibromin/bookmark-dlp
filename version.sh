@@ -23,6 +23,7 @@ PKGBUILD_FILE=./packaging/PKGBUILD
 README_FILE=./README.md
 NUGET_YML_FILE=./.github/workflows/nuget.yml
 PRERELEASE_YML_FILE=./.github/workflows/prerelease.yml
+DOXYGEN_YML_FILE=./.github/workflows/doxygen.yml
 PRERELEASE_GITEA_YML_FILE=./.github/workflows/prerelease_gitea.yml
 MANPAGE_FILE=./bookmark-dlp.manpage.md
 NEW_DATE=$(date +'%Y. %m. %d')
@@ -71,6 +72,15 @@ fi
 # Replace the version in the VERSION environment variable
 sed -i -E "s/^  VERSION: \"[0-9]+\.[0-9]+\.[0-9]+\"/  VERSION: \"${NEW_VERSION}\"/" "$NUGET_YML_FILE"
 echo "VERSION updated to $NEW_VERSION in $NUGET_YML_FILE."
+
+# Validate the doxygen.yml file exists
+if [ ! -f "$DOXYGEN_YML_FILE" ]; then
+    echo "Error: File '$DOXYGEN_YML_FILE' not found."
+    exit 1
+fi
+# Replace the version in the VERSION environment variable
+sed -i -E "s/^  VERSION: \"[0-9]+\.[0-9]+\.[0-9]+\"/  VERSION: \"${NEW_VERSION}\"/" "$DOXYGEN_YML_FILE"
+echo "VERSION updated to $NEW_VERSION in $DOXYGEN_YML_FILE."
 
 # Validate the prerelease.yml file exists
 if [ ! -f "$PRERELEASE_YML_FILE" ]; then

@@ -12,15 +12,15 @@
     mc:Ignorable="d">
     <Grid Margin="5" RowDefinitions="Auto,*">
 
-        <DockPanel>
-            <Button Command="{ReflectionBinding $parent[Window].DataContext.BackToStartPage}">
+        <Grid ColumnDefinitions="Auto, *, Auto">
+            <Button Grid.Column="0" Command="{ReflectionBinding $parent[Window].DataContext.BackToStartPage}">
                 <StackPanel Orientation="Horizontal">
                     <PathIcon Data="{StaticResource arrow_reply_regular}" />
                     <TextBlock>Back</TextBlock>
                 </StackPanel>
             </Button>
-            <Label>Bookmarks</Label>
-            <Button
+            <Label Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center">Bookmarks</Label>
+            <Button Grid.Column="2"
                 Margin="4"
                 HorizontalAlignment="Right"
                 VerticalAlignment="Center"
@@ -30,30 +30,19 @@
                     <TextBlock>Settings</TextBlock>
                 </StackPanel>
             </Button>
-        </DockPanel>
+        </Grid>
 
         <Grid Grid.Row="1" ColumnDefinitions="*, 4*, *">
 
             <!--  tree of folders  -->
             <Grid Grid.Column="0" RowDefinitions="*, Auto">
-                <!--
-				<TreeView Grid.Row="0" ItemsSource="{Binding HierarchcalFolderCollection}">
-                    <TreeView.ItemTemplate>
-                        <TreeDataTemplate ItemsSource="{Binding Children}">
-                            <TextBlock Text="{Binding Name}" />
-                        </TreeDataTemplate>
-                    </TreeView.ItemTemplate>
-                </TreeView>
-				
-				-->
                 <Rectangle Grid.Row="0" Fill="Aquamarine" />
-
                 <StackPanel
                     Grid.Row="1"
                     Height="30"
+                    DockPanel.Dock="Bottom"
                     Orientation="Horizontal">
                     <TextBlock
-                        DockPanel.Dock="Bottom"
                         FontSize="12"
                         TextWrapping="WrapWithOverflow">
                         Source:
@@ -66,45 +55,7 @@
                     </TextBlock>
                 </StackPanel>
             </Grid>
-
-            <!--  main view  -->
-            <!-- 
-            <DataGrid
-                Grid.Column="1"
-                Margin="20"
-                Background="Chartreuse"
-                BorderBrush="Gray"
-                BorderThickness="1"
-                ColumnWidth="auto"
-                CanUserReorderColumns="True"
-                CanUserResizeColumns="True"
-                CanUserSortColumns="False"
-                GridLinesVisibility="All"
-                IsReadOnly="False"
-                ItemsSource="{Binding FolderCollection}"
-                AutoGenerateColumns="False">
-                <DataGrid.Styles>
-                    <Style Selector="DataGridCell">
-                        <Setter Property="FontSize" Value="8" />
-                    </Style>
-                    <Style Selector="DataGridColumnHeader">
-                        <Setter Property="FontSize" Value="8" />
-                        <Setter Property="Margin" Value="0"/>
-                        <Setter Property="Padding" Value="0"/>
-                    </Style>
-                </DataGrid.Styles>
-                <DataGrid.Columns>
-                    <DataGridTextColumn Binding="{Binding Name}" Header="Folder Name" Width="auto"/>
-                    <DataGridTextColumn Binding="{Binding Numberoflinks}" Header="Number of links" Width="*"/>
-                    <DataGridTextColumn Binding="{Binding NumberOfVideosAllWanted}" Header="Videos all wanted" Width="*"/>
-                    <DataGridTextColumn Binding="{Binding NumberOfVideosDirectlyWanted}" Header="Videos directly wanted" Width="*"/>
-                    <DataGridTextColumn Binding="{Binding NumberOfVideosIndirectlyWanted}" Header="Videos indirectly wanted" Width="*"/>
-                    <DataGridTextColumn Binding="{Binding NumberOfWantedVideosFound}" Header="Wanted videos found" Width="*"/>
-                    <DataGridTextColumn Binding="{Binding NumberOfOtherVideosFound}" Header="Other videos found" Width="*"/>
-                    <DataGridCheckBoxColumn Binding="{Binding WantDownloaded}" Header="Want downloaded" Width="*"/>
-                </DataGrid.Columns>
-            </DataGrid>
-            -->
+            
             <!-- TreeDataGrid for folder representation hierarchically -->
             <TreeDataGrid Grid.Column="1" Name="HierarchicalViewer" Source="{Binding TreeSource}">
               <TreeDataGrid.Resources>
@@ -130,42 +81,32 @@
             </TreeDataGrid>
 
             <!--  stats  -->
-            <Grid Grid.Column="2" RowDefinitions="Auto,*,Auto">
-                <Button
-                    Margin="5"
-                    HorizontalAlignment="Stretch"
-                    VerticalAlignment="Top"
-                    IsEnabled="False">
-                    <StackPanel Orientation="Horizontal">
-                        <PathIcon Data="{StaticResource arrow_sync_circle_regular}" />
-                        <TextBlock>Refresh stats</TextBlock>
-                    </StackPanel>
-                </Button>
-                <Grid Grid.Row="1" Background="DarkCyan">
-                    <Label Grid.Row="1">Stats</Label>
-                    <Button
-                        Grid.Row="2"
-                        HorizontalAlignment="Stretch"
-                        VerticalAlignment="Bottom"
-                        IsEnabled="False"
-                        IsVisible="True">
-                        View logs
-                    </Button>
+            <Grid Grid.Column="2" RowDefinitions="*,Auto">
+                <Grid Grid.Row="0" Background="DarkCyan" RowDefinitions="*,Auto">
+                    <DockPanel Grid.Row="0">
+                        <Label>Stats</Label>
+                        <Button
+                            Width="20"
+                            Height="20"
+                            DockPanel.Dock="Right"
+                            Margin="3"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Top"
+                            IsEnabled="False">
+                            <PathIcon Data="{StaticResource arrow_sync_circle_regular}" />
+                        </Button>
+                    </DockPanel>
                 </Grid>
                 <Button
-                    Grid.Row="2"
+                    Grid.Row="1"
                     Margin="5"
                     VerticalAlignment="Bottom">
-
                     <StackPanel Orientation="Horizontal">
                         <PathIcon Data="{StaticResource arrow_download_regular}" />
                         <TextBlock>Start download</TextBlock>
                     </StackPanel>
                 </Button>
             </Grid>
-
         </Grid>
-
-
     </Grid>
 </UserControl>

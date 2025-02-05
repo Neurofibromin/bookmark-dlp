@@ -1,6 +1,5 @@
 # Maintainer: Neurofibromin <125222560+Neurofibromin@users.noreply.github.com>
 # Contributor: Neurofibromin <125222560+Neurofibromin@users.noreply.github.com>
-_tag=0.4.1
 _sourceName="bookmark-dlp"
 _dotnet_version=9.0
 
@@ -22,7 +21,7 @@ makedepends=(
 optdepends=()
 options=(staticlibs
          !strip    )
-source=("${pkgname}-${pkgver}.tar.gz::${url}/archive/refs/tags/${_tag}.tar.gz")
+source=("${pkgname}-${pkgver}.tar.gz::${url}/archive/refs/tags/${pkgver}.tar.gz")
 validpgpkeys=('9F9BFE94618AD26667BD28214F671AFAD8D4428B')
 b2sums=('5d6d98068b0a330f09144e916bcc99d2aac92ae83efe0fa19f2ea5065f299d8140242771c5d7755898ac720b86fbc42e8407eccbda811870671460b568f695fb')
 

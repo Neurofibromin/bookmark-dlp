@@ -27,7 +27,7 @@ namespace NfLogger
         private static List<Stream> _logStreams;
         private static List<string> _logFiles;
         private static List<StreamWriter> _logWriters;
-        public static event EventHandler ProcessExit;
+        // public static event EventHandler ProcessExit;
         
         /// <summary>
         /// Measure of how verbose something should be. Default: info
