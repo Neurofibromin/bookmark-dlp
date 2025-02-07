@@ -95,7 +95,7 @@ namespace bookmark_dlp.ViewModels
             return tabItems;
         }
         
-        public async Task SettingsCommand()
+        public void SettingsCommand()
         {
             PreviousSelectedTab = SelectedTab;
             SelectedTab = TabItems.First(x => x.Content == MySettingsViewModel);

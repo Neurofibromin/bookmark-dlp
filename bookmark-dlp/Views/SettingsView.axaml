@@ -62,5 +62,20 @@
             FontSize="9">
             Restore Defaults
         </Button>
+        <StackPanel Orientation="Horizontal">
+            <TextBlock FontSize="9">yt-dlp config source</TextBlock>
+            <ListBox SelectionMode="AlwaysSelected" 
+                     Background="Chartreuse"
+                     SelectedItem="{Binding ActiveSettings.Selected_yt_dlp_configfile}"
+                     ItemsSource="{Binding ActiveSettings.Yt_dlp_configfiles}"
+                     />
+            <Button Command="{Binding ChooseConfFileCommand}"><TextBlock FontSize="9">Add new config</TextBlock></Button>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal">
+            <TextBlock FontSize="9">Theme</TextBlock>
+            <Button Command="{Binding ChangeThemeToClassicCommand}"><TextBlock FontSize="9">Classic</TextBlock></Button>
+            <Button Command="{Binding ChangeThemeToFluentCommand}"><TextBlock FontSize="9">Fluent</TextBlock></Button>
+            <Button Command="{Binding ChangeThemeToSimpleCommand}"><TextBlock FontSize="9">Simple</TextBlock></Button>
+        </StackPanel>
     </StackPanel>
 </UserControl>

@@ -103,12 +103,12 @@ If the same directory is used for different profiles things can get written into
 ### Locations for files <a name="locations-for-files"/>
 #### Config for bookmark-dlp: <a name="config-for-bookmark-dlp"/>
 1. local 
-    1. Path.Combine(Directory.GetCurrentDirectory(), "bookmark-dlp.conf");
-    2. Assembly.GetExecutingAssembly
+    1. `Path.Combine(Directory.GetCurrentDirectory(), "bookmark-dlp.conf")`
+    2. `Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "bookmark-dlp.conf")`
 2. OS config directory
-    * windows = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "bookmark-dlp\\bookmark-dlp.conf");
-    * linux = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "bookmark-dlp/bookmark-dlp.conf"); 
-    * osx = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.Personal), "bookmark-dlp/bookmark-dlp.conf");
+    * windows = `Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "bookmark-dlp\\bookmark-dlp.conf")`
+    * linux = `Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "bookmark-dlp/bookmark-dlp.conf")`
+    * osx = `Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.Personal), "bookmark-dlp/bookmark-dlp.conf")`
 
 If no config is found at startup popup asks for location for new config file.
 
@@ -116,6 +116,7 @@ If no config is found at startup popup asks for location for new config file.
 1. program is called from
 2. program executable is found in
 3. chosen output folder
+4. path
 
 accepted filenames for the yt-dlp binary:
 - osx: { "yt-dlp", "yt-dlp_macos", "yt-dlp_macos_legacy" }
@@ -126,11 +127,24 @@ accepted filenames for the yt-dlp binary:
 
 https://github.com/yt-dlp/yt-dlp?tab=readme-ov-file#configuration
 
-1. program is called from
-2. program executable is found in
-3. chosen output folder
-4. yt-dlp executable is found in (even if manually selected)
-5. yt-dlp default folder (somewhere in .local?)
+1. bookmark-dlp program is called from
+2. yt-dlp executable is found in 
+3. bookmark-dlp chosen output folder
+4. bookmark-dlp executable is found in
+5. yt-dlp default folder
+    1. `${XDG_CONFIG_HOME}/yt-dlp.conf`
+    2. `${XDG_CONFIG_HOME}/yt-dlp/config`
+    3. `${XDG_CONFIG_HOME}/yt-dlp/config.txt`
+    4. `${APPDATA}/yt-dlp.conf`
+    5. `${APPDATA}/yt-dlp/config`
+    6. `${APPDATA}/yt-dlp/config.txt`
+    7. `~/yt-dlp.conf`
+    8. `~/yt-dlp.conf.txt`
+    9. `~/.yt-dlp/config`
+    10. `~/.yt-dlp/config.txt`
+    11. `/etc/yt-dlp.conf`
+    12. `/etc/yt-dlp/config`
+    13. `/etc/yt-dlp/config.txt`
 
 
 ## Releases <a name="releases"/>
@@ -177,6 +191,7 @@ Build your own: this project is open source
 - [ ] Add screenshots to README.md
 - [ ] Add manpage to .spec
 - [ ] Add manpage to PKGBUILD
+- [ ] Add manpage to .nix
 
 
 ### Signatures, hashes and integrity checks <a name="signatures-hashes-and-integrity-checks"/>

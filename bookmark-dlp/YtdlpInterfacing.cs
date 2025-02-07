@@ -1,12 +1,14 @@
 using System.ComponentModel;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Web;
 using Avalonia.Controls.ApplicationLifetimes;
+using bookmark_dlp.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
 using NfLogger;
 
@@ -14,8 +16,7 @@ namespace bookmark_dlp
 {
     public static class YtdlpInterfacing
     {
-        public static string? YtdlpPath;
-        
+        public static string? YtdlpPath { get; set; } 
         /// <summary>
         /// Gets list of video ids from a given channel. Requires internet.
         /// </summary>
@@ -222,21 +223,27 @@ namespace bookmark_dlp
         /// Finds yt-dlp binary. Checks multiple places. More details in project Readme.
         /// </summary>
         /// <param name="rootdir">The rootdir where bookmark-dlp is called from.</param>
+        /// <param name="output_folder">The chosen output folder of bookmark-dlp</param>
         /// <returns>String containing the yt-dlp binary filepath or NULL if not installed.</returns>
-        public static string? Yt_dlp_pathfinder(string? rootdir = "")
+        public static string? Yt_dlp_pathfinder(string? rootdir = "", string? output_folder = "")
         {
-            rootdir ??= "";
-            string ytdlp_path = ""; //checks is yt-dlp binary is present in root or if it is on path, returns ytdlp_path so it can be written into the script files
+            string? ytdlp_path = null; //checks is yt-dlp binary is present in root or if it is on path, returns ytdlp_path so it can be written into the script files
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 if (!String.IsNullOrWhiteSpace(rootdir) && File.Exists(Path.Combine(rootdir, "yt-dlp.exe")))
                 {
-                    //Console.WriteLine(Path.Combine(rootdir, "yt-dlp.exe") + " found");
                     ytdlp_path = Path.Combine(rootdir, "yt-dlp.exe");
+                }
+                else if (File.Exists(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "yt-dlp.exe")))
+                {
+                    ytdlp_path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "yt-dlp.exe");
+                }
+                else if (!String.IsNullOrWhiteSpace(output_folder) && File.Exists(Path.Combine(output_folder, "yt-dlp.exe")))
+                {
+                    ytdlp_path = Path.Combine(output_folder, "yt-dlp.exe");
                 }
                 else
                 {
-                    //Console.WriteLine(Path.Combine(rootdir, "yt-dlp.exe") + " not found, searching PATH.");
                     //TODO: Windows path check for yt-dlp
                     // maybe already works? test.
                     try
@@ -245,7 +252,7 @@ namespace bookmark_dlp
                         proc.StartInfo.FileName = "yt-dlp.exe";
                         proc.Start();
                         proc.WaitForExit();
-                        ytdlp_path = "yt-dlp.exe";
+                        ytdlp_path = "yt-dlp.exe"; //if no exception was thrown, yt-dlp must be on the path
                     }
                     // check into Win32Exceptions and their error codes!
                     catch (Win32Exception winEx)
@@ -255,7 +262,7 @@ namespace bookmark_dlp
                             // 2 => "The system cannot find the FILE specified."
                             // 3 => "The system cannot find the PATH specified."
                             Logger.LogVerbose("yt-dlp not installed!", Logger.Verbosity.Warning);
-                            return null;
+                            ytdlp_path = null;
                         }
                         else
                         {
@@ -263,9 +270,7 @@ namespace bookmark_dlp
                             throw;
                         }
                     }
-                    ytdlp_path = "yt-dlp.exe"; //no exception was thrown, so yt-dlp must be on the path
                 }
-                return ytdlp_path;
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
@@ -275,18 +280,30 @@ namespace bookmark_dlp
                     // check for yt-dlp executable in working rootdir
                     if (!String.IsNullOrWhiteSpace(rootdir) && File.Exists(Path.Combine(rootdir, filename)))
                     {
-                        Logger.LogVerbose("yt-dlp binary found at: " + Path.Combine(rootdir, filename), Logger.Verbosity.Debug);
                         ytdlp_path = Path.Combine(rootdir, filename);
                         break;
                     }
+                    else if (File.Exists(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, filename)))
+                    {
+                        ytdlp_path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, filename);
+                        break;
+                    }
+                    else if (!String.IsNullOrWhiteSpace(output_folder) && File.Exists(Path.Combine(output_folder, filename)))
+                    {
+                        ytdlp_path = Path.Combine(output_folder, filename);
+                        break;
+                    }
                 }
-                if (ytdlp_path == "")
+                if (!string.IsNullOrEmpty(ytdlp_path))
+                {
+                    Logger.LogVerbose("yt-dlp binary found at: " + ytdlp_path, Logger.Verbosity.Debug);   
+                }
+                else // string.IsNullOrEmpty(ytdlp_path)
                 {
                     // check for yt-dlp binary on path
-                    Logger.LogVerbose(Path.Combine(rootdir, "yt-dlp") + " not found, searching PATH.", Logger.Verbosity.Info);
+                    Logger.LogVerbose(Path.Combine(rootdir ?? "unkown_root", "yt-dlp") + " not found, searching PATH.", Logger.Verbosity.Debug);
                     string command = "-c \"command -v yt-dlp\"";
                     Process process = new Process();
-                    // Console.WriteLine("command: " + command);
                     var processStartInfo = new ProcessStartInfo()
                     {
                         WindowStyle = ProcessWindowStyle.Hidden,
@@ -303,21 +320,17 @@ namespace bookmark_dlp
                     string result = process.StandardOutput.ReadToEnd();
                     String error = process.StandardError.ReadToEnd();
                     process.WaitForExit();
-                    // Console.WriteLine("Result: " + result.Trim());
-                    // Console.WriteLine("Error: " + error);
                     if (process.ExitCode != 0)
                     {
                         Logger.LogVerbose("yt-dlp not installed!", Logger.Verbosity.Warning);
-                        return null;
+                        ytdlp_path = null;
                     }
                     else //yt-dlp is on the path
                     {
-                        ytdlp_path = result.Trim();
+                        ytdlp_path = "yt-dlp";
                     }
-                    // Console.WriteLine("ExitCode: {0}", process.ExitCode);
                     process.Close();
                 }
-                return ytdlp_path;
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
@@ -326,22 +339,84 @@ namespace bookmark_dlp
                 {
                     if (!String.IsNullOrWhiteSpace(rootdir) && File.Exists(Path.Combine(rootdir, filename)))
                     {
-                        // Console.WriteLine(Path.Combine(rootdir, filename) + " found");
                         ytdlp_path = Path.Combine(rootdir, filename);
                         break;
                     }
+                    else if (File.Exists(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, filename)))
+                    {
+                        ytdlp_path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, filename);
+                        break;
+                    }
+                    else if (!String.IsNullOrWhiteSpace(output_folder) && File.Exists(Path.Combine(output_folder, filename)))
+                    {
+                        ytdlp_path = Path.Combine(output_folder, filename);
+                        break;
+                    }
                 }
-                if (ytdlp_path == "")
+                if (!string.IsNullOrEmpty(ytdlp_path))
+                {
+                    Logger.LogVerbose("yt-dlp binary found at: " + ytdlp_path, Logger.Verbosity.Debug);
+                }
+                else // string.IsNullOrEmpty(ytdlp_path)
                 {
                     throw new NotImplementedException();
                     // TODO check OSX path for yt-dlp
                     /*Console.WriteLine(Path.Combine(rootdir, "yt-dlp") + " not found, searching PATH.");
-            Console.WriteLine("Is it on the path? Y/N");
-            if (Console.ReadLine().Contains("Y")) { ytdlp_path = "yt-dlp"; }
-            else { throw new Exception($"yt-dlp not found in path or in rootdir, install it before continuing."); }*/
+                    Console.WriteLine("Is it on the path? Y/N");
+                    if (Console.ReadLine().Contains("Y")) { ytdlp_path = "yt-dlp"; }
+                    else { throw new Exception($"yt-dlp not found in path or in rootdir, install it before continuing."); }*/
                 }
             }
             return ytdlp_path;
+        }
+
+        /// <summary>
+        /// Searches the locations described in README for yt-dlp config file
+        /// </summary>
+        /// <param name="rootdir">directory bookmark-dlp is called from</param>
+        /// <param name="ytdlp_path">path to yt-dlp executable</param>
+        /// <returns>List of found yt-dlp configs (may be length of 0)</returns>
+        public static ObservableCollection<string> Yt_dlp_configfinder(string? rootdir = "", string? ytdlp_path = "")
+        {
+            ObservableCollection<String> ytdlpConfigs = new ObservableCollection<string>();
+            if (!string.IsNullOrEmpty(rootdir))
+            {
+                if (File.Exists(Path.Combine(rootdir, "yt-dlp.conf")))
+                    ytdlpConfigs.Add(Path.Combine(rootdir, "yt-dlp.conf"));
+            }
+            if (!string.IsNullOrEmpty(ytdlp_path))
+            {
+                if (File.Exists(Path.Combine(ytdlp_path, "yt-dlp.conf")))
+                    ytdlpConfigs.Add(Path.Combine(ytdlp_path, "yt-dlp.conf"));
+            }
+            if (!string.IsNullOrEmpty(AppSettings._settings?.Outputfolder))
+            {
+                if (File.Exists(Path.Combine(AppSettings._settings.Outputfolder, "yt-dlp.conf")))
+                    ytdlpConfigs.Add(Path.Combine(AppSettings._settings.Outputfolder, "yt-dlp.conf"));
+            }
+            List<string> defaultlocations = new List<string>
+            {
+                Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "yt-dlp.conf"),
+                Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "yt-dlp.conf"),
+                Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "yt-dlp", "config"),
+                Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "yt-dlp", "config.txt"),
+                Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "yt-dlp.conf"),
+                Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "yt-dlp.conf.txt"),
+                Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".yt-dlp", "config"),
+                Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".yt-dlp", "config.txt"),
+            };
+            if (OperatingSystem.IsLinux() || OperatingSystem.IsMacOS())
+            {
+                defaultlocations.Add("/etc/yt-dlp.conf");
+                defaultlocations.Add("/etc/yt-dlp/config");
+                defaultlocations.Add("/etc/yt-dlp/config.txt");
+            }
+            foreach (string location in defaultlocations)
+            {
+                if (File.Exists(location))
+                    ytdlpConfigs.Add(location);
+            }
+            return ytdlpConfigs;
         }
     }
 }

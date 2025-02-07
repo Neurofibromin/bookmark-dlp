@@ -22,7 +22,12 @@ using System.Threading.Channels;
 using System.Threading.Tasks;
 using System.Threading;
 using System;
+using Avalonia.Markup.Xaml.Styling;
+using Avalonia.Themes.Fluent;
+using Avalonia.Themes.Simple;
 using bookmark_dlp.Models;
+using Classic.Avalonia.Theme;
+using Material.Styles.Themes;
 using NfLogger;
 
 
@@ -42,14 +47,11 @@ namespace bookmark_dlp.ViewModels
         [ObservableProperty] private SettingsStruct _activeSettings;
 
         public SettingsViewModel() {
-            // Console.WriteLine("jsonrepr: " + AppSettings.GetJsonStringRepresentation());
-            // Console.WriteLine("In orig at vmcreation: " + JsonConvert.SerializeObject(AppSettings._settings));
             ActiveSettings = AppSettings._settings;
-            // Console.WriteLine("In settingsviewmodel at creation: " + JsonConvert.SerializeObject(ActiveSettings));
         }
 
         [RelayCommand]
-        private async Task RestoreDefaultSettings()
+        private void RestoreDefaultSettings()
         {
             AppSettings.ResetSettingsToDefault();
         }
@@ -107,7 +109,7 @@ namespace bookmark_dlp.ViewModels
             ErrorMessages?.Clear();
             try
             {
-                var file = await DoOpenFilePickerAsync();
+                var file = await DoOpenFilePickerAsync("Open html file with bookmarks");
                 if (file != null)
                 {
                     ActiveSettings.Yt_dlp_binary_path = file.TryGetLocalPath();
@@ -120,17 +122,87 @@ namespace bookmark_dlp.ViewModels
             }
         }
         
-        private async Task<IStorageFile?> DoOpenFilePickerAsync()
+        private async Task<IStorageFile?> DoOpenFilePickerAsync(string? title)
         {
             if (Application.Current?.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop ||
                 desktop.MainWindow?.StorageProvider is not { } provider)
                 throw new NullReferenceException("Missing StorageProvider instance.");
             var files = await provider.OpenFilePickerAsync(new FilePickerOpenOptions()
             {
-                Title = "Open html file with bookmarks",
+                Title = title,
                 AllowMultiple = false
             });
             return files?.Count >= 1 ? files[0] : null;
+        }
+        
+        [RelayCommand]
+        private async Task ChooseConfFile(CancellationToken token)
+        {
+            ErrorMessages?.Clear();
+            try
+            {
+                var file = await DoOpenFilePickerAsync("Open yt-dlp.conf file");
+                if (file != null)
+                {
+                    string? newconffile = file.TryGetLocalPath();
+                    if (newconffile != null)
+                    {
+                        ActiveSettings.Yt_dlp_configfiles.Add(newconffile);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                ErrorMessages?.Add(e.Message);
+            }
+        }
+        
+        [RelayCommand]
+        private void ChangeThemeToClassic()
+        {
+            Application.Current!.Styles.Clear();
+            Application.Current.Styles.Add(new ClassicTheme());
+            Uri semiTreeData = new Uri("avares://Semi.Avalonia.TreeDataGrid/Index.axaml");
+            var a = new StyleInclude(semiTreeData);
+            a.Source = semiTreeData;
+            Application.Current.Styles.Add(a);
+            
+            Uri localIcons = new Uri("avares://bookmark-dlp/Assets/Icons.axaml");
+            var b = new StyleInclude(localIcons);
+            b.Source = localIcons;
+            Application.Current.Styles.Add(b);
+        }
+        
+        [RelayCommand]
+        private void ChangeThemeToFluent()
+        {
+            Application.Current!.Styles.Clear();
+            Application.Current.Styles.Add(new FluentTheme());
+            Uri semiTreeData = new Uri("avares://Avalonia.Controls.TreeDataGrid/Themes/Fluent.axaml");
+            var a = new StyleInclude(semiTreeData);
+            a.Source = semiTreeData;
+            Application.Current.Styles.Add(a);
+            
+            Uri localIcons = new Uri("avares://bookmark-dlp/Assets/Icons.axaml");
+            var b = new StyleInclude(localIcons);
+            b.Source = localIcons;
+            Application.Current.Styles.Add(b);
+        }
+        
+        [RelayCommand]
+        private void ChangeThemeToSimple()
+        {
+            Application.Current!.Styles.Clear();
+            Application.Current.Styles.Add(new SimpleTheme());
+            Uri semiTreeData = new Uri("avares://Semi.Avalonia.TreeDataGrid/Index.axaml");
+            var a = new StyleInclude(semiTreeData);
+            a.Source = semiTreeData;
+            Application.Current.Styles.Add(a);
+            
+            Uri localIcons = new Uri("avares://bookmark-dlp/Assets/Icons.axaml");
+            var b = new StyleInclude(localIcons);
+            b.Source = localIcons;
+            Application.Current.Styles.Add(b);
         }
     }
 }

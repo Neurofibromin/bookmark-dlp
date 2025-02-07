@@ -50,7 +50,10 @@ public static class AppMethods
         {
             return configpath_local;
         }
-
+        if (File.Exists(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "bookmark-dlp.conf")))
+        {
+            return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "bookmark-dlp.conf");
+        }
         if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
         {
             string configpath_osx = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.Personal), "bookmark-dlp", "bookmark-dlp.conf");
@@ -66,7 +69,6 @@ public static class AppMethods
             string configpath_linux = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "bookmark-dlp", "bookmark-dlp.conf");
             if (File.Exists(configpath_linux)) { return configpath_linux; }
         }
-
         return null; //no config paths were found
     }
 

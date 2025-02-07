@@ -41,34 +41,34 @@ namespace bookmark_dlp
 
                     MessageBus.ButtonClicked += async (sender, buttonText) =>
                     {
-                        await Console.Out.WriteLineAsync(buttonText);
+                        //await Console.Out.WriteLineAsync(buttonText);
                         switch (buttonText)
                         {
                             case "Appdata/local":
                                 if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
                                 {
                                     string configpath_osx = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.Personal), "bookmark-dlp/bookmark-dlp.conf");
-                                    AppSettings.configloc = configpath_osx;
+                                    AppSettings.SetConfigFileLocation(configpath_osx);
                                 }
                                 else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                                 {
                                     string configpath_windows = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "bookmark-dlp\\bookmark-dlp.conf");
-                                    AppSettings.configloc = configpath_windows;
+                                    AppSettings.SetConfigFileLocation(configpath_windows);
                                 }
                                 else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                                 {
                                     string configpath_linux = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "bookmark-dlp/bookmark-dlp.conf");
-                                    AppSettings.configloc = configpath_linux;
+                                    AppSettings.SetConfigFileLocation(configpath_linux);
                                 }
                                 break;
                             case "No config":
-                                AppSettings.configloc = null;
+                                AppSettings.SetConfigFileLocation(null);
                                 break;
                             case "local dir":
-                                AppSettings.configloc = Path.Combine(Directory.GetCurrentDirectory(), "bookmark-dlp.conf");
+                                AppSettings.SetConfigFileLocation(Path.Combine(Directory.GetCurrentDirectory(), "bookmark-dlp.conf"));
                                 break;
                             default:
-                                AppSettings.configloc = null;
+                                AppSettings.SetConfigFileLocation(null);
                                 break;
                         }
                         var mainWindowVm = new MainWindowViewModel();
@@ -83,8 +83,8 @@ namespace bookmark_dlp
                 }
                 else 
                 {
-                    Console.WriteLine("Config was found");
-                    Console.WriteLine("Location: " + AppMethods.ConfigFileLocation());
+                    Logger.LogVerbose("Config was found", Logger.Verbosity.Debug);
+                    Logger.LogVerbose("Location: " + AppMethods.ConfigFileLocation(), Logger.Verbosity.Debug);
                     var mainWindowVm = new MainWindowViewModel();
                     var mainWindow = new MainWindow
                     {
