@@ -101,13 +101,13 @@ namespace bookmark_dlp.ViewModels
             SelectedTab = TabItems.First(x => x.Content == MySettingsViewModel);
         }
 
-        public async Task GoForward()
+        public void GoForward()
         {
             //PreviousViewModel = SelectedTab;
             MyDownloadingViewModel.FileSource = AppSettings._settings.ManualImportUsed
                 ? AppSettings._settings.Manualimportfilelocation
                 : MyStartPageViewModel.ChosenBrowser;
-            ImportSuccess = await MyDownloadingViewModel.LoadFoldersFromFile();
+            ImportSuccess = MyDownloadingViewModel.LoadFoldersFromFile();
             if (ImportSuccess)
             {
                 TabItems.First(x => x.Content == MyDownloadingViewModel).IsEnabled = true;

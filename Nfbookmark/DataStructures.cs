@@ -65,8 +65,8 @@ namespace bookmark_dlp
         public string url;
         public Linktype linktype;
         public string yt_id;
-        public string channel_id;
-        public string playlist_id;
+        // public string channel_id;
+        // public string playlist_id;
         /// <summary>
         /// Contains yt ids of videos in the playlist or uploaded by the channel. Only used it linktype is Channel_* or Playlist. 
         /// </summary>
@@ -76,7 +76,7 @@ namespace bookmark_dlp
 
         public override string ToString()
         {
-            return $"Url: {url}, linktype: {linktype.ToString()}, yt_id: {yt_id}, channel_id: {channel_id}, playlist_id: {playlist_id}";
+            return $"Url: {url}, linktype: {linktype.ToString()}, yt_id: {yt_id}";
         }
 
         public override bool Equals(object obj)
@@ -86,8 +86,6 @@ namespace bookmark_dlp
                 return url == other.url &&
                        linktype == other.linktype &&
                        yt_id == other.yt_id &&
-                       channel_id == other.channel_id &&
-                       playlist_id == other.playlist_id &&
                        Enumerable.SequenceEqual(member_ids ?? new List<string>(), other.member_ids ?? new List<string>()) &&
                        Enumerable.SequenceEqual(member_ids_found ?? new List<string>(), other.member_ids_found ?? new List<string>()) &&
                        Enumerable.SequenceEqual(member_ids_not_found ?? new List<string>(), other.member_ids_not_found ?? new List<string>());
@@ -101,8 +99,6 @@ namespace bookmark_dlp
                 url,
                 linktype,
                 yt_id,
-                channel_id,
-                playlist_id,
                 member_ids != null ? string.Join(",", member_ids).GetHashCode() : 0,
                 member_ids_found != null ? string.Join(",", member_ids_found).GetHashCode() : 0,
                 member_ids_not_found != null ? string.Join(",", member_ids_not_found).GetHashCode() : 0

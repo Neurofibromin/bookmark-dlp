@@ -118,8 +118,7 @@ namespace Nfbookmark.Tests
             {
                 url = "https://www.youtube.com/playlist?list=123456789123456789",
                 linktype = Linktype.Playlist,
-                yt_id = "12345",
-                playlist_id = "123456789123456789",
+                yt_id = "123456789123456789",
                 member_ids = new List<string> { "a", "b", "c" },
                 member_ids_found = new List<string> { "a", "c" },
                 member_ids_not_found = new List<string> { "b" }
@@ -129,8 +128,7 @@ namespace Nfbookmark.Tests
             {
                 url = "https://www.youtube.com/playlist?list=123456789123456789",
                 linktype = Linktype.Playlist,
-                yt_id = "12345",
-                playlist_id = "123456789123456789",
+                yt_id = "123456789123456789",
                 member_ids = new List<string> { "a", "b", "c" },
                 member_ids_found = new List<string> { "a", "c" },
                 member_ids_not_found = new List<string> { "b" }
@@ -151,8 +149,8 @@ namespace Nfbookmark.Tests
         [Fact]
         public void GetHashCode_SameValues_ReturnsSameHash()
         {
-            var link1 = new YTLink { url = "https://example.com", yt_id = "12345", channel_id = "channel1", playlist_id = "playlist1" };
-            var link2 = new YTLink { url = "https://example.com", yt_id = "12345", channel_id = "channel1", playlist_id = "playlist1" };
+            var link1 = new YTLink { url = "https://example.com", yt_id = "12345", linktype = Linktype.Playlist };
+            var link2 = new YTLink { url = "https://example.com", yt_id = "12345", linktype = Linktype.Playlist };
             
             Assert.Equal(link1.GetHashCode(), link2.GetHashCode());
         }
@@ -160,8 +158,17 @@ namespace Nfbookmark.Tests
         [Fact]
         public void GetHashCode_DifferentValues_ReturnsDifferentHash()
         {
-            var link1 = new YTLink { url = "https://example.com/1", yt_id = "12345" };
-            var link2 = new YTLink { url = "https://example.com/2", yt_id = "54321" };
+            var link1 = new YTLink { url = "https://example.com/1", yt_id = "12345", linktype = Linktype.Playlist };
+            var link2 = new YTLink { url = "https://example.com/2", yt_id = "54321", linktype = Linktype.Playlist };
+            
+            Assert.NotEqual(link1.GetHashCode(), link2.GetHashCode());
+        }
+        
+        [Fact]
+        public void GetHashCode_DifferentValues_ReturnsDifferentHash_2()
+        {
+            var link1 = new YTLink { url = "https://example.com/1", yt_id = "54321", linktype = Linktype.Video };
+            var link2 = new YTLink { url = "https://example.com/1", yt_id = "54321", linktype = Linktype.Playlist };
             
             Assert.NotEqual(link1.GetHashCode(), link2.GetHashCode());
         }

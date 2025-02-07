@@ -182,11 +182,15 @@ namespace Nfbookmark
         /// <summary>
         /// Creating the folder structure on filesystems and storing the access paths to folders[].folderpath <br/>
         /// Requires:
-        /// Name
-        /// Depth
-        /// Parent<br/>
+        /// <list type="bullet">
+        /// <item> Name </item>
+        /// <item> Depth </item>
+        /// <item> Parent </item>
+        /// </list>
         /// Fills:
-        /// Folderpath
+        /// <list type="bullet"> 
+        /// <item> Folderpath </item>
+        /// </list>  
         /// </summary>
         /// <param name="folders">Bookmark folders to be made into filesystem folders</param>
         /// <param name="rootdir">Fiilesystems directory to contain all the folders</param>

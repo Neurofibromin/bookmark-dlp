@@ -61,7 +61,7 @@ namespace Nfbookmark
         /// Fills:
         /// <list type="bullet">
         /// <item> startline </item>
-        /// <item> url </item>
+        /// <item> urls </item>
         /// <item> name </item>
         /// <item> depth </item>
         /// <item> parentId </item>
@@ -225,7 +225,7 @@ namespace Nfbookmark
         /// Fills:
         /// <list type="bullet">
         /// <item> startline </item>
-        /// <item> url </item>
+        /// <item> urls </item>
         /// <item> name </item>
         /// <item> depth </item>
         /// <item> id </item>
@@ -344,7 +344,16 @@ namespace Nfbookmark
         }
 
         /// <summary>
-        /// Takes all bookmarks and folders from an sql file and creates a list to hold them
+        /// Takes all bookmarks and folders from an sql file and creates a list to hold them <br/>
+        /// Fills:
+        /// <list type="bullet">
+        /// <item> id </item>
+        /// <item> depth </item>
+        /// <item> parentId </item>
+        /// <item> name </item>
+        /// <item> startline </item>
+        /// <item> urls </item>
+        /// </list>
         /// </summary>
         /// <param name="filePath">Sqlite file location</param>
         /// <returns>List of bookmark folders that have their children in them or null</returns>
@@ -441,10 +450,17 @@ namespace Nfbookmark
             return folders;
         }
 
-
-
         /// <summary>
-        /// Intake of bookmarks and bookmarkfolders from a Google Takeout Html file
+        /// Intake of bookmarks and bookmarkfolders from a Google Takeout Html file <br/>
+        /// Fills:
+        /// <list type="bullet">
+        /// <item> name </item>
+        /// <item> id </item>
+        /// <item> urls </item>
+        /// <item> depth </item>
+        /// <item> endingline </item>
+        /// <item> startline </item>
+        /// </list>
         /// </summary>
         /// <param name="filePath">Html file location</param>
         /// <returns>List of folders that have all their url bookmarks as children</returns>
@@ -474,7 +490,7 @@ namespace Nfbookmark
             }
 
             Logger.LogVerbose(inputarray.Length + "/" + lineCount + " lines were read.", Logger.Verbosity.Debug);
-            Logger.LogVerbose("The intake has finished!", Logger.Verbosity.Debug);
+            Logger.LogVerbose("The html intake has finished!", Logger.Verbosity.Debug);
 
             /*//Creating the folders[] object array and initialize all its elements, notice that the max number of folders equals the number of lines
             Folderclass[] folders = new Folderclass[lineCount];
@@ -575,7 +591,16 @@ namespace Nfbookmark
         }
 
         /// <summary>
-        /// Intake of bookmarks and bookmarkfolders from a browser exported Html file
+        /// Intake of bookmarks and bookmarkfolders from a browser exported Html file <br/>
+        /// Fills:
+        /// <list type="bullet">
+        /// <item> name </item>
+        /// <item> id </item>
+        /// <item> urls </item>
+        /// <item> depth </item>
+        /// <item> endingline </item>
+        /// <item> startline </item>
+        /// </list>
         /// </summary>
         /// <param name="filePath">Html file location</param>
         /// <returns>List of folders that have all their url bookmarks as children</returns>
@@ -684,6 +709,16 @@ namespace Nfbookmark
                 }
             }
             return folders;
+        }
+
+        /// <summary>
+        /// Validates the foldeclass after import finished. <br/>
+        /// Checks:
+        /// </summary>
+        /// <param name="folder"></param>
+        public static void ValidateImportedFolderclass(Folderclass folder)
+        {
+            
         }
     }
 }

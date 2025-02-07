@@ -198,13 +198,13 @@ namespace bookmark_dlp
                 if (end == -1)
                   end = _url.Length;
                 link.linktype = Linktype.Playlist;
-                link.playlist_id = _url.Substring(start, end);
+                link.yt_id = _url.Substring(start, end);
                 string? extracted = YtdlpInterfacing.ExtractPlaylistId(_url);
                 if (extracted == null)
-                    Logger.LogVerbose($"Could not autoextract playlist ID {_url}, manual parsing resulted in: {link.playlist_id}", Logger.Verbosity.Error);
-                else if (extracted != link.playlist_id)
+                    Logger.LogVerbose($"Could not autoextract playlist ID {_url}, manual parsing resulted in: {link.yt_id}", Logger.Verbosity.Error);
+                else if (extracted != link.yt_id)
                 {
-                    Logger.LogVerbose($"Manual and autoparsing resulted in different ids {link.playlist_id} and {extracted}");
+                    Logger.LogVerbose($"Manual and autoparsing resulted in different ids {link.yt_id} and {extracted}");
                 }
             }
             else if (_url.Substring(24, 4) == "user")
@@ -214,7 +214,7 @@ namespace bookmark_dlp
                 Match match = Regex.Match(_url, pattern);
                 if (match.Success && match.Groups.Count > 1)
                 {
-                    link.channel_id = match.Groups[1].Value;
+                    link.yt_id = match.Groups[1].Value;
                 }
                 else
                 {
@@ -229,7 +229,7 @@ namespace bookmark_dlp
                 Match match = Regex.Match(_url, pattern);
                 if (match.Success && match.Groups.Count > 1)
                 {
-                    link.channel_id = match.Groups[1].Value;
+                    link.yt_id = match.Groups[1].Value;
                 }
                 else
                 {
@@ -249,7 +249,7 @@ namespace bookmark_dlp
                 Match match = Regex.Match(_url, pattern);
                 if (match.Success && match.Groups.Count > 1)
                 {
-                    link.channel_id = match.Groups[1].Value;
+                    link.yt_id = match.Groups[1].Value;
                 }
                 else
                 {
@@ -264,7 +264,7 @@ namespace bookmark_dlp
                 Match match = Regex.Match(_url, pattern);
                 if (match.Success && match.Groups.Count > 1)
                 {
-                    link.channel_id = match.Groups[1].Value;
+                    link.yt_id = match.Groups[1].Value;
                 }
                 else
                 {
