@@ -23,9 +23,9 @@ namespace bookmark_dlp
             Logger.verbosity = Logger.Verbosity.Debug;
             // Functions.PrintToConsole(Import.SmartImport(Import.GetBrowserBookmarkFilesPaths()[0].foundProfiles[0]));
             Console.WriteLine("starting");
-            Functions.PrintToConsole(Import.SmartImport("test1.html"));
+            Functions.PrintToStream(Import.SmartImport("test1.html"));
             Console.WriteLine("\n\n\n");
-            Functions.PrintToConsole(Import.SmartImport("test2.html"));
+            Functions.PrintToStream(Import.SmartImport("test2.html"));
             Console.ReadKey();
             Environment.Exit(0);
 #endif
@@ -157,14 +157,14 @@ namespace bookmark_dlp
                 Functions.Createfolderstructure(folders, rootdir);
                 AutoImport.WritelinkstotxtFromFolderclasses(folders, downloadPlaylists, downloadChannels, downloadShorts, rootdir);
                 
-                Functions.PrintToConsole(folders); //dump all the folder info to console
+                Functions.PrintToStream(folders); //dump all the folder info to console
                 AutoImport.Scriptwriter(folders, ytdlp_path); //writing the scripts that call yt-dlp and add .txt with the links in the arguments //NOT the method that creates the .txt files
                 Functions.Deleteemptyfolders(folders); //deletes the folders from the folder structure that are empty (no youtube links were written into them)
                 Console.WriteLine("Running the scripts after ENTER.");
                 Console.ReadKey();
                 AutoImport.Runningthescripts(folders);
                 //AppMethods.Checkformissing //checking if all the desired links have indeed been downloaded, archive.txt integrity as well
-                Functions.PrintToConsole(folders);
+                Functions.PrintToStream(folders);
                 Console.WriteLine("Press enter to exit");
                 Console.Read();
                 Environment.Exit(0);

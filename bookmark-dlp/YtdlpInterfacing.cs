@@ -431,7 +431,7 @@ namespace bookmark_dlp
         /// <summary>
         /// Wrapper for link-by-link getting
         /// </summary>
-        /// <param name="folders"></param>
+        /// <param name="rootfolder"></param>
         private static async Task GetFolderEstimatedSizes(HierarchicalFolderclass rootfolder)
         {
             rootfolder.EstimatedSize = 0;
@@ -494,11 +494,11 @@ namespace bookmark_dlp
             {
                 Console.WriteLine(line);
                 continue;
-                if (int.TryParse(line, out int parsedSize))
+                /*if (int.TryParse(line, out int parsedSize))
                 {
                     size = parsedSize;
                     break; // Use the first valid size found
-                }
+                }*/
             }
 
             return size;

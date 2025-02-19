@@ -172,7 +172,7 @@ fi
 # Replace the Version value
 sed -i -E "s/^Version=[0-9]+\.[0-9]+\.[0-9]+/Version=${NEW_VERSION}/" "$PKGBUILD_SUM_UPDATER"
 echo "Version updated to $NEW_VERSION in $PKGBUILD_SUM_UPDATER."
-t
+
 
 # Validate the nix file exists
 if [ ! -f "$NIX_FILE" ]; then
@@ -180,5 +180,6 @@ if [ ! -f "$NIX_FILE" ]; then
     exit 1
 fi
 # Replace the Version value
-sed -i -E "s/^version = "[0-9]\+\.[0-9]\+\.[0-9]\+"/version = "${NEW_VERSION}/"" "$SPEC_FILE"
+sed -i -E "s/(version = \")[0-9]+\.[0-9]+\.[0-9]+(\";)/\1${NEW_VERSION}\2/" "$NIX_FILE"
+#old: sed -i -E "s/^version = "[0-9]\+\.[0-9]\+\.[0-9]\+"/version = "${NEW_VERSION}/"" "$NIX_FILE"
 echo "Version updated to $NEW_VERSION in $NIX_FILE."

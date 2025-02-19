@@ -1,6 +1,6 @@
 %global debug_package %{nil}
 Name:           bookmark-dlp
-Version:        0.4.1
+Version:        0.4.2
 Release:        %autorelease
 Summary:        Utility program for downloading bookmarked YouTube links using yt-dlp
 

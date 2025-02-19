@@ -4,7 +4,7 @@ _sourceName="bookmark-dlp"
 _dotnet_version=9.0
 
 pkgname="bookmark-dlp"
-pkgver=0.4.1
+pkgver=0.4.2
 pkgrel=1
 pkgdesc="Small utility program for downloading bookmarked YouTube links using yt-dlp."
 arch=("x86_64")

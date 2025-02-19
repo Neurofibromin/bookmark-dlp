@@ -35,7 +35,7 @@
 	
 	<AllowUnsafeBlocks>false</AllowUnsafeBlocks>
 	<NoWarn>1591</NoWarn>
-	<Version>0.4.1</Version>
+	<Version>0.4.2</Version>
 	  
 	  <!--	  <PublishTrimmed>true</PublishTrimmed> trimming is currently problematic with Avalonia -->
 	  <!-- Without native library self extraction the published file will not be singular.-->
