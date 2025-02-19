@@ -29,11 +29,11 @@ namespace bookmark_dlp
     /// <code>
     /// var folders = Import.SmartImport(somefile);
     /// AutoImport.LinksFromUrls(folders);
-    /// AppMethods.CountWantedVideos(folders)
-    /// AppMethods.CheckCurrentFilesystemState(folders)
     /// Functions.FoldernameValidation(folders);
     /// Functions.Createfolderstructure(folders, rootdir);
-    /// AppMethods.Deleteemptyfolders(folders);
+    /// AppMethods.CountWantedVideos(folder)
+    /// AppMethods.CheckCurrentFilesystemState(folder)
+    /// //optionally: AppMethods.Deleteemptyfolders(folders);
     /// </code>
     /// </example>
     public static class AutoImport
@@ -42,6 +42,7 @@ namespace bookmark_dlp
         /// Fills links from urls. If not youtube url no link is generated.
         /// If link parsing throws exception no link is generated,
         /// and log message is written, but no exception will be thrown. Wrapper around LinkFromUrl. <br/>
+        /// Uses internet to query video ids for playlists and channels.<br/>
         /// Requires:
         /// <list type="bullet">
         /// <item> urls </item>
@@ -172,8 +173,6 @@ namespace bookmark_dlp
         /// <list type="bullet">
         /// <item> url </item>
         /// <item> linktype </item>
-        /// <item> channel_id </item>
-        /// <item> playlist_id </item>
         /// <item> yt_id </item>
         /// <item> member_ids </item>
         /// </list>

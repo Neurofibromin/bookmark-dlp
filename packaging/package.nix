@@ -47,6 +47,31 @@ buildDotnetModule rec {
   ];
 
   executables = [ "bookmark-dlp" ];
+  
+  preBuild = ''
+      patch bookmark-dlp.sln < nix-patch.patch
+  '';
+  
+  installPhase = ''
+      # Create the icon directory in the $out/share/icons/hicolor directory
+      mkdir -p $out/share/icons/hicolor/{16x16,24x24,32x32,48x48,64x64,96x96,128x128,256x256,512x512,1024x1024,scalable}/apps
+  
+      # Copy the icons to the appropriate directories
+      cp bookmark-dlp/Assets/bookmark-dlp.16.png $out/share/icons/hicolor/16x16/apps/bookmark-dlp.png
+      cp bookmark-dlp/Assets/bookmark-dlp.24.png $out/share/icons/hicolor/24x24/apps/bookmark-dlp.png
+      cp bookmark-dlp/Assets/bookmark-dlp.32.png $out/share/icons/hicolor/32x32/apps/bookmark-dlp.png
+      cp bookmark-dlp/Assets/bookmark-dlp.48.png $out/share/icons/hicolor/48x48/apps/bookmark-dlp.png
+      cp bookmark-dlp/Assets/bookmark-dlp.64.png $out/share/icons/hicolor/64x64/apps/bookmark-dlp.png
+      cp bookmark-dlp/Assets/bookmark-dlp.96.png $out/share/icons/hicolor/96x96/apps/bookmark-dlp.png
+      cp bookmark-dlp/Assets/bookmark-dlp.128.png $out/share/icons/hicolor/128x128/apps/bookmark-dlp.png
+      cp bookmark-dlp/Assets/bookmark-dlp.256.png $out/share/icons/hicolor/256x256/apps/bookmark-dlp.png
+      cp bookmark-dlp/Assets/bookmark-dlp.512.png $out/share/icons/hicolor/512x512/apps/bookmark-dlp.png
+      cp bookmark-dlp/Assets/bookmark-dlp.1024.png $out/share/icons/hicolor/1024x1024/apps/bookmark-dlp.png
+      cp bookmark-dlp/Assets/bookmark-dlp.svg $out/share/icons/hicolor/scalable/apps/bookmark-dlp.svg  # For the SVG icon
+  
+      # Install the desktop entry
+      install -Dm 0755 bookmark-dlp.desktop $out/share/applications/bookmark-dlp.desktop
+    '';
 
   meta = {
     description = "Download bookmarked youtube links using yt-dlp";

@@ -15,7 +15,10 @@ namespace Nfbookmark
     {
 
         /// <summary>
-        /// Pretty prints the folder structure to console <br/>
+        /// Pretty prints the folder structure to selected output.
+        /// Can print to Log, arbitrary Stream or StdOut.
+        /// If Log is selected and no stream is given, then will not print to StdOut.
+        /// If Log not selected and no stream is given, then will print to StdOut.<br/>
         /// Requires:
         /// Name
         /// Depth
@@ -26,12 +29,26 @@ namespace Nfbookmark
         /// Id
         /// </summary>
         /// <param name="folders">The folder structure to be printed</param>
-        public static void PrintToConsole(List<Folderclass> folders)
+        /// <param name="wantOutputToLog">If true uses Nflogger.Log.Logverbose to print (as well)</param>
+        /// <param name="outputStream">The stream to print to</param>
+        public static void PrintToStream(List<Folderclass> folders, bool wantOutputToLog = false, Stream outputStream = null)
         {
-            //TODO: rewrite this
+            bool wantOutputToStream = outputStream != null;
+            StreamWriter writer = null;
+            if (outputStream != null)
+                writer = new StreamWriter(outputStream);
+            if (outputStream == null && !wantOutputToLog)
+            {
+                outputStream = Console.OpenStandardOutput();
+                writer = new StreamWriter(outputStream);
+                wantOutputToStream = true;
+            }
             if (folders == null || folders.Count == 0)
             {
-                Logger.LogVerbose("No folders to display.");
+                if (wantOutputToLog)
+                    Logger.LogVerbose("No folders to display.");
+                if (wantOutputToStream)
+                    writer.WriteLine("No folders to display.");
                 return;
             }
             // int deepestdepth = folders.Select(t => t.depth).Prepend(0).Max(); //Finding the deepest folder depth
@@ -88,34 +105,46 @@ namespace Nfbookmark
                     }
                 }               // string.Concat(Enumerable.Repeat("_", Math.Abs(depthsymbolcounter - deepestdepthlength)))
                 else { } //at first folder the depth does not change
-                Console.Write(string.Concat(Enumerable.Repeat("-", depthsymbolcounter)));
+                if (wantOutputToLog)
+                    Logger.LogVerbose(string.Concat(Enumerable.Repeat("-", depthsymbolcounter)));
+                if (wantOutputToStream)
+                    writer.Write(string.Concat(Enumerable.Repeat("-", depthsymbolcounter)));
                 string write = $"{currentFolder.depth.ToString().PadRight(deepestdepthlength, '_')}" + new string('_', deepestdepth - depthsymbolcounter) +
                     $" is the depth of {currentFolder.startline.ToString().PadLeft(maxstartlinelength, '_')}/{currentFolder.endingline.ToString().PadLeft(maxendlinelength, '_')} " +
                     $"[{currentFolder.name.Replace(' ', '_').PadRight(maxnamelength, '_')}] folder, which contains [{currentFolder.urls.Count.ToString().PadLeft(maxnumberoflinklength, '_')}] links. " +
                     $"id:\"{currentFolder.id.ToString().PadLeft(maxidlength, '_')}\" parentId:\"{currentFolder.parentId.ToString().PadLeft(maxidlength, '_')}";
                 //Console.ForegroundColor = ConsoleColor.Red;
                 //Console.ResetColor();
-                
+                if (wantOutputToLog)
+                    Logger.LogVerbose(write);
                 string[] words = write.Split(' ');
-
                 for (int i = 0; i < words.Length; i++)
                 {
                     string word = words[i];
 
                     if (word.StartsWith("[") || word.EndsWith("]"))
                     {
-                        Console.ForegroundColor = ConsoleColor.Red;
+                        // Console.ForegroundColor = ConsoleColor.Red;
                         word = word.Replace("[", string.Empty);
                         word = word.Replace("]", string.Empty);
                     }
-
-                    Console.Write(word.Replace('_', ' ') + " ");
-                    Console.ResetColor();
+                    
+                    if (wantOutputToStream)
+                        writer.Write(word.Replace('_', ' ') + " ");
+                    // Console.Write();
+                    // Console.ResetColor();
                 }
-                Logger.LogVerbose("");
+                if (wantOutputToLog)
+                    Logger.LogVerbose("");
+                if (wantOutputToStream)
+                    writer.Write("\n");
                 previousFolder = currentFolder;
             }
-            Logger.LogVerbose("Alltogether " + folders.Count + " folders were found.");
+            if (wantOutputToLog)
+                Logger.LogVerbose("Alltogether " + folders.Count + " folders were found.");
+            if (wantOutputToStream)
+                writer.WriteLine("Alltogether " + folders.Count + " folders were found.");
+            outputStream?.Flush();
         }
 
         #region FolderFunctions

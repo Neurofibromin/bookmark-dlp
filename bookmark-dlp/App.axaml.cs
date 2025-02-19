@@ -22,7 +22,7 @@ namespace bookmark_dlp
         /// <summary>
         /// Show AskConfigWindow popup if no config found, then show the MainWindow
         /// </summary>
-        public override async void OnFrameworkInitializationCompleted()
+        public override void OnFrameworkInitializationCompleted()
         {
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
@@ -39,7 +39,7 @@ namespace bookmark_dlp
                     desktop.MainWindow = askConfigWindow;
                     askConfigWindow.Show();
 
-                    MessageBus.ButtonClicked += async (sender, buttonText) =>
+                    MessageBus.ButtonClicked += (sender, buttonText) =>
                     {
                         //await Console.Out.WriteLineAsync(buttonText);
                         switch (buttonText)

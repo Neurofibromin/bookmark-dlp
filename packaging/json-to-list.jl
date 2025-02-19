@@ -1,3 +1,4 @@
+#!/usr/bin/env -S julia --color=yes --startup-file=no
 # import Pkg
 # Pkg.add("JSON")
 using JSON

@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using bookmark_dlp.Models;
+using Nfbookmark;
 using NfLogger;
 
 namespace bookmark_dlp;
@@ -124,14 +125,23 @@ public static class AppMethods
         return hierarchicalFolderclasses;
     }
 
-    public enum ProgramUI { GUI, CLI }
-    public static ProgramUI programUI;
+    public static List<Folderclass> GenerateListFolderclassesFromHierarchical(
+        ObservableCollection<HierarchicalFolderclass> folders)
+    {
+        throw new NotImplementedException();
+    }
 
+    public static void MethodRunner(Func<Folderclass, string> func, ObservableCollection<HierarchicalFolderclass> folders)
+    {
+        
+    }
+    
     /// <summary>
     /// Count how many videos are wanted directly or indirectly. <br/>
     /// Requires:
     /// <list type="bullet">
     /// <item> links </item>
+    /// <item> link.member_ids </item>
     /// </list>
     /// Fills:
     /// <list type="bullet"> 
@@ -139,22 +149,25 @@ public static class AppMethods
     /// <item> numberOfVideosIndirectlyWanted </item>
     /// </list>    
     /// </summary>
-    /// <param name="folder"></param>
-    public static void CountWantedVideos(ref Folderclass folder)
+    /// <param name="folders"></param>
+    public static void CountWantedVideos(ref List<Folderclass> folders)
     {
-        foreach (YTLink link in folder.links)
+        foreach (Folderclass folder in folders)
         {
-            if (link.linktype == Linktype.Video || link.linktype == Linktype.Short)
+            foreach (YTLink link in folder.links)
             {
-                folder.numberOfVideosDirectlyWanted++;
-            }
-            else if (link.linktype == Linktype.Channel_channel ||
-                     link.linktype == Linktype.Channel_at ||
-                     link.linktype == Linktype.Channel_user ||
-                     link.linktype == Linktype.Channel_c ||
-                     link.linktype == Linktype.Playlist)
-            {
-                folder.numberOfVideosIndirectlyWanted += link.member_ids.Count;
+                if (link.linktype == Linktype.Video || link.linktype == Linktype.Short)
+                {
+                    folder.numberOfVideosDirectlyWanted++;
+                }
+                else if (link.linktype == Linktype.Channel_channel ||
+                         link.linktype == Linktype.Channel_at ||
+                         link.linktype == Linktype.Channel_user ||
+                         link.linktype == Linktype.Channel_c ||
+                         link.linktype == Linktype.Playlist)
+                {
+                    folder.numberOfVideosIndirectlyWanted += link.member_ids.Count;
+                }
             }
         }
     }
@@ -163,6 +176,7 @@ public static class AppMethods
     /// <summary>
     /// Checks if wanted videos are found on the filesystem (are/were downloaded) and fills Folderclass fields for object accordingly.
     /// Only checks the filenames for the yt-id (11 characters): if yt-dlp config is set to not include such id in the filename it will not work.<br/>
+    /// Only queries filesystem, no requests to YouTube. <br/>
     /// Requires:
     /// <list type="bullet">
     /// <item> folderpath </item>
@@ -180,7 +194,7 @@ public static class AppMethods
     /// <item> link.member_ids_found </item>
     /// </list>  
     /// </summary>
-    /// <param name="folders">The list of folders that is being checked</param>
+    /// <param name="folders">The folders that are being checked</param>
     public static void CheckCurrentFilesystemState(ref List<Folderclass> folders)
     {
         foreach (Folderclass folder in folders)
@@ -288,41 +302,39 @@ public static class AppMethods
                     }
                 }
             }
-            else
-            {
-                continue;
-            }
             // folder.numberOfIndirectlyWantedVideosNotFound = folder.links.Select(f => f.member_ids_not_found).ToList().Select(f => f.Count()).Sum();
             // folder.numberOfDirectlyWantedVideosNotFound = folder.LinksWithMissingVideos.Count(f => f.linktype is Linktype.Video or Linktype.Short);
             // folder.numberOfDirectlyWantedVideosNotFound = folder.numberOfVideosDirectlyWanted - folder.numberOfDirectlyWantedVideosFound;
             folder.numberOfIndirectlyWantedVideosFound = folder.links.Select(f => f.member_ids_found.Count).Sum();
             folder.numberOfDirectlyWantedVideosFound = folder.LinksWithNoMissingVideos.Count(f => f.linktype is Linktype.Video or Linktype.Short);
+   
         }
-#if DEBUG
-        foreach (Folderclass folder in folders)
-        {
-            foreach (YTLink link in folder.links)
-            {
-                if (link.linktype == Linktype.Channel_channel ||
-                    link.linktype == Linktype.Channel_at ||
-                    link.linktype == Linktype.Channel_user ||
-                    link.linktype == Linktype.Channel_c ||
-                    link.linktype == Linktype.Playlist)
-                {
-                    HashSet<string> allids = new HashSet<string>(link.member_ids);
-                    HashSet<string> found_ids = new HashSet<string>(link.member_ids_found);
-                    HashSet<string> not_found_ids = new HashSet<string>(link.member_ids_not_found);
-                    found_ids.UnionWith(not_found_ids);
-                    Debug.Assert(allids.SetEquals(found_ids));
-                }
-            }
-                
-            HashSet<YTLink> found = new HashSet<YTLink>(folder.LinksWithNoMissingVideos);
-            HashSet<YTLink> notfound = new HashSet<YTLink>(folder.LinksWithMissingVideos);
-            HashSet<YTLink> all = new HashSet<YTLink>(folder.links);
-            found.UnionWith(notfound);
-            Debug.Assert(all.SetEquals(found));
-        }
-#endif
     }
+
+    public static void ValidateFolderclassBeforeDownload(Folderclass folder)
+    {
+        foreach (YTLink link in folder.links)
+        {
+            if (link.linktype == Linktype.Channel_channel ||
+                link.linktype == Linktype.Channel_at ||
+                link.linktype == Linktype.Channel_user ||
+                link.linktype == Linktype.Channel_c ||
+                link.linktype == Linktype.Playlist)
+            {
+                HashSet<string> allids = new HashSet<string>(link.member_ids);
+                HashSet<string> found_ids = new HashSet<string>(link.member_ids_found);
+                HashSet<string> not_found_ids = new HashSet<string>(link.member_ids_not_found);
+                found_ids.UnionWith(not_found_ids);
+                Debug.Assert(allids.SetEquals(found_ids));
+            }
+        }
+        HashSet<YTLink> found = new HashSet<YTLink>(folder.LinksWithNoMissingVideos);
+        HashSet<YTLink> notfound = new HashSet<YTLink>(folder.LinksWithMissingVideos);
+        HashSet<YTLink> all = new HashSet<YTLink>(folder.links);
+        found.UnionWith(notfound);
+        Debug.Assert(all.SetEquals(found));
+    }
+    
+    public enum ProgramUI { GUI, CLI }
+    public static ProgramUI programUI;
 }

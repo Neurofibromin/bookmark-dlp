@@ -36,6 +36,11 @@ namespace bookmark_dlp.Models
         [ObservableProperty] private bool _isExpanded = false;
         internal ObservableCollection<HierarchicalFolderclass>? _children;
         /// <summary>
+        /// Size of all videos wanted by folder (not by its children) in bytes 
+        /// </summary>
+        [ObservableProperty] private int _estimatedSize;
+        
+        /// <summary>
         /// The folders that are children to the given folder are in this list. Hierarchical, tree structure.
         /// </summary>
         public IReadOnlyList<HierarchicalFolderclass>? Children => _children;
@@ -67,6 +72,7 @@ namespace bookmark_dlp.Models
             _numberOfOtherVideosFound = other.numberOfOtherVideosFound;
             _children = new ObservableCollection<HierarchicalFolderclass>();
             _hasChildren = other.childrenIds.Count > 0;
+            _estimatedSize = 0;
         }
         
         public static Comparison<HierarchicalFolderclass?> SortAscending<T>(Func<HierarchicalFolderclass, T> selector)

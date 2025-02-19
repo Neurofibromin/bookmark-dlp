@@ -418,5 +418,91 @@ namespace bookmark_dlp
             }
             return ytdlpConfigs;
         }
+
+        /// <summary>
+        /// Wrapper for private functions
+        /// </summary>
+        /// <param name="folders"></param>
+        public static async Task GetEstimatedSizes(ObservableCollection<HierarchicalFolderclass> folders)
+        {
+            await Task.WhenAll(folders.Select(GetFolderEstimatedSizes));
+        }
+
+        /// <summary>
+        /// Wrapper for link-by-link getting
+        /// </summary>
+        /// <param name="folders"></param>
+        private static async Task GetFolderEstimatedSizes(HierarchicalFolderclass rootfolder)
+        {
+            rootfolder.EstimatedSize = 0;
+            foreach (YTLink link in rootfolder.LinksWithMissingVideos)
+            {
+                rootfolder.EstimatedSize += await GetEstimatedSize(link);
+            }
+            if (rootfolder.Children?.Count > 0)
+            {
+                await Task.WhenAll(rootfolder.Children.Select(GetFolderEstimatedSizes));
+            }
+        }
+
+        /// <summary>
+        /// Calls yt-dlp
+        /// </summary>
+        /// <param name="link"></param>
+        /// <returns></returns>
+        private static async Task<int> GetEstimatedSize(YTLink link)
+        {
+            string url = link.url;
+            Process process = new Process
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = YtdlpPath,
+                    Arguments = $"--print \"filesize_approx\" -q \"{url}\"",
+                    RedirectStandardOutput = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                    WindowStyle = ProcessWindowStyle.Hidden,
+                    RedirectStandardError = true,
+                }
+            };
+            process.Start();
+            string result = await process.StandardOutput.ReadToEndAsync();
+            string error = await process.StandardError.ReadToEndAsync();
+            await process.WaitForExitAsync();
+            int exitCode = process.ExitCode;
+            process.Close();
+            if (exitCode != 0)
+            {
+                if (error.Contains("Unable to download webpage: HTTP Error 404") || error.Contains("Unable to download API page") || error.Contains("Failed to establish a new connection: [Errno -3]"))
+                {
+                    Logger.LogVerbose(error, Logger.Verbosity.Error);
+                    return 0;
+                }
+                if (result.Contains("Unable to download webpage: HTTP Error 404") || result.Contains("Unable to download API page") || result.Contains("Failed to establish a new connection: [Errno -3]"))
+                {
+                    Logger.LogVerbose(result, Logger.Verbosity.Error);
+                    return 0;
+                }
+                Logger.LogVerbose($"yt-dlp exit code: {exitCode}, failed to query videos for playlist: {url}", Logger.Verbosity.Error);
+                return 0;
+            }
+            // parse info from result:
+            int size = 0;
+            var lines = result.Split('\n', StringSplitOptions.RemoveEmptyEntries);
+            foreach (var line in lines)
+            {
+                Console.WriteLine(line);
+                continue;
+                if (int.TryParse(line, out int parsedSize))
+                {
+                    size = parsedSize;
+                    break; // Use the first valid size found
+                }
+            }
+
+            return size;
+        }
+        
     }
 }

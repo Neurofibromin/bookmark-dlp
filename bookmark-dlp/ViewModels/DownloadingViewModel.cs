@@ -31,6 +31,7 @@ using System.Threading;
 using System;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -43,11 +44,11 @@ namespace bookmark_dlp.ViewModels
 {
     public partial class DownloadingViewModel : ViewModelBase
     {
-        [ObservableProperty] private SettingsStruct? _activeSettings;
+        [ObservableProperty] private SettingsStruct _activeSettings;
         [ObservableProperty] private string? _fileSource;
         private List<Folderclass>? _folders;
-        public ObservableCollection<HierarchicalFolderclass>? HierarchicalFolderCollection { get; set; }
-        private static IconConverter? s_iconConverter;
+        private ObservableCollection<HierarchicalFolderclass>? HierarchicalFolderCollection { get; set; }
+        private static IconConverter? _iconConverter;
         [ObservableProperty] private HierarchicalTreeDataGridSource<HierarchicalFolderclass>? _treeSource;
         
         // public HierarchicalTreeDataGridSource<HierarchicalFolderclass> TreeSource => _treeSource;
@@ -63,8 +64,27 @@ namespace bookmark_dlp.ViewModels
         {
             ActiveSettings = AppSettings._settings;
         }
+
+        [RelayCommand]
+        private void GetCurrentStatusWithQueryYT()
+        {
+            // TODO: this
+            // At this point DownloadingView is open and the folders are loaded to TreeDataGrid
+            if (_folders == null)
+                throw new NoNullAllowedException("List<Folderclass> _folders must not be null when starting the status query.");
+            // LoadFoldersFromFile() : Import.SmartImport();
+            AutoImport.LinksFromUrls(_folders);
+            Functions.Createfolderstructure(_folders, ActiveSettings.Outputfolder);
+            AppMethods.CountWantedVideos(ref _folders);
+            AppMethods.CheckCurrentFilesystemState(ref _folders);
+        }
         
-        public async Task<bool> LoadFoldersFromFile()
+        /// <summary>
+        /// Starts the import and loads the imported folders to TreeDataGrid
+        /// </summary>
+        /// <returns>true if successful, false if import failed/empty</returns>
+        /// <exception cref="ArgumentNullException">There is no file source available</exception>
+        public bool LoadFoldersFromFile()
         {
             if(FileSource == null)
                 throw new ArgumentNullException(nameof(FileSource));
@@ -117,7 +137,7 @@ namespace bookmark_dlp.ViewModels
             get
             {
                 // Logger.LogVerbose("Getting FileIconConverter", Logger.Verbosity.Trace);
-                if (s_iconConverter is null)
+                if (_iconConverter is null)
                 {
                     Logger.LogVerbose("FileIconConverter is NULL", Logger.Verbosity.Trace);
                     bool a = Application.Current!.Styles.TryGetResource("folder_regular",theme: Application.Current.ActualThemeVariant , value: out var folderIconregular);
@@ -126,7 +146,7 @@ namespace bookmark_dlp.ViewModels
                     if (a && b && folderIconopen is StreamGeometry openFolderGeometry && folderIconregular is StreamGeometry regularFolderGeometry)
                     {
                         Logger.LogVerbose("FileIconConverter found", Logger.Verbosity.Trace);
-                        s_iconConverter = new IconConverter(openFolderGeometry, regularFolderGeometry);
+                        _iconConverter = new IconConverter(openFolderGeometry, regularFolderGeometry);
                     }
                     else
                     {
@@ -135,23 +155,23 @@ namespace bookmark_dlp.ViewModels
                             if (folderIconopen is StreamGeometry openFolderGeometry2)
                             {
                                 Logger.LogVerbose("Only folderIconopen found", Logger.Verbosity.Error);
-                                s_iconConverter = new IconConverter(openFolderGeometry2, new StreamGeometry());
+                                _iconConverter = new IconConverter(openFolderGeometry2, new StreamGeometry());
                             }
                             else if (folderIconregular is StreamGeometry regularFolderGeometry2)
                             {
                                 Logger.LogVerbose("Only folderIconregular found", Logger.Verbosity.Error);
-                                s_iconConverter = new IconConverter(new StreamGeometry(), regularFolderGeometry2);
+                                _iconConverter = new IconConverter(new StreamGeometry(), regularFolderGeometry2);
                             }
                             else
                             {
                                 Logger.LogVerbose("Failed to load folder icons. Using default values.", Logger.Verbosity.Error);
-                                s_iconConverter = new IconConverter(new StreamGeometry(), new StreamGeometry()); // Provide default values
+                                _iconConverter = new IconConverter(new StreamGeometry(), new StreamGeometry()); // Provide default values
                             }
                         }
                         else
                         {
                             Logger.LogVerbose("Failed to load folder icons. Using default values.", Logger.Verbosity.Error);
-                            s_iconConverter = new IconConverter(new StreamGeometry(), new StreamGeometry()); // Provide default values
+                            _iconConverter = new IconConverter(new StreamGeometry(), new StreamGeometry()); // Provide default values
                         }
                     }
 
@@ -161,9 +181,9 @@ namespace bookmark_dlp.ViewModels
                     else
                         Logger.LogVerbose("FileIconConverter not found", Logger.Verbosity.Error);
                     Logger.LogVerbose("Found folder icon resources.", Logger.Verbosity.Trace);
-                    s_iconConverter = new IconConverter((StreamGeometry) folderIconopen, (StreamGeometry) folderIconregular);*/
+                    _iconConverter = new IconConverter((StreamGeometry) folderIconopen, (StreamGeometry) folderIconregular);*/
                 }
-                return s_iconConverter;
+                return _iconConverter;
             }
         }
         #endregion

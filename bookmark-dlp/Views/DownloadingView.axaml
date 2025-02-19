@@ -92,7 +92,8 @@
                             Margin="3"
                             HorizontalAlignment="Right"
                             VerticalAlignment="Top"
-                            IsEnabled="False">
+                            IsEnabled="False"
+                            Command="{Binding GetCurrentStatusWithQueryYTCommand}">
                             <PathIcon Data="{StaticResource arrow_sync_circle_regular}" />
                         </Button>
                     </DockPanel>

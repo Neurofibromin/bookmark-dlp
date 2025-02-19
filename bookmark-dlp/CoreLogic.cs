@@ -50,8 +50,8 @@ namespace bookmark_dlp
                 bool downloadPlaylists = false;
                 bool downloadShorts = false;
                 bool downloadChannels = false;
-                bool concurrent_downloads = false;
-                bool cookies_autoextract = false;
+                // bool concurrent_downloads = false;
+                // bool cookies_autoextract = false;
 
                 Logger.LogVerbose("Interactive CLI session");
                 if (setOptions.HtmlFileLocation != null) { localhtml = setOptions.HtmlFileLocation; }
@@ -100,9 +100,9 @@ namespace bookmark_dlp
                 (downloadPlaylists, downloadShorts, downloadChannels) = AppMethods.Wantcomplex();
 
                 Logger.LogVerbose("Concurrent downloads? Y/N");
-                if (Console.ReadKey().ToString().ToLower().Equals("y")) { concurrent_downloads = true; }
+                // if (Console.ReadKey().ToString().ToLower().Equals("y")) { concurrent_downloads = true; }
                 Logger.LogVerbose("Cookies autoextract? Y/N");
-                if (Console.ReadKey().ToString().ToLower().Equals("y")) { cookies_autoextract = true; }
+                // if (Console.ReadKey().ToString().ToLower().Equals("y")) { cookies_autoextract = true; }
                 if (setOptions.Outputfolder == null)
                 {
                     while (true)

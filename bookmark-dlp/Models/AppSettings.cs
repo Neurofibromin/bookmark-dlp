@@ -16,7 +16,7 @@ namespace bookmark_dlp.Models
         /// <summary>
         /// Singleton!
         /// </summary>
-        public static SettingsStruct _settings;
+        public static SettingsStruct _settings = SettingsStruct.GetDefaultSettings();
         private static string? configloc;
         private static AppSettings _instance = new AppSettings();
         
@@ -26,24 +26,32 @@ namespace bookmark_dlp.Models
             configloc = AppMethods.ConfigFileLocation();
             if (File.Exists(configloc))
             {
-                string jsonimportstring = File.ReadAllText(configloc);
+                SettingsStruct? imported;
                 try
                 {
-                    SettingsStruct? imported = JsonSerializer.Deserialize<SettingsStruct>(jsonimportstring);
+                    string jsonimportstring = File.ReadAllText(configloc);
+                    imported = JsonSerializer.Deserialize<SettingsStruct>(jsonimportstring);
                     imported = ValidateImportedSettingsBeforeUse(imported);
-                    _settings = imported ?? throw new NullReferenceException();
-                    Logger.LogVerbose("Config import successful", Logger.Verbosity.Info);
                 }
                 catch
                 {
-                    Logger.LogVerbose("Settings could not be deserialized, fallback to default settings. Not overwriting corrupt file!");
+                    Logger.LogVerbose("Settings could not be deserialized, fallback to default settings. Not overwriting corrupt file!", Logger.Verbosity.Error);
+                    imported = null;
+                }
+                if (imported != null)
+                {
+                    _settings = imported;
+                    Logger.LogVerbose("Config import successful", Logger.Verbosity.Info);
+                }
+                else
+                {
                     _settings = SettingsStruct.GetDefaultSettings();
                     configloc = null; //to protect file from overwrite
-                }
+                }   
             }
             else
             {
-                Logger.LogVerbose("Config file doesnt exist, going with defaults");
+                Logger.LogVerbose("Config file does not exist, going with defaults");
                 _settings = SettingsStruct.GetDefaultSettings(); //no config file, so set configs to default value
                 configloc = null;
             }
