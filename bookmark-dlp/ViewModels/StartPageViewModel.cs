@@ -41,17 +41,19 @@ namespace bookmark_dlp.ViewModels
         [ObservableProperty] private bool _enableImportButton;
 
 
-        public StartPageViewModel()
+        public StartPageViewModel(IAppSettings appSettings)
         {
             AvailableBrowserBookmarkPaths = BrowserLocations.GetBrowserBookmarkFilesPaths()?
                 .SelectMany(browser => browser.foundProfiles)
                 .ToList() ?? new List<string>();
             
             if (YtdlpInterfacing.Yt_dlp_pathfinder(Directory.GetCurrentDirectory()) != null) { AppSettings._settings.Ytdlp_executable_not_found = false; }
-            ActiveSettings = AppSettings._settings;
+            _activeSettings = appSettings.Settings;
             ActiveSettings.PropertyChanged += ActiveSettings_PropertyChanged;
             ShouldEnableImportButton();
         }
+        
+        public StartPageViewModel() : this(new AppSettings()) {}
         
         partial void OnChosenBrowserChanged(string? value)
         {

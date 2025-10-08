@@ -51,6 +51,7 @@
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
     <PackageReference Include="Material.Avalonia" Version="3.13.1" />
     <PackageReference Include="Microsoft.Data.Sqlite" Version="9.0.9" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.9" />
     <PackageReference Include="Semi.Avalonia" Version="11.3.7" />
     <PackageReference Include="Semi.Avalonia.TreeDataGrid" Version="11.0.10.4" />
   </ItemGroup>

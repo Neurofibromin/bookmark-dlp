@@ -46,18 +46,23 @@ namespace bookmark_dlp.ViewModels
 
         [ObservableProperty] private List<TabItem> _tabItems;
         
-        public MainWindowViewModel()
+        public MainWindowViewModel( StartPageViewModel startPageViewModel, 
+            SettingsViewModel settingsViewModel, 
+            LogViewModel logViewModel, 
+            DownloadingViewModel downloadingViewModel)
         {
             // Initialize ViewModels
-            _mySettingsViewModel = new SettingsViewModel();
-            _myStartPageViewModel = new StartPageViewModel();
-            _myDownloadingViewModel = new DownloadingViewModel();
-            _myLogViewModel = new LogViewModel();
+            _myStartPageViewModel = startPageViewModel;
+            _mySettingsViewModel = settingsViewModel;
+            _myLogViewModel = logViewModel;
+            _myDownloadingViewModel = downloadingViewModel;
             
             TabItems = GetTabItems();
             SelectedTab = TabItems.First(x => x.Content == MyStartPageViewModel);
             PreviousSelectedTab = SelectedTab;
         }
+        
+        public MainWindowViewModel() {}
 
         private List<TabItem> GetTabItems()
         {
