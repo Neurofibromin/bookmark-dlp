@@ -50,8 +50,8 @@
 		<!-- HashCode is included in later frameworks -->
 		<PackageReference Include="Microsoft.Bcl.HashCode" Version="6.0.0" Condition="'$(Targetframework)' == 'netstandard2.0'" />
 		<PackageReference Include="Microsoft.Bcl.HashCode" Version="6.0.0" Condition="'$(Targetframework)' == 'NET481'" />
-		<PackageReference Include="Microsoft.Data.Sqlite" Version="9.0.1"/>
-		<PackageReference Include="System.Text.Json" Version="9.0.1" />
+		<PackageReference Include="Microsoft.Data.Sqlite" Version="9.0.9" />
+		<PackageReference Include="System.Text.Json" Version="9.0.9" />
 		<None Include="README.nuget.md" Pack="true" PackagePath="\README.md"/>
 	</ItemGroup>
 	

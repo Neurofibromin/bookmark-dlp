@@ -8,6 +8,8 @@ todo.txt
 doxygen-generated/
 bookmark-dlp.sln.DotSettings.user
 test_data_files
+header-collector.sh
+concatenated_code.txt
 
 ################################################################################
 # This .gitignore file was automatically created by Microsoft(R) Visual Studio.
