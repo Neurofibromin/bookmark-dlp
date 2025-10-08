@@ -45,10 +45,12 @@ namespace bookmark_dlp.ViewModels
     public partial class SettingsViewModel : ViewModelBase
     {
         [ObservableProperty] private SettingsStruct _activeSettings;
+        private IAppSettings _appSettings;
         
         public SettingsViewModel(IAppSettings appSettings) 
         {
             _activeSettings = appSettings.Settings;
+            _appSettings = appSettings;
         }
 
         //for the XAML designer to work
@@ -57,7 +59,7 @@ namespace bookmark_dlp.ViewModels
         [RelayCommand]
         private void RestoreDefaultSettings()
         {
-            AppSettings.ResetSettingsToDefault();
+            _appSettings.ResetSettingsToDefault();
         }
         
         [RelayCommand]

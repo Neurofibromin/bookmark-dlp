@@ -108,7 +108,7 @@ namespace bookmark_dlp.Models
             return importedsettings;
         }
 
-        public static void ResetSettingsToDefault()
+        public void ResetSettingsToDefault()
         {
             Settings = SettingsStruct.GetDefaultSettings();
         }
@@ -257,5 +257,6 @@ namespace bookmark_dlp.Models
     public interface IAppSettings
     {
         SettingsStruct Settings { get; }
+        public void ResetSettingsToDefault();
     }
 }
