@@ -60,10 +60,12 @@ namespace bookmark_dlp.ViewModels
             private set => this.SetPropertyAndNotifyOnCompletion(ref _source, value);
         }*/
         
-        public DownloadingViewModel()
+        public DownloadingViewModel(IAppSettings appSettings)
         {
-            ActiveSettings = AppSettings._settings;
+            _activeSettings = appSettings.Settings;
         }
+        
+        public DownloadingViewModel() : this(new AppSettings()) {}
 
         [RelayCommand]
         private void GetCurrentStatusWithQueryYT()

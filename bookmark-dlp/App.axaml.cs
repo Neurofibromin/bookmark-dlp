@@ -2,6 +2,8 @@ using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Data.Core;
 using System.Runtime.InteropServices;
+using System.Runtime.InteropServices.JavaScript;
+using Microsoft.Extensions.DependencyInjection; 
 using Avalonia.Controls;
 using Avalonia.Data.Core.Plugins;
 using Avalonia.Markup.Xaml;
@@ -18,17 +20,28 @@ namespace bookmark_dlp
         {
             AvaloniaXamlLoader.Load(this);
         }
+        
+        private void ConfigureServices(IServiceCollection services, String? configpath_location)
+        {
+            services.AddSingleton<IAppSettings>(new AppSettings(configpath_location));
+            services.AddTransient<MainWindowViewModel>();
+            services.AddTransient<StartPageViewModel>();
+            services.AddTransient<SettingsViewModel>();
+            services.AddTransient<DownloadingViewModel>();
+            services.AddTransient<LogViewModel>();
+        }
 
         /// <summary>
         /// Show AskConfigWindow popup if no config found, then show the MainWindow
         /// </summary>
         public override void OnFrameworkInitializationCompleted()
         {
+            // Line below is needed to remove Avalonia data validation.
+            // Without this line you will get duplicate validations from both Avalonia and CT
+            BindingPlugins.DataValidators.RemoveAt(0);
+            
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
-                // Line below is needed to remove Avalonia data validation.
-                // Without this line you will get duplicate validations from both Avalonia and CT
-                BindingPlugins.DataValidators.RemoveAt(0);
                 if (!AppMethods.IsConfigPresent())
                 {
                     var askConfigViewModel = new AskConfigWindowViewModel();
@@ -39,6 +52,8 @@ namespace bookmark_dlp
                     desktop.MainWindow = askConfigWindow;
                     askConfigWindow.Show();
 
+                    String? configpath_location = null;
+
                     MessageBus.ButtonClicked += (sender, buttonText) =>
                     {
                         //await Console.Out.WriteLineAsync(buttonText);
@@ -47,31 +62,35 @@ namespace bookmark_dlp
                             case "Appdata/local":
                                 if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
                                 {
-                                    string configpath_osx = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.Personal), "bookmark-dlp/bookmark-dlp.conf");
-                                    AppSettings.SetConfigFileLocation(configpath_osx);
+                                    configpath_location = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.Personal), "bookmark-dlp/bookmark-dlp.conf");
                                 }
                                 else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                                 {
-                                    string configpath_windows = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "bookmark-dlp\\bookmark-dlp.conf");
-                                    AppSettings.SetConfigFileLocation(configpath_windows);
+                                    configpath_location = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "bookmark-dlp\\bookmark-dlp.conf");
                                 }
                                 else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                                 {
-                                    string configpath_linux = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "bookmark-dlp/bookmark-dlp.conf");
-                                    AppSettings.SetConfigFileLocation(configpath_linux);
+                                    configpath_location = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "bookmark-dlp/bookmark-dlp.conf");
                                 }
                                 break;
                             case "No config":
-                                AppSettings.SetConfigFileLocation(null);
+                                configpath_location = null;
                                 break;
                             case "local dir":
-                                AppSettings.SetConfigFileLocation(Path.Combine(Directory.GetCurrentDirectory(), "bookmark-dlp.conf"));
+                                configpath_location = Path.Combine(Directory.GetCurrentDirectory(), "bookmark-dlp.conf");
                                 break;
                             default:
-                                AppSettings.SetConfigFileLocation(null);
+                                configpath_location = null;
                                 break;
                         }
-                        var mainWindowVm = new MainWindowViewModel();
+                        
+                        
+                        // var mainWindowVm = new MainWindowViewModel();
+                        var collection = new ServiceCollection();
+                        ConfigureServices(collection, configpath_location);
+                        var services = collection.BuildServiceProvider();
+                        
+                        MainWindowViewModel mainWindowVm = services.GetRequiredService<MainWindowViewModel>();
                         var mainWindow = new MainWindow
                         {
                             DataContext = mainWindowVm,
@@ -85,7 +104,11 @@ namespace bookmark_dlp
                 {
                     Logger.LogVerbose("Config was found", Logger.Verbosity.Debug);
                     Logger.LogVerbose("Location: " + AppMethods.ConfigFileLocation(), Logger.Verbosity.Debug);
-                    var mainWindowVm = new MainWindowViewModel();
+                    // var mainWindowVm = new MainWindowViewModel();
+                    var collection = new ServiceCollection();
+                    ConfigureServices(collection, AppMethods.ConfigFileLocation());
+                    var services = collection.BuildServiceProvider();
+                    MainWindowViewModel mainWindowVm = services.GetRequiredService<MainWindowViewModel>();
                     var mainWindow = new MainWindow
                     {
                         DataContext = mainWindowVm,

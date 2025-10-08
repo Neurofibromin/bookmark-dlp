@@ -46,17 +46,33 @@ namespace bookmark_dlp.ViewModels
 
         [ObservableProperty] private List<TabItem> _tabItems;
         
-        public MainWindowViewModel()
+        public MainWindowViewModel( StartPageViewModel startPageViewModel, 
+            SettingsViewModel settingsViewModel, 
+            LogViewModel logViewModel, 
+            DownloadingViewModel downloadingViewModel)
         {
             // Initialize ViewModels
-            _mySettingsViewModel = new SettingsViewModel();
-            _myStartPageViewModel = new StartPageViewModel();
-            _myDownloadingViewModel = new DownloadingViewModel();
-            _myLogViewModel = new LogViewModel();
+            _myStartPageViewModel = startPageViewModel;
+            _mySettingsViewModel = settingsViewModel;
+            _myLogViewModel = logViewModel;
+            _myDownloadingViewModel = downloadingViewModel;
             
-            TabItems = GetTabItems();
-            SelectedTab = TabItems.First(x => x.Content == MyStartPageViewModel);
-            PreviousSelectedTab = SelectedTab;
+            _tabItems = GetTabItems();
+            _selectedTab = TabItems.First(x => x.Content == MyStartPageViewModel);
+            PreviousSelectedTab = _selectedTab;
+        }
+        
+        // Parameterless constructor for XAML designer support
+        public MainWindowViewModel() 
+        {
+            var appSettings = new AppSettings();
+            _myStartPageViewModel = new StartPageViewModel(appSettings);
+            _mySettingsViewModel = new SettingsViewModel(appSettings);
+            _myLogViewModel = new LogViewModel();
+            _myDownloadingViewModel = new DownloadingViewModel(appSettings);
+
+            _tabItems = GetTabItems();
+            _selectedTab = _tabItems.First();
         }
 
         private List<TabItem> GetTabItems()
@@ -65,34 +81,13 @@ namespace bookmark_dlp.ViewModels
                 <TabItem Name="Imported" Header="Imported" Content="{Binding MyDownloadingViewModel}" IsEnabled="{Binding DownloadingEnabled}"/>
                 <TabItem Name="Log" Header="Log" Content="{Binding MyLogViewModel}" IsEnabled="{Binding LogEnabled}"/>
                 <TabItem Name="Settings" Header="Settings" Content="{Binding MySettingsViewModel}" IsEnabled="{Binding SettingsEnabled}"/>*/
-            List<TabItem> tabItems = new List<TabItem>()
+            return new List<TabItem>()
             {
-                new TabItem()
-                {
-                    Header = "Sources",
-                    Content = MyStartPageViewModel,
-                    IsEnabled = true
-                },
-                new TabItem()
-                {
-                    Header = "Imported",
-                    Content = MyDownloadingViewModel,
-                    IsEnabled = false
-                },
-                new TabItem()
-                {
-                    Header = "Log",
-                    Content = MyLogViewModel,
-                    IsEnabled = true
-                },
-                new TabItem()
-                {
-                    Header = "Settings",
-                    Content = MySettingsViewModel,
-                    IsEnabled = true
-                },
+                new TabItem() { Header = "Sources", Content = MyStartPageViewModel, IsEnabled = true },
+                new TabItem() { Header = "Imported", Content = MyDownloadingViewModel, IsEnabled = false },
+                new TabItem() { Header = "Log", Content = MyLogViewModel, IsEnabled = true },
+                new TabItem() { Header = "Settings", Content = MySettingsViewModel, IsEnabled = true },
             };
-            return tabItems;
         }
         
         public void SettingsCommand()
@@ -104,9 +99,10 @@ namespace bookmark_dlp.ViewModels
         public void GoForward()
         {
             //PreviousViewModel = SelectedTab;
-            MyDownloadingViewModel.FileSource = AppSettings._settings.ManualImportUsed
-                ? AppSettings._settings.Manualimportfilelocation
+            MyDownloadingViewModel.FileSource = MyStartPageViewModel.ActiveSettings.ManualImportUsed
+                ? MyStartPageViewModel.ActiveSettings.Manualimportfilelocation
                 : MyStartPageViewModel.ChosenBrowser;
+
             ImportSuccess = MyDownloadingViewModel.LoadFoldersFromFile();
             if (ImportSuccess)
             {

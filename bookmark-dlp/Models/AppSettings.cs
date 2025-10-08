@@ -4,69 +4,79 @@ using System.Text;
 using CommunityToolkit.Mvvm.ComponentModel;
 using System.Text.Json;
 using NfLogger;
+using System.IO;
+using System;
+using System.Linq;
 
 namespace bookmark_dlp.Models
 {
-    /// <summary>
-    /// Stores a global AppSettings state. ViewModels build their own from the global state and return their changes to the global state.
-    /// Built from config file if present. Otherwise defaults are loaded.
-    /// </summary>
-    public sealed class AppSettings
+    public class AppSettings : IAppSettings
     {
-        /// <summary>
-        /// Singleton!
-        /// </summary>
-        public static SettingsStruct _settings = SettingsStruct.GetDefaultSettings();
-        private static string? configloc;
-        private static AppSettings _instance = new AppSettings();
+        private string? _configloc;
         
-        //Constructor
-        private AppSettings()
+        public SettingsStruct Settings { get; private set; }
+        
+        public AppSettings(String? configpath_location = null)
         {
-            configloc = AppMethods.ConfigFileLocation();
-            if (File.Exists(configloc))
+            _configloc = configpath_location ?? AppMethods.ConfigFileLocation();
+            
+            Settings = SettingsStruct.GetDefaultSettings();
+
+            if (!string.IsNullOrEmpty(_configloc) && File.Exists(_configloc))
             {
-                SettingsStruct? imported;
-                try
-                {
-                    string jsonimportstring = File.ReadAllText(configloc);
-                    imported = JsonSerializer.Deserialize<SettingsStruct>(jsonimportstring);
-                    imported = ValidateImportedSettingsBeforeUse(imported);
-                }
-                catch
-                {
-                    Logger.LogVerbose("Settings could not be deserialized, fallback to default settings. Not overwriting corrupt file!", Logger.Verbosity.Error);
-                    imported = null;
-                }
-                if (imported != null)
-                {
-                    _settings = imported;
-                    Logger.LogVerbose("Config import successful", Logger.Verbosity.Info);
-                }
-                else
-                {
-                    _settings = SettingsStruct.GetDefaultSettings();
-                    configloc = null; //to protect file from overwrite
-                }   
+                LoadFromFile(_configloc);
             }
             else
             {
-                Logger.LogVerbose("Config file does not exist, going with defaults");
-                _settings = SettingsStruct.GetDefaultSettings(); //no config file, so set configs to default value
-                configloc = null;
+                Logger.LogVerbose("Config file does not exist or location not set, going with defaults");
             }
-            _settings.PropertyChanged += SettingsOnPropertyChanged;
+            Settings.PropertyChanged += SettingsOnPropertyChanged;
         }
 
+        private void LoadFromFile(string configPath)
+        {
+            try
+            {
+                string jsonimportstring = File.ReadAllText(configPath);
+                var imported = JsonSerializer.Deserialize<SettingsStruct>(jsonimportstring);
+                Settings = ValidateImportedSettingsBeforeUse(imported) ?? SettingsStruct.GetDefaultSettings();
+                Logger.LogVerbose("Config import successful", Logger.Verbosity.Info);
+            }
+            catch(Exception ex)
+            {
+                Logger.LogVerbose($"Settings could not be deserialized: {ex.Message}. Falling back to default settings.", Logger.Verbosity.Error);
+                Settings = SettingsStruct.GetDefaultSettings();
+                _configloc = null; // Protect corrupt file from being overwritten
+            }
+        }
+        
+        public void SaveToFile()
+        {
+            if (_configloc != null)
+            {
+                string jsonstringexport = JsonSerializer.Serialize(Settings);
+                // Ensure directory exists before writing
+                var directory = Path.GetDirectoryName(_configloc);
+                if (directory != null) Directory.CreateDirectory(directory);
+
+                File.WriteAllText(_configloc, jsonstringexport);
+            }
+        }
+        
         private void SettingsOnPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(_settings.Yt_dlp_binary_path) && _settings.Yt_dlp_binary_path != null)
+            if (e.PropertyName == nameof(Settings.Yt_dlp_binary_path) && Settings.Yt_dlp_binary_path != null)
             {
-                YtdlpInterfacing.YtdlpPath = _settings.Yt_dlp_binary_path;
-                _settings.Yt_dlp_configfiles = new ObservableCollection<string>(YtdlpInterfacing.Yt_dlp_configfinder(Directory.GetCurrentDirectory(), _settings.Yt_dlp_binary_path));
+                YtdlpInterfacing.YtdlpPath = Settings.Yt_dlp_binary_path;
+                Settings.Yt_dlp_configfiles = new ObservableCollection<string>(YtdlpInterfacing.Yt_dlp_configfinder(Directory.GetCurrentDirectory(), Settings.Yt_dlp_binary_path, Settings.Outputfolder));
                 Logger.LogVerbose("Ytdlp path changed in YtdlpInterfacing");
             }
             SaveToFile();
+        }
+        
+        public void SetConfigFileLocation(string? configfilelocation)
+        {
+            _configloc = configfilelocation;
         }
 
         /// <summary>
@@ -94,72 +104,41 @@ namespace bookmark_dlp.Models
             if (importedsettings.Outputfolder != null)
                 if(!Directory.Exists(importedsettings.Outputfolder))
                     importedsettings.Outputfolder = SettingsStruct.GetDefaultSettings().Outputfolder;
-            foreach (string file in importedsettings.Yt_dlp_configfiles)
+            
+            var filesToRemove = importedsettings.Yt_dlp_configfiles.Where(file => !File.Exists(file)).ToList();
+            foreach (var file in filesToRemove)
             {
-                if(!File.Exists(file))
-                    importedsettings.Yt_dlp_configfiles.Remove(file);    
-            }    
+                importedsettings.Yt_dlp_configfiles.Remove(file);
+            }
             
             return importedsettings;
         }
 
-        public static AppSettings GetAppSettings()
+        public void ResetSettingsToDefault()
         {
-            return _instance;
+            var defaultSettings = SettingsStruct.GetDefaultSettings();
+            Settings.Manualimportfilelocation = defaultSettings.Manualimportfilelocation;
+            Settings.ManualImportUsed = defaultSettings.ManualImportUsed;
+            Settings.Outputfolder = defaultSettings.Outputfolder;
+            Settings.Ytdlp_executable_not_found = defaultSettings.Ytdlp_executable_not_found;
+            Settings.DownloadPlaylists = defaultSettings.DownloadPlaylists;
+            Settings.DownloadShorts = defaultSettings.DownloadShorts;
+            Settings.DownloadChannels = defaultSettings.DownloadChannels;
+            Settings.Concurrent_downloads = defaultSettings.Concurrent_downloads;
+            Settings.Cookies_autoextract = defaultSettings.Cookies_autoextract;
+            Settings.Yt_dlp_binary_path = defaultSettings.Yt_dlp_binary_path;
+            Settings.CanChangeSettings = defaultSettings.CanChangeSettings;
+            Settings.Selected_yt_dlp_configfile = defaultSettings.Selected_yt_dlp_configfile;
+            Settings.Yt_dlp_configfiles = new ObservableCollection<string>(defaultSettings.Yt_dlp_configfiles);
         }
-
-        public static void ResetSettingsToDefault()
-        {
-            _settings.ManualImportUsed = false;
-            _settings.Manualimportfilelocation = "";
-            _settings.Outputfolder = Directory.GetCurrentDirectory();
-            _settings.Ytdlp_executable_not_found = true;
-            _settings.DownloadPlaylists = false; 
-            _settings.DownloadShorts = false; 
-            _settings.DownloadChannels = false; 
-            _settings.Concurrent_downloads = false;
-            _settings.Cookies_autoextract = false; 
-            _settings.Yt_dlp_binary_path = YtdlpInterfacing.Yt_dlp_pathfinder(Directory.GetCurrentDirectory());
-            _settings.Yt_dlp_configfiles = YtdlpInterfacing.Yt_dlp_configfinder(Directory.GetCurrentDirectory(), _settings.Yt_dlp_binary_path);
-        }
-
-
-        private static void SaveToFile()
-        {
-            //if configloc already exists overwrite it, if not create it
-            if (configloc != null) //only save to file if a config file is present or was chosen
-            {
-                string jsonstringexport = JsonSerializer.Serialize(_settings);
-                File.Delete(configloc);
-                StreamWriter write = new StreamWriter(configloc, append:false, encoding:Encoding.UTF8);
-                write.Write(jsonstringexport);
-                write.Close();
-            }
-        }
-
+        
         /// <summary>
         /// Finalizer
         /// </summary>
         ~AppSettings()
         {
-            if(configloc != null){ SaveToFile(); } //only save to file if a config file is present or was chosen
+            if(_configloc != null){ SaveToFile(); } //only save to file if a config file is present or was chosen
         }
-        
-        /// <summary>
-        /// Gets JSON string representation of whole AppSettings state in current form. Used by ViewModels to build local Settings state.
-        /// </summary>
-        /// <returns>Json string of settings.</returns>
-        public static string GetJsonStringRepresentation()
-        {
-            string a = JsonSerializer.Serialize(_settings);
-            return a;
-        }
-
-        public static void SetConfigFileLocation(string? configfilelocation)
-        {
-            configloc = configfilelocation;
-        }
-        
     }
 
     /// <summary>
@@ -209,22 +188,6 @@ namespace bookmark_dlp.Models
             yt_dlp_configfiles = cyt_dlp_configfiles;
             selected_yt_dlp_configfile = cselected_yt_dlp_configfile;
         }
-        
-        /*public SettingsStruct(SettingsStruct other)
-        {
-            manualimportfilelocation = other.manualimportfilelocation;
-            manualImportUsed = other.manualImportUsed;
-            outputfolder = other.outputfolder;
-            ytdlp_executable_not_found = other.ytdlp_executable_not_found;
-            downloadPlaylists = other.downloadPlaylists;
-            downloadShorts = other.downloadShorts;
-            downloadChannels = other.downloadChannels;
-            concurrent_downloads = other.concurrent_downloads;
-            cookies_autoextract = other.cookies_autoextract;
-            yt_dlp_binary_path = other.yt_dlp_binary_path;
-            canChangeSettings = other.canChangeSettings;
-            yt_dlp_configfiles = new ObservableCollection<string>(other.yt_dlp_configfiles == null ? new List<string>() : other.yt_dlp_configfiles);
-        }*/
 
         /// <summary>
         /// Parameterless ctor needed by JsonSerializer.Deserialize
@@ -281,16 +244,23 @@ namespace bookmark_dlp.Models
 
         public static SettingsStruct GetDefaultSettings()
         {
+            var outputFolder = Directory.GetCurrentDirectory();
             return new SettingsStruct(
                 cmanualimportfilelocation: "", cmanualImportUsed: false,
-                coutputfolder: Directory.GetCurrentDirectory(),
+                coutputfolder: outputFolder,
                 cytdlp_executable_not_found: true,
                 cdownloadPlaylists: false, cdownloadShorts: false,
                 cdownloadChannels: false,
                 cconcurrent_downloads: false, ccookies_autoextract: false,
                 cyt_dlp_binary_path: YtdlpInterfacing.Yt_dlp_pathfinder(Directory.GetCurrentDirectory()),
-                ccanChangeSettings: true, cyt_dlp_configfiles: YtdlpInterfacing.Yt_dlp_configfinder(),
+                ccanChangeSettings: true, cyt_dlp_configfiles: YtdlpInterfacing.Yt_dlp_configfinder(output_folder: outputFolder),
                 cselected_yt_dlp_configfile: null);
         }
+    }
+    
+    public interface IAppSettings
+    {
+        SettingsStruct Settings { get; }
+        void ResetSettingsToDefault();
     }
 }

@@ -375,8 +375,9 @@ namespace bookmark_dlp
         /// </summary>
         /// <param name="rootdir">directory bookmark-dlp is called from</param>
         /// <param name="ytdlp_path">path to yt-dlp executable</param>
+        /// <param name="output_folder">The configured output folder</param>
         /// <returns>List of found yt-dlp configs (may be length of 0)</returns>
-        public static ObservableCollection<string> Yt_dlp_configfinder(string? rootdir = "", string? ytdlp_path = "")
+        public static ObservableCollection<string> Yt_dlp_configfinder(string? rootdir = "", string? ytdlp_path = "", string? output_folder = "")
         {
             ObservableCollection<String> ytdlpConfigs = new ObservableCollection<string>();
             if (!string.IsNullOrEmpty(rootdir))
@@ -389,10 +390,10 @@ namespace bookmark_dlp
                 if (File.Exists(Path.Combine(ytdlp_path, "yt-dlp.conf")))
                     ytdlpConfigs.Add(Path.Combine(ytdlp_path, "yt-dlp.conf"));
             }
-            if (!string.IsNullOrEmpty(AppSettings._settings?.Outputfolder))
+            if (!string.IsNullOrEmpty(output_folder))
             {
-                if (File.Exists(Path.Combine(AppSettings._settings.Outputfolder, "yt-dlp.conf")))
-                    ytdlpConfigs.Add(Path.Combine(AppSettings._settings.Outputfolder, "yt-dlp.conf"));
+                if (File.Exists(Path.Combine(output_folder, "yt-dlp.conf")))
+                    ytdlpConfigs.Add(Path.Combine(output_folder, "yt-dlp.conf"));
             }
             List<string> defaultlocations = new List<string>
             {
