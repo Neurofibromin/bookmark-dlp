@@ -47,7 +47,8 @@
         </Grid>
         <DockPanel Margin="4">
             <Label FontSize="9">Current output folder:</Label>
-            <Label Background="YellowGreen" Content="{Binding ActiveSettings.Outputfolder, TargetNullValue='not found'}" />
+            <Label Background="YellowGreen"
+                   Content="{Binding ActiveSettings.Outputfolder, TargetNullValue='not found'}" />
             <Button
                 HorizontalAlignment="Right"
                 Command="{Binding ChooseOutputFolderCommand}"
@@ -64,12 +65,13 @@
         </Button>
         <StackPanel Orientation="Horizontal">
             <TextBlock FontSize="9">yt-dlp config source</TextBlock>
-            <ListBox SelectionMode="AlwaysSelected" 
+            <ListBox SelectionMode="AlwaysSelected"
                      Background="Chartreuse"
                      SelectedItem="{Binding ActiveSettings.Selected_yt_dlp_configfile}"
-                     ItemsSource="{Binding ActiveSettings.Yt_dlp_configfiles}"
-                     />
-            <Button Command="{Binding ChooseConfFileCommand}"><TextBlock FontSize="9">Add new config</TextBlock></Button>
+                     ItemsSource="{Binding ActiveSettings.Yt_dlp_configfiles}" />
+            <Button Command="{Binding ChooseConfFileCommand}">
+                <TextBlock FontSize="9">Add new config</TextBlock>
+            </Button>
         </StackPanel>
         <StackPanel Orientation="Horizontal">
             <TextBlock FontSize="9">Theme</TextBlock>

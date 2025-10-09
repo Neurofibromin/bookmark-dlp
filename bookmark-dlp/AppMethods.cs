@@ -1,17 +1,19 @@
 ﻿using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using bookmark_dlp.Models;
-using Nfbookmark;
 using NfLogger;
 
 namespace bookmark_dlp;
 
 public static class AppMethods
 {
+    public enum ProgramUI { GUI, CLI }
+
+    public static ProgramUI programUI;
+
     /// <summary>
-    /// Asks user if they want playlists, shorts and channels downloaded.
+    ///     Asks user if they want playlists, shorts and channels downloaded.
     /// </summary>
     /// <returns>Want (downloadPlaylists, downloadShorts, downloadChannels) in this order.</returns>
     public static (bool, bool, bool) Wantcomplex()
@@ -47,14 +49,9 @@ public static class AppMethods
     public static string? ConfigFileLocation()
     {
         string configpath_local = Path.Combine(Directory.GetCurrentDirectory(), "bookmark-dlp.conf");
-        if (File.Exists(configpath_local))
-        {
-            return configpath_local;
-        }
+        if (File.Exists(configpath_local)) return configpath_local;
         if (File.Exists(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "bookmark-dlp.conf")))
-        {
             return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "bookmark-dlp.conf");
-        }
         if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
         {
             string configpath_osx = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.Personal), "bookmark-dlp", "bookmark-dlp.conf");
@@ -75,18 +72,14 @@ public static class AppMethods
 
     public static bool IsConfigPresent()
     {
-        if (ConfigFileLocation() == null)
-        {
-            return false;
-        }
-        else
-        {
-            return true;
-        }
+        if (ConfigFileLocation() == null) return false;
+
+        return true;
     }
-    
+
     /// <summary>
-    /// Generating Hierarchical Observable FolderCollection from folders, used when displaying the list of folders in the TreeDataGrid.
+    ///     Generating Hierarchical Observable FolderCollection from folders, used when displaying the list of folders in the
+    ///     TreeDataGrid.
     /// </summary>
     /// <param name="folders"></param>
     /// <returns></returns>
@@ -137,17 +130,17 @@ public static class AppMethods
     }
     
     /// <summary>
-    /// Count how many videos are wanted directly or indirectly. <br/>
-    /// Requires:
-    /// <list type="bullet">
-    /// <item> links </item>
-    /// <item> link.member_ids </item>
-    /// </list>
-    /// Fills:
-    /// <list type="bullet"> 
-    /// <item> numberOfVideosDirectlyWanted </item>
-    /// <item> numberOfVideosIndirectlyWanted </item>
-    /// </list>    
+    ///     Count how many videos are wanted directly or indirectly. <br />
+    ///     Requires:
+    ///     <list type="bullet">
+    ///         <item> links </item>
+    ///         <item> link.member_ids </item>
+    ///     </list>
+    ///     Fills:
+    ///     <list type="bullet">
+    ///         <item> numberOfVideosDirectlyWanted </item>
+    ///         <item> numberOfVideosIndirectlyWanted </item>
+    ///     </list>
     /// </summary>
     /// <param name="folders"></param>
     public static void CountWantedVideos(ref List<Folderclass> folders)
@@ -174,25 +167,27 @@ public static class AppMethods
     
     
     /// <summary>
-    /// Checks if wanted videos are found on the filesystem (are/were downloaded) and fills Folderclass fields for object accordingly.
-    /// Only checks the filenames for the yt-id (11 characters): if yt-dlp config is set to not include such id in the filename it will not work.<br/>
-    /// Only queries filesystem, no requests to YouTube. <br/>
-    /// Requires:
-    /// <list type="bullet">
-    /// <item> folderpath </item>
-    /// <item> links </item>
-    /// <item> link.member_ids </item>
-    /// </list>
-    /// Fills:
-    /// <list type="bullet"> 
-    /// <item> numberOfDirectlyWantedVideosFound </item>
-    /// <item> numberOfIndirectlyWantedVideosFound </item>
-    /// <item> numberOfOtherVideosFound </item>
-    /// <item> LinksWithNoMissingVideos </item>
-    /// <item> LinksWithMissingVideos </item>
-    /// <item> link.member_ids_not_found </item>
-    /// <item> link.member_ids_found </item>
-    /// </list>  
+    ///     Checks if wanted videos are found on the filesystem (are/were downloaded) and fills Folderclass fields for object
+    ///     accordingly.
+    ///     Only checks the filenames for the yt-id (11 characters): if yt-dlp config is set to not include such id in the
+    ///     filename it will not work.<br />
+    ///     Only queries filesystem, no requests to YouTube. <br />
+    ///     Requires:
+    ///     <list type="bullet">
+    ///         <item> folderpath </item>
+    ///         <item> links </item>
+    ///         <item> link.member_ids </item>
+    ///     </list>
+    ///     Fills:
+    ///     <list type="bullet">
+    ///         <item> numberOfDirectlyWantedVideosFound </item>
+    ///         <item> numberOfIndirectlyWantedVideosFound </item>
+    ///         <item> numberOfOtherVideosFound </item>
+    ///         <item> LinksWithNoMissingVideos </item>
+    ///         <item> LinksWithMissingVideos </item>
+    ///         <item> link.member_ids_not_found </item>
+    ///         <item> link.member_ids_found </item>
+    ///     </list>
     /// </summary>
     /// <param name="folders">The folders that are being checked</param>
     public static void CheckCurrentFilesystemState(ref List<Folderclass> folders)
@@ -334,7 +329,4 @@ public static class AppMethods
         found.UnionWith(notfound);
         Debug.Assert(all.SetEquals(found));
     }
-    
-    public enum ProgramUI { GUI, CLI }
-    public static ProgramUI programUI;
 }

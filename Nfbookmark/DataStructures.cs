@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using NfLogger;
 
 namespace bookmark_dlp
 {
     /// <summary>
-    /// Not used for now. A more refined wrapper around just a list of folders, intended to represent all bookmarks found in a single browser profile.
-    /// Feels a bit redundant when Bookmark already exists.
+    ///     Not used for now. A more refined wrapper around just a list of folders, intended to represent all bookmarks found
+    ///     in a single browser profile.
+    ///     Feels a bit redundant when Bookmark already exists.
     /// </summary>
     public class Bookmarks
     {
@@ -19,7 +19,7 @@ namespace bookmark_dlp
     }
     
     /// <summary>
-    /// Denotes what kind of youtube structure is linked.
+    ///     Denotes what kind of youtube structure is linked.
     /// </summary>
     public enum Linktype 
     {
@@ -255,7 +255,7 @@ namespace bookmark_dlp
         {
             unchecked
             {
-                var hashCode = startline;
+                int hashCode = startline;
                 hashCode = (hashCode * 397) ^ (name != null ? name.GetHashCode() : 0);
                 hashCode = (hashCode * 397) ^ depth;
                 hashCode = (hashCode * 397) ^ endingline;
@@ -279,19 +279,19 @@ namespace bookmark_dlp
     }
 
     /// <summary>
-    /// One bookmark. Only used when importing from SQL or JSON (not for html)
+    ///     One bookmark. Only used when importing from SQL or JSON (not for html)
     /// </summary>
     public class Bookmark
     {
-        public Int64 date_added;
-        public Int64 date_last_used;
-        public Int64 date_modified; //only where type = folder
+        public List<Bookmark> children = new List<Bookmark>(); //only where type = folder
+        public long date_added;
+        public long date_last_used;
+        public long date_modified; //only where type = folder
         public string guid;
         public int id;
         public string name;
         public string type;
         public string url; //only where type = url
-        public List<Bookmark> children = new List<Bookmark>(); //only where type = folder
 
         public override string ToString()
         {
@@ -331,9 +331,9 @@ namespace bookmark_dlp
     public enum BrowserType { none, chromiumbased, firefoxbased }
 
     /// <summary>
-    /// Legacy code, but still used. Basically globaly variables but in a struct that is passed to functions as necessary.
+    ///     Legacy code, but still used. Basically globaly variables but in a struct that is passed to functions as necessary.
     /// </summary>
-    struct GlobalState
+    internal struct GlobalState
     {
         public int folderid; //used a lot instead of numberoffolders, maybe not ideal?
         //public int totalyoutubelinknumber;

@@ -1,68 +1,58 @@
 ﻿using bookmark_dlp.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using NfLogger;
 
-namespace bookmark_dlp.ViewModels
+namespace bookmark_dlp.ViewModels;
+
+/// <summary>
+///     Separate window to ask the user where to save the config file for the bookmark-dlp application.
+/// </summary>
+internal partial class AskConfigWindowViewModel : ViewModelBase
 {
-    /// <summary>
-    /// Separate window to ask the user where to save the config file for the bookmark-dlp application.
-    /// </summary>
-    internal partial class AskConfigWindowViewModel : ViewModelBase
+    private readonly CancellationTokenSource _cts = new CancellationTokenSource();
+
+    [ObservableProperty] private string _myLabel = "Starting application...";
+
+    [ObservableProperty] private string _whichButton = "whichbutton";
+
+
+    public AskConfigWindowViewModel()
     {
+        ButtonCommand = new AsyncRelayCommand<string>(HandleButtonClickAsync);
+    }
 
-        [ObservableProperty]
-        private string _myLabel = "Starting application...";
-        [ObservableProperty]
-        private string _whichButton = "whichbutton";
+    private CancellationToken CancellationToken => _cts.Token;
 
-        public void Cancel()
+
+    public AsyncRelayCommand<string> ButtonCommand { get; }
+
+    public void Cancel()
+    {
+        MyLabel = "Cancelling...";
+        _cts.Cancel();
+        Environment.Exit(0);
+    }
+
+    private async Task HandleButtonClickAsync(string? buttonText)
+    {
+        if (buttonText == null)
+            return;
+        WhichButton = buttonText;
+        MessageBus.RaiseButtonClicked(buttonText);
+        try
         {
-            MyLabel = "Cancelling...";
-            _cts.Cancel();
-            Environment.Exit(0);
+            await AwaitButtonPressAsync(CancellationToken);
         }
-
-        private readonly CancellationTokenSource _cts = new();
-
-        private CancellationToken CancellationToken => _cts.Token;
-
-
-        public AsyncRelayCommand<string> ButtonCommand { get; }
-  
-
-        public AskConfigWindowViewModel()
+        catch (OperationCanceledException)
         {
-            ButtonCommand = new AsyncRelayCommand<string>(HandleButtonClickAsync);
-            
+            // Handle cancellation: nothing to do
         }
+    }
 
-        private async Task HandleButtonClickAsync(string? buttonText)
-        {
-            if (buttonText == null)
-                return;
-            WhichButton = buttonText;
-            MessageBus.RaiseButtonClicked(buttonText);
-            try
-            {
-                await AwaitButtonPressAsync(CancellationToken);
-            }
-            catch (OperationCanceledException)
-            {
-                // Handle cancellation: nothing to do
-            }
-        }
-
-        private async Task AwaitButtonPressAsync(CancellationToken cancellationToken)
-        {
-            await Task.Delay(1000, cancellationToken);
-            // Simulating some asynchronous operation
-            // Implementation later
-        }
+    private async Task AwaitButtonPressAsync(CancellationToken cancellationToken)
+    {
+        await Task.Delay(1000, cancellationToken);
+        // Simulating some asynchronous operation
+        // Implementation later
     }
 }

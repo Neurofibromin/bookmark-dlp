@@ -1,19 +1,16 @@
 ﻿using Avalonia;
 using NfLogger;
 
+namespace bookmark_dlp;
 
-
-namespace bookmark_dlp
+internal sealed class Program
 {
-
-    internal sealed class Program
+    // Initialization code. Don't use any Avalonia, third-party APIs or any
+    // SynchronizationContext-reliant code before AppMain is called: things aren't initialized
+    // yet and stuff might break.
+    [STAThread]
+    public static void Main(string[] args)
     {
-        // Initialization code. Don't use any Avalonia, third-party APIs or any
-        // SynchronizationContext-reliant code before AppMain is called: things aren't initialized
-        // yet and stuff might break.
-        [STAThread]
-        public static void Main(string[] args)
-        {
 #if CLIMODE
 #if DEBUG
             Logger.verbosity = Logger.Verbosity.Trace;
@@ -26,38 +23,37 @@ namespace bookmark_dlp
             CoreLogic.CoreLogicMain(args); }
 #else
 #if DEBUG
-            Logger.verbosity = Logger.Verbosity.Trace;
-            Logger.LogVerbose("Program started in DEBUG mode");
+        Logger.verbosity = Logger.Verbosity.Trace;
+        Logger.LogVerbose("Program started in DEBUG mode");
 #else
             Logger.verbosity = Logger.Verbosity.Warning;
 #endif
-            Logger.LogVerbose("Program started in GUI mode", Logger.Verbosity.Debug);
-            if (args.Length == 0)
-            {
-                //
-                // If WindowsOperations.SetWindowMode(WindowMode.Hidden) is used the console invoking the program will close after the program has started. This is undesirable
-                // when the user intentionally launches ./bookmark-dlp from the terminal, but desirable if the app is launched by just double clicking on the executable.
-                // Will leave it in for now, as launching from the terminal is a lot less likely in my opinion.
-                //
-                // WindowsOperations.SetWindowMode(WindowMode.Hidden);
-                AppMethods.programUI = AppMethods.ProgramUI.GUI;
-                BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
-                return;
-            }
-            else
-            {
-                AppMethods.programUI = AppMethods.ProgramUI.CLI;
-                CoreLogic.CoreLogicMain(args);
-            }
+        Logger.LogVerbose("Program started in GUI mode", Logger.Verbosity.Debug);
+        if (args.Length == 0)
+        {
+            //
+            // If WindowsOperations.SetWindowMode(WindowMode.Hidden) is used the console invoking the program will close after the program has started. This is undesirable
+            // when the user intentionally launches ./bookmark-dlp from the terminal, but desirable if the app is launched by just double clicking on the executable.
+            // Will leave it in for now, as launching from the terminal is a lot less likely in my opinion.
+            //
+            // WindowsOperations.SetWindowMode(WindowMode.Hidden);
+            AppMethods.programUI = AppMethods.ProgramUI.GUI;
+            BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
         }
-        // Avalonia configuration, don't remove; also used by visual designer.
-        public static AppBuilder BuildAvaloniaApp()
-        => AppBuilder.Configure<App>()
+        else
+        {
+            AppMethods.programUI = AppMethods.ProgramUI.CLI;
+            CoreLogic.CoreLogicMain(args);
+        }
+    }
+
+    // Avalonia configuration, don't remove; also used by visual designer.
+    public static AppBuilder BuildAvaloniaApp()
+    {
+        return AppBuilder.Configure<App>()
             .UsePlatformDetect()
             .WithInterFont()
             .LogToTrace();
-#endif
     }
-
-
+#endif
 }

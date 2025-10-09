@@ -3,8 +3,6 @@
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:bookmark_dlp"
-    xmlns:semi="https://irihi.tech/semi"
-    xmlns:themes="clr-namespace:Material.Styles.Themes;assembly=Material.Styles"
     RequestedThemeVariant="Default">
     <!--  "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options.  -->
 
@@ -30,8 +28,8 @@
         <themes:MaterialTheme BaseTheme="Light" PrimaryColor="Cyan" SecondaryColor="Lime" />
         <StyleInclude Source="avares://Semi.Avalonia.TreeDataGrid/Index.axaml" />
             -->
-        
-        <FluentTheme /> 
+
+        <FluentTheme />
         <StyleInclude Source="avares://Avalonia.Controls.TreeDataGrid/Themes/Fluent.axaml" />
         <StyleInclude Source="/Assets/Icons.axaml" />
     </Application.Styles>

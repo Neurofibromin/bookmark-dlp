@@ -2,31 +2,29 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
 using bookmark_dlp;
 using NfLogger;
 
 namespace Nfbookmark
 {
     /// <summary>
-    /// Contains functions relating to the management of bookmark folders and logging
+    ///     Contains functions relating to the management of bookmark folders and logging
     /// </summary>
     public class Functions
     {
-
         /// <summary>
-        /// Pretty prints the folder structure to selected output.
-        /// Can print to Log, arbitrary Stream or StdOut.
-        /// If Log is selected and no stream is given, then will not print to StdOut.
-        /// If Log not selected and no stream is given, then will print to StdOut.<br/>
-        /// Requires:
-        /// Name
-        /// Depth
-        /// Startline
-        /// Endingline
-        /// urls
-        /// Parent
-        /// Id
+        ///     Pretty prints the folder structure to selected output.
+        ///     Can print to Log, arbitrary Stream or StdOut.
+        ///     If Log is selected and no stream is given, then will not print to StdOut.
+        ///     If Log not selected and no stream is given, then will print to StdOut.<br />
+        ///     Requires:
+        ///     Name
+        ///     Depth
+        ///     Startline
+        ///     Endingline
+        ///     urls
+        ///     Parent
+        ///     Id
         /// </summary>
         /// <param name="folders">The folder structure to be printed</param>
         /// <param name="wantOutputToLog">If true uses Nflogger.Log.Logverbose to print (as well)</param>
@@ -43,6 +41,7 @@ namespace Nfbookmark
                 writer = new StreamWriter(outputStream);
                 wantOutputToStream = true;
             }
+
             if (folders == null || folders.Count == 0)
             {
                 if (wantOutputToLog)
@@ -51,6 +50,7 @@ namespace Nfbookmark
                     writer.WriteLine("No folders to display.");
                 return;
             }
+
             // int deepestdepth = folders.Select(t => t.depth).Prepend(0).Max(); //Finding the deepest folder depth
             // int maxnamelength = folders.Select(t => t.name.Length).Prepend(0).Max();
             // int maxidlength = folders.Select(folder => folder.id.ToString().Length).Max();
@@ -79,7 +79,7 @@ namespace Nfbookmark
                 Folderclass currentFolder = folders[m];
                 Folderclass previousFolder;
                 if (m > 0) { previousFolder = folders[m - 1]; } else { previousFolder = null; }*/
-            
+
             int depthsymbolcounter = 0;
             Folderclass previousFolder = null;
             List<Folderclass> sorted = new List<Folderclass>(folders);
@@ -92,27 +92,25 @@ namespace Nfbookmark
                 if (previousFolder != null)
                 {
                     if (currentFolder.depth > previousFolder.depth) //greater depth than before
-                    {
                         depthsymbolcounter = depthsymbolcounter + (currentFolder.depth - previousFolder.depth);
-                    }
                     if (currentFolder.depth < previousFolder.depth) //lesser depth than before
-                    {
                         depthsymbolcounter = depthsymbolcounter - (previousFolder.depth - currentFolder.depth);
-                    }
                     if (currentFolder.depth == previousFolder.depth) //same depth as before
                     {
                         //depthsymbolcounter does not change
                     }
-                }               // string.Concat(Enumerable.Repeat("_", Math.Abs(depthsymbolcounter - deepestdepthlength)))
-                else { } //at first folder the depth does not change
+                } // string.Concat(Enumerable.Repeat("_", Math.Abs(depthsymbolcounter - deepestdepthlength)))
+
+                //at first folder the depth does not change
                 if (wantOutputToLog)
                     Logger.LogVerbose(string.Concat(Enumerable.Repeat("-", depthsymbolcounter)));
                 if (wantOutputToStream)
                     writer.Write(string.Concat(Enumerable.Repeat("-", depthsymbolcounter)));
-                string write = $"{currentFolder.depth.ToString().PadRight(deepestdepthlength, '_')}" + new string('_', deepestdepth - depthsymbolcounter) +
-                    $" is the depth of {currentFolder.startline.ToString().PadLeft(maxstartlinelength, '_')}/{currentFolder.endingline.ToString().PadLeft(maxendlinelength, '_')} " +
-                    $"[{currentFolder.name.Replace(' ', '_').PadRight(maxnamelength, '_')}] folder, which contains [{currentFolder.urls.Count.ToString().PadLeft(maxnumberoflinklength, '_')}] links. " +
-                    $"id:\"{currentFolder.id.ToString().PadLeft(maxidlength, '_')}\" parentId:\"{currentFolder.parentId.ToString().PadLeft(maxidlength, '_')}";
+                string write = $"{currentFolder.depth.ToString().PadRight(deepestdepthlength, '_')}" +
+                               new string('_', deepestdepth - depthsymbolcounter) +
+                               $" is the depth of {currentFolder.startline.ToString().PadLeft(maxstartlinelength, '_')}/{currentFolder.endingline.ToString().PadLeft(maxendlinelength, '_')} " +
+                               $"[{currentFolder.name.Replace(' ', '_').PadRight(maxnamelength, '_')}] folder, which contains [{currentFolder.urls.Count.ToString().PadLeft(maxnumberoflinklength, '_')}] links. " +
+                               $"id:\"{currentFolder.id.ToString().PadLeft(maxidlength, '_')}\" parentId:\"{currentFolder.parentId.ToString().PadLeft(maxidlength, '_')}";
                 //Console.ForegroundColor = ConsoleColor.Red;
                 //Console.ResetColor();
                 if (wantOutputToLog)
@@ -128,7 +126,7 @@ namespace Nfbookmark
                         word = word.Replace("[", string.Empty);
                         word = word.Replace("]", string.Empty);
                     }
-                    
+
                     if (wantOutputToStream)
                         writer.Write(word.Replace('_', ' ') + " ");
                     // Console.Write();
@@ -150,16 +148,18 @@ namespace Nfbookmark
         #region FolderFunctions
 
         /// <summary>
-        /// Attempt to make sure all bookmark folder names are good for filesystems folder names. If needed, changes the folder.name value<br/>
-        /// Necessary because bookmark folders can have 1) empty names 2) the same names 3) contain not allowed characters or character combinations<br/>
-        /// Requires:
-        /// Name
-        /// Parent
+        ///     Attempt to make sure all bookmark folder names are good for filesystems folder names. If needed, changes the
+        ///     folder.name value<br />
+        ///     Necessary because bookmark folders can have 1) empty names 2) the same names 3) contain not allowed characters or
+        ///     character combinations<br />
+        ///     Requires:
+        ///     Name
+        ///     Parent
         /// </summary>
         /// <param name="folders">The bookmark folders to operate on, folder names may be changed</param>
         public static void FoldernameValidation(List<Folderclass> folders)
         {
-            string[] forbiddenCharacters = {"/", ":", "?", "<", ">", "*", "|" , "\\" , "\""};
+            string[] forbiddenCharacters = { "/", ":", "?", "<", ">", "*", "|", "\\", "\"" };
             // If name empty
             foreach (Folderclass folder in folders)
             {
@@ -192,10 +192,11 @@ namespace Nfbookmark
                     folder.name = newfoldername;
                 }
             }
+
             // If two folders have the same name and same parent (and same depth)
-            for (int i = 0; i < folders.Count-1; i++)
+            for (int i = 0; i < folders.Count - 1; i++)
             {
-                for (int j = i+1; j < folders.Count; j++)
+                for (int j = i + 1; j < folders.Count; j++)
                 {
                     if (string.Equals(folders[i].name, folders[j].name, StringComparison.CurrentCultureIgnoreCase) &&
                         folders[i].depth == folders[j].depth &&
@@ -209,26 +210,26 @@ namespace Nfbookmark
         }
 
         /// <summary>
-        /// Creating the folder structure on filesystems and storing the access paths to folders[].folderpath <br/>
-        /// Requires:
-        /// <list type="bullet">
-        /// <item> Name </item>
-        /// <item> Depth </item>
-        /// <item> Parent </item>
-        /// </list>
-        /// Fills:
-        /// <list type="bullet"> 
-        /// <item> Folderpath </item>
-        /// </list>  
+        ///     Creating the folder structure on filesystems and storing the access paths to folders[].folderpath <br />
+        ///     Requires:
+        ///     <list type="bullet">
+        ///         <item> Name </item>
+        ///         <item> Depth </item>
+        ///         <item> Parent </item>
+        ///     </list>
+        ///     Fills:
+        ///     <list type="bullet">
+        ///         <item> Folderpath </item>
+        ///     </list>
         /// </summary>
         /// <param name="folders">Bookmark folders to be made into filesystem folders</param>
         /// <param name="rootdir">Fiilesystems directory to contain all the folders</param>
         public static void Createfolderstructure(List<Folderclass> folders, string rootdir)
         {
             FoldernameValidation(folders);
-            if (!Directory.Exists(rootdir)) { Directory.CreateDirectory(rootdir); }
+            if (!Directory.Exists(rootdir)) Directory.CreateDirectory(rootdir);
             Directory.SetCurrentDirectory(rootdir);
-            System.IO.Directory.CreateDirectory("Bookmarks");
+            Directory.CreateDirectory("Bookmarks");
             Directory.SetCurrentDirectory("Bookmarks");
             string bookmarkroot = Directory.GetCurrentDirectory();
             string parentdir;
@@ -250,10 +251,11 @@ namespace Nfbookmark
                     Logger.LogVerbose($"Folder has no parent? Folder name: {folder.name}, parent id: {folder.parentId}, number of folders: {folders.Count}", Logger.Verbosity.Error);
                     throw;
                 }
+
                 if (folder.depth == 0)
                 {
                     parentdir = bookmarkroot;
-                    System.IO.Directory.CreateDirectory(Path.Combine(parentdir, folder.name));
+                    Directory.CreateDirectory(Path.Combine(parentdir, folder.name));
                     folder.folderpath = Path.Combine(parentdir, folder.name); //path
                     Logger.LogVerbose($"Folderpath created for folder {folder.name} is {folder.folderpath}", Logger.Verbosity.Trace);
                 }
@@ -265,22 +267,32 @@ namespace Nfbookmark
                     }
                     catch (IndexOutOfRangeException)
                     {
-                        Logger.LogVerbose($"Folder has no parent? Folder name: {folder.name}, parent id: {folder.parentId}, number of folders: {folders.Count}", Logger.Verbosity.Error);
+                        Logger.LogVerbose(
+                            $"Folder has no parent? Folder name: {folder.name}, parent id: {folder.parentId}, number of folders: {folders.Count}",
+                            Logger.Verbosity.Error);
                         throw;
                     }
+
                     if (!Directory.Exists(parentdir))
                     {
                         if (folder.depth <= folders[folder.parentId].depth)
                         {
-                            Logger.LogVerbose($"Folder's parent has not lower depth than folder. Folder name: {folder.name}, depth: {folder.depth}," +
-                                              $" parent name: {folders[folder.parentId].name} parent depth: {folders[folder.parentId].depth}", Logger.Verbosity.Error);
+                            Logger.LogVerbose(
+                                $"Folder's parent has not lower depth than folder. Folder name: {folder.name}, depth: {folder.depth}," +
+                                $" parent name: {folders[folder.parentId].name} parent depth: {folders[folder.parentId].depth}",
+                                Logger.Verbosity.Error);
                         }
-                        throw new InvalidDataException("Folder's parent directory does not exist. Folder: " + folder.name +
-                                                       " Parent: " + folders[folder.parentId].name + " Parent dir: " + parentdir);
+
+                        throw new InvalidDataException("Folder's parent directory does not exist. Folder: " +
+                                                       folder.name +
+                                                       " Parent: " + folders[folder.parentId].name + " Parent dir: " +
+                                                       parentdir);
                     }
-                    System.IO.Directory.CreateDirectory(Path.Combine(parentdir, folder.name));
+
+                    Directory.CreateDirectory(Path.Combine(parentdir, folder.name));
                     folder.folderpath = Path.Combine(parentdir, folder.name); //path
-                    Logger.LogVerbose($"Folderpath created for folder {folder.name} is {folder.folderpath}", Logger.Verbosity.Trace);
+                    Logger.LogVerbose($"Folderpath created for folder {folder.name} is {folder.folderpath}",
+                        Logger.Verbosity.Trace);
                 }
             }
 
@@ -330,25 +342,25 @@ namespace Nfbookmark
         }
 
         /// <summary>
-        /// Delete filesystem folders that are associated with bookmark folders if 
-        /// 1) filesystems folder has no files AND
-        /// 2) filesystem folder has no folders <br/>
-        /// Requires:
-        /// <list type="bullet">
-        /// <item> name </item>
-        /// <item> depth </item>
-        /// <item> parentId </item>
-        /// <item> folderpath </item>
-        /// </list>
+        ///     Delete filesystem folders that are associated with bookmark folders if
+        ///     1) filesystems folder has no files AND
+        ///     2) filesystem folder has no folders <br />
+        ///     Requires:
+        ///     <list type="bullet">
+        ///         <item> name </item>
+        ///         <item> depth </item>
+        ///         <item> parentId </item>
+        ///         <item> folderpath </item>
+        ///     </list>
         /// </summary>
         /// <param name="folders"></param>
         public static void Deleteemptyfolders(List<Folderclass> folders)
         {
             int a = 0;
-            var deepestdepth = folders.Select(f => f.depth).Prepend(0).Max(); //Finding the deepest folder depth
+            int deepestdepth = folders.Select(f => f.depth).Prepend(0).Max(); //Finding the deepest folder depth
             for (int q = deepestdepth; q > 0; q--) //deleting empty folders from the deepest layer upwards
             {
-                foreach (var t in folders)
+                foreach (Folderclass t in folders)
                 {
                     if (t.depth == q) //only check folders with the given depth
                     {
@@ -356,15 +368,11 @@ namespace Nfbookmark
                         string path = t.folderpath;
                         if (Directory.Exists(path))
                         {
-                            if (Directory.GetDirectories(@path).Length != 0) //check if the given directory has any children directories
-                            {
+                            if (Directory.GetDirectories(path).Length != 0) //check if the given directory has any children directories
                                 thisfolderisempty = false;
-                            }
                             if (Directory.GetFiles(t.folderpath).Length != 0) //check if the given directory has any files
-                            {
                                 thisfolderisempty = false;
-                            }
-                            if (thisfolderisempty == true)
+                            if (thisfolderisempty)
                             {
                                 Directory.Delete(t.folderpath);
                                 a++;
@@ -373,9 +381,9 @@ namespace Nfbookmark
                     }
                 }
             }
-            Logger.LogVerbose($"{a} empty folders deleted", Logger.Verbosity.Info);
+            Logger.LogVerbose($"{a} empty folders deleted");
         }
-        
+
         #endregion FolderFunctions
     }
 }

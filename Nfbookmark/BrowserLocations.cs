@@ -3,9 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text.Json.Serialization;
-using System.Text.Json;
-using Microsoft.Data.Sqlite;
 using NfLogger;
 
 namespace bookmark_dlp

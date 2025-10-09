@@ -35,7 +35,7 @@ namespace Nfbookmark
             {
                 if (e is FileNotFoundException || e is IOException || e is UnauthorizedAccessException)
                 {
-                    Logger.LogVerbose(e + " File:" + filePath + "could not be read.");    
+                    Logger.LogVerbose(e + " File:" + filePath + "could not be read.");
                 }
                 throw;
             }
@@ -48,13 +48,13 @@ namespace Nfbookmark
                 case ".html":
                     return HtmlTakeoutIntake(filePath);
                 default: //Chrome-based does not use extension for the Bookmarks file
-                    if (Path.GetFileName(filePath) == "Bookmarks")  
+                    if (Path.GetFileName(filePath) == "Bookmarks")
                         return JsonIntake(filePath);
                     return null;
             }
         }
 
-        
+
 
         /// <summary>
         /// Imports bookmarks from a json file. Used for chromium based browsers <br/>
@@ -92,7 +92,7 @@ namespace Nfbookmark
                     Logger.LogVerbose("Invalid JSON: 'roots' property missing.", Logger.Verbosity.Error);
                     return null;
                 }
-                
+
                 JsonElement bookmarks_bar_Element;
                 JsonElement other_Element;
                 JsonElement synced_Element;
@@ -124,58 +124,60 @@ namespace Nfbookmark
             bookmark_bar.name = "Bookmark Bar"; //has to be renamed, because google puts "Bookmarks bar" in json and "Bookmark Bar" in html (diff: capitalisation!, plural)
                                                 //note: the naming MUST be consistent, so if html and autoimport are both used in the same directory videos will not get downloaded twice
             Bookmark root = new Bookmark
-            // the root is not actually a bookmark json object, it just contains the 3 json objects of other, synced and bookmarks_bar
-            // as such here a root json object is created, which will contain those three as children
-            {
-                name = "Bookmarks",
-                guid = Guid.NewGuid().ToString(), //adding new guid to the root
-                id = Convert.ToInt16("0"), //id for : bookmark_bar=1, other=2, synced=3
-                type = "folder",
-                date_added = Convert.ToInt64(bookmark_bar.date_added) - 2, //just setting a time that was slightly earlier than the bookmark_bar creation
-                date_last_used = Convert.ToInt64("0"), //not used by chrome apparently
-                date_modified = Convert.ToInt64("0"), //not much used by chrome apparently
-                children = new List<Bookmark> { bookmark_bar, other, synced }
-            };
-                /* the structure of the file:
+                // the root is not actually a bookmark json object, it just contains the 3 json objects of other, synced and bookmarks_bar
+                // as such here a root json object is created, which will contain those three as children
                 {
-                 "checksum": "12345678912345678912345678912345",
-                 "roots": {
-                    "bookmark_bar": {
-                            childred:[ ], /////////here are all the bookmarks generally
-                            "date_added": "123456789123456789",
-                            "date_last_used": "0",
-                            "date_modified": "123456789123456789",
-                            "guid": "guid-123456789123456789",
-                            "id": "1",
-                            "name": "Bookmarks bar",
-                            "type": "folder"
-                        },
-                        "other": {
-                            "children": [  ],
-                            "date_added": "123456789123456789",
-                            "date_last_used": "0",
-                            "date_modified": "0",
-                            "guid": "guid-123456789123456789",
-                            "id": "2",
-                            "name": "Other bookmarks",
-                            "type": "folder"
-                        },
-                        "synced": {
-                            "children": [  ],
-                            "date_added": "123456789123456789",
-                            "date_last_used": "0",
-                            "date_modified": "0",
-                            "guid": "guid-123456789123456789",
-                            "id": "3",
-                            "name": "Mobile bookmarks",
-                            "type": "folder"
-                        }
-                 },
-                 "sync_metadata": "123456789#__4000000_char_long_string",
-                 "version": 1
-               }
-                */
-                
+                    name = "Bookmarks",
+                    guid = Guid.NewGuid().ToString(), //adding new guid to the root
+                    id = Convert.ToInt16("0"), //id for : bookmark_bar=1, other=2, synced=3
+                    type = "folder",
+                    date_added =
+                        Convert.ToInt64(bookmark_bar.date_added) -
+                        2, //just setting a time that was slightly earlier than the bookmark_bar creation
+                    date_last_used = Convert.ToInt64("0"), //not used by chrome apparently
+                    date_modified = Convert.ToInt64("0"), //not much used by chrome apparently
+                    children = new List<Bookmark> { bookmark_bar, other, synced }
+                };
+            /* the structure of the file:
+            {
+             "checksum": "12345678912345678912345678912345",
+             "roots": {
+                "bookmark_bar": {
+                        childred:[ ], /////////here are all the bookmarks generally
+                        "date_added": "123456789123456789",
+                        "date_last_used": "0",
+                        "date_modified": "123456789123456789",
+                        "guid": "guid-123456789123456789",
+                        "id": "1",
+                        "name": "Bookmarks bar",
+                        "type": "folder"
+                    },
+                    "other": {
+                        "children": [  ],
+                        "date_added": "123456789123456789",
+                        "date_last_used": "0",
+                        "date_modified": "0",
+                        "guid": "guid-123456789123456789",
+                        "id": "2",
+                        "name": "Other bookmarks",
+                        "type": "folder"
+                    },
+                    "synced": {
+                        "children": [  ],
+                        "date_added": "123456789123456789",
+                        "date_last_used": "0",
+                        "date_modified": "0",
+                        "guid": "guid-123456789123456789",
+                        "id": "3",
+                        "name": "Mobile bookmarks",
+                        "type": "folder"
+                    }
+             },
+             "sync_metadata": "123456789#__4000000_char_long_string",
+             "version": 1
+           }
+            */
+
             List<Folderclass> folders = new List<Folderclass>();
             GlobalState globalState = new GlobalState();
 
@@ -202,7 +204,7 @@ namespace Nfbookmark
                     folders.Add(Childfinder(child, depth + 1, ref globalState, ref folders));
                 }
             }
-            
+
             thisBookmark.endingline = globalState.endingline;
             globalState.endingline++;
             folders[0] = thisBookmark;
@@ -211,7 +213,8 @@ namespace Nfbookmark
             {
                 foreach (Folderclass child in folders)
                 {
-                    if (parent.depth == child.depth - 1 && parent.startline < child.startline && child.endingline < parent.endingline)
+                    if (parent.depth == child.depth - 1 && parent.startline < child.startline &&
+                        child.endingline < parent.endingline)
                     {
                         child.parentId = parent.id;
                     }
@@ -237,7 +240,8 @@ namespace Nfbookmark
         /// <param name="globalState">Used to keep track of ending lines (which folders are closed)</param>
         /// <param name="folders">The list of folders found so far</param>
         /// <returns></returns>
-        private static Folderclass Childfinder(Bookmark current, int depth, ref GlobalState globalState, ref List<Folderclass> folders)
+        private static Folderclass Childfinder(Bookmark current, int depth, ref GlobalState globalState,
+            ref List<Folderclass> folders)
         {
             globalState.folderid++;
             Folderclass thisBookmark = new Folderclass
@@ -284,7 +288,8 @@ namespace Nfbookmark
         /// <param name="bookmarks">Contains only folders</param>
         /// <param name="parentid">parentid[i] = the sql id of the parent folder of the bookmark with the id i</param>
         /// <returns>List of Folderclasses with most values filled (parent, depth) or null</returns>
-        private static List<Folderclass> Bookmarktofolderclasses(List<Bookmark> bookmarks, Dictionary<int, int> parentid)
+        private static List<Folderclass> Bookmarktofolderclasses(List<Bookmark> bookmarks,
+            Dictionary<int, int> parentid)
         {
             // only folders remain in the sql_list
             if (bookmarks.Count == 0)
@@ -335,7 +340,7 @@ namespace Nfbookmark
                 }
 
                 //Console.WriteLine("Name: {0} ID: {1} Numberoflinks: {2} Depth: {3}", folders[folderid].name, folders[folderid].startline, folders[folderid].numberoflinks, folders[folderid].depth);
-                
+
                 folderid++;
                 folders.Add(currentfolder);
             }
@@ -361,8 +366,10 @@ namespace Nfbookmark
         {
             if (!File.Exists(filePath)) { return null; }
             // Create a temporary copy of the database
-            string tempFilePath = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? Path.Combine(Path.GetTempPath(), Guid.NewGuid() + ".txt") : Path.GetTempFileName();
-            
+            string tempFilePath = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+                ? Path.Combine(Path.GetTempPath(), Guid.NewGuid() + ".txt")
+                : Path.GetTempFileName();
+
             File.Copy(filePath, tempFilePath, overwrite: true);
             filePath = tempFilePath;
             // docs: https://kb.mozillazine.org/Places.sqlite
@@ -451,16 +458,16 @@ namespace Nfbookmark
         }
 
         /// <summary>
-        /// Intake of bookmarks and bookmarkfolders from a Google Takeout Html file <br/>
-        /// Fills:
-        /// <list type="bullet">
-        /// <item> name </item>
-        /// <item> id </item>
-        /// <item> urls </item>
-        /// <item> depth </item>
-        /// <item> endingline </item>
-        /// <item> startline </item>
-        /// </list>
+        ///     Intake of bookmarks and bookmarkfolders from a Google Takeout Html file <br />
+        ///     Fills:
+        ///     <list type="bullet">
+        ///         <item> name </item>
+        ///         <item> id </item>
+        ///         <item> urls </item>
+        ///         <item> depth </item>
+        ///         <item> endingline </item>
+        ///         <item> startline </item>
+        ///     </list>
         /// </summary>
         /// <param name="filePath">Html file location</param>
         /// <returns>List of folders that have all their url bookmarks as children</returns>
@@ -479,7 +486,7 @@ namespace Nfbookmark
             catch (FileNotFoundException ex) { Logger.LogVerbose($"Html file could not found: {ex.Message}", Logger.Verbosity.Error); return null; }
             catch (IOException ex) { Logger.LogVerbose($"Html file IOException: {ex.Message}", Logger.Verbosity.Error); return null; }
 
-            if (inputarray[2].Substring(0,3) == "   ")
+            if (inputarray[2].Substring(0, 3) == "   ")
             {
                 Logger.LogVerbose($"The html file {filePath} appears to be an exported one", Logger.Verbosity.Info);
                 return HtmlExportIntake(filePath);
@@ -591,21 +598,21 @@ namespace Nfbookmark
         }
 
         /// <summary>
-        /// Intake of bookmarks and bookmarkfolders from a browser exported Html file <br/>
-        /// Fills:
-        /// <list type="bullet">
-        /// <item> name </item>
-        /// <item> id </item>
-        /// <item> urls </item>
-        /// <item> depth </item>
-        /// <item> endingline </item>
-        /// <item> startline </item>
-        /// </list>
+        ///     Intake of bookmarks and bookmarkfolders from a browser exported Html file <br />
+        ///     Fills:
+        ///     <list type="bullet">
+        ///         <item> name </item>
+        ///         <item> id </item>
+        ///         <item> urls </item>
+        ///         <item> depth </item>
+        ///         <item> endingline </item>
+        ///         <item> startline </item>
+        ///     </list>
         /// </summary>
         /// <param name="filePath">Html file location</param>
         /// <returns>List of folders that have all their url bookmarks as children</returns>
         /// <exception cref="NotImplementedException"></exception>
-        public static List<Folderclass> HtmlExportIntake (string filePath)
+        public static List<Folderclass> HtmlExportIntake(string filePath)
         {
             // read .html
             string[] inputarray;
@@ -712,13 +719,13 @@ namespace Nfbookmark
         }
 
         /// <summary>
-        /// Validates the foldeclass after import finished. <br/>
-        /// Checks:
+        ///     Validates the foldeclass after import finished. <br />
+        ///     Checks:
         /// </summary>
         /// <param name="folder"></param>
         public static void ValidateImportedFolderclass(Folderclass folder)
         {
-            
+
         }
     }
 }

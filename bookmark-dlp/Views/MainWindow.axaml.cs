@@ -1,12 +1,11 @@
 using Avalonia.Controls;
 
-namespace bookmark_dlp.Views
+namespace bookmark_dlp.Views;
+
+public partial class MainWindow : Window
 {
-    public partial class MainWindow : Window
+    public MainWindow()
     {
-        public MainWindow()
-        {
-            InitializeComponent();
-        }
+        InitializeComponent();
     }
 }
