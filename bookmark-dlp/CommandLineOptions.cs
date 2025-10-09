@@ -1,8 +1,7 @@
 ﻿using CommandLine;
-using NfLogger;
 
 /// <summary>
-/// Parsing of command line options, using an external library.
+///     Parsing of command line options, using an external library.
 /// </summary>
 class CommandLineOptions()
 {
@@ -42,6 +41,4 @@ class CommandLineOptions()
     /*Done automatically by library
      * [Option('h', "help", Required = false, Default = false, HelpText = "Displays help and usage information.")]
     public bool Help { get; set; }*/
-
-
 }
