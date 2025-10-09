@@ -4,13 +4,11 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:sts="using:bookmark_dlp.Models"
     xmlns:vm="using:bookmark_dlp.ViewModels"
     d:DesignHeight="450"
     d:DesignWidth="800"
     x:DataType="vm:StartPageViewModel"
     mc:Ignorable="d">
-
 
 
     <Grid RowDefinitions="Auto, 5*,*,2*,Auto">
@@ -43,7 +41,7 @@
                 ItemsSource="{Binding AvailableBrowserBookmarkPaths, Mode=OneWay, TargetNullValue=ErrorMessage}"
                 SelectedItem="{Binding ChosenBrowser}"
                 SelectionMode="Single,Toggle"
-                IsEnabled="{Binding ActiveSettings.CanChangeSettings}"/>
+                IsEnabled="{Binding ActiveSettings.CanChangeSettings}" />
         </Grid>
 
 
@@ -64,11 +62,11 @@
                 <TextBox Text="{Binding ActiveSettings.Manualimportfilelocation, Mode=TwoWay}" />
             </StackPanel>
             <Button Grid.Column="2"
-                Name="OpenFileButton"
-                HorizontalAlignment="Left"
-                Margin="0,10,0,0"
-                Command="{Binding OpenFileCommand}"
-                IsEnabled="{Binding ActiveSettings.CanChangeSettings}">
+                    Name="OpenFileButton"
+                    HorizontalAlignment="Left"
+                    Margin="0,10,0,0"
+                    Command="{Binding OpenFileCommand}"
+                    IsEnabled="{Binding ActiveSettings.CanChangeSettings}">
                 <StackPanel Orientation="Horizontal">
                     <PathIcon Data="{StaticResource copy_add_regular}" />
                     <Label>Select file</Label>
@@ -128,10 +126,10 @@
                     No yt-dlp executable found
                 </TextBlock>
             </StackPanel>
-            <StackPanel 
+            <StackPanel
                 Grid.Column="2"
                 Orientation="Vertical"
-                Margin="10" 
+                Margin="10"
                 HorizontalAlignment="Right"
                 VerticalAlignment="Bottom">
                 <Button
@@ -144,12 +142,12 @@
                     Command="{ReflectionBinding $parent[Window].DataContext.GoForward}">
                     Next
                 </Button>
-                <TextBlock Name="warningfornoimportsource" Foreground="OrangeRed" IsVisible="{Binding !EnableImportButton}" Text="{Binding ImportButtonToolTip}"/>
+                <TextBlock Name="warningfornoimportsource" Foreground="OrangeRed"
+                           IsVisible="{Binding !EnableImportButton}" Text="{Binding ImportButtonToolTip}" />
             </StackPanel>
         </Grid>
 
     </Grid>
-
 
 
 </UserControl>

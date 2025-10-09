@@ -21,10 +21,10 @@
             </Button>
             <Label Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center">Bookmarks</Label>
             <Button Grid.Column="2"
-                Margin="4"
-                HorizontalAlignment="Right"
-                VerticalAlignment="Center"
-                Command="{ReflectionBinding $parent[Window].DataContext.SettingsCommand}">
+                    Margin="4"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Center"
+                    Command="{ReflectionBinding $parent[Window].DataContext.SettingsCommand}">
                 <StackPanel Orientation="Horizontal">
                     <PathIcon Data="{StaticResource settings_regular}" />
                     <TextBlock>Settings</TextBlock>
@@ -51,33 +51,32 @@
                         FontSize="8"
                         Text="{Binding FileSource}"
                         ToolTip.Tip="{Binding FileSource}"
-                        TextWrapping="NoWrap">
-                    </TextBlock>
+                        TextWrapping="NoWrap" />
                 </StackPanel>
             </Grid>
-            
+
             <!-- TreeDataGrid for folder representation hierarchically -->
             <TreeDataGrid Grid.Column="1" Name="HierarchicalViewer" Source="{Binding TreeSource}">
-              <TreeDataGrid.Resources>
-                <!-- Template for Name column cells -->
-                <DataTemplate x:Key="FileNameCell" DataType="models:HierarchicalFolderclass">
-                  <StackPanel Orientation="Horizontal">
-                    <PathIcon>
-                      <PathIcon.Data>
-                        <MultiBinding Converter="{x:Static vm:DownloadingViewModel.FileIconConverter}">
-                          <Binding Path="IsExpanded"/>
-                        </MultiBinding>
-                      </PathIcon.Data>
-                    </PathIcon>
-                    <TextBlock Text="{Binding Name}" VerticalAlignment="Center"/>
-                  </StackPanel>
-                </DataTemplate>
-              </TreeDataGrid.Resources>
-              <TreeDataGrid.Styles>
-                <Style Selector="TreeDataGrid TreeDataGridRow:nth-child(2n)">
-                  <Setter Property="Background"  Value="#20808080"/>
-                </Style>
-              </TreeDataGrid.Styles>
+                <TreeDataGrid.Resources>
+                    <!-- Template for Name column cells -->
+                    <DataTemplate x:Key="FileNameCell" DataType="models:HierarchicalFolderclass">
+                        <StackPanel Orientation="Horizontal">
+                            <PathIcon>
+                                <PathIcon.Data>
+                                    <MultiBinding Converter="{x:Static vm:DownloadingViewModel.FileIconConverter}">
+                                        <Binding Path="IsExpanded" />
+                                    </MultiBinding>
+                                </PathIcon.Data>
+                            </PathIcon>
+                            <TextBlock Text="{Binding Name}" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </DataTemplate>
+                </TreeDataGrid.Resources>
+                <TreeDataGrid.Styles>
+                    <Style Selector="TreeDataGrid TreeDataGridRow:nth-child(2n)">
+                        <Setter Property="Background" Value="#20808080" />
+                    </Style>
+                </TreeDataGrid.Styles>
             </TreeDataGrid>
 
             <!--  stats  -->

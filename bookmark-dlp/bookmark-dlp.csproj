@@ -1,63 +1,63 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <TargetFramework>net9.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
-    <RootNamespace>bookmark_dlp</RootNamespace>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <ApplicationManifest>../app.manifest</ApplicationManifest>
-	<SelfContained>true</SelfContained>
-    <NoWarn>1591</NoWarn>
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net9.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+        <RootNamespace>bookmark_dlp</RootNamespace>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <ApplicationManifest>../app.manifest</ApplicationManifest>
+        <SelfContained>true</SelfContained>
+        <NoWarn>1591</NoWarn>
 
-    <Copyright>Copyright (C) 2023-2025 Neurofibromin</Copyright>
-    <Description>Utility program for downloading bookmarked YouTube links using yt-dlp</Description>
-    <Authors>Neurofibromin</Authors>
-      
-	<!-- Without native library self extraction the published file will not be singular.-->
-	<IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
-	<PublishSingleFile>true</PublishSingleFile>
-	<PackageProjectUrl>https://github.com/Neurofibromin/bookmark-dlp</PackageProjectUrl>
-	<RepositoryUrl>https://github.com/Neurofibromin/bookmark-dlp</RepositoryUrl>
-	<RepositoryType>git</RepositoryType>
-	<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <!--	  <PublishTrimmed>true</PublishTrimmed> trimming is currently problematic with Avalonia -->
-	<Version>0.4.2</Version>
-	<!--      <AssemblyVersion>1.0.0.0</AssemblyVersion>   -->
-	<!--      <FileVersion>1.0.0.0</FileVersion>           -->
-    <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
-    <ApplicationIcon>Assets/bookmark-dlp.ico</ApplicationIcon>
-	<AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
-  </PropertyGroup>
+        <Copyright>Copyright (C) 2023-2025 Neurofibromin</Copyright>
+        <Description>Utility program for downloading bookmarked YouTube links using yt-dlp</Description>
+        <Authors>Neurofibromin</Authors>
 
-  <ItemGroup>
-    <AvaloniaResource Include="Assets\**" />
-  </ItemGroup>
+        <!-- Without native library self extraction the published file will not be singular.-->
+        <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+        <PublishSingleFile>true</PublishSingleFile>
+        <PackageProjectUrl>https://github.com/Neurofibromin/bookmark-dlp</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/Neurofibromin/bookmark-dlp</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <!--	  <PublishTrimmed>true</PublishTrimmed> trimming is currently problematic with Avalonia -->
+        <Version>0.4.2</Version>
+        <!--      <AssemblyVersion>1.0.0.0</AssemblyVersion>   -->
+        <!--      <FileVersion>1.0.0.0</FileVersion>           -->
+        <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
+        <ApplicationIcon>Assets/bookmark-dlp.ico</ApplicationIcon>
+        <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <AvaloniaResource Remove="Assets\Icons.axaml" />
-  </ItemGroup>
+    <ItemGroup>
+        <AvaloniaResource Include="Assets\**"/>
+    </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Avalonia" Version="11.3.7" />
-    <PackageReference Include="Avalonia.Controls.TreeDataGrid" Version="11.1.1" />
-    <PackageReference Include="Avalonia.Desktop" Version="11.3.7" />
-    <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.7" />
-    <PackageReference Include="Avalonia.Fonts.Inter" Version="11.3.7" />
-    <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
-    <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.3.7" />
-    <PackageReference Include="Classic.Avalonia.Theme" Version="11.3.0" />
-    <PackageReference Include="CommandLineParser" Version="2.9.1" />
-    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
-    <PackageReference Include="Material.Avalonia" Version="3.13.1" />
-    <PackageReference Include="Microsoft.Data.Sqlite" Version="9.0.9" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.9" />
-    <PackageReference Include="Semi.Avalonia" Version="11.3.7" />
-    <PackageReference Include="Semi.Avalonia.TreeDataGrid" Version="11.0.10.4" />
-  </ItemGroup>
+    <ItemGroup>
+        <AvaloniaResource Remove="Assets\Icons.axaml"/>
+    </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Nfbookmark\Nfbookmark.csproj" />
-  </ItemGroup>
-  
+    <ItemGroup>
+        <PackageReference Include="Avalonia" Version="11.3.7"/>
+        <PackageReference Include="Avalonia.Controls.TreeDataGrid" Version="11.1.1"/>
+        <PackageReference Include="Avalonia.Desktop" Version="11.3.7"/>
+        <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.7"/>
+        <PackageReference Include="Avalonia.Fonts.Inter" Version="11.3.7"/>
+        <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
+        <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.3.7"/>
+        <PackageReference Include="Classic.Avalonia.Theme" Version="11.3.0"/>
+        <PackageReference Include="CommandLineParser" Version="2.9.1"/>
+        <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0"/>
+        <PackageReference Include="Material.Avalonia" Version="3.13.1"/>
+        <PackageReference Include="Microsoft.Data.Sqlite" Version="9.0.9"/>
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.9"/>
+        <PackageReference Include="Semi.Avalonia" Version="11.3.7"/>
+        <PackageReference Include="Semi.Avalonia.TreeDataGrid" Version="11.0.10.4"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Nfbookmark\Nfbookmark.csproj"/>
+    </ItemGroup>
+
 </Project>

@@ -61,8 +61,8 @@
 
         </Grid>
         <DockPanel>
-            <Label Content="{Binding MyLabel}"></Label>
-            <Label Content="{Binding WhichButton}"></Label>
+            <Label Content="{Binding MyLabel}" />
+            <Label Content="{Binding WhichButton}" />
             <Button
                 Margin="7"
                 HorizontalAlignment="Right"
