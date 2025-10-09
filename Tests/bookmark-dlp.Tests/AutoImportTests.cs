@@ -1,15 +1,10 @@
-using bookmark_dlp;
-using Xunit;
-using Nfbookmark;
-using NfLogger;
-
 namespace bookmark_dlp.Tests;
 
 public class AutoImportTests
 {
-    static List<Folderclass> GenerateFolderClasses()
+    private static List<Folderclass> GenerateFolderClasses()
     {
-        var folders = new List<Folderclass>
+        List<Folderclass> folders = new List<Folderclass>
         {
             new Folderclass
             {
@@ -63,5 +58,4 @@ public class AutoImportTests
 
         return folders;
     }
-    
 }

@@ -5,8 +5,8 @@ using System.IO;
 namespace NfLogger
 {
     /// <summary>
-    /// Used for logging to streams and to files.
-    /// Standard output is added as log target by default.
+    ///     Used for logging to streams and to files.
+    ///     Standard output is added as log target by default.
     /// </summary>
     public static class Logger
     {
@@ -87,16 +87,13 @@ namespace NfLogger
         
         
         /// <summary>
-        /// Log messages to console considering urgency of message and chosen verbosity by program
+        ///     Log messages to console considering urgency of message and chosen verbosity by program
         /// </summary>
         /// <param name="message">The message to be logged</param>
         /// <param name="messageUrgency">The urgency of the message</param>
         public static void LogVerbose(string message, Verbosity messageUrgency = Verbosity.Info)
         {
-            if (string.IsNullOrEmpty(message))
-            {
-                return;
-            }
+            if (string.IsNullOrEmpty(message)) return;
 
             if (messageUrgency <= verbosity)
             {
@@ -129,12 +126,12 @@ namespace NfLogger
             if (_logStreams.Contains(stream))
             {
                 _logStreams.Remove(stream);
-                GenerateStreamWriters();    
+                GenerateStreamWriters();
             }
         }
 
         /// <summary>
-        /// Adds file to logging targets, if file was already present among them does nothing.
+        ///     Adds file to logging targets, if file was already present among them does nothing.
         /// </summary>
         /// <param name="file">file to be added</param>
         public static void AddFile(string file)
@@ -145,9 +142,9 @@ namespace NfLogger
                 GenerateStreamWriters();
             }
         }
-        
+
         /// <summary>
-        /// Removes file from logging targets, if file was not present among them does nothing.
+        ///     Removes file from logging targets, if file was not present among them does nothing.
         /// </summary>
         /// <param name="file">file to be removed</param>
         public static void RemoveFile(string file)
@@ -160,7 +157,7 @@ namespace NfLogger
         }
 
         /// <summary>
-        /// Regenerates the StreamWriters for LogWriters from LogFiles and LogStreams
+        ///     Regenerates the StreamWriters for LogWriters from LogFiles and LogStreams
         /// </summary>
         private static void GenerateStreamWriters()
         {
