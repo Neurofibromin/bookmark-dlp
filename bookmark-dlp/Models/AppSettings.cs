@@ -4,6 +4,9 @@ using System.Text;
 using CommunityToolkit.Mvvm.ComponentModel;
 using System.Text.Json;
 using NfLogger;
+using System.IO;
+using System;
+using System.Linq;
 
 namespace bookmark_dlp.Models
 {
@@ -15,7 +18,10 @@ namespace bookmark_dlp.Models
         
         public AppSettings(String? configpath_location = null)
         {
-            _configloc = AppMethods.ConfigFileLocation();
+            _configloc = configpath_location ?? AppMethods.ConfigFileLocation();
+            
+            Settings = SettingsStruct.GetDefaultSettings();
+
             if (!string.IsNullOrEmpty(_configloc) && File.Exists(_configloc))
             {
                 LoadFromFile(_configloc);
@@ -23,7 +29,6 @@ namespace bookmark_dlp.Models
             else
             {
                 Logger.LogVerbose("Config file does not exist or location not set, going with defaults");
-                Settings = SettingsStruct.GetDefaultSettings();
             }
             Settings.PropertyChanged += SettingsOnPropertyChanged;
         }
@@ -63,7 +68,7 @@ namespace bookmark_dlp.Models
             if (e.PropertyName == nameof(Settings.Yt_dlp_binary_path) && Settings.Yt_dlp_binary_path != null)
             {
                 YtdlpInterfacing.YtdlpPath = Settings.Yt_dlp_binary_path;
-                Settings.Yt_dlp_configfiles = new ObservableCollection<string>(YtdlpInterfacing.Yt_dlp_configfinder(Directory.GetCurrentDirectory(), Settings.Yt_dlp_binary_path));
+                Settings.Yt_dlp_configfiles = new ObservableCollection<string>(YtdlpInterfacing.Yt_dlp_configfinder(Directory.GetCurrentDirectory(), Settings.Yt_dlp_binary_path, Settings.Outputfolder));
                 Logger.LogVerbose("Ytdlp path changed in YtdlpInterfacing");
             }
             SaveToFile();
@@ -99,18 +104,32 @@ namespace bookmark_dlp.Models
             if (importedsettings.Outputfolder != null)
                 if(!Directory.Exists(importedsettings.Outputfolder))
                     importedsettings.Outputfolder = SettingsStruct.GetDefaultSettings().Outputfolder;
-            foreach (string file in importedsettings.Yt_dlp_configfiles)
+            
+            var filesToRemove = importedsettings.Yt_dlp_configfiles.Where(file => !File.Exists(file)).ToList();
+            foreach (var file in filesToRemove)
             {
-                if(!File.Exists(file))
-                    importedsettings.Yt_dlp_configfiles.Remove(file);    
-            }    
+                importedsettings.Yt_dlp_configfiles.Remove(file);
+            }
             
             return importedsettings;
         }
 
         public void ResetSettingsToDefault()
         {
-            Settings = SettingsStruct.GetDefaultSettings();
+            var defaultSettings = SettingsStruct.GetDefaultSettings();
+            Settings.Manualimportfilelocation = defaultSettings.Manualimportfilelocation;
+            Settings.ManualImportUsed = defaultSettings.ManualImportUsed;
+            Settings.Outputfolder = defaultSettings.Outputfolder;
+            Settings.Ytdlp_executable_not_found = defaultSettings.Ytdlp_executable_not_found;
+            Settings.DownloadPlaylists = defaultSettings.DownloadPlaylists;
+            Settings.DownloadShorts = defaultSettings.DownloadShorts;
+            Settings.DownloadChannels = defaultSettings.DownloadChannels;
+            Settings.Concurrent_downloads = defaultSettings.Concurrent_downloads;
+            Settings.Cookies_autoextract = defaultSettings.Cookies_autoextract;
+            Settings.Yt_dlp_binary_path = defaultSettings.Yt_dlp_binary_path;
+            Settings.CanChangeSettings = defaultSettings.CanChangeSettings;
+            Settings.Selected_yt_dlp_configfile = defaultSettings.Selected_yt_dlp_configfile;
+            Settings.Yt_dlp_configfiles = new ObservableCollection<string>(defaultSettings.Yt_dlp_configfiles);
         }
         
         /// <summary>
@@ -169,22 +188,6 @@ namespace bookmark_dlp.Models
             yt_dlp_configfiles = cyt_dlp_configfiles;
             selected_yt_dlp_configfile = cselected_yt_dlp_configfile;
         }
-        
-        /*public SettingsStruct(SettingsStruct other)
-        {
-            manualimportfilelocation = other.manualimportfilelocation;
-            manualImportUsed = other.manualImportUsed;
-            outputfolder = other.outputfolder;
-            ytdlp_executable_not_found = other.ytdlp_executable_not_found;
-            downloadPlaylists = other.downloadPlaylists;
-            downloadShorts = other.downloadShorts;
-            downloadChannels = other.downloadChannels;
-            concurrent_downloads = other.concurrent_downloads;
-            cookies_autoextract = other.cookies_autoextract;
-            yt_dlp_binary_path = other.yt_dlp_binary_path;
-            canChangeSettings = other.canChangeSettings;
-            yt_dlp_configfiles = new ObservableCollection<string>(other.yt_dlp_configfiles == null ? new List<string>() : other.yt_dlp_configfiles);
-        }*/
 
         /// <summary>
         /// Parameterless ctor needed by JsonSerializer.Deserialize
@@ -241,15 +244,16 @@ namespace bookmark_dlp.Models
 
         public static SettingsStruct GetDefaultSettings()
         {
+            var outputFolder = Directory.GetCurrentDirectory();
             return new SettingsStruct(
                 cmanualimportfilelocation: "", cmanualImportUsed: false,
-                coutputfolder: Directory.GetCurrentDirectory(),
+                coutputfolder: outputFolder,
                 cytdlp_executable_not_found: true,
                 cdownloadPlaylists: false, cdownloadShorts: false,
                 cdownloadChannels: false,
                 cconcurrent_downloads: false, ccookies_autoextract: false,
                 cyt_dlp_binary_path: YtdlpInterfacing.Yt_dlp_pathfinder(Directory.GetCurrentDirectory()),
-                ccanChangeSettings: true, cyt_dlp_configfiles: YtdlpInterfacing.Yt_dlp_configfinder(),
+                ccanChangeSettings: true, cyt_dlp_configfiles: YtdlpInterfacing.Yt_dlp_configfinder(output_folder: outputFolder),
                 cselected_yt_dlp_configfile: null);
         }
     }
@@ -257,6 +261,6 @@ namespace bookmark_dlp.Models
     public interface IAppSettings
     {
         SettingsStruct Settings { get; }
-        public void ResetSettingsToDefault();
+        void ResetSettingsToDefault();
     }
 }

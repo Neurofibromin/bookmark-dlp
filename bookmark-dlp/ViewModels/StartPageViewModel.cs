@@ -40,14 +40,16 @@ namespace bookmark_dlp.ViewModels
         [ObservableProperty] private string? _importButtonToolTip = "No source selected";
         [ObservableProperty] private bool _enableImportButton;
 
-
         public StartPageViewModel(IAppSettings appSettings)
         {
             AvailableBrowserBookmarkPaths = BrowserLocations.GetBrowserBookmarkFilesPaths()?
                 .SelectMany(browser => browser.foundProfiles)
                 .ToList() ?? new List<string>();
             
-            if (YtdlpInterfacing.Yt_dlp_pathfinder(Directory.GetCurrentDirectory()) != null) { appSettings.Settings.Ytdlp_executable_not_found = false; }
+            if (YtdlpInterfacing.Yt_dlp_pathfinder(Directory.GetCurrentDirectory()) != null) 
+            { 
+                appSettings.Settings.Ytdlp_executable_not_found = false; 
+            }
             _activeSettings = appSettings.Settings;
             ActiveSettings.PropertyChanged += ActiveSettings_PropertyChanged;
             ShouldEnableImportButton();
@@ -84,18 +86,22 @@ namespace bookmark_dlp.ViewModels
             {
                 ImportButtonToolTip = "No source selected";
             }
+            else
+            {
+                ImportButtonToolTip = "Import bookmarks";
+            }
         }
         
         [RelayCommand]
         private async Task OpenFile(CancellationToken token)
         {
-            ActiveSettings.ManualImportUsed = true;
             ErrorMessages?.Clear();
             try
             {
                 var file = await DoOpenFilePickerAsync();
                 if (file != null)
                 {
+                    ActiveSettings.ManualImportUsed = true;
                     ActiveSettings.Manualimportfilelocation = file.TryGetLocalPath();
                 }
                 else { }
@@ -108,7 +114,6 @@ namespace bookmark_dlp.ViewModels
         
         private async Task<IStorageFile?> DoOpenFilePickerAsync()
         {
-
             if (Application.Current?.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop ||
                 desktop.MainWindow?.StorageProvider is not { } provider)
                 throw new NullReferenceException("Missing StorageProvider instance.");
@@ -153,7 +158,6 @@ namespace bookmark_dlp.ViewModels
 
         private async Task<IStorageFolder?> DoOpenFolderPickerAsync()
         {
-
             if (Application.Current?.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop ||
                 desktop.MainWindow?.StorageProvider is not { } provider)
                 throw new NullReferenceException("Missing StorageProvider instance.");
@@ -165,7 +169,7 @@ namespace bookmark_dlp.ViewModels
             });
             if (result?.Count >= 1)
             {
-                return (IStorageFolder?)result[0];
+                return result[0];
             }
             else
             {

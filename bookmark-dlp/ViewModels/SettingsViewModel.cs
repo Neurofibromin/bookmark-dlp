@@ -44,16 +44,18 @@ namespace bookmark_dlp.ViewModels
     /// </summary>
     public partial class SettingsViewModel : ViewModelBase
     {
-        [ObservableProperty] private SettingsStruct _activeSettings;
-        private IAppSettings _appSettings;
+        [ObservableProperty] 
+        private SettingsStruct _activeSettings;
+        
+        private readonly IAppSettings _appSettings; //maybe shouldn't be readonly?
         
         public SettingsViewModel(IAppSettings appSettings) 
         {
-            _activeSettings = appSettings.Settings;
             _appSettings = appSettings;
+            _activeSettings = _appSettings.Settings;
         }
 
-        //for the XAML designer to work
+        // Parameterless constructor for XAML designer support
         public SettingsViewModel() : this(new AppSettings()) {}
 
         [RelayCommand]
@@ -99,14 +101,7 @@ namespace bookmark_dlp.ViewModels
             {
                 Title = "Choose output folder for saving the videos",
             });
-            if (result?.Count >= 1)
-            {
-                return (IStorageFolder?)result[0];
-            }
-            else
-            {
-                return null;
-            }
+            return result?.Count >= 1 ? result[0] : null;
         }
         
         [RelayCommand]
@@ -115,7 +110,7 @@ namespace bookmark_dlp.ViewModels
             ErrorMessages?.Clear();
             try
             {
-                var file = await DoOpenFilePickerAsync("Open html file with bookmarks");
+                var file = await DoOpenFilePickerAsync("Select yt-dlp executable");
                 if (file != null)
                 {
                     ActiveSettings.Yt_dlp_binary_path = file.TryGetLocalPath();
@@ -151,7 +146,7 @@ namespace bookmark_dlp.ViewModels
                 if (file != null)
                 {
                     string? newconffile = file.TryGetLocalPath();
-                    if (newconffile != null)
+                    if (newconffile != null && !ActiveSettings.Yt_dlp_configfiles.Contains(newconffile))
                     {
                         ActiveSettings.Yt_dlp_configfiles.Add(newconffile);
                     }
