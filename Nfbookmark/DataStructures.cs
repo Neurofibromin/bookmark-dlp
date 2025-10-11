@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace bookmark_dlp
+namespace Nfbookmark
 {
     /// <summary>
     ///     Not used for now. A more refined wrapper around just a list of folders, intended to represent all bookmarks found

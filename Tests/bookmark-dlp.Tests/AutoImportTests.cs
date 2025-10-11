@@ -1,3 +1,4 @@
+using Nfbookmark;
 namespace bookmark_dlp.Tests;
 
 public class AutoImportTests

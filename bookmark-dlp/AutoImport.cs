@@ -13,8 +13,8 @@ namespace bookmark_dlp;
 ///     <code>
 /// var folders = Import.SmartImport(somefile);
 /// AutoImport.LinksFromUrls(folders);
-/// Functions.FoldernameValidation(folders);
-/// Functions.Createfolderstructure(folders, rootdir);
+/// FolderManager.FoldernameValidation(folders);
+/// FolderManager.Createfolderstructure(folders, rootdir);
 /// AppMethods.CountWantedVideos(folder)
 /// AppMethods.CheckCurrentFilesystemState(folder)
 /// //optionally: AppMethods.Deleteemptyfolders(folders);
@@ -84,7 +84,7 @@ public static class AutoImport
         bool downloadPlaylists = false, bool downloadChannels = false, bool downloadShorts = false,
         string debugdirectory = "")
     {
-        Functions.FoldernameValidation(folders);
+        FolderManager.FoldernameValidation(folders);
         StreamWriter? temp = null;
         if (!string.IsNullOrEmpty(debugdirectory))
         {

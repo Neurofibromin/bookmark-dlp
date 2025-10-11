@@ -6,7 +6,6 @@ using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.Data.Sqlite;
-using bookmark_dlp;
 using NfLogger;
 
 namespace Nfbookmark

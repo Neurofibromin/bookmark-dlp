@@ -5,7 +5,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using NfLogger;
 
-namespace bookmark_dlp
+namespace Nfbookmark
 {
     public partial class BrowserLocations
     {
