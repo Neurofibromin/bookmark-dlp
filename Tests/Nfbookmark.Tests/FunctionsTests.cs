@@ -1,4 +1,3 @@
-using bookmark_dlp;
 using Xunit;
 
 namespace Nfbookmark.Tests;
@@ -23,7 +22,7 @@ public class FunctionsTests
                 new Folderclass { name = "Charlie", depth = 2, parentId = 2 },
                 new Folderclass { name = "Delta", depth = 3, parentId = 3 }
             };
-            Functions.Createfolderstructure(folders, rootPath);
+            FolderManager.Createfolderstructure(folders, rootPath);
             rootPath = Path.Combine(rootPath, "Bookmarks");
             File.Create(Path.Combine(folders[0].folderpath, "test.txt"));
             File.Create(Path.Combine(folders[1].folderpath, "test.txt"));
@@ -35,7 +34,7 @@ public class FunctionsTests
 
 
             // Act
-            Functions.Deleteemptyfolders(folders);
+            FolderManager.Deleteemptyfolders(folders);
 
             // Assert
             Assert.True(Directory.Exists(Path.Combine(rootPath, "Root")));
@@ -62,7 +61,7 @@ public class FunctionsTests
             new Folderclass { name = "folder/1", id = 1, depth = 0, parentId = 0 },
             new Folderclass { name = "folder?2", id = 2, depth = 0, parentId = 0 }
         };
-        Functions.FoldernameValidation(folders);
+        FolderManager.FoldernameValidation(folders);
         Assert.Equal("folder1", folders[0].name);
         Assert.Equal("folder2", folders[1].name);
     }
@@ -74,7 +73,7 @@ public class FunctionsTests
         {
             new Folderclass { name = "", id = 1, depth = 0, parentId = 0 }
         };
-        Functions.FoldernameValidation(folders);
+        FolderManager.FoldernameValidation(folders);
         Assert.Equal("ID1", folders[0].name);
     }
 
@@ -85,7 +84,7 @@ public class FunctionsTests
         {
             new Folderclass { name = " . ", id = 1, depth = 0, parentId = 0 }
         };
-        Functions.FoldernameValidation(folders);
+        FolderManager.FoldernameValidation(folders);
         Assert.Equal("ID1", folders[0].name);
     }
 
@@ -96,7 +95,7 @@ public class FunctionsTests
         {
             new Folderclass { name = ".hidden", id = 1, depth = 0, parentId = 0 }
         };
-        Functions.FoldernameValidation(folders);
+        FolderManager.FoldernameValidation(folders);
         Assert.Equal("ID1", folders[0].name);
     }
 
@@ -108,7 +107,7 @@ public class FunctionsTests
             new Folderclass { name = "duplicate", id = 1, depth = 0, parentId = 0 },
             new Folderclass { name = "duplicate", id = 2, depth = 0, parentId = 0 }
         };
-        Functions.FoldernameValidation(folders);
+        FolderManager.FoldernameValidation(folders);
         Assert.Equal("duplicateID1", folders[0].name);
         Assert.Equal("duplicateID2", folders[1].name);
     }
@@ -137,7 +136,7 @@ public class FunctionsTests
         try
         {
             // Act
-            Functions.Createfolderstructure(folders, rootDir);
+            FolderManager.Createfolderstructure(folders, rootDir);
 
             // Assert
             string expectedPath1 = Path.Combine(rootDir, "Bookmarks", "Folder1");
@@ -187,7 +186,7 @@ public class FunctionsTests
         try
         {
             // Act
-            Functions.Createfolderstructure(folders, rootDir);
+            FolderManager.Createfolderstructure(folders, rootDir);
 
             // Assert
             string expectedPath = Path.Combine(rootDir, "Bookmarks", "Folder1");
@@ -220,7 +219,7 @@ public class FunctionsTests
         try
         {
             // Act
-            Functions.Createfolderstructure(folders, rootDir);
+            FolderManager.Createfolderstructure(folders, rootDir);
 
             // Assert
             string expectedPathRoot = Path.Combine(rootDir, "Bookmarks", "RootFolder");

@@ -53,7 +53,7 @@ public partial class DownloadingViewModel : ViewModelBase
                 "List<Folderclass> _folders must not be null when starting the status query.");
         // LoadFoldersFromFile() : Import.SmartImport();
         AutoImport.LinksFromUrls(_folders);
-        Functions.Createfolderstructure(_folders, ActiveSettings.Outputfolder);
+        FolderManager.Createfolderstructure(_folders, ActiveSettings.Outputfolder);
         AppMethods.CountWantedVideos(ref _folders);
         AppMethods.CheckCurrentFilesystemState(ref _folders);
     }

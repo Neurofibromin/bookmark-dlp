@@ -5,6 +5,7 @@ using Avalonia.Platform.Storage;
 using bookmark_dlp.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Nfbookmark;
 
 namespace bookmark_dlp.ViewModels;
 

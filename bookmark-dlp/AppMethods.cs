@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using bookmark_dlp.Models;
 using NfLogger;
+using Nfbookmark;
 
 namespace bookmark_dlp;
 
