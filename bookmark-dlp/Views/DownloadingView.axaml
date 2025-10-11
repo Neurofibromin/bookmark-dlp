@@ -6,6 +6,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="using:bookmark_dlp.ViewModels"
     xmlns:models="clr-namespace:bookmark_dlp.Models"
+    xmlns:views="clr-namespace:bookmark_dlp.Views"
     d:DesignHeight="450"
     d:DesignWidth="800"
     x:DataType="vm:DownloadingViewModel"
@@ -63,7 +64,7 @@
                         <StackPanel Orientation="Horizontal">
                             <PathIcon>
                                 <PathIcon.Data>
-                                    <MultiBinding Converter="{x:Static vm:DownloadingViewModel.FileIconConverter}">
+                                    <MultiBinding Converter="{x:Static views:DownloadingView.FileIconConverter}">
                                         <Binding Path="IsExpanded" />
                                     </MultiBinding>
                                 </PathIcon.Data>
