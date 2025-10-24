@@ -75,7 +75,7 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         //PreviousViewModel = SelectedTab;
         MyDownloadingViewModel.FileSource = MyStartPageViewModel.ActiveSettings.ManualImportUsed
-            ? MyStartPageViewModel.ActiveSettings.Manualimportfilelocation
+            ? MyStartPageViewModel.ActiveSettings.ManualImportFileLocation
             : MyStartPageViewModel.ChosenBrowser;
 
         ImportSuccess = MyDownloadingViewModel.LoadFoldersFromFile();

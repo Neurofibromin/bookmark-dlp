@@ -59,7 +59,7 @@
                 <Label Name="ChosenfileLabel" Margin="0">
                     Chosen file:
                 </Label>
-                <TextBox Text="{Binding ActiveSettings.Manualimportfilelocation, Mode=TwoWay}" />
+                <TextBox Text="{Binding ActiveSettings.ManualImportFileLocation, Mode=TwoWay}" />
             </StackPanel>
             <Button Grid.Column="2"
                     Name="OpenFileButton"
@@ -89,7 +89,7 @@
                 Grid.Column="1"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
-                Text="{Binding ActiveSettings.Outputfolder}" />
+                Text="{Binding ActiveSettings.OutputFolder}" />
             <Button
                 Grid.Column="2"
                 HorizontalAlignment="Center"
@@ -114,15 +114,15 @@
                 Settings
             </Button>
             <StackPanel Grid.Column="1">
-                <Label Content="{Binding ActiveSettings.Yt_dlp_binary_path}" />
-                <Label Content="{Binding ActiveSettings.Manualimportfilelocation}" />
+                <Label Content="{Binding ActiveSettings.YtDlpBinaryPath}" />
+                <Label Content="{Binding ActiveSettings.ManualImportFileLocation}" />
                 <TextBlock
                     Margin="4"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
                     Background="Red"
                     IsEnabled="False"
-                    IsVisible="{Binding ActiveSettings.Ytdlp_executable_not_found}">
+                    IsVisible="{Binding ActiveSettings.YtDlpExecutableNotFound}">
                     No yt-dlp executable found
                 </TextBlock>
             </StackPanel>

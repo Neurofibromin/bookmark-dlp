@@ -30,7 +30,7 @@ public partial class StartPageViewModel : ViewModelBase
             .ToList() ?? new List<string>();
 
         if (YtdlpInterfacing.Yt_dlp_pathfinder(Directory.GetCurrentDirectory()) != null)
-            appSettings.Settings.Ytdlp_executable_not_found = false;
+            appSettings.Settings.YtDlpExecutableNotFound = false;
         _activeSettings = appSettings.Settings;
         ActiveSettings.PropertyChanged += ActiveSettings_PropertyChanged;
         ShouldEnableImportButton();
@@ -45,7 +45,7 @@ public partial class StartPageViewModel : ViewModelBase
         if (value != null)
         {
             ActiveSettings.ManualImportUsed = false;
-            ActiveSettings.Manualimportfilelocation = null;
+            ActiveSettings.ManualImportFileLocation = null;
         }
 
         ShouldEnableImportButton();
@@ -53,9 +53,9 @@ public partial class StartPageViewModel : ViewModelBase
 
     private void ActiveSettings_PropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (e.PropertyName == nameof(SettingsStruct.Manualimportfilelocation))
+        if (e.PropertyName == nameof(SettingsStruct.ManualImportFileLocation))
         {
-            if (!string.IsNullOrWhiteSpace(ActiveSettings.Manualimportfilelocation))
+            if (!string.IsNullOrWhiteSpace(ActiveSettings.ManualImportFileLocation))
             {
                 ChosenBrowser = null;
                 ShouldEnableImportButton();
@@ -82,7 +82,7 @@ public partial class StartPageViewModel : ViewModelBase
             if (file != null)
             {
                 ActiveSettings.ManualImportUsed = true;
-                ActiveSettings.Manualimportfilelocation = file.TryGetLocalPath();
+                ActiveSettings.ManualImportFileLocation = file.TryGetLocalPath();
             }
         }
         catch (Exception e)
@@ -116,7 +116,7 @@ public partial class StartPageViewModel : ViewModelBase
             if (folder != null)
             {
                 // AppSettings._settings.Outputfolder = folder.TryGetLocalPath();
-                ActiveSettings.Outputfolder = folder.TryGetLocalPath();
+                ActiveSettings.OutputFolder = folder.TryGetLocalPath();
             }
         }
         catch (Exception e)
@@ -124,13 +124,13 @@ public partial class StartPageViewModel : ViewModelBase
             ErrorMessages?.Add(e.Message);
         }
 
-        if (ActiveSettings.Ytdlp_executable_not_found)
+        if (ActiveSettings.YtDlpExecutableNotFound)
         {
-            if (YtdlpInterfacing.Yt_dlp_pathfinder(ActiveSettings.Outputfolder) != null)
+            if (YtdlpInterfacing.Yt_dlp_pathfinder(ActiveSettings.OutputFolder) != null)
             {
                 // await Console.Out.WriteLineAsync("thisone");
                 // AppSettings._settings.Ytdlp_executable_not_found = false;
-                ActiveSettings.Ytdlp_executable_not_found = false;
+                ActiveSettings.YtDlpExecutableNotFound = false;
             }
         }
     }

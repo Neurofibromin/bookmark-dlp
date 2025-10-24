@@ -8,7 +8,7 @@ class CommandLineOptions()
     [Option('s', "sourcehtml", Required = false, HelpText = "Input html file containing bookmarks.")]
     public string? HtmlFileLocation { get; set; }
 
-    [Option('o', "outputfolder", Required = false, HelpText = "Output directory for video files and folder structure. Default: $PWD")]
+    [Option('o', "_outputFolder", Required = false, HelpText = "Output directory for video files and folder structure. Default: $PWD")]
     public string? Outputfolder { get; set; }
 
     [Option('v', "verbose", Required = false, Default = false, HelpText = "Prints all messages to standard output.")]

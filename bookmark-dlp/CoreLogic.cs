@@ -43,8 +43,8 @@ public class CoreLogic
             bool downloadPlaylists = false;
             bool downloadShorts = false;
             bool downloadChannels = false;
-            // bool concurrent_downloads = false;
-            // bool cookies_autoextract = false;
+            // bool _concurrentDownloads = false;
+            // bool _cookiesAutoextract = false;
 
             Logger.LogVerbose("Interactive CLI session");
             if (setOptions.HtmlFileLocation != null) localhtml = setOptions.HtmlFileLocation;
@@ -104,9 +104,9 @@ public class CoreLogic
             (downloadPlaylists, downloadShorts, downloadChannels) = AppMethods.Wantcomplex();
 
             Logger.LogVerbose("Concurrent downloads? Y/N");
-            // if (Console.ReadKey().ToString().ToLower().Equals("y")) { concurrent_downloads = true; }
+            // if (Console.ReadKey().ToString().ToLower().Equals("y")) { _concurrentDownloads = true; }
             Logger.LogVerbose("Cookies autoextract? Y/N");
-            // if (Console.ReadKey().ToString().ToLower().Equals("y")) { cookies_autoextract = true; }
+            // if (Console.ReadKey().ToString().ToLower().Equals("y")) { _cookiesAutoextract = true; }
             if (setOptions.Outputfolder == null)
             {
                 while (true)

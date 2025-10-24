@@ -25,10 +25,10 @@
         <CheckBox Margin="4" IsChecked="{Binding ActiveSettings.DownloadChannels}">
             Channels
         </CheckBox>
-        <CheckBox Margin="4" IsChecked="{Binding ActiveSettings.Concurrent_downloads}">
+        <CheckBox Margin="4" IsChecked="{Binding ActiveSettings.ConcurrentDownloads}">
             Concurrent downloads
         </CheckBox>
-        <CheckBox Margin="4" IsChecked="{Binding ActiveSettings.Cookies_autoextract}">
+        <CheckBox Margin="4" IsChecked="{Binding ActiveSettings.CookiesAutoextract}">
             Cookies autoextract
         </CheckBox>
         <Grid Margin="4" ColumnDefinitions="Auto,*,Auto,Auto">
@@ -36,7 +36,7 @@
             <Label
                 Grid.Column="1"
                 Background="Red"
-                Content="{Binding ActiveSettings.Yt_dlp_binary_path, TargetNullValue='not found'}" />
+                Content="{Binding ActiveSettings.YtDlpBinaryPath, TargetNullValue='not found'}" />
             <Button
                 Grid.Column="2"
                 VerticalAlignment="Top"
@@ -48,7 +48,7 @@
         <DockPanel Margin="4">
             <Label FontSize="9">Current output folder:</Label>
             <Label Background="YellowGreen"
-                   Content="{Binding ActiveSettings.Outputfolder, TargetNullValue='not found'}" />
+                   Content="{Binding ActiveSettings.OutputFolder, TargetNullValue='not found'}" />
             <Button
                 HorizontalAlignment="Right"
                 Command="{Binding ChooseOutputFolderCommand}"
@@ -67,8 +67,8 @@
             <TextBlock FontSize="9">yt-dlp config source</TextBlock>
             <ListBox SelectionMode="AlwaysSelected"
                      Background="Chartreuse"
-                     SelectedItem="{Binding ActiveSettings.Selected_yt_dlp_configfile}"
-                     ItemsSource="{Binding ActiveSettings.Yt_dlp_configfiles}" />
+                     SelectedItem="{Binding ActiveSettings.SelectedYtDlpConfigFile}"
+                     ItemsSource="{Binding ActiveSettings.YtDlpConfigFiles}" />
             <Button Command="{Binding ChooseConfFileCommand}">
                 <TextBlock FontSize="9">Add new config</TextBlock>
             </Button>

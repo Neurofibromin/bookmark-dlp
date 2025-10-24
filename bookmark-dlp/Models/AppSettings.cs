@@ -29,19 +29,19 @@ public class AppSettings : IAppSettings
     public void ResetSettingsToDefault()
     {
         SettingsStruct defaultSettings = SettingsStruct.GetDefaultSettings();
-        Settings.Manualimportfilelocation = defaultSettings.Manualimportfilelocation;
+        Settings.ManualImportFileLocation = defaultSettings.ManualImportFileLocation;
         Settings.ManualImportUsed = defaultSettings.ManualImportUsed;
-        Settings.Outputfolder = defaultSettings.Outputfolder;
-        Settings.Ytdlp_executable_not_found = defaultSettings.Ytdlp_executable_not_found;
+        Settings.OutputFolder = defaultSettings.OutputFolder;
+        Settings.YtDlpExecutableNotFound = defaultSettings.YtDlpExecutableNotFound;
         Settings.DownloadPlaylists = defaultSettings.DownloadPlaylists;
         Settings.DownloadShorts = defaultSettings.DownloadShorts;
         Settings.DownloadChannels = defaultSettings.DownloadChannels;
-        Settings.Concurrent_downloads = defaultSettings.Concurrent_downloads;
-        Settings.Cookies_autoextract = defaultSettings.Cookies_autoextract;
-        Settings.Yt_dlp_binary_path = defaultSettings.Yt_dlp_binary_path;
+        Settings.ConcurrentDownloads = defaultSettings.ConcurrentDownloads;
+        Settings.CookiesAutoextract = defaultSettings.CookiesAutoextract;
+        Settings.YtDlpBinaryPath = defaultSettings.YtDlpBinaryPath;
         Settings.CanChangeSettings = defaultSettings.CanChangeSettings;
-        Settings.Selected_yt_dlp_configfile = defaultSettings.Selected_yt_dlp_configfile;
-        Settings.Yt_dlp_configfiles = new ObservableCollection<string>(defaultSettings.Yt_dlp_configfiles);
+        Settings.SelectedYtDlpConfigFile = defaultSettings.SelectedYtDlpConfigFile;
+        Settings.YtDlpConfigFiles = new ObservableCollection<string>(defaultSettings.YtDlpConfigFiles);
     }
 
     private void LoadFromFile(string configPath)
@@ -77,12 +77,12 @@ public class AppSettings : IAppSettings
 
     private void SettingsOnPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (e.PropertyName == nameof(Settings.Yt_dlp_binary_path) && Settings.Yt_dlp_binary_path != null)
+        if (e.PropertyName == nameof(Settings.YtDlpBinaryPath) && Settings.YtDlpBinaryPath != null)
         {
-            YtdlpInterfacing.YtdlpPath = Settings.Yt_dlp_binary_path;
-            Settings.Yt_dlp_configfiles = new ObservableCollection<string>(
-                YtdlpInterfacing.Yt_dlp_configfinder(Directory.GetCurrentDirectory(), Settings.Yt_dlp_binary_path,
-                    Settings.Outputfolder));
+            YtdlpInterfacing.YtdlpPath = Settings.YtDlpBinaryPath;
+            Settings.YtDlpConfigFiles = new ObservableCollection<string>(
+                YtdlpInterfacing.Yt_dlp_configfinder(Directory.GetCurrentDirectory(), Settings.YtDlpBinaryPath,
+                    Settings.OutputFolder));
             Logger.LogVerbose("Ytdlp path changed in YtdlpInterfacing");
         }
 
@@ -100,42 +100,42 @@ public class AppSettings : IAppSettings
     /// </summary>
     /// <param name="importedsettings">the struct from the json string</param>
     /// <returns>
-    ///     validated settingsstruct with ytdlpbinarypath, ytdlpexecutablenotfound, manualimportfilelocation,
-    ///     manualimportused, outputfolder and ytdlpconfigfiles set as appropriate
+    ///     validated settingsstruct with ytdlpbinarypath, ytdlpexecutablenotfound, _manualImportFileLocation,
+    ///     manualimportused, _outputFolder and ytdlpconfigfiles set as appropriate
     /// </returns>
     private SettingsStruct? ValidateImportedSettingsBeforeUse(SettingsStruct? importedsettings)
     {
         if (importedsettings == null)
             return importedsettings;
-        if (importedsettings.Yt_dlp_binary_path != null)
+        if (importedsettings.YtDlpBinaryPath != null)
         {
-            if (!File.Exists(importedsettings.Yt_dlp_binary_path))
+            if (!File.Exists(importedsettings.YtDlpBinaryPath))
             {
-                importedsettings.Yt_dlp_binary_path = SettingsStruct.GetDefaultSettings().Yt_dlp_binary_path;
-                importedsettings.Ytdlp_executable_not_found =
-                    SettingsStruct.GetDefaultSettings().Ytdlp_executable_not_found;
+                importedsettings.YtDlpBinaryPath = SettingsStruct.GetDefaultSettings().YtDlpBinaryPath;
+                importedsettings.YtDlpExecutableNotFound =
+                    SettingsStruct.GetDefaultSettings().YtDlpExecutableNotFound;
             }
         }
 
-        if (importedsettings.Manualimportfilelocation != null)
+        if (importedsettings.ManualImportFileLocation != null)
         {
-            if (!File.Exists(importedsettings.Manualimportfilelocation))
+            if (!File.Exists(importedsettings.ManualImportFileLocation))
             {
-                importedsettings.Manualimportfilelocation = null;
+                importedsettings.ManualImportFileLocation = null;
                 importedsettings.ManualImportUsed = false;
             }
         }
 
-        if (importedsettings.Outputfolder != null)
+        if (importedsettings.OutputFolder != null)
         {
-            if (!Directory.Exists(importedsettings.Outputfolder))
-                importedsettings.Outputfolder = SettingsStruct.GetDefaultSettings().Outputfolder;
+            if (!Directory.Exists(importedsettings.OutputFolder))
+                importedsettings.OutputFolder = SettingsStruct.GetDefaultSettings().OutputFolder;
         }
 
-        List<string> filesToRemove = importedsettings.Yt_dlp_configfiles.Where(file => !File.Exists(file)).ToList();
+        List<string> filesToRemove = importedsettings.YtDlpConfigFiles.Where(file => !File.Exists(file)).ToList();
         foreach (string file in filesToRemove)
         {
-            importedsettings.Yt_dlp_configfiles.Remove(file);
+            importedsettings.YtDlpConfigFiles.Remove(file);
         }
 
         return importedsettings;
@@ -150,123 +150,8 @@ public class AppSettings : IAppSettings
     }
 }
 
-/// <summary>
-///     Struct of all settings value types used in the program.
-/// </summary>
-public partial class SettingsStruct : ObservableObject
+public interface IAppSettings
 {
-    [ObservableProperty] public bool canChangeSettings;
-    [ObservableProperty] public bool concurrent_downloads;
-    [ObservableProperty] public bool cookies_autoextract;
-    [ObservableProperty] public bool downloadChannels;
-    [ObservableProperty] public bool downloadPlaylists;
-    [ObservableProperty] public bool downloadShorts;
-    [ObservableProperty] public string? manualimportfilelocation;
-    [ObservableProperty] public bool manualImportUsed;
-    [ObservableProperty] public string? outputfolder;
-    [ObservableProperty] public string? selected_yt_dlp_configfile;
-    [ObservableProperty] public string? yt_dlp_binary_path;
-    [ObservableProperty] public ObservableCollection<string> yt_dlp_configfiles;
-    [ObservableProperty] public bool ytdlp_executable_not_found;
-
-    public SettingsStruct(string? cmanualimportfilelocation,
-        bool cmanualImportUsed,
-        string? coutputfolder,
-        bool cytdlp_executable_not_found,
-        bool cdownloadPlaylists,
-        bool cdownloadShorts,
-        bool cdownloadChannels,
-        bool cconcurrent_downloads,
-        bool ccookies_autoextract,
-        string? cyt_dlp_binary_path,
-        bool ccanChangeSettings,
-        ObservableCollection<string> cyt_dlp_configfiles,
-        string? cselected_yt_dlp_configfile)
-    {
-        manualimportfilelocation = cmanualimportfilelocation;
-        manualImportUsed = cmanualImportUsed;
-        outputfolder = coutputfolder;
-        ytdlp_executable_not_found = cytdlp_executable_not_found;
-        downloadPlaylists = cdownloadPlaylists;
-        downloadShorts = cdownloadShorts;
-        downloadChannels = cdownloadChannels;
-        concurrent_downloads = cconcurrent_downloads;
-        cookies_autoextract = ccookies_autoextract;
-        yt_dlp_binary_path = cyt_dlp_binary_path;
-        canChangeSettings = ccanChangeSettings;
-        yt_dlp_configfiles = cyt_dlp_configfiles;
-        selected_yt_dlp_configfile = cselected_yt_dlp_configfile;
-    }
-
-    /// <summary>
-    ///     Parameterless ctor needed by JsonSerializer.Deserialize
-    /// </summary>
-    public SettingsStruct()
-    {
-        manualimportfilelocation = null;
-        manualImportUsed = false;
-        outputfolder = null;
-        ytdlp_executable_not_found = true;
-        downloadPlaylists = false;
-        downloadShorts = false;
-        downloadChannels = false;
-        concurrent_downloads = false;
-        cookies_autoextract = false;
-        yt_dlp_binary_path = null;
-        canChangeSettings = true;
-        yt_dlp_configfiles = new ObservableCollection<string>();
-        selected_yt_dlp_configfile = null;
-    }
-
-    public override string ToString()
-    {
-        StringBuilder sb = new StringBuilder();
-        sb.AppendLine("SettingsStruct:");
-        sb.AppendLine($"  Manual Import File Location: {Manualimportfilelocation ?? "N/A"}");
-        sb.AppendLine($"  Manual Import Used: {ManualImportUsed}");
-        sb.AppendLine($"  Output Folder: {Outputfolder ?? "N/A"}");
-        sb.AppendLine($"  Yt-dlp Executable Not Found: {Ytdlp_executable_not_found}");
-        sb.AppendLine($"  Download Playlists: {DownloadPlaylists}");
-        sb.AppendLine($"  Download Shorts: {DownloadShorts}");
-        sb.AppendLine($"  Download Channels: {DownloadChannels}");
-        sb.AppendLine($"  Concurrent Downloads: {Concurrent_downloads}");
-        sb.AppendLine($"  Cookies Auto Extract: {Cookies_autoextract}");
-        sb.AppendLine($"  yt-dlp Binary Path: {Yt_dlp_binary_path ?? "N/A"}");
-        sb.AppendLine($"  Can Change Settings: {CanChangeSettings}");
-        sb.AppendLine($"  Selected yt-dlp Config File: {Selected_yt_dlp_configfile ?? "N/A"}");
-
-        sb.AppendLine("  yt-dlp Config Files:");
-        if (Yt_dlp_configfiles is { Count: > 0 })
-        {
-            foreach (string file in Yt_dlp_configfiles)
-            {
-                sb.AppendLine($"    - {file}");
-            }
-        }
-        else
-            sb.AppendLine("    No config files found.");
-
-        return sb.ToString();
-    }
-
-        public static SettingsStruct GetDefaultSettings()
-        {
-            var outputFolder = Directory.GetCurrentDirectory();
-            return new SettingsStruct(
-                cmanualimportfilelocation: "", cmanualImportUsed: false,
-                coutputfolder: outputFolder,
-                cytdlp_executable_not_found: true,
-                cdownloadPlaylists: false, cdownloadShorts: false,
-                cdownloadChannels: false,
-                cconcurrent_downloads: false, ccookies_autoextract: false,
-                cyt_dlp_binary_path: YtdlpInterfacing.Yt_dlp_pathfinder(Directory.GetCurrentDirectory()),
-                ccanChangeSettings: true, cyt_dlp_configfiles: YtdlpInterfacing.Yt_dlp_configfinder(output_folder: outputFolder),
-                cselected_yt_dlp_configfile: null);
-        }
-    }
-    
-    public interface IAppSettings
-    {
-        SettingsStruct Settings { get; }
-        void ResetSettingsToDefault();
-    }
+    SettingsStruct Settings { get; }
+    void ResetSettingsToDefault();
+}
