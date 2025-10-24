@@ -14,7 +14,12 @@ namespace bookmark_dlp;
 public static class YtdlpInterfacing
 {
     public static string? YtdlpPath { get; set; }
-    
+
+    /// <summary>
+    ///     Synchronously executes the yt-dlp process with the given arguments.
+    /// </summary>
+    /// <param name="arguments">The arguments to pass to yt-dlp.</param>
+    /// <returns>A tuple containing the standard output, standard error, and exit code.</returns>
     private static (string Output, string Error, int ExitCode) ExecuteYtDlpProcess(string arguments)
     {
         if (string.IsNullOrEmpty(YtdlpPath))
@@ -41,10 +46,27 @@ public static class YtdlpInterfacing
         process.Start();
         string output = process.StandardOutput.ReadToEnd();
         string error = process.StandardError.ReadToEnd();
-        int exitcode = process.ExitCode;
         process.WaitForExit();
+        int exitCode = process.ExitCode;
         process.Close();
-        return (output, error, exitcode);
+        if (exitCode != 0)
+        {
+            if (error.Contains("Unable to download webpage: HTTP Error 404") ||
+                error.Contains("Unable to download API page") ||
+                error.Contains("Failed to establish a new connection: [Errno -3]"))
+            {
+                Logger.LogVerbose(error, Logger.Verbosity.Error);
+            }
+
+            if (output.Contains("Unable to download webpage: HTTP Error 404") ||
+                output.Contains("Unable to download API page") ||
+                output.Contains("Failed to establish a new connection: [Errno -3]"))
+            {
+                Logger.LogVerbose(output, Logger.Verbosity.Error);
+            }
+        }
+        
+        return (output, error, exitCode);
     }
 
     /// <summary>
@@ -57,87 +79,42 @@ public static class YtdlpInterfacing
     /// </returns>
     public static List<string>? GetVideoIdsFromChannelUrl(string url)
     {
-        if (string.IsNullOrEmpty(YtdlpPath))
-        {
-            Logger.LogVerbose("YtdlpPath is not set in YtdlpInterfacing::GetVideoIdsFromChannelUrl()",
-                Logger.Verbosity.Error);
-            return null;
-        }
-
         if (string.IsNullOrEmpty(url)) return null;
         if (url.ToLower().EndsWith("/videos"))
             url = url.Substring(0, url.Length - "/videos".Length);
-        string channelUrl = url;
-        string ytDlpPath = YtdlpPath;
-        List<string> videoIds = new List<string>();
-        // Run yt-dlp
-        Process process = new Process
+
+        try
         {
-            StartInfo = new ProcessStartInfo
+            var (output, error, exitCode) = ExecuteYtDlpProcess($"-j --flat-playlist \"{url}\"");
+
+            if (exitCode != 0)
             {
-                FileName = ytDlpPath,
-                Arguments = $"-j --flat-playlist \"{channelUrl}\"",
-                RedirectStandardOutput = true,
-                UseShellExecute = false,
-                CreateNoWindow = true,
-                WindowStyle = ProcessWindowStyle.Hidden,
-                RedirectStandardError = true
-            }
-        };
-        process.Start();
-        string result = process.StandardOutput.ReadToEnd();
-        string error = process.StandardError.ReadToEnd();
-        process.WaitForExit();
-        int exitcode = process.ExitCode;
-        process.Close();
-        if (exitcode != 0)
-        {
-            if (error.Contains("Unable to download webpage: HTTP Error 404") ||
-                error.Contains("Unable to download API page") ||
-                error.Contains("Failed to establish a new connection: [Errno -3]"))
-            {
-                Logger.LogVerbose(error, Logger.Verbosity.Error);
+                Logger.LogVerbose($"yt-dlp exited with code {exitCode} for channel {url}. Error: {error}", Logger.Verbosity.Error);
                 return null;
             }
 
-            if (result.Contains("Unable to download webpage: HTTP Error 404") ||
-                result.Contains("Unable to download API page") ||
-                result.Contains("Failed to establish a new connection: [Errno -3]"))
-            {
-                Logger.LogVerbose(result, Logger.Verbosity.Error);
-                return null;
-            }
-
-            Logger.LogVerbose($"yt-dlp exit code: {exitcode}, failed to query videos for channel: {channelUrl}",
-                Logger.Verbosity.Error);
+            // Use LINQ for safer and more concise parsing
+            List<string> lines = output.Split('\n', StringSplitOptions.RemoveEmptyEntries)
+                         .Select(line => {
+                             try { return JsonDocument.Parse(line); }
+                             catch (JsonException ex) { 
+                                 Logger.LogVerbose($"Error parsing JSON: {ex.Message} for line: {line}", Logger.Verbosity.Error);
+                                 return null; 
+                             }
+                         })
+                         .Where(doc => doc != null)
+                         .Select(doc => doc.RootElement.TryGetProperty("id", out var id) ? id.GetString() : null)
+                         .Where(id => !string.IsNullOrEmpty(id))
+                         .ToList();
+            return lines;
+        }
+        catch (Exception ex)
+        {
+            Logger.LogVerbose($"Failed to query channel {url}. Exception: {ex.Message}", Logger.Verbosity.Error);
             return null;
         }
-
-        string[] lines = result.Split('\n');
-        foreach (string line in lines)
-        {
-            try
-            {
-                // Parse JSON for each video
-                JsonDocument jsonDoc = JsonDocument.Parse(line);
-                if (jsonDoc.RootElement.TryGetProperty("id", out JsonElement idElement))
-                {
-                    string? a = idElement.GetString();
-                    if (a != null)
-                        videoIds.Add(a);
-                }
-                else
-                    Logger.LogVerbose($"There was no id property in jsondoc: {line}", Logger.Verbosity.Warning);
-            }
-            catch (JsonException ex)
-            {
-                Logger.LogVerbose($"Error parsing JSON: {ex.Message}", Logger.Verbosity.Error);
-            }
-        }
-
-        return videoIds;
     }
-
+    
     /// <summary>
     ///     Extracts the playlist ID from a given YouTube URL.
     /// </summary>
@@ -151,20 +128,13 @@ public static class YtdlpInterfacing
         if (string.IsNullOrEmpty(url)) return null;
         try
         {
-            // Parse the URL
             Uri uri = new Uri(url);
-            // Extract the query parameters
-            string query = uri.Query;
-            // Parse the query parameters into a dictionary
-            NameValueCollection queryParameters = HttpUtility.ParseQueryString(query);
-            // Return the value of the "list" parameter if it exists
+            NameValueCollection queryParameters = HttpUtility.ParseQueryString(uri.Query);
             return queryParameters["list"];
         }
         catch (Exception ex)
         {
-            // Log error if necessary
-            Logger.LogVerbose($"Failed to extract playlist ID from URL: {url}. Error: {ex.Message}",
-                Logger.Verbosity.Error);
+            Logger.LogVerbose($"Failed to extract playlist ID from URL: {url}. Error: {ex.Message}", Logger.Verbosity.Error);
             return null;
         }
     }
@@ -179,103 +149,57 @@ public static class YtdlpInterfacing
     /// </returns>
     public static List<string>? GetVideoIdsFromPlaylistUrl(string url)
     {
-        if (string.IsNullOrEmpty(YtdlpPath))
+        if (string.IsNullOrEmpty(url)) return null;
+
+        string? playlistId = ExtractPlaylistId(url);
+        if (playlistId is null)
         {
-            Logger.LogVerbose("YtdlpPath is not set in YtdlpInterfacing::GetVideoIdsFromPlaylistUrl()",
-                Logger.Verbosity.Error);
+            Logger.LogVerbose($"URL does not contain a valid playlist ID: {url}", Logger.Verbosity.Warning);
             return null;
         }
 
-        if (string.IsNullOrEmpty(url)) return null;
-        string oldurl = url;
-        if (ExtractPlaylistId(url) != null)
-            url = "https://www.youtube.com/playlist?list=" + ExtractPlaylistId(url);
-        else
-        {
-            Logger.LogVerbose($"Url was not Playlist: {url}", Logger.Verbosity.Warning);
-            return null;
-        }
-        Logger.LogVerbose($"Parsed playlist url from {oldurl} to {url}", Logger.Verbosity.Debug);
-        
+        string playlistUrl = "https://www.youtube.com/playlist?list=" + playlistId;
+        Logger.LogVerbose($"Parsed playlist url from {url} to {playlistUrl}", Logger.Verbosity.Debug);
         string output;
-        string error; int exitcode;
         try
         {
-            (output, error, exitcode) = ExecuteYtDlpProcess($"-j --flat-playlist \"{url}\"");
-            if (exitcode != 0)
+            string error;
+            int exitCode;
+            (output, error, exitCode) = ExecuteYtDlpProcess($"-j --flat-playlist \"{playlistUrl}\"");
+
+            if (exitCode != 0)
             {
-                Logger.LogVerbose($"yt-dlp exited with code {exitcode} for playlist {url}. Error: {error}", Logger.Verbosity.Error);
-                return null;
-            }
-            if (error.Contains("Unable to download webpage: HTTP Error 404") ||
-                error.Contains("Unable to download API page") ||
-                error.Contains("Failed to establish a new connection: [Errno -3]"))
-            {
-                Logger.LogVerbose(error, Logger.Verbosity.Error);
-                return null;
-            }
-            if (output.Contains("Unable to download webpage: HTTP Error 404") ||
-                output.Contains("Unable to download API page") ||
-                output.Contains("Failed to establish a new connection: [Errno -3]"))
-            {
-                Logger.LogVerbose(output, Logger.Verbosity.Error);
+                Logger.LogVerbose($"yt-dlp exited with code {exitCode} for playlist {playlistUrl}. Error: {error}", Logger.Verbosity.Error);
                 return null;
             }
         }
         catch (Exception ex)
         {
-            Logger.LogVerbose($"Failed to query playlist {url}. Exception: {ex.Message}", Logger.Verbosity.Error);
+            Logger.LogVerbose($"Failed to query playlist {playlistUrl}. Exception: {ex.Message}", Logger.Verbosity.Error);
             return null;
         }
-        
+
         try
         {
-            List<string> videoIds = output.Split('\n', StringSplitOptions.RemoveEmptyEntries)
-                .Select(line =>
-                {
-                    try
-                    {
-                        return JsonDocument.Parse(line);
-                    }
-                    catch
-                    {
+            // Use LINQ for safer and more concise parsing
+            return output.Split('\n', StringSplitOptions.RemoveEmptyEntries)
+                .Select(line => {
+                    try { return JsonDocument.Parse(line); }
+                    catch (JsonException ex) {
+                        Logger.LogVerbose($"Error parsing JSON: {ex.Message} for line: {line}", Logger.Verbosity.Error);
                         return null;
                     }
                 })
                 .Where(doc => doc != null)
                 .Select(doc => doc.RootElement.TryGetProperty("id", out var id) ? id.GetString() : null)
-                .Where(id => id != null)
+                .Where(id => !string.IsNullOrEmpty(id))
                 .ToList();
-            return videoIds;
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
-            Logger.LogVerbose($"JSON parsing in GetVideoIdsFromPlaylistUrl failed: {e.Message}", Logger.Verbosity.Error);
+            Logger.LogVerbose($"Failed to parse result of playlist query {playlistUrl}. Exception: {ex.Message}", Logger.Verbosity.Error);
             return null;
         }
-        /*string[] lines = output.Split('\n');
-        foreach (string line in lines)
-        {
-            try
-            {
-                // Parse JSON for each video
-                JsonDocument jsonDoc = JsonDocument.Parse(line);
-                if (jsonDoc.RootElement.TryGetProperty("id", out JsonElement idElement))
-                {
-                    string? a = idElement.GetString();
-                    if (a != null)
-                        videoIds.Add(a);
-                }
-                else
-                    Logger.LogVerbose($"No 'id' property found in JSON: {line}", Logger.Verbosity.Error);
-            }
-            catch (JsonException ex)
-            {
-                Logger.LogVerbose($"Error parsing JSON: {ex.Message}", Logger.Verbosity.Error);
-            }
-        }
-
-        return videoIds;*/
     }
 
     /// <summary>
@@ -423,7 +347,6 @@ public static class YtdlpInterfacing
                 else { throw new Exception($"yt-dlp not found in path or in rootdir, install it before continuing."); }*/
             }
         }
-
         return ytdlp_path;
     }
 
@@ -486,7 +409,6 @@ public static class YtdlpInterfacing
     /// <summary>
     ///     Wrapper for private functions
     /// </summary>
-    /// <param name="folders"></param>
     public static async Task GetEstimatedSizes(ObservableCollection<HierarchicalFolderclass> folders)
     {
         await Task.WhenAll(folders.Select(GetFolderEstimatedSizes));
@@ -495,7 +417,6 @@ public static class YtdlpInterfacing
     /// <summary>
     ///     Wrapper for link-by-link getting
     /// </summary>
-    /// <param name="rootfolder"></param>
     private static async Task GetFolderEstimatedSizes(HierarchicalFolderclass rootfolder)
     {
         rootfolder.EstimatedSize = 0;
@@ -504,72 +425,79 @@ public static class YtdlpInterfacing
             rootfolder.EstimatedSize += await GetEstimatedSize(link);
         }
 
-        if (rootfolder.Children?.Count > 0) await Task.WhenAll(rootfolder.Children.Select(GetFolderEstimatedSizes));
+        if (rootfolder.Children?.Count > 0) 
+            await Task.WhenAll(rootfolder.Children.Select(GetFolderEstimatedSizes));
     }
 
     /// <summary>
-    ///     Calls yt-dlp
+    ///     Calls yt-dlp to get the approximate filesize of a video.
     /// </summary>
-    /// <param name="link"></param>
-    /// <returns></returns>
     private static async Task<int> GetEstimatedSize(YTLink link)
     {
-        string url = link.url;
-        Process process = new Process
+        try
+        {
+            var (output, error, exitCode) = await ExecuteYtDlpProcessAsync($"--print \"filesize_approx\" -q \"{link.url}\"");
+
+            if (exitCode != 0)
+            {
+                Logger.LogVerbose($"yt-dlp exited with code {exitCode} for size query on {link.url}. Error: {error}", Logger.Verbosity.Error);
+                return 0;
+            }
+
+            // Parse the first valid integer from the output.
+            string? firstLine = output.Split('\n', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault();
+            if (int.TryParse(firstLine, out int parsedSize))
+            {
+                return parsedSize;
+            }
+
+            return 0;
+        }
+        catch (Exception ex)
+        {
+            Logger.LogVerbose($"Failed to get estimated size for {link.url}. Exception: {ex.Message}", Logger.Verbosity.Error);
+            return 0;
+        }
+    }
+    
+    /// <summary>
+    ///     Asynchronously executes the yt-dlp process with the given arguments.
+    /// </summary>
+    /// <param name="arguments">The arguments to pass to yt-dlp.</param>
+    /// <returns>A tuple containing the standard output, standard error, and exit code.</returns>
+    private static async Task<(string Output, string Error, int ExitCode)> ExecuteYtDlpProcessAsync(string arguments)
+    {
+        if (string.IsNullOrEmpty(YtdlpPath))
+        {
+            Logger.LogVerbose("YtdlpPath is not set.", Logger.Verbosity.Error);
+            throw new InvalidOperationException("YtDlpPath is not set.");
+        }
+    
+        using var process = new Process
         {
             StartInfo = new ProcessStartInfo
             {
                 FileName = YtdlpPath,
-                Arguments = $"--print \"filesize_approx\" -q \"{url}\"",
+                Arguments = arguments,
                 RedirectStandardOutput = true,
+                RedirectStandardError = true,
                 UseShellExecute = false,
                 CreateNoWindow = true,
                 WindowStyle = ProcessWindowStyle.Hidden,
-                RedirectStandardError = true
             }
         };
+    
         process.Start();
-        string result = await process.StandardOutput.ReadToEndAsync();
-        string error = await process.StandardError.ReadToEndAsync();
+        Task<string> outputTask = process.StandardOutput.ReadToEndAsync();
+        Task<string> errorTask = process.StandardError.ReadToEndAsync();
+    
         await process.WaitForExitAsync();
+    
+        string output = await outputTask;
+        string error = await errorTask;
         int exitCode = process.ExitCode;
         process.Close();
-        if (exitCode != 0)
-        {
-            if (error.Contains("Unable to download webpage: HTTP Error 404") ||
-                error.Contains("Unable to download API page") ||
-                error.Contains("Failed to establish a new connection: [Errno -3]"))
-            {
-                Logger.LogVerbose(error, Logger.Verbosity.Error);
-                return 0;
-            }
 
-            if (result.Contains("Unable to download webpage: HTTP Error 404") ||
-                result.Contains("Unable to download API page") ||
-                result.Contains("Failed to establish a new connection: [Errno -3]"))
-            {
-                Logger.LogVerbose(result, Logger.Verbosity.Error);
-                return 0;
-            }
-
-            Logger.LogVerbose($"yt-dlp exit code: {exitCode}, failed to query videos for playlist: {url}",
-                Logger.Verbosity.Error);
-            return 0;
-        }
-
-        // parse info from result:
-        int size = 0;
-        string[] lines = result.Split('\n', StringSplitOptions.RemoveEmptyEntries);
-        foreach (string line in lines)
-        {
-            Console.WriteLine(line);
-            /*if (int.TryParse(line, out int parsedSize))
-            {
-                size = parsedSize;
-                break; // Use the first valid size found
-            }*/
-        }
-
-        return size;
+        return (output, error, exitCode);
     }
 }
