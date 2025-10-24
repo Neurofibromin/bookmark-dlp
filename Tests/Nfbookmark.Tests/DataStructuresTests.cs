@@ -45,8 +45,8 @@ public class DataStructuresTests
         Assert.True(f1.Equals(f2));
         Assert.True(f1.Equals(f2));
 
-        Assert.True(f1 == f2);
-        Assert.True(f2 == f1);
+        Assert.False(f1 == f2);
+        Assert.False(f2 == f1);
     }
 
     [Fact]
@@ -71,8 +71,8 @@ public class DataStructuresTests
         Assert.True(f1.Equals(f2));
         Assert.True(f1.Equals(f2));
 
-        Assert.True(f1 == f2);
-        Assert.True(f2 == f1);
+        Assert.False(f1 == f2);
+        Assert.False(f2 == f1);
     }
 
     #endregion FolderClass

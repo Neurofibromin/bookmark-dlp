@@ -19,7 +19,7 @@ namespace Nfbookmark
         ///     Parent
         /// </summary>
         /// <param name="folders">The bookmark folders to operate on, folder names may be changed</param>
-        public static void FoldernameValidation(List<Folderclass> folders)
+        public static void ValidateFolderNames(List<Folderclass> folders)
         {
             string[] forbiddenCharacters = { "/", ":", "?", "<", ">", "*", "|", "\\", "\"" };
             // If name empty
@@ -56,19 +56,28 @@ namespace Nfbookmark
             }
 
             // If two folders have the same name and same parent (and same depth)
-            for (int i = 0; i < folders.Count - 1; i++)
+            var duplicateFolders = folders
+                .GroupBy(f => new { f.name, f.parentId, f.depth })
+                .Where(g => g.Count() > 1)
+                .SelectMany(g => g);
+
+            foreach (var folder in duplicateFolders)
             {
-                for (int j = i + 1; j < folders.Count; j++)
-                {
-                    if (string.Equals(folders[i].name, folders[j].name, StringComparison.CurrentCultureIgnoreCase) &&
-                        folders[i].depth == folders[j].depth &&
-                        folders[i].parentId == folders[j].parentId)
-                    {
-                        folders[j].name = folders[j].name + $"ID{folders[j].id}";
-                        folders[i].name = folders[i].name + $"ID{folders[i].id}";
-                    }
-                }
+                folder.name = $"{folder.name}ID{folder.id}";
             }
+            // for (int i = 0; i < folders.Count - 1; i++)
+            // {
+            //     for (int j = i + 1; j < folders.Count; j++)
+            //     {
+            //         if (string.Equals(folders[i].name, folders[j].name, StringComparison.CurrentCultureIgnoreCase) &&
+            //             folders[i].depth == folders[j].depth &&
+            //             folders[i].parentId == folders[j].parentId)
+            //         {
+            //             folders[j].name = folders[j].name + $"ID{folders[j].id}";
+            //             folders[i].name = folders[i].name + $"ID{folders[i].id}";
+            //         }
+            //     }
+            // }
         }
 
         /// <summary>
@@ -86,9 +95,9 @@ namespace Nfbookmark
         /// </summary>
         /// <param name="folders">Bookmark folders to be made into filesystem folders</param>
         /// <param name="rootdir">Fiilesystems directory to contain all the folders</param>
-        public static void Createfolderstructure(List<Folderclass> folders, string rootdir)
+        public static void CreateFolderStructure(List<Folderclass> folders, string rootdir)
         {
-            FoldernameValidation(folders);
+            ValidateFolderNames(folders);
             if (!Directory.Exists(rootdir)) Directory.CreateDirectory(rootdir);
             Directory.SetCurrentDirectory(rootdir);
             Directory.CreateDirectory("Bookmarks");
@@ -216,7 +225,7 @@ namespace Nfbookmark
         ///     </list>
         /// </summary>
         /// <param name="folders"></param>
-        public static void Deleteemptyfolders(List<Folderclass> folders)
+        public static void DeleteEmptyFolders(List<Folderclass> folders)
         {
             int a = 0;
             int deepestdepth = folders.Select(f => f.depth).Prepend(0).Max(); //Finding the deepest folder depth
