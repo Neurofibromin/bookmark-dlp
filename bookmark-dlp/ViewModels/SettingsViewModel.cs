@@ -50,19 +50,19 @@ public partial class SettingsViewModel : ViewModelBase
         {
             IStorageFolder? folder = await DoOpenFolderPickerAsync();
             if (folder != null)
-                ActiveSettings.Outputfolder = folder.TryGetLocalPath();
+                ActiveSettings.OutputFolder = folder.TryGetLocalPath();
         }
         catch (Exception e)
         {
             ErrorMessages?.Add(e.Message);
         }
 
-        if (ActiveSettings.Ytdlp_executable_not_found)
+        if (ActiveSettings.YtDlpExecutableNotFound)
         {
-            if (YtdlpInterfacing.Yt_dlp_pathfinder(ActiveSettings.Outputfolder) != null)
+            if (YtdlpInterfacing.Yt_dlp_pathfinder(ActiveSettings.OutputFolder) != null)
             {
-                ActiveSettings.Ytdlp_executable_not_found = false;
-                ActiveSettings.Yt_dlp_binary_path = YtdlpInterfacing.Yt_dlp_pathfinder(ActiveSettings.Outputfolder);
+                ActiveSettings.YtDlpExecutableNotFound = false;
+                ActiveSettings.YtDlpBinaryPath = YtdlpInterfacing.Yt_dlp_pathfinder(ActiveSettings.OutputFolder);
             }
         }
     }
@@ -88,8 +88,8 @@ public partial class SettingsViewModel : ViewModelBase
             IStorageFile? file = await DoOpenFilePickerAsync("Select yt-dlp executable");
             if (file != null)
             {
-                ActiveSettings.Yt_dlp_binary_path = file.TryGetLocalPath();
-                ActiveSettings.Ytdlp_executable_not_found = false;
+                ActiveSettings.YtDlpBinaryPath = file.TryGetLocalPath();
+                ActiveSettings.YtDlpExecutableNotFound = false;
             }
         }
         catch (Exception e)
@@ -121,8 +121,8 @@ public partial class SettingsViewModel : ViewModelBase
             if (file != null)
             {
                 string? newconffile = file.TryGetLocalPath();
-                if (newconffile != null && !ActiveSettings.Yt_dlp_configfiles.Contains(newconffile))
-                    ActiveSettings.Yt_dlp_configfiles.Add(newconffile);
+                if (newconffile != null && !ActiveSettings.YtDlpConfigFiles.Contains(newconffile))
+                    ActiveSettings.YtDlpConfigFiles.Add(newconffile);
             }
         }
         catch (Exception e)

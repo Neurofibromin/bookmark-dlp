@@ -16,7 +16,7 @@ public static class AppMethods
     /// <summary>
     ///     Asks user if they want playlists, shorts and channels downloaded.
     /// </summary>
-    /// <returns>Want (downloadPlaylists, downloadShorts, downloadChannels) in this order.</returns>
+    /// <returns>Want (_downloadPlaylists, _downloadShorts, _downloadChannels) in this order.</returns>
     public static (bool, bool, bool) Wantcomplex()
     {
         Logger.LogVerbose("Do you want to write and download not video links? (eg. playlists and channels. by default: no)");
