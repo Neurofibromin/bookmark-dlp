@@ -11,14 +11,6 @@ using CommunityToolkit.Mvvm.Input;
 
 namespace bookmark_dlp.ViewModels;
 
-/// <summary>
-///     TODO: autodetect yt-dlp.config file at folders where
-///     1) program is called from
-///     2) program executable is found in
-///     3) output folder
-///     4) yt-dlp executable is found in
-///     5) yt-dlp default folder (somewhere in .local?
-/// </summary>
 public partial class SettingsViewModel : ViewModelBase
 {
     private readonly IAppSettings _appSettings; //maybe shouldn't be readonly?
