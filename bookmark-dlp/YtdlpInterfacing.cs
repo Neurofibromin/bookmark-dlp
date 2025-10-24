@@ -351,59 +351,111 @@ public static class YtdlpInterfacing
     }
 
     /// <summary>
-    ///     Searches the locations described in README for yt-dlp config file
+    ///     Searches for yt-dlp configuration files in all standard locations.
+    ///     This includes portable, user, and system-wide paths as defined by the official yt-dlp documentation.
     /// </summary>
-    /// <param name="rootdir">directory bookmark-dlp is called from</param>
-    /// <param name="ytdlp_path">path to yt-dlp executable</param>
-    /// <param name="output_folder">The configured output folder</param>
-    /// <returns>List of found yt-dlp configs (may be length of 0)</returns>
+    /// <param name="rootdir">The directory where the bookmark-dlp program is called from.</param>
+    /// <param name="ytdlp_path">The full path to the yt-dlp executable.</param>
+    /// <param name="output_folder">The configured output folder for downloads.</param>
+    /// <returns>An ObservableCollection of unique, existing yt-dlp config file paths.</returns>
     public static ObservableCollection<string> Yt_dlp_configfinder(string? rootdir = "", string? ytdlp_path = "",
         string? output_folder = "")
     {
-        ObservableCollection<string> ytdlpConfigs = new ObservableCollection<string>();
+        // Use a HashSet to store unique file paths and avoid duplicates.
+        var ytdlpConfigPaths = new HashSet<string>();
+
+        // Helper function to check for a file's existence and add it to the set.
+        void AddExistingFile(string? path)
+        {
+            if (!string.IsNullOrEmpty(path) && File.Exists(path))
+            {
+                ytdlpConfigPaths.Add(path);
+            }
+        }
+
+        // 1. Directory where bookmark-dlp is called from.
         if (!string.IsNullOrEmpty(rootdir))
         {
-            if (File.Exists(Path.Combine(rootdir, "yt-dlp.conf")))
-                ytdlpConfigs.Add(Path.Combine(rootdir, "yt-dlp.conf"));
+            AddExistingFile(Path.Combine(rootdir, "yt-dlp.conf"));
         }
 
+        // 2. Directory where the yt-dlp executable is found (Portable Configuration).
         if (!string.IsNullOrEmpty(ytdlp_path))
         {
-            if (File.Exists(Path.Combine(ytdlp_path, "yt-dlp.conf")))
-                ytdlpConfigs.Add(Path.Combine(ytdlp_path, "yt-dlp.conf"));
+            var ytdlpDir = Path.GetDirectoryName(ytdlp_path);
+            if (!string.IsNullOrEmpty(ytdlpDir) && Directory.Exists(ytdlpDir))
+            {
+                AddExistingFile(Path.Combine(ytdlpDir, "yt-dlp.conf"));
+            }
         }
 
+        // 3. The configured output folder.
         if (!string.IsNullOrEmpty(output_folder))
         {
-            if (File.Exists(Path.Combine(output_folder, "yt-dlp.conf")))
-                ytdlpConfigs.Add(Path.Combine(output_folder, "yt-dlp.conf"));
+            AddExistingFile(Path.Combine(output_folder, "yt-dlp.conf"));
+        }
+        
+        // 4. Directory where the bookmark-dlp executable is found.
+        AddExistingFile(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "yt-dlp.conf"));
+
+        // 5. Default locations yt-dlp looks for (User and System Configurations).
+        var potentialLocations = new List<string>();
+        string userProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+
+        // User Configuration Locations
+        if (OperatingSystem.IsWindows())
+        {
+            string appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            potentialLocations.AddRange(new[]
+            {
+                Path.Combine(appData, "yt-dlp.conf"),
+                Path.Combine(appData, "yt-dlp", "config"),
+                Path.Combine(appData, "yt-dlp", "config.txt")
+            });
+        }
+        else // For Linux and macOS, respect the XDG Base Directory Specification.
+        {
+            string? xdgConfigHome = Environment.GetEnvironmentVariable("XDG_CONFIG_HOME");
+            if (string.IsNullOrEmpty(xdgConfigHome) || !Directory.Exists(xdgConfigHome))
+            {
+                xdgConfigHome = Path.Combine(userProfile, ".config");
+            }
+
+            potentialLocations.AddRange(new[]
+            {
+                Path.Combine(xdgConfigHome, "yt-dlp.conf"),
+                Path.Combine(xdgConfigHome, "yt-dlp", "config"),
+                Path.Combine(xdgConfigHome, "yt-dlp", "config.txt")
+            });
         }
 
-        List<string> defaultlocations = new List<string>
+        // Home directory locations (common for all OS).
+        potentialLocations.AddRange(new[]
         {
-            Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "yt-dlp.conf"),
-            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "yt-dlp.conf"),
-            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "yt-dlp", "config"),
-            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "yt-dlp", "config.txt"),
-            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "yt-dlp.conf"),
-            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "yt-dlp.conf.txt"),
-            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".yt-dlp", "config"),
-            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".yt-dlp", "config.txt")
-        };
+            Path.Combine(userProfile, "yt-dlp.conf"),
+            Path.Combine(userProfile, "yt-dlp.conf.txt"),
+            Path.Combine(userProfile, ".yt-dlp", "config"),
+            Path.Combine(userProfile, ".yt-dlp", "config.txt")
+        });
+
+        // System-wide locations (Linux/macOS).
         if (OperatingSystem.IsLinux() || OperatingSystem.IsMacOS())
         {
-            defaultlocations.Add("/etc/yt-dlp.conf");
-            defaultlocations.Add("/etc/yt-dlp/config");
-            defaultlocations.Add("/etc/yt-dlp/config.txt");
+            potentialLocations.AddRange(new[]
+            {
+                "/etc/yt-dlp.conf",
+                "/etc/yt-dlp/config",
+                "/etc/yt-dlp/config.txt"
+            });
         }
 
-        foreach (string location in defaultlocations)
+        // Check all potential default locations.
+        foreach (string location in potentialLocations)
         {
-            if (File.Exists(location))
-                ytdlpConfigs.Add(location);
+            AddExistingFile(location);
         }
 
-        return ytdlpConfigs;
+        return new ObservableCollection<string>(ytdlpConfigPaths);
     }
 
     /// <summary>
