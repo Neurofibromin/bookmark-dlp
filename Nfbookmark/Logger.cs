@@ -163,8 +163,7 @@ namespace NfLogger
         {
             foreach (StreamWriter writer in _logWriters)
             {
-                writer.Flush();
-                writer.Close();
+                writer.Dispose();
             }
             _logWriters.Clear();
 
@@ -177,9 +176,12 @@ namespace NfLogger
 
             foreach (Stream stream in _logStreams)
             {
-                StreamWriter writer = new StreamWriter(stream);
-                writer.AutoFlush = true;
-                _logWriters.Add(writer);
+                if (stream.CanWrite) // Add a check to ensure the stream is writable
+                {
+                    StreamWriter writer = new StreamWriter(stream, new System.Text.UTF8Encoding(false), 1024, leaveOpen: true);
+                    writer.AutoFlush = true;
+                    _logWriters.Add(writer);
+                }
             }
         }
     }
