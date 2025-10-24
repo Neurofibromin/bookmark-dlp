@@ -1,16 +1,10 @@
 using Xunit;
+using Nfbookmark;
 
 namespace Nfbookmark.Tests;
 
 public class DataStructuresTests
 {
-    [Fact]
-    public void Bookmarks_FoldersEmptyAtStartTest()
-    {
-        Bookmarks bookmark = new Bookmarks();
-        Assert.Empty(bookmark.folders);
-    }
-
 
     #region FolderClass
 

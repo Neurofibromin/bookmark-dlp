@@ -39,7 +39,7 @@ public class ImportTests
         {
             using (StreamWriter writer = new StreamWriter(memoryStream))
             {
-                Functions.PrintToStream(folders, false, memoryStream);
+                Legacy.PrintToStream(folders, false, memoryStream);
                 writer.Flush(); // Ensure everything is written to the stream
 
                 memoryStream.Seek(0, SeekOrigin.Begin); // Reset stream position

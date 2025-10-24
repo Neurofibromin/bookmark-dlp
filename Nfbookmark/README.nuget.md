@@ -11,6 +11,7 @@ Provides general functions for importing bookmarks from different browsers acros
 * Get list of installed browsers and browser profiles
 * Import bookmarks from said browser profiles
 * Import bookmarks from Google Takeout .html files
+* Import bookmarks from browser exported bookmarks .html files
 * Use the imported bookmarks for your purposes
 
 ## Supported platforms:
@@ -41,10 +42,10 @@ Import all bookmarks from Chrome:
 
 ```csharp
 using System;
-using bookmark_dlp;
+using Nfbookmark;
 
 //set verbosity
-bookmark_dlp.Logger.verbosity = Logger.Verbosity.Warning;
+Nfbookmark.Logger.verbosity = Logger.Verbosity.Warning;
 //get list of places where browser might be installed
 List<BrowserLocations> maybeLocations = BrowserLocations.GetBrowserLocations();
 //get list of places where browsers are actually installed
@@ -62,9 +63,9 @@ foreach (string location in actualLocations[0].foundProfiles)
 string path = actualLocations[0].foundProfiles[0];
 Console.WriteLine(path);
 List<Folderclass> folders = Import.SmartImport(path);
-Functions.PrintToConsole(folders);
+Legacy.PrintToConsole(folders);
 // One liner to showcase:
-Functions.PrintToConsole(Import.SmartImport(Import.GetBrowserBookmarkFilesPaths()[0].foundProfiles[0]));
+Legacy.PrintToConsole(Import.SmartImport(Import.GetBrowserBookmarkFilesPaths()[0].foundProfiles[0]));
 ```
 
 ## Main Functions
@@ -73,17 +74,17 @@ Functions.PrintToConsole(Import.SmartImport(Import.GetBrowserBookmarkFilesPaths(
 
 The main functions provided by this library are:
 
-* `bookmark_dlp.Import.SmartImport`
-* `bookmark_dlp.Import.JsonIntake`
-* `bookmark_dlp.Import.SqlIntake`
-* `bookmark_dlp.Import.HtmlTakeoutIntake`
-* `bookmark_dlp.BrowserLocations.GetBrowserBookmarkFilesPaths`
-* `bookmark_dlp.BrowserLocations.GetBrowserLocations`
-* `bookmark_dlp.BrowserLocations.QueryChosenBookmarksFile`
-* `bookmark_dlp.Functions.FoldernameValidation`
-* `bookmark_dlp.Functions.Createfolderstructure`
-* `bookmark_dlp.Functions.Deleteemptyfolders`
-* `bookmark_dlp.Functions.PrintToConsole`
+* `Nfbookmark.Import.SmartImport`
+* `Nfbookmark.Import.JsonIntake`
+* `Nfbookmark.Import.SqlIntake`
+* `Nfbookmark.Import.HtmlTakeoutIntake`
+* `Nfbookmark.BrowserLocations.GetBrowserBookmarkFilesPaths`
+* `Nfbookmark.BrowserLocations.GetBrowserLocations`
+* `Nfbookmark.BrowserLocations.QueryChosenBookmarksFile`
+* `Nfbookmark.FolderManager.FoldernameValidation`
+* `Nfbookmark.FolderManager.Createfolderstructure`
+* `Nfbookmark.FolderManager.Deleteemptyfolders`
+* `Nfbookmark.Legacy.PrintToConsole`
 
 Additionally, logging capacity:
 
@@ -99,9 +100,9 @@ Additionally, logging capacity:
 
 The main types provided by this library are:
 
-* `bookmark_dlp.DataStructures.Folderclass`
-* `bookmark_dlp.DataStructures.Bookmark`
-* `bookmark_dlp.DataStructures.BrowserLocations`
+* `Nfbookmark.Folderclass`
+* `Nfbookmark.Bookmark`
+* `Nfbookmark.BrowserLocations`
 
 ## Program using this package
 

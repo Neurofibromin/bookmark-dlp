@@ -7,8 +7,36 @@ using NfLogger;
 
 namespace Nfbookmark
 {
-    public partial class BrowserLocations
+    /// <summary>
+    /// Type: Chromium of Firefox based
+    /// </summary>
+    public enum BrowserType { none, chromiumbased, firefoxbased }
+    
+    /// <summary>
+    /// Representing the default locations (filepaths) where one browser might store its
+    /// user profiles.
+    /// </summary>
+    public class BrowserLocations
     {
+        public string browsername;
+        public string windows_profilespath = "";
+        public List<string> linux_profilespath = new List<string>();
+        public List<string> osx_profilespath = new List<string>();
+        public List<string> hardcodedpaths = new List<string>();
+        /// <summary>
+        /// List of paths to FILES containing bookmarks (one file for one browser profile usually)
+        /// </summary>
+        public List<string> foundProfiles = new List<string>();
+        /// <summary>
+        /// Type of this browser: Chromium of Firefox based
+        /// </summary>
+        public BrowserType browserType = BrowserType.none;
+
+        public override string ToString()
+        {
+            return $"Name:{browsername}, found profiles:{foundProfiles.ToString()}";
+        }
+        
         /// <summary>
         /// Gives list of default locations for profiles for Linux, OSX and Windows
         /// </summary>

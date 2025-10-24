@@ -6,11 +6,17 @@ using NfLogger;
 
 namespace Nfbookmark
 {
-    /// <summary>
-    ///     Contains functions relating to the management of bookmark folders and logging
-    /// </summary>
-    public class Functions
+    public static class Legacy
     {
+        /// <summary>
+        ///     Legacy code, but still used. Basically globaly variables but in a struct that is passed to functions as necessary.
+        /// </summary>
+        public struct GlobalState
+        {
+            public int folderid; //used a lot instead of numberoffolders, maybe not ideal?
+            public int endingline;
+        }
+        
         /// <summary>
         ///     Pretty prints the folder structure to selected output.
         ///     Can print to Log, arbitrary Stream or StdOut.
