@@ -94,6 +94,9 @@ public class App : Application
                     ServiceCollection collection = new ServiceCollection();
                     ConfigureServices(collection, configpath_location);
                     ServiceProvider services = collection.BuildServiceProvider();
+                    
+                    var appSettings = services.GetRequiredService<IAppSettings>();
+                    ThemeManager.ApplyTheme(appSettings.Settings.SelectedTheme);
 
                     MainWindowViewModel mainWindowVm = services.GetRequiredService<MainWindowViewModel>();
                     MainWindow mainWindow = new MainWindow
@@ -113,6 +116,8 @@ public class App : Application
                 ServiceCollection collection = new ServiceCollection();
                 ConfigureServices(collection, AppMethods.ConfigFileLocation());
                 ServiceProvider services = collection.BuildServiceProvider();
+                var appSettings = services.GetRequiredService<IAppSettings>();
+                ThemeManager.ApplyTheme(appSettings.Settings.SelectedTheme);
                 MainWindowViewModel mainWindowVm = services.GetRequiredService<MainWindowViewModel>();
                 MainWindow mainWindow = new MainWindow
                 {

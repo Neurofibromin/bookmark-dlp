@@ -126,48 +126,24 @@ public partial class SettingsViewModel : ViewModelBase
     [RelayCommand]
     private void ChangeThemeToClassic()
     {
-        Application.Current!.Styles.Clear();
-        Application.Current.Styles.Add(new ClassicTheme());
-        Uri semiTreeData = new Uri("avares://Semi.Avalonia.TreeDataGrid/Index.axaml");
-        StyleInclude a = new StyleInclude(semiTreeData);
-        a.Source = semiTreeData;
-        Application.Current.Styles.Add(a);
-
-        Uri localIcons = new Uri("avares://bookmark-dlp/Assets/Icons.axaml");
-        StyleInclude b = new StyleInclude(localIcons);
-        b.Source = localIcons;
-        Application.Current.Styles.Add(b);
+        if (ActiveSettings.SelectedTheme == AppTheme.Classic) return;
+        ThemeManager.ApplyTheme(AppTheme.Classic);
+        ActiveSettings.SelectedTheme = AppTheme.Classic;
     }
 
     [RelayCommand]
     private void ChangeThemeToFluent()
     {
-        Application.Current!.Styles.Clear();
-        Application.Current.Styles.Add(new FluentTheme());
-        Uri semiTreeData = new Uri("avares://Avalonia.Controls.TreeDataGrid/Themes/Fluent.axaml");
-        StyleInclude a = new StyleInclude(semiTreeData);
-        a.Source = semiTreeData;
-        Application.Current.Styles.Add(a);
-
-        Uri localIcons = new Uri("avares://bookmark-dlp/Assets/Icons.axaml");
-        StyleInclude b = new StyleInclude(localIcons);
-        b.Source = localIcons;
-        Application.Current.Styles.Add(b);
+        if (ActiveSettings.SelectedTheme == AppTheme.Fluent) return;
+        ThemeManager.ApplyTheme(AppTheme.Fluent);
+        ActiveSettings.SelectedTheme = AppTheme.Fluent;
     }
 
     [RelayCommand]
     private void ChangeThemeToSimple()
     {
-        Application.Current!.Styles.Clear();
-        Application.Current.Styles.Add(new SimpleTheme());
-        Uri semiTreeData = new Uri("avares://Semi.Avalonia.TreeDataGrid/Index.axaml");
-        StyleInclude a = new StyleInclude(semiTreeData);
-        a.Source = semiTreeData;
-        Application.Current.Styles.Add(a);
-
-        Uri localIcons = new Uri("avares://bookmark-dlp/Assets/Icons.axaml");
-        StyleInclude b = new StyleInclude(localIcons);
-        b.Source = localIcons;
-        Application.Current.Styles.Add(b);
+        if (ActiveSettings.SelectedTheme == AppTheme.Simple) return;
+        ThemeManager.ApplyTheme(AppTheme.Simple);
+        ActiveSettings.SelectedTheme = AppTheme.Simple;
     }
 }

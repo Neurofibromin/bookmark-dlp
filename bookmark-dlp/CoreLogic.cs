@@ -193,7 +193,7 @@ public class CoreLogic
 
             #endregion Interactive
         }
-        else
+        else //non-interactive
         {
             #region Non-Interactive
 
@@ -222,44 +222,25 @@ public class CoreLogic
                 Logger.LogVerbose($"{localhtml} is the html import file");
                 importSourceFound = true;
                 ishtml = true;
+                filePath = localhtml;
             }
             else
             {
                 // import from browser
                 // not html
-                Logger.LogVerbose("No html set, proceeding with search in installed browser default locations"); //goig to autoimport, as no .html present
-                throw new NotImplementedException();
-                //TODO: cannot as its interactive : filePath = AutoImport.QueryChosenBookmarksFile(AutoImport.FindBrowserBookmarkFilesPaths());
+                Logger.LogVerbose("No html set! Non-interactive version requires html to be set!"); //goig to autoimport, as no .html present
+                Environment.Exit(1);
             }
-
-            if (ishtml)
-                filePath = localhtml;
-            else if (!string.IsNullOrEmpty(filePath))
-            {
-                // Import for both json and sql and html
-                folders = Import.SmartImport(filePath);
-            }
-            else
-                throw new FileNotFoundException("No source file!");
-
+            folders = Import.SmartImport(filePath);
+            
             //now import is finished
             Logger.LogVerbose("Import finished", Logger.Verbosity.Debug);
-
-            int deepestdepth = 0; //Finding the deepest folder depth
-            for (int q = 0; q < folders.Count; q++)
-            {
-                if (deepestdepth < folders[q].depth) deepestdepth = folders[q].depth;
-            }
-
             FolderManager.CreateFolderStructure(folders, rootdir);
-            AutoImport.WriteLinksToTextFiles(folders, downloadPlaylists, downloadChannels, downloadShorts,
-                rootdir);
-
+            AutoImport.WriteLinksToTextFiles(folders, downloadPlaylists, downloadChannels, downloadShorts, rootdir);
 
             /////////////////////////////////////////
             //TODO: totalyoutubelinknumbers
             /////////////////////////////////////////
-
 
             AutoImport.Scriptwriter(folders, ytdlp_path); //writing the scripts that call yt-dlp and add .txt with the links in the arguments //NOT the method that creates the .txt files
             FolderManager.DeleteEmptyFolders(folders); //deletes the folders from the folder structure that are empty (no youtube links were written into them)
@@ -269,6 +250,7 @@ public class CoreLogic
 
             #endregion Non-Interactive
         }
+        Environment.Exit(0);
     }
 
 
