@@ -39,29 +39,21 @@ public static class AutoImport
     /// <param name="folders">The folders that are filled</param>
     public static void LinksFromUrls(List<Folderclass> folders)
     {
-        foreach (Folderclass folder in folders)
+        Parallel.ForEach(folders, folder =>
         {
-            foreach (string url in folder.urls)
-            {
-                YTLink? link;
-                try
+            folder.links = folder.urls.Select(url =>
                 {
-                    link = LinkFromUrl(url);
-                }
-                catch (InvalidLinkException e)
-                {
-                    Logger.LogVerbose(e.Message, Logger.Verbosity.Error);
-                    continue;
-                }
-
-                if (link is not null)
-                {
-                    folder.links.Add(link.Value);
-                    //already logged in LinkFromUrl(): Logger.LogVerbose($"Link from {url} successfully converted to {link.Value}.", Logger.Verbosity.Trace);
-                }
-                // link is null, it was not a youtube link
-            }
-        }
+                    try
+                    { return LinkFromUrl(url); }
+                    catch (InvalidLinkException e)
+                    {
+                        Logger.LogVerbose(e.Message, Logger.Verbosity.Error);
+                        return (YTLink?)null;
+                    }
+                })
+                .Where(link => link is not null)
+                .Select(link => link.Value).ToList();
+        });
     }
 
 
@@ -404,7 +396,7 @@ public static class AutoImport
             Console.Read();
         }
 
-        string extensionforscript = ""; //writing scripts
+        string extensionforscript = "";
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) extensionforscript = ".bat";
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux)) extensionforscript = ".sh";
         if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) extensionforscript = ".sh";
@@ -447,7 +439,7 @@ public static class AutoImport
                         }
                     };
                 }
-                else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) //TODO: maybe it does not work, not tested?
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
                 {
                     string command = "\"" + Path.Combine(targetDir, folder.name + extensionforscript) + "\"";
                     process = new Process

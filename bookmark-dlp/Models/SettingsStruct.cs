@@ -26,6 +26,7 @@ public partial class SettingsStruct : ObservableObject
     [ObservableProperty] public string? _ytDlpBinaryPath;
     [ObservableProperty] public ObservableCollection<string> _ytDlpConfigFiles;
     [ObservableProperty] public bool _ytDlpExecutableNotFound;
+    [ObservableProperty] public AppTheme _selectedTheme;
 
     public SettingsStruct(string? cmanualimportfilelocation,
         bool cmanualImportUsed,
@@ -39,7 +40,8 @@ public partial class SettingsStruct : ObservableObject
         string? cyt_dlp_binary_path,
         bool ccanChangeSettings,
         ObservableCollection<string> cytDlpConfigFiles,
-        string? cselectedYtDlpConfigFile)
+        string? cselectedYtDlpConfigFile,
+        AppTheme cselectedTheme)
     {
         _manualImportFileLocation = cmanualimportfilelocation;
         _manualImportUsed = cmanualImportUsed;
@@ -54,6 +56,7 @@ public partial class SettingsStruct : ObservableObject
         _canChangeSettings = ccanChangeSettings;
         _ytDlpConfigFiles = cytDlpConfigFiles;
         _selectedYtDlpConfigFile = cselectedYtDlpConfigFile;
+        _selectedTheme = cselectedTheme;
     }
 
     /// <summary>
@@ -74,6 +77,7 @@ public partial class SettingsStruct : ObservableObject
         _canChangeSettings = true;
         _ytDlpConfigFiles = new ObservableCollection<string>();
         _selectedYtDlpConfigFile = null;
+        _selectedTheme = AppTheme.Fluent;
     }
 
     public override string ToString()
@@ -103,6 +107,7 @@ public partial class SettingsStruct : ObservableObject
         }
         else
             sb.AppendLine("    No config files found.");
+        sb.AppendLine($"  Chosen application theme: {SelectedTheme.ToString()}");
 
         return sb.ToString();
     }
@@ -119,6 +124,7 @@ public partial class SettingsStruct : ObservableObject
             cconcurrent_downloads: false, ccookies_autoextract: false,
             cyt_dlp_binary_path: YtdlpInterfacing.Yt_dlp_pathfinder(Directory.GetCurrentDirectory()),
             ccanChangeSettings: true, cytDlpConfigFiles: YtdlpInterfacing.Yt_dlp_configfinder(output_folder: outputFolder),
-            cselectedYtDlpConfigFile: null);
+            cselectedYtDlpConfigFile: null,
+            cselectedTheme: AppTheme.Fluent);
     }
 }

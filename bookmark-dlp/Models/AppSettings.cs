@@ -41,6 +41,7 @@ public class AppSettings : IAppSettings
         Settings.YtDlpBinaryPath = defaultSettings.YtDlpBinaryPath;
         Settings.CanChangeSettings = defaultSettings.CanChangeSettings;
         Settings.SelectedYtDlpConfigFile = defaultSettings.SelectedYtDlpConfigFile;
+        Settings.SelectedTheme = defaultSettings.SelectedTheme;
         Settings.YtDlpConfigFiles = new ObservableCollection<string>(defaultSettings.YtDlpConfigFiles);
     }
 
