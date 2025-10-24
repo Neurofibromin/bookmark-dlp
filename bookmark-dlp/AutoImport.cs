@@ -80,7 +80,7 @@ public static class AutoImport
     /// <param name="downloadShorts">options</param>
     /// <param name="downloadChannels">options</param>
     /// <returns></returns>
-    public static void WritelinkstotxtFromFolderclasses(List<Folderclass> folders,
+    public static void WriteLinksToTextFiles(List<Folderclass> folders,
         bool downloadPlaylists = false, bool downloadChannels = false, bool downloadShorts = false,
         string debugdirectory = "")
     {
@@ -350,79 +350,37 @@ public static class AutoImport
             throw new DirectoryNotFoundException(
                 "The directories for scriptwriting could not be found for one or more folders.");
 
-        string extensionforscript = ""; //writing scripts
+        string scriptExtension;
+        Func<string, string, string> scriptContentFactory;
+
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
-            extensionforscript = ".bat";
-            foreach (Folderclass folder in folders) //writing bat files for every folder
-            {
-                if (folder.urls.Count > 0)
-                {
-                    StreamWriter writer1 =
-                        new StreamWriter(Path.Combine(folder.folderpath, folder.name + extensionforscript), true);
-                    writer1.WriteLine(
-                        "chcp 65001"); //uft8 charset in commandline - it will not work without this if there are special characters in access path
-                    writer1.WriteLine("\"" + ytdlp_path + "\" -a \"" +
-                                      Path.Combine(folder.folderpath, folder.name + ".txt") + "\"");
-                    //writer1.WriteLine("pause");
-                    writer1.Flush();
-                    writer1.Close();
-                }
-
-                Logger.LogVerbose(folder.id + "/" + folders.Count + " folder bat file writing finished.",
-                    Logger.Verbosity.Trace);
-            }
-
-            Logger.LogVerbose(folders.Count + " folder bat file writing finished.");
+            scriptExtension = ".bat";
+            //uft8 charset in commandline - it will not work without this if there are special characters in access path
+            scriptContentFactory = (path, txtFile) => $"chcp 65001\r\n\"{path}\" -a \"{txtFile}\"";
         }
-
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
         {
-            extensionforscript = ".sh";
-            foreach (Folderclass folder in folders) //writing sh files for every folder
-            {
-                if (folder.urls.Count > 0)
-                {
-                    StreamWriter writer1 =
-                        new StreamWriter(Path.Combine(folder.folderpath, folder.name + extensionforscript), true);
-                    writer1.WriteLine("#! /bin/bash");
-                    writer1.WriteLine("\"" + ytdlp_path + "\" -a \"" +
-                                      Path.Combine(folder.folderpath, folder.name + ".txt") + "\"");
-                    //writer1.WriteLine("pause");
-                    writer1.Flush();
-                    writer1.Close();
-                }
-
-                Logger.LogVerbose(folder.id + "/" + folders.Count + " folder sh file writing finished.",
-                    Logger.Verbosity.Trace);
-            }
-
-            Logger.LogVerbose(folders.Count + " folder sh file writing finished");
+            scriptExtension = ".sh";
+            scriptContentFactory = (path, txtFile) => $"#! /bin/bash\n\"{path}\" -a \"{txtFile}\"";
         }
-
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
         {
-            extensionforscript = ".sh";
-            foreach (Folderclass folder in folders) //writing sh files for every folder
-            {
-                if (folder.urls.Count > 0)
-                {
-                    StreamWriter writer1 =
-                        new StreamWriter(Path.Combine(folder.folderpath, folder.name + extensionforscript), true);
-                    writer1.WriteLine("#!/usr/bin/env bash");
-                    writer1.WriteLine("\"" + ytdlp_path + "\" -a \"" +
-                                      Path.Combine(folder.folderpath, folder.name + ".txt") + "\"");
-                    //writer1.WriteLine("pause");
-                    writer1.Flush();
-                    writer1.Close();
-                }
-
-                Logger.LogVerbose(folder.id + "/" + folders.Count + " folder sh file writing finished.",
-                    Logger.Verbosity.Trace);
-            }
-
-            Logger.LogVerbose(folders.Count + " folder sh file writing finished");
+            scriptExtension = ".sh";
+            scriptContentFactory = (path, txtFile) => $"#!/usr/bin/env bash\n\"{path}\" -a \"{txtFile}\"";
         }
+        else { throw new PlatformNotSupportedException();}
+
+        foreach (var folder in folders.Where(f => f.urls.Count > 0))
+        {
+            string scriptPath = Path.Combine(folder.folderpath, folder.name + scriptExtension);
+            string txtFilePath = Path.Combine(folder.folderpath, folder.name + ".txt");
+            string scriptContent = scriptContentFactory(ytdlp_path, txtFilePath);
+    
+            File.WriteAllText(scriptPath, scriptContent);
+            Logger.LogVerbose($"{folder.id}/{folders.Count} folder script writing finished.", Logger.Verbosity.Trace);
+        }
+        Logger.LogVerbose($"{folders.Count} folder script file writing finished.");
     }
 
     /// <summary>

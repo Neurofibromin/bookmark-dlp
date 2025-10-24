@@ -74,14 +74,8 @@ public partial class HierarchicalFolderclass : ObservableObject
     {
         return (x, y) =>
         {
-            if (x is null && y is null)
-                return 0;
-            else if (x is null)
-                return -1;
-            else if (y is null)
-                return 1;
-            else
-                return Comparer<T>.Default.Compare(selector(x), selector(y));
+            if (x is null || y is null) return x is null ? (y is null ? 0 : -1) : 1;
+            return Comparer<T>.Default.Compare(selector(x), selector(y));
         };
     }
 
@@ -89,12 +83,7 @@ public partial class HierarchicalFolderclass : ObservableObject
     {
         return (x, y) =>
         {
-            if (x is null && y is null)
-                return 0;
-            if (x is null)
-                return 1;
-            if (y is null)
-                return -1;
+            if (x is null || y is null) return x is null ? (y is null ? 0 : 1) : -1;
             return Comparer<T>.Default.Compare(selector(y), selector(x));
         };
     }
