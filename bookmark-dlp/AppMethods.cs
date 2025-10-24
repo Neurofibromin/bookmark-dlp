@@ -17,7 +17,7 @@ public static class AppMethods
     ///     Asks user if they want playlists, shorts and channels downloaded.
     /// </summary>
     /// <returns>Want (_downloadPlaylists, _downloadShorts, _downloadChannels) in this order.</returns>
-    public static (bool, bool, bool) Wantcomplex()
+    public static (bool, bool, bool) PromptForAdvancedDownloadOptions()
     {
         Logger.LogVerbose("Do you want to write and download not video links? (eg. playlists and channels. by default: no)");
         Logger.LogVerbose("Depending on the yt-dlp conf settings this can result in very large downloads, a single bookmark can lead to hundreds of videos being downloaded.");
@@ -86,37 +86,29 @@ public static class AppMethods
     /// <returns></returns>
     public static ObservableCollection<HierarchicalFolderclass> GenerateHierarchicalFolderclassesFromList(List<Folderclass> folders)
     {
-        ObservableCollection<HierarchicalFolderclass> hierarchicalFolderclasses = new ObservableCollection<HierarchicalFolderclass>();
-        
-        foreach (Folderclass folder in folders.Where(a => a.depth == 0))
+        var hierarchicalFolders = folders.Select(f => new HierarchicalFolderclass(f)).ToList();
+        var folderMap = hierarchicalFolders.ToDictionary(f => f.Id);
+        var rootFolders = new ObservableCollection<HierarchicalFolderclass>();
+    
+        foreach (var folder in hierarchicalFolders)
         {
-            hierarchicalFolderclasses.Add(new HierarchicalFolderclass(folder) { IsExpanded = true });
-            Logger.LogVerbose("added root: " + folder.name, Logger.Verbosity.Trace);
-        }
-        foreach (Folderclass folder in folders.Where(a => a.depth != 0).OrderBy(a => a.depth))
-        {
-            Logger.LogVerbose("examining " + folder.name + " " + folder.id + " parentId:" + folder.parentId, Logger.Verbosity.Trace);
-            bool foundparent = false;
-            foreach (HierarchicalFolderclass parent in hierarchicalFolderclasses)
+            if (folder.ParentId != 0 && folderMap.TryGetValue(folder.ParentId, out var parent))
             {
-                if (parent.Id == folder.parentId) { 
-                    Logger.LogVerbose("Found parent: " + parent.Name, Logger.Verbosity.Trace);
-                    parent._children ??= new ObservableCollection<HierarchicalFolderclass>();
-                    parent._children.Add(new HierarchicalFolderclass(folder));
-                    parent.HasChildren = true;
-                    foundparent = true;
-                    break;
-                }
+                parent._children ??= new ObservableCollection<HierarchicalFolderclass>();
+                parent._children.Add(folder);
+                parent.HasChildren = true;
             }
-            if (!foundparent)
+            else
             {
-                hierarchicalFolderclasses.Add(new HierarchicalFolderclass(folder));
-                Logger.LogVerbose("The following folder has no parent despite depth != 0: " + folder.name, Logger.Verbosity.Error);
+                // Set IsExpanded for root items
+                folder.IsExpanded = true;
+                rootFolders.Add(folder);
+                if (folder.ParentId != 0)
+                    Logger.LogVerbose("The following folder has no parent despite depth != 0: " + folder.Name, Logger.Verbosity.Error);
             }
-            // HierarchcalFolderCollection.Single(parent => parent.Id == folder.parent).Children.Add(onefolder);
-            Logger.LogVerbose("added: " + folder.name, Logger.Verbosity.Trace);
         }
-        return hierarchicalFolderclasses;
+    
+        return rootFolders;
     }
 
     public static List<Folderclass> GenerateListFolderclassesFromHierarchical(
