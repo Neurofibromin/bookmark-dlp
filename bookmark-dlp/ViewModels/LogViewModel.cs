@@ -6,7 +6,7 @@ namespace bookmark_dlp.ViewModels;
 
 public partial class LogViewModel : ViewModelBase
 {
-    private readonly MemoryStream _logStream;
+    /*private readonly MemoryStream _logStream;
     private long _lastReadPosition;
 
     [ObservableProperty] private string _logs;
@@ -44,25 +44,23 @@ public partial class LogViewModel : ViewModelBase
 
         // Update the read position
         _lastReadPosition = currentReadPosition;
+    }*/
+
+    // solution using event capable streams (must create ObservableStream wrapper for Stream)
+    private readonly Models.ObservableStream _logStream;
+    [ObservableProperty] private string _logs;
+    public LogViewModel()
+    {
+        _logs = "";
+        _logStream = new Models.ObservableStream();
+        _logStream.DataWritten += OnDataWritten;
+ 
+        Logger.AddStream(_logStream);
     }
-
-    /* solution using event capable streams (must create ObservableStream wrapper for Stream)
-     * private readonly ObservableStream _logStream;
-
-       public LogViewModel()
-       {
-           _logs = "";
-           _logStream = new ObservableStream();
-           _logStream.DataWritten += OnDataWritten;
-
-           Logger.AddStream(_logStream); // Assuming Logger.AddStream accepts a Stream
-       }
-
-       private void OnDataWritten(object sender, string newData)
-       {
-           // Append the new data to the logs
-           _logs += newData;
-       }
-     *
-     */
+ 
+    private void OnDataWritten(object sender, string newData)
+    {
+        // Append the new data to the logs
+        Logs += newData;
+    }
 }
