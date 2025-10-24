@@ -14,6 +14,38 @@ namespace bookmark_dlp;
 public static class YtdlpInterfacing
 {
     public static string? YtdlpPath { get; set; }
+    
+    private static (string Output, string Error, int ExitCode) ExecuteYtDlpProcess(string arguments)
+    {
+        if (string.IsNullOrEmpty(YtdlpPath))
+        {
+            Logger.LogVerbose("YtdlpPath is not set in YtdlpInterfacing::ExecuteYtDlpProcess()",
+                Logger.Verbosity.Error);
+            throw new InvalidOperationException("YtDlpPath is not set.");
+        }
+
+        using var process = new Process
+        {
+            StartInfo = new ProcessStartInfo
+            {
+                FileName = YtdlpPath,
+                Arguments = arguments,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                WindowStyle = ProcessWindowStyle.Hidden,
+            }
+        };
+
+        process.Start();
+        string output = process.StandardOutput.ReadToEnd();
+        string error = process.StandardError.ReadToEnd();
+        int exitcode = process.ExitCode;
+        process.WaitForExit();
+        process.Close();
+        return (output, error, exitcode);
+    }
 
     /// <summary>
     ///     Gets list of video ids from a given channel. Requires internet.
@@ -163,32 +195,18 @@ public static class YtdlpInterfacing
             Logger.LogVerbose($"Url was not Playlist: {url}", Logger.Verbosity.Warning);
             return null;
         }
-
         Logger.LogVerbose($"Parsed playlist url from {oldurl} to {url}", Logger.Verbosity.Debug);
-
-        List<string> videoIds = new List<string>();
-        // Run yt-dlp
-        Process process = new Process
+        
+        string output;
+        string error; int exitcode;
+        try
         {
-            StartInfo = new ProcessStartInfo
+            (output, error, exitcode) = ExecuteYtDlpProcess($"-j --flat-playlist \"{url}\"");
+            if (exitcode != 0)
             {
-                FileName = YtdlpPath,
-                Arguments = $"-j --flat-playlist \"{url}\"",
-                RedirectStandardOutput = true,
-                UseShellExecute = false,
-                CreateNoWindow = true,
-                WindowStyle = ProcessWindowStyle.Hidden,
-                RedirectStandardError = true
+                Logger.LogVerbose($"yt-dlp exited with code {exitcode} for playlist {url}. Error: {error}", Logger.Verbosity.Error);
+                return null;
             }
-        };
-        process.Start();
-        string result = process.StandardOutput.ReadToEnd();
-        string error = process.StandardError.ReadToEnd();
-        process.WaitForExit();
-        int exitCode = process.ExitCode;
-        process.Close();
-        if (exitCode != 0)
-        {
             if (error.Contains("Unable to download webpage: HTTP Error 404") ||
                 error.Contains("Unable to download API page") ||
                 error.Contains("Failed to establish a new connection: [Errno -3]"))
@@ -196,21 +214,46 @@ public static class YtdlpInterfacing
                 Logger.LogVerbose(error, Logger.Verbosity.Error);
                 return null;
             }
-
-            if (result.Contains("Unable to download webpage: HTTP Error 404") ||
-                result.Contains("Unable to download API page") ||
-                result.Contains("Failed to establish a new connection: [Errno -3]"))
+            if (output.Contains("Unable to download webpage: HTTP Error 404") ||
+                output.Contains("Unable to download API page") ||
+                output.Contains("Failed to establish a new connection: [Errno -3]"))
             {
-                Logger.LogVerbose(result, Logger.Verbosity.Error);
+                Logger.LogVerbose(output, Logger.Verbosity.Error);
                 return null;
             }
-
-            Logger.LogVerbose($"yt-dlp exit code: {exitCode}, failed to query videos for playlist: {url}",
-                Logger.Verbosity.Error);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogVerbose($"Failed to query playlist {url}. Exception: {ex.Message}", Logger.Verbosity.Error);
             return null;
         }
-
-        string[] lines = result.Split('\n');
+        
+        try
+        {
+            List<string> videoIds = output.Split('\n', StringSplitOptions.RemoveEmptyEntries)
+                .Select(line =>
+                {
+                    try
+                    {
+                        return JsonDocument.Parse(line);
+                    }
+                    catch
+                    {
+                        return null;
+                    }
+                })
+                .Where(doc => doc != null)
+                .Select(doc => doc.RootElement.TryGetProperty("id", out var id) ? id.GetString() : null)
+                .Where(id => id != null)
+                .ToList();
+            return videoIds;
+        }
+        catch (Exception e)
+        {
+            Logger.LogVerbose($"JSON parsing in GetVideoIdsFromPlaylistUrl failed: {e.Message}", Logger.Verbosity.Error);
+            return null;
+        }
+        /*string[] lines = output.Split('\n');
         foreach (string line in lines)
         {
             try
@@ -232,7 +275,7 @@ public static class YtdlpInterfacing
             }
         }
 
-        return videoIds;
+        return videoIds;*/
     }
 
     /// <summary>

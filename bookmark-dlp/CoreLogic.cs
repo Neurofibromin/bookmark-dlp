@@ -101,7 +101,7 @@ public class CoreLogic
                 importSourceFound = true;
             }
 
-            (downloadPlaylists, downloadShorts, downloadChannels) = AppMethods.Wantcomplex();
+            (downloadPlaylists, downloadShorts, downloadChannels) = AppMethods.PromptForAdvancedDownloadOptions();
 
             Logger.LogVerbose("Concurrent downloads? Y/N");
             // if (Console.ReadKey().ToString().ToLower().Equals("y")) { _concurrentDownloads = true; }
@@ -176,7 +176,7 @@ public class CoreLogic
             }
 
             FolderManager.CreateFolderStructure(folders, rootdir);
-            AutoImport.WritelinkstotxtFromFolderclasses(folders, downloadPlaylists, downloadChannels, downloadShorts,
+            AutoImport.WriteLinksToTextFiles(folders, downloadPlaylists, downloadChannels, downloadShorts,
                 rootdir);
 
             Legacy.PrintToStream(folders); //dump all the folder info to console
@@ -252,7 +252,7 @@ public class CoreLogic
             }
 
             FolderManager.CreateFolderStructure(folders, rootdir);
-            AutoImport.WritelinkstotxtFromFolderclasses(folders, downloadPlaylists, downloadChannels, downloadShorts,
+            AutoImport.WriteLinksToTextFiles(folders, downloadPlaylists, downloadChannels, downloadShorts,
                 rootdir);
 
 
