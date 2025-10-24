@@ -152,7 +152,7 @@ public static class AppMethods
             {
                 if (link.linktype == Linktype.Video || link.linktype == Linktype.Short)
                 {
-                    folder.numberOfVideosDirectlyWanted++;
+                    folder.downloadStatus.NumberOfVideosDirectlyWanted++;
                 }
                 else if (link.linktype == Linktype.Channel_channel ||
                          link.linktype == Linktype.Channel_at ||
@@ -160,7 +160,7 @@ public static class AppMethods
                          link.linktype == Linktype.Channel_c ||
                          link.linktype == Linktype.Playlist)
                 {
-                    folder.numberOfVideosIndirectlyWanted += link.member_ids.Count;
+                    folder.downloadStatus.NumberOfVideosIndirectlyWanted += link.member_ids.Count;
                 }
             }
         }
@@ -195,9 +195,9 @@ public static class AppMethods
     {
         foreach (Folderclass folder in folders)
         {
-            folder.numberOfDirectlyWantedVideosFound = 0;
-            folder.numberOfIndirectlyWantedVideosFound = 0;
-            folder.numberOfOtherVideosFound = 0;
+            folder.downloadStatus.NumberOfDirectlyWantedVideosFound = 0;
+            folder.downloadStatus.NumberOfIndirectlyWantedVideosFound = 0;
+            folder.downloadStatus.NumberOfOtherVideosFound = 0;
             if (Directory.Exists(folder.folderpath))
             {
                 var files = Directory.GetFiles(folder.folderpath);
@@ -226,19 +226,19 @@ public static class AppMethods
                         {
                             if (ytIdsFoundInArchive.Contains(link.yt_id)) // in archive.txt
                             {
-                                folder.LinksWithNoMissingVideos.Add(link);
+                                folder.downloadStatus.LinksWithNoMissingVideos.Add(link);
                                 Logger.LogVerbose($"In folder {folder.folderpath} video {link.url} found in archive.txt", Logger.Verbosity.Trace);
                                 continue;
                             }
                         }
                         if (files.Any(s => s.Contains(link.yt_id)))
                         {
-                            folder.LinksWithNoMissingVideos.Add(link);
+                            folder.downloadStatus.LinksWithNoMissingVideos.Add(link);
                             Logger.LogVerbose($"In folder {folder.folderpath} video {link.url} found in files list", Logger.Verbosity.Trace);
                         }
                         else
                         {
-                            folder.LinksWithMissingVideos.Add(link);
+                            folder.downloadStatus.LinksWithMissingVideos.Add(link);
                             Logger.LogVerbose($"In folder {folder.folderpath} video {link.url} not found", Logger.Verbosity.Trace);
                         }
                         continue;
@@ -259,7 +259,7 @@ public static class AppMethods
                     {
                         Logger.LogVerbose($"Could not ascertain which videos are wanted by link {link}. May be a network error", Logger.Verbosity.Error);
                         found = false;
-                        folder.LinksWithMissingVideos.Add(link);
+                        folder.downloadStatus.LinksWithMissingVideos.Add(link);
                         continue;
                     }
                     foreach (string id in idsToCheck)
@@ -288,12 +288,12 @@ public static class AppMethods
                     }
                     if (found)
                     {
-                        folder.LinksWithNoMissingVideos.Add(link);
+                        folder.downloadStatus.LinksWithNoMissingVideos.Add(link);
                         Logger.LogVerbose($"All members were found for {link.url} in folder {folder.folderpath}", Logger.Verbosity.Trace);
                     }
                     else
                     {
-                        folder.LinksWithMissingVideos.Add(link);
+                        folder.downloadStatus.LinksWithMissingVideos.Add(link);
                         Logger.LogVerbose($"Not all members were found for {link.url} in folder {folder.folderpath}", Logger.Verbosity.Trace);
                     }
                 }
@@ -301,8 +301,8 @@ public static class AppMethods
             // folder.numberOfIndirectlyWantedVideosNotFound = folder.links.Select(f => f.member_ids_not_found).ToList().Select(f => f.Count()).Sum();
             // folder.numberOfDirectlyWantedVideosNotFound = folder.LinksWithMissingVideos.Count(f => f.linktype is Linktype.Video or Linktype.Short);
             // folder.numberOfDirectlyWantedVideosNotFound = folder.numberOfVideosDirectlyWanted - folder.numberOfDirectlyWantedVideosFound;
-            folder.numberOfIndirectlyWantedVideosFound = folder.links.Select(f => f.member_ids_found.Count).Sum();
-            folder.numberOfDirectlyWantedVideosFound = folder.LinksWithNoMissingVideos.Count(f => f.linktype is Linktype.Video or Linktype.Short);
+            folder.downloadStatus.NumberOfIndirectlyWantedVideosFound = folder.links.Select(f => f.member_ids_found.Count).Sum();
+            folder.downloadStatus.NumberOfDirectlyWantedVideosFound = folder.downloadStatus.LinksWithNoMissingVideos.Count(f => f.linktype is Linktype.Video or Linktype.Short);
    
         }
     }
@@ -324,8 +324,8 @@ public static class AppMethods
                 Debug.Assert(allids.SetEquals(found_ids));
             }
         }
-        HashSet<YTLink> found = new HashSet<YTLink>(folder.LinksWithNoMissingVideos);
-        HashSet<YTLink> notfound = new HashSet<YTLink>(folder.LinksWithMissingVideos);
+        HashSet<YTLink> found = new HashSet<YTLink>(folder.downloadStatus.LinksWithNoMissingVideos);
+        HashSet<YTLink> notfound = new HashSet<YTLink>(folder.downloadStatus.LinksWithMissingVideos);
         HashSet<YTLink> all = new HashSet<YTLink>(folder.links);
         found.UnionWith(notfound);
         Debug.Assert(all.SetEquals(found));

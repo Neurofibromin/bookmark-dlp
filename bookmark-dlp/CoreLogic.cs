@@ -175,13 +175,13 @@ public class CoreLogic
                 if (deepestdepth < folders[q].depth) deepestdepth = folders[q].depth;
             }
 
-            FolderManager.Createfolderstructure(folders, rootdir);
+            FolderManager.CreateFolderStructure(folders, rootdir);
             AutoImport.WritelinkstotxtFromFolderclasses(folders, downloadPlaylists, downloadChannels, downloadShorts,
                 rootdir);
 
             Legacy.PrintToStream(folders); //dump all the folder info to console
             AutoImport.Scriptwriter(folders, ytdlp_path); //writing the scripts that call yt-dlp and add .txt with the links in the arguments //NOT the method that creates the .txt files
-            FolderManager.Deleteemptyfolders(folders); //deletes the folders from the folder structure that are empty (no youtube links were written into them)
+            FolderManager.DeleteEmptyFolders(folders); //deletes the folders from the folder structure that are empty (no youtube links were written into them)
             Console.WriteLine("Running the scripts after ENTER.");
             Console.ReadKey();
             AutoImport.Runningthescripts(folders);
@@ -251,7 +251,7 @@ public class CoreLogic
                 if (deepestdepth < folders[q].depth) deepestdepth = folders[q].depth;
             }
 
-            FolderManager.Createfolderstructure(folders, rootdir);
+            FolderManager.CreateFolderStructure(folders, rootdir);
             AutoImport.WritelinkstotxtFromFolderclasses(folders, downloadPlaylists, downloadChannels, downloadShorts,
                 rootdir);
 
@@ -262,7 +262,7 @@ public class CoreLogic
 
 
             AutoImport.Scriptwriter(folders, ytdlp_path); //writing the scripts that call yt-dlp and add .txt with the links in the arguments //NOT the method that creates the .txt files
-            FolderManager.Deleteemptyfolders(folders); //deletes the folders from the folder structure that are empty (no youtube links were written into them)
+            FolderManager.DeleteEmptyFolders(folders); //deletes the folders from the folder structure that are empty (no youtube links were written into them)
             AutoImport.Runningthescripts(folders);
             //FolderManager.Checkformissing
             Environment.Exit(0); //leaving the program, so it does not contiue running according to Program.cs

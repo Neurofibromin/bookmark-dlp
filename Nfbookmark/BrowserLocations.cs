@@ -43,7 +43,7 @@ namespace Nfbookmark
         /// Gives list of default locations for profiles for Linux, OSX and Windows
         /// </summary>
         /// <returns>List of folder paths where profile folders may be located (not just for installed browsers)</returns>
-        public static List<BrowserLocations> GetBrowserLocations()
+        public static List<BrowserLocations> GetDefaultBrowserConfigurations()
         {
             BrowserLocations Chrome = new BrowserLocations
             {
@@ -147,25 +147,30 @@ namespace Nfbookmark
         /// <summary>
         /// Interactively query which file containing bookmarks should be selected
         /// </summary>
-        /// <param name="browserLocations">Preferably from GetBrowserLocations()</param>
+        /// <param name="browserLocations">Preferably from GetDefaultBrowserConfigurations()</param>
         /// <returns>Path (string) to chosen file or null</returns>
         public static string QueryChosenBookmarksFile(List<BrowserLocations> browserLocations)
         {
-            if (browserLocations.Count == 0) { return null; }
-            string chosenFilePath;
-            List<string> possibleFilePaths = new List<string>();
-            Logger.LogVerbose("Which browser bookmarks would you like to use?\nWrite the number");
-            int m = 1;
-            foreach (BrowserLocations browser in browserLocations)
+            if (browserLocations == null || !browserLocations.Any())
             {
-                foreach (string path in browser.FoundBookmarkFilePaths)
-                {
-                    Logger.LogVerbose(m + ". path: " + path);
-                    possibleFilePaths.Add(path);
-                    m++;
-                }
+                return null;
             }
-            
+
+            var possibleFilePaths = browserLocations
+                .SelectMany(browser => browser.FoundBookmarkFilePaths)
+                .ToList();
+
+            if (!possibleFilePaths.Any())
+            {
+                return null;
+            }
+
+            Logger.LogVerbose("Which browser bookmarks would you like to use?\nWrite the number");
+            for (int i = 0; i < possibleFilePaths.Count; i++)
+            {
+                Logger.LogVerbose($"{i + 1}. path: {possibleFilePaths[i]}");
+            }
+            string chosenFilePath;
             int chosenindexInt;
             while (true)
             {
@@ -173,7 +178,7 @@ namespace Nfbookmark
                 try
                 {
                     chosenindexInt = int.Parse(chosenindex ?? throw new InvalidOperationException());
-                    if (chosenindexInt < 1 || chosenindexInt >= m) { throw new IndexOutOfRangeException(); }
+                    if (chosenindexInt < 1 || chosenindexInt > possibleFilePaths.Count) { throw new IndexOutOfRangeException(); }
                     else { break; }
                 }
                 catch (Exception)
@@ -187,6 +192,15 @@ namespace Nfbookmark
             return chosenFilePath;
         }
 
+        private static BrowserLocations FindBookmarkFiles(BrowserLocations browser)
+        {
+            Logger.LogVerbose("Checking browser locations for " + browser.BrowserName, Logger.Verbosity.Debug);
+            if (browser.BrowserType != BrowserType.chromiumbased) { return CheckFirefoxLocations(browser); }
+            if (browser.BrowserType == BrowserType.chromiumbased) { return CheckChromiumBasedLocations(browser); }
+            Logger.LogVerbose("Invalid browser type", Logger.Verbosity.Error);
+            return null;
+        }
+
         /// <summary>
         /// Checks for existing profiles in the default places for a browser. Supports GNU/Linux, OSX, Windows.
         /// </summary>
@@ -194,8 +208,6 @@ namespace Nfbookmark
         /// <returns>Browserlocations object that has foundfiles and linksfound filled. If no profiles are found then the BrowserLocations object is returned as it was.</returns>
         private static BrowserLocations CheckChromiumBasedLocations(BrowserLocations browser)
         {
-            Logger.LogVerbose("Checking browser locations for " + browser.BrowserName, Logger.Verbosity.Debug);
-            if (browser.BrowserType != BrowserType.chromiumbased) { return CheckFirefoxLocations(browser); }
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 if (Directory.Exists(browser.WindowsProfilesPath))
@@ -376,9 +388,9 @@ namespace Nfbookmark
         /// <returns>List with all browser and their paths that have any browser profiles</returns>
         public static List<BrowserLocations> GetBrowserBookmarkFilesPaths()
         {
-            List<BrowserLocations> browserLocations = GetBrowserLocations(); //gets list of supported browsers
+            List<BrowserLocations> browserLocations = GetDefaultBrowserConfigurations(); //gets list of supported browsers
             return browserLocations
-                .Select(browser => CheckChromiumBasedLocations(browser)) // Check each browser
+                .Select(browser => FindBookmarkFiles(browser)) // Check each browser
                 .Where(browser => browser.FoundBookmarkFilePaths.Count != 0) // Filter browsers with profiles
                 .ToList();
         }

@@ -7,14 +7,14 @@ public class BrowserLocationsTests
     [Fact]
     public void Get_List_from_GetBrowserLocations()
     {
-        List<BrowserLocations> browserLocations = BrowserLocations.GetBrowserLocations();
+        List<BrowserLocations> browserLocations = BrowserLocations.GetDefaultBrowserConfigurations();
         Assert.NotEmpty(browserLocations);
-        Assert.Equal("Chrome", browserLocations.First().browsername);
+        Assert.Equal("Chrome", browserLocations.First().BrowserName);
         foreach (BrowserLocations browser in browserLocations)
         {
-            Assert.NotNull(browser.windows_profilespath);
-            Assert.NotEmpty(browser.linux_profilespath);
-            Assert.NotEmpty(browser.osx_profilespath);
+            Assert.NotNull(browser.WindowsProfilesPath);
+            Assert.NotEmpty(browser.LinuxProfilesPaths);
+            Assert.NotEmpty(browser.OsxProfilesPaths);
         }
     }
 }
