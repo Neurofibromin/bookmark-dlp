@@ -16,9 +16,9 @@ public class CoreLogic
         Logger.verbosity = Logger.Verbosity.Debug;
         // Functions.PrintToConsole(Import.SmartImport(Import.GetBrowserBookmarkFilesPaths()[0].foundProfiles[0]));
         Console.WriteLine("starting");
-        Functions.PrintToStream(Import.SmartImport("test1.html"));
+        Legacy.PrintToStream(Import.SmartImport("test1.html"));
         Console.WriteLine("\n\n\n");
-        Functions.PrintToStream(Import.SmartImport("test2.html"));
+        Legacy.PrintToStream(Import.SmartImport("test2.html"));
         Console.ReadKey();
         Environment.Exit(0);
 #endif
@@ -179,14 +179,14 @@ public class CoreLogic
             AutoImport.WritelinkstotxtFromFolderclasses(folders, downloadPlaylists, downloadChannels, downloadShorts,
                 rootdir);
 
-            Functions.PrintToStream(folders); //dump all the folder info to console
+            Legacy.PrintToStream(folders); //dump all the folder info to console
             AutoImport.Scriptwriter(folders, ytdlp_path); //writing the scripts that call yt-dlp and add .txt with the links in the arguments //NOT the method that creates the .txt files
             FolderManager.Deleteemptyfolders(folders); //deletes the folders from the folder structure that are empty (no youtube links were written into them)
             Console.WriteLine("Running the scripts after ENTER.");
             Console.ReadKey();
             AutoImport.Runningthescripts(folders);
             //AppMethods.Checkformissing //checking if all the desired links have indeed been downloaded, archive.txt integrity as well
-            Functions.PrintToStream(folders);
+            Legacy.PrintToStream(folders);
             Console.WriteLine("Press enter to exit");
             Console.Read();
             Environment.Exit(0);

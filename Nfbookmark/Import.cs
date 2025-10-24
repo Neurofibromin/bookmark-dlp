@@ -178,7 +178,7 @@ namespace Nfbookmark
             */
 
             List<Folderclass> folders = new List<Folderclass>();
-            GlobalState globalState = new GlobalState();
+            Legacy.GlobalState globalState = new Legacy.GlobalState();
 
             Bookmark bookmarkroot = root;
             Folderclass thisBookmark = new Folderclass
@@ -239,7 +239,7 @@ namespace Nfbookmark
         /// <param name="globalState">Used to keep track of ending lines (which folders are closed)</param>
         /// <param name="folders">The list of folders found so far</param>
         /// <returns></returns>
-        private static Folderclass Childfinder(Bookmark current, int depth, ref GlobalState globalState,
+        private static Folderclass Childfinder(Bookmark current, int depth, ref Legacy.GlobalState globalState,
             ref List<Folderclass> folders)
         {
             globalState.folderid++;
