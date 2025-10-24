@@ -26,7 +26,7 @@ public partial class StartPageViewModel : ViewModelBase
     public StartPageViewModel(IAppSettings appSettings)
     {
         AvailableBrowserBookmarkPaths = BrowserLocations.GetBrowserBookmarkFilesPaths()?
-            .SelectMany(browser => browser.foundProfiles)
+            .SelectMany(browser => browser.FoundBookmarkFilePaths)
             .ToList() ?? new List<string>();
 
         if (YtdlpInterfacing.Yt_dlp_pathfinder(Directory.GetCurrentDirectory()) != null)
