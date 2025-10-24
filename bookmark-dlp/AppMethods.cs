@@ -110,11 +110,55 @@ public static class AppMethods
     
         return rootFolders;
     }
-
+    
     public static List<Folderclass> GenerateListFolderclassesFromHierarchical(
         ObservableCollection<HierarchicalFolderclass> folders)
     {
-        throw new NotImplementedException();
+        var flatList = new List<Folderclass>();
+        foreach (var hierarchicalFolder in folders)
+        {
+            FlattenHierarchicalFolder(hierarchicalFolder, flatList);
+        }
+        flatList = flatList.OrderBy(f => f.id).ToList();
+        return flatList;
+    }
+
+    private static void FlattenHierarchicalFolder(HierarchicalFolderclass hierarchicalFolder, List<Folderclass> flatList)
+    {
+        var folder = new Folderclass
+        {
+            startline = hierarchicalFolder.Startline,
+            name = hierarchicalFolder.Name,
+            depth = hierarchicalFolder.Depth,
+            endingline = hierarchicalFolder.Endingline,
+            folderpath = hierarchicalFolder.Folderpath,
+            urls = hierarchicalFolder.Urls,
+            links = hierarchicalFolder.Links,
+            id = hierarchicalFolder.Id,
+            parentId = hierarchicalFolder.ParentId,
+            childrenIds = hierarchicalFolder.ChildrenIds,
+            downloadStatus = new DownloadStatus
+            {
+                LinksWithMissingVideos = hierarchicalFolder.LinksWithMissingVideos,
+                LinksWithNoMissingVideos = hierarchicalFolder.LinksWithNoMissingVideos,
+                WantDownloaded = hierarchicalFolder.WantDownloaded,
+                NumberOfVideosDirectlyWanted = hierarchicalFolder.NumberOfVideosDirectlyWanted,
+                NumberOfVideosIndirectlyWanted = hierarchicalFolder.NumberOfVideosIndirectlyWanted,
+                NumberOfDirectlyWantedVideosFound = hierarchicalFolder.NumberOfDirectlyWantedVideosFound,
+                NumberOfIndirectlyWantedVideosFound = hierarchicalFolder.NumberOfIndirectlyWantedVideosFound,
+                NumberOfOtherVideosFound = hierarchicalFolder.NumberOfOtherVideosFound
+            }
+        };
+
+        flatList.Add(folder);
+
+        if (hierarchicalFolder.Children != null)
+        {
+            foreach (var child in hierarchicalFolder.Children)
+            {
+                FlattenHierarchicalFolder(child, flatList);
+            }
+        }
     }
 
     public static void MethodRunner(Func<Folderclass, string> func, ObservableCollection<HierarchicalFolderclass> folders)
