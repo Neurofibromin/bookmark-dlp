@@ -23,15 +23,6 @@ public partial class DownloadingViewModel : ViewModelBase
     private List<Folderclass>? _folders;
     [ObservableProperty] private HierarchicalTreeDataGridSource<HierarchicalFolderclass>? _treeSource;
 
-    // public HierarchicalTreeDataGridSource<HierarchicalFolderclass> TreeSource => _treeSource;
-    // private ITreeDataGridSource<HierarchicalFolderclass> _source;
-    // private HierarchicalFolderclass? _root;
-    /*public ITreeDataGridSource<HierarchicalFolderclass> Source
-    {
-        get => _source;
-        private set => this.SetPropertyAndNotifyOnCompletion(ref _source, value);
-    }*/
-
     public DownloadingViewModel(IAppSettings appSettings)
     {
         _activeSettings = appSettings.Settings;
@@ -51,10 +42,37 @@ public partial class DownloadingViewModel : ViewModelBase
         if (_folders == null)
             throw new NoNullAllowedException(
                 "List<Folderclass> _folders must not be null when starting the status query.");
-        // LoadFoldersFromFile() : Import.SmartImport();
         AutoImport.LinksFromUrls(_folders);
         FolderManager.CreateFolderStructure(_folders, ActiveSettings.OutputFolder);
         AppMethods.CountWantedVideos(ref _folders);
+        AppMethods.CheckCurrentFilesystemState(ref _folders);
+    }
+
+    [RelayCommand]
+    private void First()
+    {
+        Logger.LogVerbose("first", Logger.Verbosity.Critical);
+        AutoImport.LinksFromUrls(_folders);
+    }
+    
+    [RelayCommand]
+    private void Second()
+    {
+        Logger.LogVerbose("2", Logger.Verbosity.Critical);
+        FolderManager.CreateFolderStructure(_folders, ActiveSettings.OutputFolder);
+    }
+    
+    [RelayCommand]
+    private void Third()
+    {
+        Logger.LogVerbose("3", Logger.Verbosity.Critical);
+        AppMethods.CountWantedVideos(ref _folders);
+    }
+    
+    [RelayCommand]
+    private void Fourth()
+    {
+        Logger.LogVerbose("4", Logger.Verbosity.Critical);
         AppMethods.CheckCurrentFilesystemState(ref _folders);
     }
 
