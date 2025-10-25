@@ -2626,7 +2626,6 @@ GROUP_GRAPHS           = YES
 # Language.
 # The default value is: NO.
 # This tag requires that the tag HAVE_DOT is set to YES.
-# //todo maybe not?
 UML_LOOK               = YES
 
 # If the UML_LOOK tag is enabled, the fields and methods are shown inside the
