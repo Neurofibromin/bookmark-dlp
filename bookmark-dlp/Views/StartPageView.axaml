@@ -137,6 +137,7 @@
                     HorizontalAlignment="Right"
                     VerticalAlignment="Bottom"
                     Background="Aqua"
+                    x:Name="ImportButton"
                     IsEnabled="{Binding EnableImportButton}"
                     ToolTip.Tip="{Binding ImportButtonToolTip}"
                     Command="{ReflectionBinding $parent[Window].DataContext.GoForward}">

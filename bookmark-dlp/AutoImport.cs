@@ -161,7 +161,6 @@ public static class AutoImport
     /// <exception cref="InvalidLinkException">If link parsing encounters unexpected characters</exception>
     public static YTLink? LinkFromUrl(string _url)
     {
-        // TODO: test this
         if (!_url.Contains("www.youtube.com")) //only work with youtube links
             return null;
         YTLink link = new YTLink();
