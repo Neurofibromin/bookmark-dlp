@@ -6,10 +6,10 @@ namespace Nfbookmark.Tests;
 
 public class ImportTests
 {
-    private static readonly string test_data_files_prefix = @"../../../../test_data_files/";
+    private static readonly string TestDataFilesPrefix = @"../../../../test_data_files/";
 
-    private static readonly string test_data_files_folder =
-        Path.Combine(Directory.GetCurrentDirectory(), test_data_files_prefix);
+    private static readonly string TestDataFilesFolder =
+        Path.Combine(Directory.GetCurrentDirectory(), TestDataFilesPrefix);
 
     private readonly ITestOutputHelper _output;
 
@@ -97,19 +97,19 @@ public class ImportTests
     [Fact]
     public void DataFilesExistTest()
     {
-        Assert.True(Directory.Exists(test_data_files_folder));
-        Assert.True(Directory.Exists(Path.Combine(test_data_files_folder, "chromium_linux")));
-        Assert.True(Directory.Exists(Path.Combine(test_data_files_folder, "firefox_linux")));
+        Assert.True(Directory.Exists(TestDataFilesFolder));
+        Assert.True(Directory.Exists(Path.Combine(TestDataFilesFolder, "chromium_linux")));
+        Assert.True(Directory.Exists(Path.Combine(TestDataFilesFolder, "firefox_linux")));
     }
 
     #region Chromium
-
-    //TODO set up html takeoutimport tests
+    
     [Theory]
     [InlineData("chromium_linux/bookmarks.json")]
     public void JsonChromiumTest(string path)
     {
-        string realpath = Path.Combine(test_data_files_folder, path);
+        string realpath = Path.Combine(TestDataFilesFolder, path);
+        Assert.True(File.Exists(realpath));
         List<Folderclass> folders = Import.JsonIntake(realpath);
 
         using (MemoryStream memoryStream = new MemoryStream())
@@ -136,11 +136,24 @@ public class ImportTests
     [InlineData("chromium_linux/exported_bookmarks.html")]
     public void HtmlExportedChromiumTest(string path)
     {
-        string realpath = Path.Combine(test_data_files_folder, path);
+        string realpath = Path.Combine(TestDataFilesFolder, path);
+        Assert.True(File.Exists(realpath));
         List<Folderclass> folders = Import.HtmlExportIntake(realpath);
         Assert.NotNull(folders);
         Assert.True(folders.Count > 0);
-        Assert.Equal(20, folders.Count); //check this
+        Assert.Equal(20, folders.Count);
+    }
+    
+    [Theory]
+    [InlineData("chromium_linux/dummy_takeout_bookmarks.html")]
+    public void HtmlTakeoutChromiumTest(string path)
+    {
+        string realpath = Path.Combine(TestDataFilesFolder, path);
+        Assert.True(File.Exists(realpath));
+        List<Folderclass> folders = Import.HtmlExportIntake(realpath);
+        Assert.NotNull(folders);
+        Assert.True(folders.Count > 0);
+        Assert.Equal(20, folders.Count);
     }
 
     #endregion Chromium
@@ -151,7 +164,8 @@ public class ImportTests
     [InlineData("firefox_linux/saved_bookmarks.json")]
     public void Json_Firefox_Test(string path)
     {
-        string realpath = Path.Combine(test_data_files_folder, path);
+        string realpath = Path.Combine(TestDataFilesFolder, path);
+        Assert.True(File.Exists(realpath));
         var folders = Import.JsonIntake(realpath);
         Assert.NotNull(folders);
     }
@@ -160,7 +174,8 @@ public class ImportTests
     [InlineData("firefox_linux/bookmarks.html")]
     public void Html_Firefox_Test(string path)
     {
-        string realpath = Path.Combine(test_data_files_folder, path);
+        string realpath = Path.Combine(TestDataFilesFolder, path);
+        Assert.True(File.Exists(realpath));
         var folders = Import.HtmlExportIntake(realpath);
         Assert.NotNull(folders);
     }
@@ -169,7 +184,8 @@ public class ImportTests
     [InlineData("firefox_linux/places.sqlite")]
     public void Sql_Firefox_Test(string path)
     {
-        string realpath = Path.Combine(test_data_files_folder, path);
+        string realpath = Path.Combine(TestDataFilesFolder, path);
+        Assert.True(File.Exists(realpath));
         List<Folderclass> folders = Import.SqlIntake(realpath);
         Assert.NotNull(folders);
     }
@@ -183,7 +199,7 @@ public class ImportTests
     [InlineData("firefox_linux/saved_bookmarks.json")]
     public void SmartImport_JsonTest(string path)
     {
-        string realpath = Path.Combine(test_data_files_folder, path);
+        string realpath = Path.Combine(TestDataFilesFolder, path);
         Assert.True(File.Exists(realpath));
         var smartImportResult = Import.SmartImport(realpath);
         var jsonIntakeResult = Import.JsonIntake(realpath);
@@ -200,7 +216,7 @@ public class ImportTests
     [InlineData("firefox_linux/bookmarks.html")]
     public void SmartImport_HtmlTest(string path)
     {
-        string realpath = Path.Combine(test_data_files_folder, path);
+        string realpath = Path.Combine(TestDataFilesFolder, path);
         Assert.True(File.Exists(realpath));
         
         var smartImportResult = Import.SmartImport(realpath);
@@ -217,7 +233,7 @@ public class ImportTests
     [InlineData("firefox_linux/places.sqlite")]
     public void SmartImport_SqlTest(string path)
     {
-        string realpath = Path.Combine(test_data_files_folder, path);
+        string realpath = Path.Combine(TestDataFilesFolder, path);
         Assert.True(File.Exists(realpath));
         var smartImportResult = Import.SmartImport(realpath);
         var sqlIntakeResult = Import.SqlIntake(realpath);
