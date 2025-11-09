@@ -16,9 +16,9 @@ public class CoreLogic
         Logger.verbosity = Logger.Verbosity.Debug;
         // Functions.PrintToConsole(Import.SmartImport(Import.GetBrowserBookmarkFilesPaths()[0].foundProfiles[0]));
         Console.WriteLine("starting");
-        Legacy.PrintToStream(Import.SmartImport("test1.html"));
+        Legacy.PrintToStream(BookmarkImporterFactory.SmartImport("test1.html"));
         Console.WriteLine("\n\n\n");
-        Legacy.PrintToStream(Import.SmartImport("test2.html"));
+        Legacy.PrintToStream(BookmarkImporterFactory.SmartImport("test2.html"));
         Console.ReadKey();
         Environment.Exit(0);
 #endif
@@ -158,7 +158,7 @@ public class CoreLogic
             if (!string.IsNullOrEmpty(filePath))
             {
                 // Intake for both html and sql and json
-                folders = Import.SmartImport(filePath);
+                folders = BookmarkImporterFactory.SmartImport(filePath);
             }
             else
             {
@@ -231,7 +231,7 @@ public class CoreLogic
                 Logger.LogVerbose("No html set! Non-interactive version requires html to be set!"); //goig to autoimport, as no .html present
                 Environment.Exit(1);
             }
-            folders = Import.SmartImport(filePath);
+            folders = BookmarkImporterFactory.SmartImport(filePath);
             
             //now import is finished
             Logger.LogVerbose("Import finished", Logger.Verbosity.Debug);

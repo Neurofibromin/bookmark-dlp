@@ -1,4 +1,5 @@
 using System.Text;
+using Nfbookmark.Importers;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -110,7 +111,8 @@ public class ImportTests
     {
         string realpath = Path.Combine(TestDataFilesFolder, path);
         Assert.True(File.Exists(realpath));
-        List<Folderclass> folders = Import.JsonIntake(realpath);
+        var importer = new JsonImporter();
+        List<Folderclass> folders =  importer.Import(realpath);
 
         using (MemoryStream memoryStream = new MemoryStream())
         {
@@ -138,7 +140,8 @@ public class ImportTests
     {
         string realpath = Path.Combine(TestDataFilesFolder, path);
         Assert.True(File.Exists(realpath));
-        List<Folderclass> folders = Import.HtmlExportIntake(realpath);
+        var importer = new HtmlExportImporter();
+        List<Folderclass> folders = importer.Import(realpath);
         Assert.NotNull(folders);
         Assert.True(folders.Count > 0);
         Assert.Equal(20, folders.Count);
@@ -150,7 +153,8 @@ public class ImportTests
     {
         string realpath = Path.Combine(TestDataFilesFolder, path);
         Assert.True(File.Exists(realpath));
-        List<Folderclass> folders = Import.HtmlExportIntake(realpath);
+        var importer = new HtmlTakeoutImporter();
+        List<Folderclass> folders = importer.Import(realpath);
         Assert.NotNull(folders);
         Assert.True(folders.Count > 0);
         Assert.Equal(20, folders.Count);
@@ -166,7 +170,8 @@ public class ImportTests
     {
         string realpath = Path.Combine(TestDataFilesFolder, path);
         Assert.True(File.Exists(realpath));
-        var folders = Import.JsonIntake(realpath);
+        var importer = new JsonImporter();
+        var folders = importer.Import(realpath);
         Assert.NotNull(folders);
     }
 
@@ -176,7 +181,8 @@ public class ImportTests
     {
         string realpath = Path.Combine(TestDataFilesFolder, path);
         Assert.True(File.Exists(realpath));
-        var folders = Import.HtmlExportIntake(realpath);
+        var importer = new HtmlExportImporter();
+        var folders = importer.Import(realpath);
         Assert.NotNull(folders);
     }
 
@@ -186,7 +192,8 @@ public class ImportTests
     {
         string realpath = Path.Combine(TestDataFilesFolder, path);
         Assert.True(File.Exists(realpath));
-        List<Folderclass> folders = Import.SqlIntake(realpath);
+        var importer = new SqliteImporter();
+        List<Folderclass> folders = importer.Import(realpath);
         Assert.NotNull(folders);
     }
 
@@ -201,8 +208,9 @@ public class ImportTests
     {
         string realpath = Path.Combine(TestDataFilesFolder, path);
         Assert.True(File.Exists(realpath));
-        var smartImportResult = Import.SmartImport(realpath);
-        var jsonIntakeResult = Import.JsonIntake(realpath);
+        var smartImportResult = BookmarkImporterFactory.SmartImport(realpath);
+        var jsonimporter = new JsonImporter();
+        var jsonIntakeResult = jsonimporter.Import(realpath);
 
         _output.WriteLine($"Comparing results for {path}");
         Assert.NotNull(smartImportResult);
@@ -219,8 +227,9 @@ public class ImportTests
         string realpath = Path.Combine(TestDataFilesFolder, path);
         Assert.True(File.Exists(realpath));
         
-        var smartImportResult = Import.SmartImport(realpath);
-        var htmlIntakeResult = Import.HtmlExportIntake(realpath); 
+        var smartImportResult = BookmarkImporterFactory.SmartImport(realpath);
+        var htmlimporter = new HtmlExportImporter();
+        var htmlIntakeResult = htmlimporter.Import(realpath); 
         
         _output.WriteLine($"Comparing results for {path}");
         Assert.NotNull(smartImportResult);
@@ -235,8 +244,9 @@ public class ImportTests
     {
         string realpath = Path.Combine(TestDataFilesFolder, path);
         Assert.True(File.Exists(realpath));
-        var smartImportResult = Import.SmartImport(realpath);
-        var sqlIntakeResult = Import.SqlIntake(realpath);
+        var smartImportResult = BookmarkImporterFactory.SmartImport(realpath);
+        var sqlimporter = new SqliteImporter();
+        var sqlIntakeResult = sqlimporter.Import(realpath);
 
         Assert.NotNull(smartImportResult);
         Assert.NotNull(sqlIntakeResult);

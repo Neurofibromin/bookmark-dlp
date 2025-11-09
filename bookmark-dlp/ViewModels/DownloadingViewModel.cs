@@ -87,7 +87,7 @@ public partial class DownloadingViewModel : ViewModelBase
             throw new ArgumentNullException(nameof(FileSource));
         try
         {
-            _folders = Import.SmartImport(FileSource);
+            _folders = BookmarkImporterFactory.SmartImport(FileSource);
         }
         catch (Exception e)
         {
