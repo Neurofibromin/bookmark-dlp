@@ -61,14 +61,17 @@ namespace Nfbookmark
             }
 
             // If two folders have the same name and same parent (and same depth)
-            var duplicateFolders = folders
-                .GroupBy(f => new { f.name, f.parentId, f.depth })
-                .Where(g => g.Count() > 1)
-                .SelectMany(g => g);
+            var duplicateFolderGroups = folders
+                .GroupBy(f => new { f.name, f.parentId })
+                .Where(g => g.Count() > 1);
 
-            foreach (var folder in duplicateFolders)
+            foreach (var group in duplicateFolderGroups)
             {
-                folder.name = $"{folder.name}ID{folder.id}";
+                Log.Warning("Found duplicate folder name '{FolderName}' with parentId {ParentId}. Appending IDs to differentiate.", group.Key.name, group.Key.parentId);
+                foreach (var folder in group)
+                {
+                    folder.name = $"{folder.name}ID{folder.id}";
+                }
             }
             // for (int i = 0; i < folders.Count - 1; i++)
             // {
@@ -99,122 +102,51 @@ namespace Nfbookmark
         ///     </list>
         /// </summary>
         /// <param name="folders">Bookmark folders to be made into filesystem folders</param>
-        /// <param name="rootdir">Fiilesystems directory to contain all the folders</param>
+        /// <param name="rootdir">Filesystems directory to contain all the folders</param>
         public static void CreateFolderStructure(List<Folderclass> folders, string rootdir)
         {
+            Log.Information("Creating folder structure in root directory: {RootDir}", rootdir);
             ValidateFolderNames(folders);
-            if (!Directory.Exists(rootdir)) Directory.CreateDirectory(rootdir);
-            Directory.SetCurrentDirectory(rootdir);
-            Directory.CreateDirectory("Bookmarks");
-            Directory.SetCurrentDirectory("Bookmarks");
-            string bookmarkroot = Directory.GetCurrentDirectory();
-            string parentdir;
-            List<Folderclass> ordered = new List<Folderclass>(folders);
-            foreach (Folderclass folder in ordered.OrderBy(f => f.depth))
-            {
-                try
-                {
-                    if (folder.depth != 0 && folder.depth != folders[folder.parentId].depth + 1)
-                    {
-                        Logger.LogVerbose(
-                            $"Depth of folder {folder.name} is {folder.depth}, not 1 more than its parent's {folders[folder.parentId].name} depth: {folders[folder.parentId].depth}", Logger.Verbosity.Error);
-                        throw new InvalidDataException(
-                            $"Depth of folder {folder.name} is {folder.depth}, not 1 more than its parent's {folders[folder.parentId].name} depth: {folders[folder.parentId].depth}");
-                    }
-                }
-                catch (IndexOutOfRangeException)
-                {
-                    Logger.LogVerbose($"Folder has no parent? Folder name: {folder.name}, parent id: {folder.parentId}, number of folders: {folders.Count}", Logger.Verbosity.Error);
-                    throw;
-                }
 
-                if (folder.depth == 0)
+            if (!Directory.Exists(rootdir)) Directory.CreateDirectory(rootdir);
+            
+            string bookmarksRoot = Path.Combine(rootdir, "Bookmarks");
+            Directory.CreateDirectory(bookmarksRoot);
+
+            var folderMap = folders.ToDictionary(f => f.id);
+
+            foreach (Folderclass folder in folders.OrderBy(f => f.depth))
+            {
+                if (folder.depth != 0)
                 {
-                    parentdir = bookmarkroot;
-                    Directory.CreateDirectory(Path.Combine(parentdir, folder.name));
-                    folder.folderpath = Path.Combine(parentdir, folder.name); //path
-                    Logger.LogVerbose($"Folderpath created for folder {folder.name} is {folder.folderpath}", Logger.Verbosity.Trace);
+                    if (!folderMap.TryGetValue(folder.parentId, out var parentFolder))
+                    {
+                        Log.Error("Folder '{FolderName}' with parentId {ParentId} appears to have no parent in the list.", folder.name, folder.parentId);
+                        throw new InvalidDataException($"Could not find parent for folder {folder.name}");
+                    }
+
+                    if (folder.depth != parentFolder.depth + 1)
+                    {
+                        Log.Error("Depth of folder '{FolderName}' ({FolderDepth}) is not 1 more than its parent '{ParentName}' depth ({ParentDepth}).", folder.name, folder.depth, parentFolder.name, parentFolder.depth);
+                        throw new InvalidDataException($"Depth of folder {folder.name} is incorrect.");
+                    }
+
+                    if (string.IsNullOrEmpty(parentFolder.folderpath) || !Directory.Exists(parentFolder.folderpath))
+                    {
+                        Log.Error("Parent directory for folder '{FolderName}' does not exist: {ParentPath}", folder.name, parentFolder.folderpath);
+                        throw new InvalidDataException($"Parent directory does not exist for {folder.name}.");
+                    }
+                    
+                    folder.folderpath = Path.Combine(parentFolder.folderpath, folder.name);
                 }
                 else
                 {
-                    try
-                    {
-                        parentdir = folders[folder.parentId].folderpath;
-                    }
-                    catch (IndexOutOfRangeException)
-                    {
-                        Logger.LogVerbose(
-                            $"Folder has no parent? Folder name: {folder.name}, parent id: {folder.parentId}, number of folders: {folders.Count}",
-                            Logger.Verbosity.Error);
-                        throw;
-                    }
-
-                    if (!Directory.Exists(parentdir))
-                    {
-                        if (folder.depth <= folders[folder.parentId].depth)
-                        {
-                            Logger.LogVerbose(
-                                $"Folder's parent has not lower depth than folder. Folder name: {folder.name}, depth: {folder.depth}," +
-                                $" parent name: {folders[folder.parentId].name} parent depth: {folders[folder.parentId].depth}",
-                                Logger.Verbosity.Error);
-                        }
-
-                        throw new InvalidDataException("Folder's parent directory does not exist. Folder: " +
-                                                       folder.name +
-                                                       " Parent: " + folders[folder.parentId].name + " Parent dir: " +
-                                                       parentdir);
-                    }
-
-                    Directory.CreateDirectory(Path.Combine(parentdir, folder.name));
-                    folder.folderpath = Path.Combine(parentdir, folder.name); //path
-                    Logger.LogVerbose($"Folderpath created for folder {folder.name} is {folder.folderpath}",
-                        Logger.Verbosity.Trace);
+                    folder.folderpath = Path.Combine(bookmarksRoot, folder.name);
                 }
+
+                Directory.CreateDirectory(folder.folderpath);
+                Log.Verbose("Created folder path for '{FolderName}': {FolderPath}", folder.name, folder.folderpath);
             }
-
-            /* Old method, did not take parent into account, assumed only the element in the list directly before the folder may be its parent
-             for (int m = 0; m < folders.Count; m++)
-            {
-                if (m > 0)
-                {
-                    if (folders[m].depth > folders[m - 1].depth) //more depth than previous folder
-                    {
-                        Directory.SetCurrentDirectory(folders[m - 1].name);
-                        Directory.CreateDirectory(folders[m].name);
-                        Directory.SetCurrentDirectory(folders[m].name); //going into the folder
-                        folders[m].folderpath = Directory.GetCurrentDirectory(); //path
-                        Directory.SetCurrentDirectory(Path.Combine(Directory.GetCurrentDirectory(), "..")); //coming out of the folder
-                    }
-
-                    if (folders[m].depth < folders[m - 1].depth) //less depth than the previous folder
-                    {
-                        for (int q = 0; q < (folders[m - 1].depth - folders[m].depth); q++) //the depth may have decreased by more than 1
-                        {
-                            Directory.SetCurrentDirectory(Path.Combine(Directory.GetCurrentDirectory(), ".."));
-                        }
-                        Directory.CreateDirectory(folders[m].name);
-                        Directory.SetCurrentDirectory(folders[m].name); //going into the folder
-                        folders[m].folderpath = Directory.GetCurrentDirectory(); //path
-                        Directory.SetCurrentDirectory(Path.Combine(Directory.GetCurrentDirectory(), "..")); //coming out of the folder
-                    }
-
-                    if (folders[m].depth == folders[m - 1].depth) //the same depth as the previous folder
-                    {
-                        Directory.CreateDirectory(folders[m].name);
-                        Directory.SetCurrentDirectory(folders[m].name); //going into the folder
-                        folders[m].folderpath = Directory.GetCurrentDirectory(); //path
-                        Directory.SetCurrentDirectory(Path.Combine(Directory.GetCurrentDirectory(), "..")); //coming out of the folder
-                    }
-
-                }
-                else //it is the first folder
-                {
-                    System.IO.Directory.CreateDirectory(folders[m].name);
-                    Directory.SetCurrentDirectory(folders[m].name); //going into the folder
-                    folders[m].folderpath = Directory.GetCurrentDirectory(); //path
-                    Directory.SetCurrentDirectory(Path.Combine(Directory.GetCurrentDirectory(), "..")); //coming out of the folder
-                }
-            }*/
         }
 
         /// <summary>
