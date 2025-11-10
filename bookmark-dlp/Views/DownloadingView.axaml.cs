@@ -3,12 +3,13 @@ using System.Globalization;
 using Avalonia;
 using Avalonia.Data.Converters;
 using Avalonia.Media;
-using NfLogger;
+using Serilog;
 
 namespace bookmark_dlp.Views;
 
 public partial class DownloadingView : UserControl
 {
+    private static readonly ILogger Log = Serilog.Log.ForContext<DownloadingView>();
     private static IconConverter? _iconConverter;
     
     public DownloadingView()
@@ -45,10 +46,9 @@ public partial class DownloadingView : UserControl
     {
         get
         {
-            // Logger.LogVerbose("Getting FileIconConverter", Logger.Verbosity.Trace);
             if (_iconConverter is null)
             {
-                Logger.LogVerbose("FileIconConverter is NULL", Logger.Verbosity.Trace);
+                Log.Verbose("FileIconConverter is NULL");
                 bool a = Application.Current!.Styles.TryGetResource("folder_regular",
                     Application.Current.ActualThemeVariant, out object? folderIconregular);
                 bool b = Application.Current.Styles.TryGetResource("folder_open_regular",
@@ -57,7 +57,7 @@ public partial class DownloadingView : UserControl
                 if (a && b && folderIconopen is StreamGeometry openFolderGeometry &&
                     folderIconregular is StreamGeometry regularFolderGeometry)
                 {
-                    Logger.LogVerbose("FileIconConverter found", Logger.Verbosity.Trace);
+                    Log.Verbose("FileIconConverter found");
                     _iconConverter = new IconConverter(openFolderGeometry, regularFolderGeometry);
                 }
                 else
@@ -66,25 +66,24 @@ public partial class DownloadingView : UserControl
                     {
                         if (folderIconopen is StreamGeometry openFolderGeometry2)
                         {
-                            Logger.LogVerbose("Only folderIconopen found", Logger.Verbosity.Error);
+                            Log.Error("Only folderIconopen found");
                             _iconConverter = new IconConverter(openFolderGeometry2, new StreamGeometry());
                         }
                         else if (folderIconregular is StreamGeometry regularFolderGeometry2)
                         {
-                            Logger.LogVerbose("Only folderIconregular found", Logger.Verbosity.Error);
+                            Log.Error("Only folderIconregular found");
                             _iconConverter = new IconConverter(new StreamGeometry(), regularFolderGeometry2);
                         }
                         else
                         {
-                            Logger.LogVerbose("Failed to load folder icons. Using default values.",
-                                Logger.Verbosity.Error);
+                            Log.Error("Failed to load folder icons. Using default values.");
                             _iconConverter =
                                 new IconConverter(new StreamGeometry(), new StreamGeometry()); // Provide default values
                         }
                     }
                     else
                     {
-                        Logger.LogVerbose("Failed to load folder icons. Using default values.", Logger.Verbosity.Error);
+                        Log.Error("Failed to load folder icons. Using default values.");
                         _iconConverter =
                             new IconConverter(new StreamGeometry(), new StreamGeometry()); // Provide default values
                     }

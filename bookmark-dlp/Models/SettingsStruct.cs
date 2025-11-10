@@ -3,7 +3,6 @@ using System.ComponentModel;
 using System.Text;
 using System.Text.Json;
 using CommunityToolkit.Mvvm.ComponentModel;
-using NfLogger;
 
 namespace bookmark_dlp.Models;
 

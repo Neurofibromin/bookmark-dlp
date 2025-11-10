@@ -6,11 +6,14 @@ using bookmark_dlp.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nfbookmark;
+using Serilog;
 
 namespace bookmark_dlp.ViewModels;
 
 public partial class StartPageViewModel : ViewModelBase
 {
+    private readonly ILogger Log = Serilog.Log.ForContext<StartPageViewModel>();
+    
     [ObservableProperty] private SettingsStruct _activeSettings;
     [ObservableProperty] private string[] _browserList = { "Firefox", "Chrome", "Safari" };
     [ObservableProperty] private string? _chosenBrowser;
@@ -28,9 +31,13 @@ public partial class StartPageViewModel : ViewModelBase
         AvailableBrowserBookmarkPaths = BrowserLocations.GetBrowserBookmarkFilesPaths()?
             .SelectMany(browser => browser.FoundBookmarkFilePaths)
             .ToList() ?? new List<string>();
+        Log.Information("Found {BrowserCount} available browser bookmark profiles.", AvailableBrowserBookmarkPaths.Count);
 
         if (YtdlpInterfacing.Yt_dlp_pathfinder(Directory.GetCurrentDirectory()) != null)
+        {
             appSettings.Settings.YtDlpExecutableNotFound = false;
+            Log.Debug("yt-dlp executable found in the current directory.");
+        }
         _activeSettings = appSettings.Settings;
         ActiveSettings.PropertyChanged += ActiveSettings_PropertyChanged;
         ShouldEnableImportButton();
@@ -44,6 +51,7 @@ public partial class StartPageViewModel : ViewModelBase
     {
         if (value != null)
         {
+            Log.Information("User chose browser bookmark source: {BrowserPath}", value);
             ActiveSettings.ManualImportUsed = false;
             ActiveSettings.ManualImportFileLocation = null;
         }
@@ -57,6 +65,7 @@ public partial class StartPageViewModel : ViewModelBase
         {
             if (!string.IsNullOrWhiteSpace(ActiveSettings.ManualImportFileLocation))
             {
+                Log.Debug("ManualImportFileLocation changed, clearing ChosenBrowser.");
                 ChosenBrowser = null;
                 ShouldEnableImportButton();
             }
@@ -78,15 +87,23 @@ public partial class StartPageViewModel : ViewModelBase
         ErrorMessages?.Clear();
         try
         {
+            Log.Debug("Opening file picker for manual bookmark import.");
             IStorageFile? file = await DoOpenFilePickerAsync();
             if (file != null)
             {
+                var path = file.TryGetLocalPath();
+                Log.Information("User selected manual import file: {FilePath}", path);
                 ActiveSettings.ManualImportUsed = true;
-                ActiveSettings.ManualImportFileLocation = file.TryGetLocalPath();
+                ActiveSettings.ManualImportFileLocation = path;
+            }
+            else
+            {
+                Log.Debug("User cancelled the file selection.");
             }
         }
         catch (Exception e)
         {
+            Log.Error(e, "An exception occurred while opening the file picker.");
             ErrorMessages?.Add(e.Message);
         }
     }
@@ -95,7 +112,10 @@ public partial class StartPageViewModel : ViewModelBase
     {
         if (Application.Current?.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop ||
             desktop.MainWindow?.StorageProvider is not { } provider)
+        {
+            Log.Error("Missing StorageProvider instance.");
             throw new NullReferenceException("Missing StorageProvider instance.");
+        }
 
         IReadOnlyList<IStorageFile>? files = await provider.OpenFilePickerAsync(new FilePickerOpenOptions
         {
@@ -112,25 +132,37 @@ public partial class StartPageViewModel : ViewModelBase
         ErrorMessages?.Clear();
         try
         {
+            Log.Debug("Opening folder picker for output folder.");
             IStorageFolder? folder = await DoOpenFolderPickerAsync();
             if (folder != null)
             {
-                // AppSettings._settings.Outputfolder = folder.TryGetLocalPath();
-                ActiveSettings.OutputFolder = folder.TryGetLocalPath();
+                var path = folder.TryGetLocalPath();
+                Log.Information("User selected new output folder: {OutputFolder}", path);
+                ActiveSettings.OutputFolder = path;
+            }
+            else
+            {
+                Log.Debug("User cancelled the folder selection.");
             }
         }
         catch (Exception e)
         {
+            Log.Error(e, "An exception occurred while opening the folder picker.");
             ErrorMessages?.Add(e.Message);
         }
 
         if (ActiveSettings.YtDlpExecutableNotFound)
         {
-            if (YtdlpInterfacing.Yt_dlp_pathfinder(ActiveSettings.OutputFolder) != null)
+            Log.Debug("Re-checking for yt-dlp executable after folder change.");
+            var foundPath = YtdlpInterfacing.Yt_dlp_pathfinder(ActiveSettings.OutputFolder);
+            if (foundPath != null)
             {
-                // await Console.Out.WriteLineAsync("thisone");
-                // AppSettings._settings.Ytdlp_executable_not_found = false;
+                Log.Information("yt-dlp executable found at {YtdlpPath}", foundPath);
                 ActiveSettings.YtDlpExecutableNotFound = false;
+            }
+            else
+            {
+                Log.Warning("yt-dlp executable still not found after folder change.");
             }
         }
     }
@@ -139,8 +171,11 @@ public partial class StartPageViewModel : ViewModelBase
     {
         if (Application.Current?.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop ||
             desktop.MainWindow?.StorageProvider is not { } provider)
+        {
+            Log.Error("Missing StorageProvider instance.");
             throw new NullReferenceException("Missing StorageProvider instance.");
-
+        }
+            
         IReadOnlyList<IStorageFolder>? result = await provider.OpenFolderPickerAsync(new FolderPickerOpenOptions
         {
             Title = "Choose output folder for saving the videos"

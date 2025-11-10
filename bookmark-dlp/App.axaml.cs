@@ -7,12 +7,13 @@ using bookmark_dlp.Models;
 using bookmark_dlp.ViewModels;
 using bookmark_dlp.Views;
 using Microsoft.Extensions.DependencyInjection;
-using NfLogger;
+using Serilog;
 
 namespace bookmark_dlp;
 
 public class App : Application
 {
+    private readonly ILogger Log = Serilog.Log.ForContext<App>();
     public static ObservableStream UiLogStream { get; } = new ObservableStream();
     
     public override void Initialize()
@@ -112,8 +113,8 @@ public class App : Application
             }
             else
             {
-                Logger.LogVerbose("Config was found", Logger.Verbosity.Debug);
-                Logger.LogVerbose("Location: " + AppMethods.ConfigFileLocation(), Logger.Verbosity.Debug);
+                Log.Debug("Config was found");
+                Log.Debug("Location: {ConfigLocation}", AppMethods.ConfigFileLocation());
                 // var mainWindowVm = new MainWindowViewModel();
                 ServiceCollection collection = new ServiceCollection();
                 ConfigureServices(collection, AppMethods.ConfigFileLocation());
@@ -131,7 +132,7 @@ public class App : Application
         }
         else
         {
-            Logger.LogVerbose("App not desktop, unable to initialize");
+            Log.Error("Application is not a desktop application, unable to initialize.");
         }
 
         base.OnFrameworkInitializationCompleted();

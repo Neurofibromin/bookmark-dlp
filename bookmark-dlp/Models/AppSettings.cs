@@ -1,14 +1,15 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Text;
 using System.Text.Json;
+using bookmark_dlp.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
-using NfLogger;
+using Serilog;
 
 namespace bookmark_dlp.Models;
 
 public class AppSettings : IAppSettings
 {
+    private readonly ILogger Log = Serilog.Log.ForContext<AppSettings>();
     private string? _configloc;
 
     public AppSettings(string? configpath_location = null)
@@ -20,7 +21,7 @@ public class AppSettings : IAppSettings
         if (!string.IsNullOrEmpty(_configloc) && File.Exists(_configloc))
             LoadFromFile(_configloc);
         else
-            Logger.LogVerbose("Config file does not exist or location not set, going with defaults");
+            Log.Information("Config file does not exist or location not set, going with defaults");
         Settings.PropertyChanged += SettingsOnPropertyChanged;
     }
 
@@ -52,12 +53,11 @@ public class AppSettings : IAppSettings
             string jsonimportstring = File.ReadAllText(configPath);
             SettingsStruct? imported = JsonSerializer.Deserialize<SettingsStruct>(jsonimportstring);
             Settings = ValidateImportedSettingsBeforeUse(imported) ?? SettingsStruct.GetDefaultSettings();
-            Logger.LogVerbose("Config import successful");
+            Log.Information("Config import successful from {ConfigPath}", configPath);
         }
         catch (Exception ex)
         {
-            Logger.LogVerbose($"Settings could not be deserialized: {ex.Message}. Falling back to default settings.",
-                Logger.Verbosity.Error);
+            Log.Error(ex, "Settings could not be deserialized from {ConfigPath}. Falling back to default settings.", configPath);
             Settings = SettingsStruct.GetDefaultSettings();
             _configloc = null; // Protect corrupt file from being overwritten
         }
@@ -67,12 +67,19 @@ public class AppSettings : IAppSettings
     {
         if (_configloc != null)
         {
-            string jsonstringexport = JsonSerializer.Serialize(Settings);
-            // Ensure directory exists before writing
-            string? directory = Path.GetDirectoryName(_configloc);
-            if (directory != null) Directory.CreateDirectory(directory);
+            try
+            {
+                string jsonstringexport = JsonSerializer.Serialize(Settings, new JsonSerializerOptions { WriteIndented = true });
+                // Ensure directory exists before writing
+                string? directory = Path.GetDirectoryName(_configloc);
+                if (directory != null) Directory.CreateDirectory(directory);
 
-            File.WriteAllText(_configloc, jsonstringexport);
+                File.WriteAllText(_configloc, jsonstringexport);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Failed to save settings to {ConfigLocation}", _configloc);
+            }
         }
     }
 
@@ -84,7 +91,7 @@ public class AppSettings : IAppSettings
             Settings.YtDlpConfigFiles = new ObservableCollection<string>(
                 YtdlpInterfacing.Yt_dlp_configfinder(Directory.GetCurrentDirectory(), Settings.YtDlpBinaryPath,
                     Settings.OutputFolder));
-            Logger.LogVerbose("Ytdlp path changed in YtdlpInterfacing");
+            Log.Debug("Ytdlp path changed in YtdlpInterfacing to {YtdlpPath}", Settings.YtDlpBinaryPath);
         }
 
         SaveToFile();
@@ -107,35 +114,32 @@ public class AppSettings : IAppSettings
     private SettingsStruct? ValidateImportedSettingsBeforeUse(SettingsStruct? importedsettings)
     {
         if (importedsettings == null)
-            return importedsettings;
-        if (importedsettings.YtDlpBinaryPath != null)
+            return null;
+
+        if (importedsettings.YtDlpBinaryPath != null && !File.Exists(importedsettings.YtDlpBinaryPath))
         {
-            if (!File.Exists(importedsettings.YtDlpBinaryPath))
-            {
-                importedsettings.YtDlpBinaryPath = SettingsStruct.GetDefaultSettings().YtDlpBinaryPath;
-                importedsettings.YtDlpExecutableNotFound =
-                    SettingsStruct.GetDefaultSettings().YtDlpExecutableNotFound;
-            }
+            Log.Warning("yt-dlp binary path not found at {YtdlpPath}, reverting to default.", importedsettings.YtDlpBinaryPath);
+            importedsettings.YtDlpBinaryPath = SettingsStruct.GetDefaultSettings().YtDlpBinaryPath;
+            importedsettings.YtDlpExecutableNotFound = SettingsStruct.GetDefaultSettings().YtDlpExecutableNotFound;
         }
 
-        if (importedsettings.ManualImportFileLocation != null)
+        if (importedsettings.ManualImportFileLocation != null && !File.Exists(importedsettings.ManualImportFileLocation))
         {
-            if (!File.Exists(importedsettings.ManualImportFileLocation))
-            {
-                importedsettings.ManualImportFileLocation = null;
-                importedsettings.ManualImportUsed = false;
-            }
+            Log.Warning("Manual import file not found at {ManualImportFileLocation}, clearing setting.", importedsettings.ManualImportFileLocation);
+            importedsettings.ManualImportFileLocation = null;
+            importedsettings.ManualImportUsed = false;
         }
 
-        if (importedsettings.OutputFolder != null)
+        if (importedsettings.OutputFolder != null && !Directory.Exists(importedsettings.OutputFolder))
         {
-            if (!Directory.Exists(importedsettings.OutputFolder))
-                importedsettings.OutputFolder = SettingsStruct.GetDefaultSettings().OutputFolder;
+            Log.Warning("Output folder not found at {OutputFolder}, reverting to default.", importedsettings.OutputFolder);
+            importedsettings.OutputFolder = SettingsStruct.GetDefaultSettings().OutputFolder;
         }
 
         List<string> filesToRemove = importedsettings.YtDlpConfigFiles.Where(file => !File.Exists(file)).ToList();
         foreach (string file in filesToRemove)
         {
+            Log.Warning("yt-dlp config file not found at {ConfigFile}, removing from list.", file);
             importedsettings.YtDlpConfigFiles.Remove(file);
         }
 

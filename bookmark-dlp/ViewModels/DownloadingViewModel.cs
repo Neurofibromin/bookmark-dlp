@@ -11,12 +11,13 @@ using bookmark_dlp.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nfbookmark;
-using NfLogger;
+using Serilog;
 
 namespace bookmark_dlp.ViewModels;
 
 public partial class DownloadingViewModel : ViewModelBase
 {
+    private readonly ILogger Log = Serilog.Log.ForContext<DownloadingViewModel>();
     
     [ObservableProperty] private SettingsStruct _activeSettings;
     [ObservableProperty] private string? _fileSource;
@@ -51,52 +52,88 @@ public partial class DownloadingViewModel : ViewModelBase
     [RelayCommand]
     private void First()
     {
-        Logger.LogVerbose("first", Logger.Verbosity.Critical);
-        AutoImport.LinksFromUrls(_folders);
+        Log.Fatal("Executing debug step: First");
+        if (_folders != null)
+        {
+            AutoImport.LinksFromUrls(_folders);
+        }
+        else
+        {
+            Log.Warning("Debug step First executed but _folders is null.");
+        }
     }
     
     [RelayCommand]
     private void Second()
     {
-        Logger.LogVerbose("2", Logger.Verbosity.Critical);
-        FolderManager.CreateFolderStructure(_folders, ActiveSettings.OutputFolder);
+        Log.Fatal("Executing debug step: Second");
+        if (_folders != null)
+        {
+            FolderManager.CreateFolderStructure(_folders, ActiveSettings.OutputFolder);
+        }
+        else
+        {
+            Log.Warning("Debug step Second executed but _folders is null.");
+        }
     }
     
     [RelayCommand]
     private void Third()
     {
-        Logger.LogVerbose("3", Logger.Verbosity.Critical);
-        AppMethods.CountWantedVideos(ref _folders);
+        Log.Fatal("Executing debug step: Third");
+        if (_folders != null)
+        {
+            AppMethods.CountWantedVideos(ref _folders);
+        }
+        else
+        {
+            Log.Warning("Debug step Third executed but _folders is null.");
+        }
     }
     
     [RelayCommand]
     private void Fourth()
     {
-        Logger.LogVerbose("4", Logger.Verbosity.Critical);
-        AppMethods.CheckCurrentFilesystemState(ref _folders);
+        Log.Fatal("Executing debug step: Fourth");
+        if (_folders != null)
+        {
+            AppMethods.CheckCurrentFilesystemState(ref _folders);
+        }
+        else
+        {
+            Log.Warning("Debug step Fourth executed but _folders is null.");
+        }
     }
 
     /// <summary>
     ///     Starts the import and loads the imported folders to TreeDataGrid
     /// </summary>
     /// <returns>true if successful, false if import failed/empty</returns>
-    /// <exception cref="ArgumentNullException">There is no file source available</exception>
     public bool LoadFoldersFromFile()
     {
         if (FileSource == null)
-            throw new ArgumentNullException(nameof(FileSource));
+        {
+            Log.Error("FileSource is null, cannot load folders.");
+            return false;
+        }
         try
         {
+            Log.Information("Starting bookmark import from {FileSource}...", FileSource);
             _folders = BookmarkImporterFactory.SmartImport(FileSource);
         }
         catch (Exception e)
         {
-            Logger.LogVerbose(e.Message, Logger.Verbosity.Critical);
-            throw;
+            Log.Error(e, "An unhandled exception occurred during bookmark import from {FileSource} by DownloadingViewModel", FileSource);
+            return false;
         }
 
-        if (_folders == null)
+        if (_folders == null || _folders.Count == 0)
+        {
+            Log.Error("Bookmark import from {FileSource} resulted in no folders.", FileSource);
             return false;
+        }
+        
+        Log.Information("Successfully imported {FolderCount} folders.", _folders.Count);
         HierarchicalFolderCollection = AppMethods.GenerateHierarchicalFolderclassesFromList(_folders);
         TreeSource = CreateTreeSource();
         return true;
@@ -110,10 +147,13 @@ public partial class DownloadingViewModel : ViewModelBase
                throw new InvalidOperationException("Expected a row selection model.");
     }
 
-    private HierarchicalTreeDataGridSource<HierarchicalFolderclass> CreateTreeSource()
+    private HierarchicalTreeDataGridSource<HierarchicalFolderclass>? CreateTreeSource()
     {
         if (HierarchicalFolderCollection is null)
-            throw new InvalidOperationException("Hierarchical folder collection is null.");
+        {
+            Log.Error("HierarchicalFolderCollection is null.");
+            return null;
+        }
         HierarchicalTreeDataGridSource<HierarchicalFolderclass> result =
             new HierarchicalTreeDataGridSource<HierarchicalFolderclass>(HierarchicalFolderCollection)
             {
