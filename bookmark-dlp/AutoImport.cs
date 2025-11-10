@@ -3,6 +3,7 @@ using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using Nfbookmark;
 using NfLogger;
+using System.Web;
 
 namespace bookmark_dlp;
 
@@ -142,8 +143,7 @@ public static class AutoImport
             temp.Close();
         }
     }
-
-
+    
     /// <summary>
     ///     Parses url to YTLink object and fills:<br />
     ///     <list type="bullet">
@@ -153,127 +153,154 @@ public static class AutoImport
     ///         <item> member_ids </item>
     ///     </list>
     /// </summary>
-    /// <param name="_url">
-    ///     Url to parse, must contain youtube.com. Usually FQDN, like
+    /// <param name="url">
+    ///     Url to parse. Usually FQDN, like
     ///     https://www.youtube.com/watch?v=12345678912
     /// </param>
-    /// <returns>YTLink with parameters filled or null if url is not a youtube link</returns>
-    /// <exception cref="InvalidLinkException">If link parsing encounters unexpected characters</exception>
-    public static YTLink? LinkFromUrl(string _url)
+    /// <returns>YTLink with parameters filled or null if url is not a valid youtube link</returns>
+    public static YTLink? LinkFromUrl(string url)
     {
-        if (!_url.Contains("www.youtube.com")) //only work with youtube links
+        if (string.IsNullOrEmpty(url))
+        {
+            Logger.LogVerbose($"Empty URL!");
             return null;
-        YTLink link = new YTLink();
-        link.url = _url;
-        //filtering the links with the consecutive ifs to find if they are for videos or else (channels, playlists, etc.)
-        if (_url.Substring(24, 8) == "playlist")
-        {
-            //playlist
-            int start = _url.IndexOf("playlist?list=", StringComparison.Ordinal) + "playlist?list=".Length;
-            string temp = _url.Substring(start);
-            int end = int.Min(temp.IndexOf('/'), temp.IndexOf('&'));
-            if (end == -1)
-                end = _url.Length;
-            link.linktype = Linktype.Playlist;
-            link.yt_id = _url.Substring(start, end);
-            string? extracted = YtdlpInterfacing.ExtractPlaylistId(_url);
-            if (extracted == null)
-                Logger.LogVerbose($"Could not autoextract playlist ID {_url}, manual parsing resulted in: {link.yt_id}",
-                    Logger.Verbosity.Error);
-            else if (extracted != link.yt_id)
-                Logger.LogVerbose($"Manual and autoparsing resulted in different ids {link.yt_id} and {extracted}");
         }
-        else if (_url.Substring(24, 4) == "user")
+        if (!Uri.TryCreate(url, UriKind.Absolute, out Uri? uri))
         {
-            //channel
-            string pattern = @"youtube\.com/user/([a-zA-Z0-9_-]+)";
-            Match match = Regex.Match(_url, pattern);
-            if (match.Success && match.Groups.Count > 1)
-                link.yt_id = match.Groups[1].Value;
-            else
-                throw new InvalidLinkException($"Invalid URL: {_url}, regex pattern: {pattern}");
-            link.linktype = Linktype.Channel_user;
+            Logger.LogVerbose($"not a valid URI: {url}");
+            return null;
         }
-        else if (_url.Substring(24, 7) == "channel")
+        
+        if (!uri.Host.EndsWith("youtube.com"))
         {
-            //channel
-            string pattern = @"youtube\.com/channel/([a-zA-Z0-9_-]+)";
-            Match match = Regex.Match(_url, pattern);
-            if (match.Success && match.Groups.Count > 1)
-                link.yt_id = match.Groups[1].Value;
-            else
-                throw new InvalidLinkException($"Invalid URL: {_url}, regex pattern: {pattern}");
-            link.linktype = Linktype.Channel_channel;
+            Logger.LogVerbose($"Not a youtube url: {url}");
+            return null;
         }
-        else if (_url.Substring(24, 7) == "results") //youtube search result was bookmarked
+
+        var link = new YTLink { url = url };
+        string[] segments = uri.Segments.Select(s => s.Trim('/')).Where(s => !string.IsNullOrEmpty(s)).ToArray();
+
+        if (segments.Length > 0)
         {
-            //not saving search results
-            link.linktype = Linktype.Search;
-        }
-        else if (_url.Substring(24, 1) == "@")
-        {
-            //channel
-            string pattern = @"youtube\.com/@([a-zA-Z0-9_-]+)";
-            Match match = Regex.Match(_url, pattern);
-            if (match.Success && match.Groups.Count > 1)
-                link.yt_id = match.Groups[1].Value;
-            else
-                throw new InvalidLinkException($"Invalid URL: {_url}, regex pattern: {pattern}");
-            link.linktype = Linktype.Channel_at;
-        }
-        else if (_url.Substring(24, 2) == "c/")
-        {
-            //channel
-            string pattern = @"youtube\.com/c/([a-zA-Z0-9_-]+)";
-            Match match = Regex.Match(_url, pattern);
-            if (match.Success && match.Groups.Count > 1)
-                link.yt_id = match.Groups[1].Value;
-            else
-                throw new InvalidLinkException($"Invalid URL: {_url}, regex pattern: {pattern}");
-            link.linktype = Linktype.Channel_c;
-        }
-        else if (_url.Substring(24, 6) == "shorts")
-        {
-            //shorts
-            string pattern = @"youtube\.com/shorts/([a-zA-Z0-9_-]+)";
-            Match match = Regex.Match(_url, pattern);
-            if (match.Success && match.Groups.Count > 1)
-                link.yt_id = match.Groups[1].Value;
-            else
-                throw new InvalidLinkException($"Invalid URL: {_url}, regex pattern: {pattern}");
-            link.linktype = Linktype.Short;
+            var path = segments[0];
+            switch (path)
+            {
+                case "watch":
+                    var queryParams = HttpUtility.ParseQueryString(uri.Query);
+                    string? videoId = queryParams["v"];
+                    if (!string.IsNullOrEmpty(videoId) && videoId.Length == 11)
+                    {
+                        link.linktype = Linktype.Video;
+                        link.yt_id = videoId;
+                    }
+                    else
+                    {
+                        Logger.LogVerbose($"Invalid YouTube video URL: {url}");
+                        return null;
+                    }
+                    break;
+
+                case "playlist":
+                     var playlistParams = HttpUtility.ParseQueryString(uri.Query);
+                     string? playlistId = playlistParams["list"];
+                     if (!string.IsNullOrEmpty(playlistId))
+                     {
+                         link.linktype = Linktype.Playlist;
+                         link.yt_id = playlistId;
+                     }
+                     else
+                     {
+                         Logger.LogVerbose($"Invalid YouTube playlist URL: {url}");
+                         return null;
+                     }
+                     break;
+                    
+                case "shorts":
+                    if (segments.Length > 1 && !string.IsNullOrEmpty(segments[1]))
+                    {
+                        link.linktype = Linktype.Short;
+                        link.yt_id = segments[1];
+                    }
+                    else
+                    {
+                        Logger.LogVerbose($"Invalid YouTube shorts URL: {url}");
+                        return null;
+                    }
+                    break;
+                
+                case "channel":
+                    if (segments.Length > 1 && !string.IsNullOrEmpty(segments[1]))
+                    {
+                        link.linktype = Linktype.Channel_channel;
+                        link.yt_id = segments[1];
+                    }
+                    else
+                    {
+                        Logger.LogVerbose($"Invalid YouTube channel URL: {url}");
+                        return null;
+                    }
+                    break;
+
+                case "c":
+                    if (segments.Length > 1 && !string.IsNullOrEmpty(segments[1]))
+                    {
+                        link.linktype = Linktype.Channel_c;
+                        link.yt_id = segments[1];
+                    }
+                    else
+                    {
+                        Logger.LogVerbose($"Invalid YouTube c channel URL: {url}");
+                        return null;
+                    }
+                    break;
+                
+                case "user":
+                    if (segments.Length > 1 && !string.IsNullOrEmpty(segments[1]))
+                    {
+                        link.linktype = Linktype.Channel_user;
+                        link.yt_id = segments[1];
+                    }
+                    else
+                    {
+                        Logger.LogVerbose($"Invalid YouTube user channel URL: {url}");
+                        return null;
+                    }
+                    break;
+                
+                case "results":
+                    link.linktype = Linktype.Search;
+                    break;
+                
+                default:
+                    // Handle channel URLs with '@' handles, which don't have a specific path like "channel"
+                    if (path.StartsWith("@"))
+                    {
+                        link.linktype = Linktype.Channel_at;
+                        string handle = path.Substring(1); // Remove '@'
+                        if (!string.IsNullOrEmpty(handle))
+                        {
+                            link.yt_id = handle; 
+                        }
+                        else
+                        {
+                            Logger.LogVerbose($"Invalid YouTube @handle: {url}");
+                            return null;
+                        }
+                    }
+                    else
+                    {
+                        Logger.LogVerbose($"Invalid YouTube URL: {url}");
+                        return null;
+                    }
+                    break;
+            }
         }
         else
         {
-            string regexed, manparsed;
-            string pattern = @"youtube\.com/watch\?v=([a-zA-Z0-9_-]+)";
-            Match match = Regex.Match(_url, pattern);
-            if (match.Success && match.Groups.Count > 1)
-                regexed = match.Groups[1].Value;
-            else
-                throw new InvalidLinkException($"Invalid URL: {_url}, regex pattern: {pattern}");
-            int start = _url.IndexOf("watch?v=", StringComparison.Ordinal) + "watch?v=".Length;
-            string temp = _url.Substring(start);
-            int end = temp.IndexOf('&');
-            if (end == -1)
-                end = _url.Length;
-            manparsed = _url.Substring(start, end);
-            if (manparsed.Length == 11 && regexed.Length == 11 &&
-                string.Equals(manparsed, regexed, StringComparison.CurrentCultureIgnoreCase))
-            {
-                link.linktype = Linktype.Video;
-                link.yt_id = manparsed;
-            }
-            else
-            {
-                Logger.LogVerbose(
-                    $"Invalid URL: {_url}, REGEX conflict. Regex pattern: {pattern}, manparsed: {manparsed}, regexed: {regexed}.",
-                    Logger.Verbosity.Error);
-                link.linktype = Linktype.Video;
-                link.yt_id = manparsed;
-            }
+            Logger.LogVerbose($"This is a base youtube.com link with no path. Not a video/channel/etc: {url}");
+            return null;
         }
-
+        
         switch (link.linktype)
         {
             case Linktype.Video:
@@ -294,7 +321,7 @@ public static class AutoImport
                 break;
         }
 
-        Logger.LogVerbose($"Url {_url} was parsed to ytlink {link}", Logger.Verbosity.Trace);
+        Logger.LogVerbose($"Url {url} was parsed to ytlink {link}", Logger.Verbosity.Trace);
         return link;
     }
 

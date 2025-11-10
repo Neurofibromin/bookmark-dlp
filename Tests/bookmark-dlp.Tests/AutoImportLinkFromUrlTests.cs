@@ -83,8 +83,11 @@ public class AutoImportLinkFromUrlTests
     [InlineData("https://www.youtube.com/@MrBeast", Linktype.Channel_at, "MrBeast")] // Handle
     [InlineData("https://www.youtube.com/@MrBeast/videos", Linktype.Channel_at, "MrBeast")] // Handle with /videos suffix
     [InlineData("https://www.youtube.com/c/SomeChannelName", Linktype.Channel_c, "SomeChannelName")] // Custom URL
+    [InlineData("https://www.youtube.com/c/SomeChannelName/videos", Linktype.Channel_c, "SomeChannelName")] // Custom URL
     [InlineData("https://www.youtube.com/channel/UC-lHJZR3Gqxm24_Vd_AJ5Yw", Linktype.Channel_channel, "UC-lHJZR3Gqxm24_Vd_AJ5Yw")] // Channel ID
+    [InlineData("https://www.youtube.com/channel/UC-lHJZR3Gqxm24_Vd_AJ5Yw/videos", Linktype.Channel_channel, "UC-lHJZR3Gqxm24_Vd_AJ5Yw")] // Channel ID
     [InlineData("https://www.youtube.com/user/oldchannelname", Linktype.Channel_user, "oldchannelname")] // Legacy username
+    [InlineData("https://www.youtube.com/user/oldchannelname/videos", Linktype.Channel_user, "oldchannelname")] // Legacy username
     public void LinkFromUrl_ShouldParseAllChannelTypesCorrectly(string url, Linktype expectedType, string expectedId)
     {
         // Act
@@ -145,16 +148,8 @@ public class AutoImportLinkFromUrlTests
     [InlineData("https://www.youtube.com/playlist?list=")]
     public void LinkFromUrl_ShouldThrowInvalidLinkException_ForMalformedUrls(string url)
     {
-        if (url.Contains("playlist?list="))
-        {
-            var result = AutoImport.LinkFromUrl(url);
-            Assert.NotNull(result);
-            Assert.Equal(string.Empty, result.Value.yt_id);
-            return;
-        }
-
         // Act & Assert
-        Assert.Throws<InvalidLinkException>(() => AutoImport.LinkFromUrl(url));
+        Assert.Null(AutoImport.LinkFromUrl(url));
     }
     
     [Theory]
@@ -196,7 +191,7 @@ public class AutoImportLinkFromUrlTests
         var url = "https://www.youtube.com/watch?v=";
 
         // Act & Assert
-        Assert.Throws<InvalidLinkException>(() => AutoImport.LinkFromUrl(url));
+        Assert.Null(AutoImport.LinkFromUrl(url));
     }
 
     [Fact]
@@ -206,6 +201,6 @@ public class AutoImportLinkFromUrlTests
         var url = "https://www.youtube.com/shorts/";
 
         // Act & Assert
-        Assert.Throws<InvalidLinkException>(() => AutoImport.LinkFromUrl(url));
+        Assert.Null(AutoImport.LinkFromUrl(url));
     }
 }
