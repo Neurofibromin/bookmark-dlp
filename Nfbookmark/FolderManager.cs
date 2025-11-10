@@ -232,32 +232,40 @@ namespace Nfbookmark
         /// <param name="folders"></param>
         public static void DeleteEmptyFolders(List<Folderclass> folders)
         {
-            int a = 0;
-            int deepestdepth = folders.Select(f => f.depth).Prepend(0).Max(); //Finding the deepest folder depth
-            for (int q = deepestdepth; q > 0; q--) //deleting empty folders from the deepest layer upwards
+            int deletedCount = 0;
+            int deepestDepth = folders.Any() ? folders.Max(f => f.depth) : 0;
+
+            for (int depth = deepestDepth; depth >= 0; depth--)
             {
-                foreach (Folderclass t in folders)
+                foreach (Folderclass folder in folders.Where(f => f.depth == depth))
                 {
-                    if (t.depth == q) //only check folders with the given depth
+                    if (string.IsNullOrEmpty(folder.folderpath) || !Directory.Exists(folder.folderpath))
+                        continue;
+
+                    if (!Directory.EnumerateFileSystemEntries(folder.folderpath).Any())
                     {
-                        bool thisfolderisempty = true;
-                        string path = t.folderpath;
-                        if (Directory.Exists(path))
+                        try
                         {
-                            if (Directory.GetDirectories(path).Length != 0) //check if the given directory has any children directories
-                                thisfolderisempty = false;
-                            if (Directory.GetFiles(t.folderpath).Length != 0) //check if the given directory has any files
-                                thisfolderisempty = false;
-                            if (thisfolderisempty)
-                            {
-                                Directory.Delete(t.folderpath);
-                                a++;
-                            }
+                            Directory.Delete(folder.folderpath);
+                            deletedCount++;
+                            Log.Debug("Deleted empty folder: {FolderPath}", folder.folderpath);
+                        }
+                        catch (IOException e)
+                        {
+                            Log.Error(e, "Could not delete empty folder: {FolderPath}", folder.folderpath);
                         }
                     }
                 }
             }
-            Logger.LogVerbose($"{a} empty folders deleted");
+            
+            if (deletedCount > 0)
+            {
+                Log.Information("{Count} empty folders deleted.", deletedCount);
+            }
+            else
+            {
+                Log.Debug("No empty folders found to delete.");
+            }
         }
     }
 }

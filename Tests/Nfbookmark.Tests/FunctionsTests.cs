@@ -16,11 +16,11 @@ public class FunctionsTests
             // Arrange: Create test folder structure
             List<Folderclass> folders = new List<Folderclass>
             {
-                new Folderclass { name = "Root", depth = 0, parentId = -1 },
-                new Folderclass { name = "Alfa", depth = 1, parentId = 0 },
-                new Folderclass { name = "Bravo", depth = 1, parentId = 0 },
-                new Folderclass { name = "Charlie", depth = 2, parentId = 2 },
-                new Folderclass { name = "Delta", depth = 3, parentId = 3 }
+                new Folderclass { name = "Root", depth = 0, parentId = -1 , id = 123},
+                new Folderclass { name = "Alfa", depth = 1, parentId = 0 , id = 124},
+                new Folderclass { name = "Bravo", depth = 1, parentId = 0 , id = 125},
+                new Folderclass { name = "Charlie", depth = 2, parentId = 2 , id = 126},
+                new Folderclass { name = "Delta", depth = 3, parentId = 3, id = 127}
             };
             FolderManager.CreateFolderStructure(folders, rootPath);
             rootPath = Path.Combine(rootPath, "Bookmarks");
@@ -45,7 +45,7 @@ public class FunctionsTests
         }
         finally
         {
-            Directory.Delete(Path.Combine(rootPath, "../"), true);
+            Directory.Delete(rootPath, true);
         }
     }
 
