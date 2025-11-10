@@ -23,7 +23,6 @@ public class ObservableStreamSink : ILogEventSink
     public void Emit(LogEvent logEvent)
     {
         // The sink's responsibility is to format the log event and write it to the target.
-        // We use a StringWriter as an intermediary to format the event.
         using var writer = new StringWriter();
         _formatter.Format(logEvent, writer);
             

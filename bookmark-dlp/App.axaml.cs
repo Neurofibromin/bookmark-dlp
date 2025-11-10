@@ -13,6 +13,8 @@ namespace bookmark_dlp;
 
 public class App : Application
 {
+    public static ObservableStream UiLogStream { get; } = new ObservableStream();
+    
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
