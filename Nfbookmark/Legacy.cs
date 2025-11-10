@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using NfLogger;
+using Serilog;
 
 namespace Nfbookmark
 {
     public static class Legacy
     {
+        private static readonly ILogger Log = Serilog.Log.ForContext(typeof(Legacy));
+
         /// <summary>
         ///     Legacy code, but still used. Basically globaly variables but in a struct that is passed to functions as necessary.
         /// </summary>
@@ -32,7 +34,7 @@ namespace Nfbookmark
         ///     Id
         /// </summary>
         /// <param name="folders">The folder structure to be printed</param>
-        /// <param name="wantOutputToLog">If true uses Nflogger.Log.Logverbose to print (as well)</param>
+        /// <param name="wantOutputToLog">If true uses Serilog to print (as well)</param>
         /// <param name="outputStream">The stream to print to</param>
         public static void PrintToStream(List<Folderclass> folders, bool wantOutputToLog = false, Stream outputStream = null)
         {
@@ -50,7 +52,7 @@ namespace Nfbookmark
             if (folders == null || folders.Count == 0)
             {
                 if (wantOutputToLog)
-                    Logger.LogVerbose("No folders to display.");
+                    Log.Information("No folders to display.");
                 if (wantOutputToStream)
                     writer.WriteLine("No folders to display.");
                 return;
@@ -66,6 +68,7 @@ namespace Nfbookmark
             int maxnamelength = 0;
             int maxnumberoflinklength = 0;
             int maxidlength = 0;
+            
             // Calculate the maximum lengths for formatting
             foreach (Folderclass folder in folders)
             {
@@ -78,12 +81,8 @@ namespace Nfbookmark
                 maxidlength = Math.Max(maxidlength, folder.id.ToString().Length);
             }
 
-            Logger.LogVerbose("The following folders were found");
-
-            /* for (int m = 0; m < folders.Count; m++)
-                Folderclass currentFolder = folders[m];
-                Folderclass previousFolder;
-                if (m > 0) { previousFolder = folders[m - 1]; } else { previousFolder = null; }*/
+            if (wantOutputToLog)
+                Log.Information("The following folders were found");
 
             int depthsymbolcounter = 0;
             Folderclass previousFolder = null;
@@ -108,45 +107,37 @@ namespace Nfbookmark
 
                 //at first folder the depth does not change
                 if (wantOutputToLog)
-                    Logger.LogVerbose(string.Concat(Enumerable.Repeat("-", depthsymbolcounter)));
+                    Log.Information("{Indent}", new string('-', depthsymbolcounter));
                 if (wantOutputToStream)
                     writer.Write(string.Concat(Enumerable.Repeat("-", depthsymbolcounter)));
+                    
                 string write = $"{currentFolder.depth.ToString().PadRight(deepestdepthlength, '_')}" +
                                new string('_', deepestdepth - depthsymbolcounter) +
                                $" is the depth of {currentFolder.startline.ToString().PadLeft(maxstartlinelength, '_')}/{currentFolder.endingline.ToString().PadLeft(maxendlinelength, '_')} " +
                                $"[{currentFolder.name.Replace(' ', '_').PadRight(maxnamelength, '_')}] folder, which contains [{currentFolder.urls.Count.ToString().PadLeft(maxnumberoflinklength, '_')}] links. " +
                                $"id:\"{currentFolder.id.ToString().PadLeft(maxidlength, '_')}\" parentId:\"{currentFolder.parentId.ToString().PadLeft(maxidlength, '_')}";
-                //Console.ForegroundColor = ConsoleColor.Red;
-                //Console.ResetColor();
+                
                 if (wantOutputToLog)
-                    Logger.LogVerbose(write);
+                    Log.Information("{FolderDetails}", write);
+                    
                 string[] words = write.Split(' ');
-                for (int i = 0; i < words.Length; i++)
+                foreach (string word in words)
                 {
-                    string word = words[i];
-
-                    if (word.StartsWith("[") || word.EndsWith("]"))
-                    {
-                        // Console.ForegroundColor = ConsoleColor.Red;
-                        word = word.Replace("[", string.Empty);
-                        word = word.Replace("]", string.Empty);
-                    }
-
+                    string cleanedWord = word.Replace("[", string.Empty).Replace("]", string.Empty);
                     if (wantOutputToStream)
-                        writer.Write(word.Replace('_', ' ') + " ");
-                    // Console.Write();
-                    // Console.ResetColor();
+                        writer.Write(cleanedWord.Replace('_', ' ') + " ");
                 }
-                if (wantOutputToLog)
-                    Logger.LogVerbose("");
+                
                 if (wantOutputToStream)
                     writer.Write("\n");
+                    
                 previousFolder = currentFolder;
             }
             if (wantOutputToLog)
-                Logger.LogVerbose("Alltogether " + folders.Count + " folders were found.");
+                Log.Information("Altogether {FolderCount} folders were found.", folders.Count);
             if (wantOutputToStream)
-                writer.WriteLine("Alltogether " + folders.Count + " folders were found.");
+                writer.WriteLine("Altogether " + folders.Count + " folders were found.");
+                
             outputStream?.Flush();
         }
     }

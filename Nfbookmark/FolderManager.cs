@@ -2,12 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Serilog;
 using NfLogger;
 
 namespace Nfbookmark
 {
     public class FolderManager
     {
+        private static readonly ILogger Log = Serilog.Log.ForContext(typeof(FolderManager));
 
         /// <summary>
         ///     Attempt to make sure all bookmark folder names are good for filesystems folder names. If needed, changes the
@@ -22,37 +24,40 @@ namespace Nfbookmark
         public static void ValidateFolderNames(List<Folderclass> folders)
         {
             string[] forbiddenCharacters = { "/", ":", "?", "<", ">", "*", "|", "\\", "\"" };
-            // If name empty
+            
             foreach (Folderclass folder in folders)
             {
+                string originalName = folder.name;
+                string newName = folder.name;
+
                 foreach (string ch in forbiddenCharacters)
                 {
-                    if (folder.name.Contains(ch))
+                    if (newName.Contains(ch))
                     {
-                        string newfoldername = folder.name.Replace(ch, string.Empty);
-                        Logger.LogVerbose($"foldername {folder.name} contained illegal character {ch}. New name:{newfoldername}", Logger.Verbosity.Warning);
-                        folder.name = newfoldername;
+                        newName = newName.Replace(ch, string.Empty);
+                        Log.Warning("Folder name '{OriginalName}' contained illegal character '{Character}'. Renaming to '{NewName}'.", originalName, ch, newName);
                     }
                 }
-                if (folder.name.Trim().Replace(" ", string.Empty).Distinct().ToList().Count() == 1 && folder.name.Trim().Replace(" ", string.Empty).Distinct().ToList()[0] == '.') 
+
+                if (newName.Trim().Replace(" ", string.Empty).Distinct().Count() == 1 && newName.Trim().Replace(" ", string.Empty).Distinct().First() == '.') 
                 {
-                    // name is only made up of spaces and .
-                    string newfoldername = $"ID{folder.id}";
-                    Logger.LogVerbose($"foldername {folder.name} contained only spaces and periods. New name:{newfoldername}", Logger.Verbosity.Warning);
-                    folder.name = newfoldername;
+                    newName = $"ID{folder.id}";
+                    Log.Warning("Folder name '{OriginalName}' contained only spaces and periods. Renaming to '{NewName}'.", originalName, newName);
                 }
-                if (folder.name.StartsWith("."))
+                
+                if (newName.StartsWith("."))
                 {
-                    string newfoldername = $"ID{folder.id}";
-                    Logger.LogVerbose($"foldername {folder.name} started with period. New name:{newfoldername}", Logger.Verbosity.Warning);
-                    folder.name = newfoldername;
+                    newName = $"ID{folder.id}";
+                    Log.Warning("Folder name '{OriginalName}' started with a period. Renaming to '{NewName}'.", originalName, newName);
                 }
-                if (String.IsNullOrWhiteSpace(folder.name))
+                
+                if (string.IsNullOrWhiteSpace(newName))
                 {
-                    string newfoldername = $"ID{folder.id}";
-                    Logger.LogVerbose($"foldername {folder.name} contained only spaces. New name:{newfoldername}", Logger.Verbosity.Warning);
-                    folder.name = newfoldername;
+                    newName = $"ID{folder.id}";
+                    Log.Warning("Folder name '{OriginalName}' was whitespace. Renaming to '{NewName}'.", originalName, newName);
                 }
+
+                folder.name = newName;
             }
 
             // If two folders have the same name and same parent (and same depth)
