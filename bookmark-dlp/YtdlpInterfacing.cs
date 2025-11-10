@@ -6,13 +6,14 @@ using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Web;
 using bookmark_dlp.Models;
-using NfLogger;
 using Nfbookmark;
+using Serilog;
 
 namespace bookmark_dlp;
 
 public static class YtdlpInterfacing
 {
+    private static readonly ILogger Log = Serilog.Log.ForContext(typeof(YtdlpInterfacing));
     public static string? YtdlpPath { get; set; }
 
     /// <summary>
@@ -24,8 +25,7 @@ public static class YtdlpInterfacing
     {
         if (string.IsNullOrEmpty(YtdlpPath))
         {
-            Logger.LogVerbose("YtdlpPath is not set in YtdlpInterfacing::ExecuteYtDlpProcess()",
-                Logger.Verbosity.Error);
+            Log.Error("YtdlpPath is not set in {MethodName}", nameof(ExecuteYtDlpProcess));
             throw new InvalidOperationException("YtDlpPath is not set.");
         }
 
@@ -55,14 +55,14 @@ public static class YtdlpInterfacing
                 error.Contains("Unable to download API page") ||
                 error.Contains("Failed to establish a new connection: [Errno -3]"))
             {
-                Logger.LogVerbose(error, Logger.Verbosity.Error);
+                Log.Error("yt-dlp error (404/API/Connection): {Error}", error);
             }
 
             if (output.Contains("Unable to download webpage: HTTP Error 404") ||
                 output.Contains("Unable to download API page") ||
                 output.Contains("Failed to establish a new connection: [Errno -3]"))
             {
-                Logger.LogVerbose(output, Logger.Verbosity.Error);
+                Log.Error("yt-dlp output error (404/API/Connection): {Output}", output);
             }
         }
         
@@ -89,7 +89,7 @@ public static class YtdlpInterfacing
 
             if (exitCode != 0)
             {
-                Logger.LogVerbose($"yt-dlp exited with code {exitCode} for channel {url}. Error: {error}", Logger.Verbosity.Error);
+                Log.Error("yt-dlp exited with code {ExitCode} for channel {Url}. Error: {Error}", exitCode, url, error);
                 return null;
             }
 
@@ -98,7 +98,7 @@ public static class YtdlpInterfacing
                          .Select(line => {
                              try { return JsonDocument.Parse(line); }
                              catch (JsonException ex) { 
-                                 Logger.LogVerbose($"Error parsing JSON: {ex.Message} for line: {line}", Logger.Verbosity.Error);
+                                 Log.Error(ex, "Error parsing JSON for line: {Line}", line);
                                  return null; 
                              }
                          })
@@ -110,7 +110,7 @@ public static class YtdlpInterfacing
         }
         catch (Exception ex)
         {
-            Logger.LogVerbose($"Failed to query channel {url}. Exception: {ex.Message}", Logger.Verbosity.Error);
+            Log.Error(ex, "Failed to query channel {Url}", url);
             return null;
         }
     }
@@ -134,7 +134,7 @@ public static class YtdlpInterfacing
         }
         catch (Exception ex)
         {
-            Logger.LogVerbose($"Failed to extract playlist ID from URL: {url}. Error: {ex.Message}", Logger.Verbosity.Error);
+            Log.Error(ex, "Failed to extract playlist ID from URL: {Url}", url);
             return null;
         }
     }
@@ -154,12 +154,12 @@ public static class YtdlpInterfacing
         string? playlistId = ExtractPlaylistId(url);
         if (playlistId is null)
         {
-            Logger.LogVerbose($"URL does not contain a valid playlist ID: {url}", Logger.Verbosity.Warning);
+            Log.Warning("URL does not contain a valid playlist ID: {Url}", url);
             return null;
         }
 
         string playlistUrl = "https://www.youtube.com/playlist?list=" + playlistId;
-        Logger.LogVerbose($"Parsed playlist url from {url} to {playlistUrl}", Logger.Verbosity.Debug);
+        Log.Debug("Parsed playlist url from {OriginalUrl} to {PlaylistUrl}", url, playlistUrl);
         string output;
         try
         {
@@ -169,13 +169,13 @@ public static class YtdlpInterfacing
 
             if (exitCode != 0)
             {
-                Logger.LogVerbose($"yt-dlp exited with code {exitCode} for playlist {playlistUrl}. Error: {error}", Logger.Verbosity.Error);
+                Log.Error("yt-dlp exited with code {ExitCode} for playlist {PlaylistUrl}. Error: {Error}", exitCode, playlistUrl, error);
                 return null;
             }
         }
         catch (Exception ex)
         {
-            Logger.LogVerbose($"Failed to query playlist {playlistUrl}. Exception: {ex.Message}", Logger.Verbosity.Error);
+            Log.Error(ex, "Failed to query playlist {PlaylistUrl}", playlistUrl);
             return null;
         }
 
@@ -186,7 +186,7 @@ public static class YtdlpInterfacing
                 .Select(line => {
                     try { return JsonDocument.Parse(line); }
                     catch (JsonException ex) {
-                        Logger.LogVerbose($"Error parsing JSON: {ex.Message} for line: {line}", Logger.Verbosity.Error);
+                        Log.Error(ex, "Error parsing JSON for line: {Line}", line);
                         return null;
                     }
                 })
@@ -197,7 +197,7 @@ public static class YtdlpInterfacing
         }
         catch (Exception ex)
         {
-            Logger.LogVerbose($"Failed to parse result of playlist query {playlistUrl}. Exception: {ex.Message}", Logger.Verbosity.Error);
+            Log.Error(ex, "Failed to parse result of playlist query {PlaylistUrl}", playlistUrl);
             return null;
         }
     }
@@ -240,12 +240,12 @@ public static class YtdlpInterfacing
         string? foundPath = SearchInDirectories(localSearchDirs!, executableNames);
         if (foundPath != null)
         {
-            Logger.LogVerbose($"yt-dlp binary found at: {foundPath}", Logger.Verbosity.Debug);
+            Log.Debug("yt-dlp binary found at: {FoundPath}", foundPath);
             return foundPath;
         }
 
         // 3. If not found locally, check the system's PATH.
-        Logger.LogVerbose("yt-dlp not found in local directories, searching PATH.", Logger.Verbosity.Debug);
+        Log.Debug("yt-dlp not found in local directories, searching PATH.");
         
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
@@ -285,11 +285,11 @@ public static class YtdlpInterfacing
         
         if (foundPath != null) 
         {
-             Logger.LogVerbose($"yt-dlp found on system PATH: {foundPath}", Logger.Verbosity.Debug);
+             Log.Debug("yt-dlp found on system PATH: {FoundPath}", foundPath);
         }
         else
         {
-            Logger.LogVerbose("yt-dlp not installed or not on PATH.", Logger.Verbosity.Warning);
+            Log.Warning("yt-dlp not installed or not on PATH.");
         }
 
         return foundPath;
@@ -459,7 +459,7 @@ public static class YtdlpInterfacing
 
             if (exitCode != 0)
             {
-                Logger.LogVerbose($"yt-dlp exited with code {exitCode} for size query on {link.url}. Error: {error}", Logger.Verbosity.Error);
+                Log.Error("yt-dlp exited with code {ExitCode} for size query on {Url}. Error: {Error}", exitCode, link.url, error);
                 return 0;
             }
 
@@ -474,7 +474,7 @@ public static class YtdlpInterfacing
         }
         catch (Exception ex)
         {
-            Logger.LogVerbose($"Failed to get estimated size for {link.url}. Exception: {ex.Message}", Logger.Verbosity.Error);
+            Log.Error(ex, "Failed to get estimated size for {Url}", link.url);
             return 0;
         }
     }
@@ -488,7 +488,7 @@ public static class YtdlpInterfacing
     {
         if (string.IsNullOrEmpty(YtdlpPath))
         {
-            Logger.LogVerbose("YtdlpPath is not set.", Logger.Verbosity.Error);
+            Log.Error("YtdlpPath is not set.");
             throw new InvalidOperationException("YtDlpPath is not set.");
         }
     

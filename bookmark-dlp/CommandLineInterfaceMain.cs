@@ -1,5 +1,3 @@
-using Avalonia;
-using NfLogger;
 using Serilog;
 using Serilog.Events;
 
@@ -30,14 +28,11 @@ public class CommandLineInterfaceMain
         
         
 #if DEBUG
-        Logger.verbosity = Logger.Verbosity.Trace;
-        Logger.LogVerbose("Program started in DEBUG mode");
         Log.Information("Application started in DEBUG mode");
 #else
             Logger.verbosity = Logger.Verbosity.Warning;
 #endif
         AppMethods.programUI = AppMethods.ProgramUI.CLI;
-        Logger.LogVerbose("Program started in CLI mode");
         Log.Information("Application started in CLI mode");
         CoreLogic.CoreLogicMain(args);
         System.Environment.Exit(0);
