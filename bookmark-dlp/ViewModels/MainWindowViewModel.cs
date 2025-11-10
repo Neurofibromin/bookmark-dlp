@@ -1,6 +1,7 @@
 ﻿using Avalonia.Controls;
 using bookmark_dlp.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
+using Serilog;
 
 namespace bookmark_dlp.ViewModels;
 

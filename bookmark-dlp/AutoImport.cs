@@ -2,8 +2,8 @@
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using Nfbookmark;
-using NfLogger;
 using System.Web;
+using Serilog;
 
 namespace bookmark_dlp;
 
@@ -23,6 +23,8 @@ namespace bookmark_dlp;
 /// </example>
 public static class AutoImport
 {
+    private static readonly ILogger Log = Serilog.Log.ForContext(typeof(AutoImport));
+
     /// <summary>
     ///     Fills links from urls. If not youtube url no link is generated.
     ///     If link parsing throws exception no link is generated,
@@ -48,7 +50,7 @@ public static class AutoImport
                     { return LinkFromUrl(url); }
                     catch (InvalidLinkException e)
                     {
-                        Logger.LogVerbose(e.Message, Logger.Verbosity.Error);
+                        Log.Error(e, "Link parsing failed for URL in folder {FolderName}", folder.name);
                         return (YTLink?)null;
                     }
                 })
@@ -134,7 +136,7 @@ public static class AutoImport
                 0) //if the txt remained empty it is deleted
             {
                 File.Delete(Path.Combine(folder.folderpath, folder.name + ".txt"));
-                Logger.LogVerbose($"Deleted txt of {folder.name}", Logger.Verbosity.Trace);
+                Log.Verbose("Deleted txt of {FolderName}", folder.name);
             }
         }
         if (temp != null)
@@ -162,18 +164,18 @@ public static class AutoImport
     {
         if (string.IsNullOrEmpty(url))
         {
-            Logger.LogVerbose($"Empty URL!");
+            Log.Information("Empty URL!");
             return null;
         }
         if (!Uri.TryCreate(url, UriKind.Absolute, out Uri? uri))
         {
-            Logger.LogVerbose($"not a valid URI: {url}");
+            Log.Information("Not a valid URI: {Url}", url);
             return null;
         }
         
         if (!uri.Host.EndsWith("youtube.com"))
         {
-            Logger.LogVerbose($"Not a youtube url: {url}");
+            Log.Information("Not a youtube url: {Url}", url);
             return null;
         }
 
@@ -195,7 +197,7 @@ public static class AutoImport
                     }
                     else
                     {
-                        Logger.LogVerbose($"Invalid YouTube video URL: {url}");
+                        Log.Information("Invalid YouTube video URL: {Url}", url);
                         return null;
                     }
                     break;
@@ -210,7 +212,7 @@ public static class AutoImport
                      }
                      else
                      {
-                         Logger.LogVerbose($"Invalid YouTube playlist URL: {url}");
+                         Log.Information("Invalid YouTube playlist URL: {Url}", url);
                          return null;
                      }
                      break;
@@ -223,7 +225,7 @@ public static class AutoImport
                     }
                     else
                     {
-                        Logger.LogVerbose($"Invalid YouTube shorts URL: {url}");
+                        Log.Information("Invalid YouTube shorts URL: {Url}", url);
                         return null;
                     }
                     break;
@@ -236,7 +238,7 @@ public static class AutoImport
                     }
                     else
                     {
-                        Logger.LogVerbose($"Invalid YouTube channel URL: {url}");
+                        Log.Information("Invalid YouTube channel URL: {Url}", url);
                         return null;
                     }
                     break;
@@ -249,7 +251,7 @@ public static class AutoImport
                     }
                     else
                     {
-                        Logger.LogVerbose($"Invalid YouTube c channel URL: {url}");
+                        Log.Information("Invalid YouTube c channel URL: {Url}", url);
                         return null;
                     }
                     break;
@@ -262,7 +264,7 @@ public static class AutoImport
                     }
                     else
                     {
-                        Logger.LogVerbose($"Invalid YouTube user channel URL: {url}");
+                        Log.Information("Invalid YouTube user channel URL: {Url}", url);
                         return null;
                     }
                     break;
@@ -283,13 +285,13 @@ public static class AutoImport
                         }
                         else
                         {
-                            Logger.LogVerbose($"Invalid YouTube @handle: {url}");
+                            Log.Information("Invalid YouTube @handle: {Url}", url);
                             return null;
                         }
                     }
                     else
                     {
-                        Logger.LogVerbose($"Invalid YouTube URL: {url}");
+                        Log.Information("Invalid YouTube URL: {Url}", url);
                         return null;
                     }
                     break;
@@ -297,7 +299,7 @@ public static class AutoImport
         }
         else
         {
-            Logger.LogVerbose($"This is a base youtube.com link with no path. Not a video/channel/etc: {url}");
+            Log.Information("This is a base youtube.com link with no path. Not a video/channel/etc: {Url}", url);
             return null;
         }
         
@@ -306,7 +308,7 @@ public static class AutoImport
             case Linktype.Video:
             case Linktype.Short:
                 if (string.IsNullOrEmpty(link.yt_id))
-                    Logger.LogVerbose($"{link} does not have yt_id filled!", Logger.Verbosity.Warning);
+                    Log.Warning("{Link} does not have yt_id filled!", link);
                 break;
             case Linktype.Search:
                 break;
@@ -321,7 +323,7 @@ public static class AutoImport
                 break;
         }
 
-        Logger.LogVerbose($"Url {url} was parsed to ytlink {link}", Logger.Verbosity.Trace);
+        Log.Verbose("Url {Url} was parsed to ytlink {Link}", url, link);
         return link;
     }
 
@@ -347,9 +349,7 @@ public static class AutoImport
     {
         if (!File.Exists(ytdlp_path))
         {
-            Logger.LogVerbose(
-                $"Writing scripts with faulty yt-dlp binary path! The binary does not exist: {ytdlp_path}.",
-                Logger.Verbosity.Warning);
+            Log.Warning("Writing scripts with faulty yt-dlp binary path! The binary does not exist: {YtDlpPath}.", ytdlp_path);
         }
 
         bool foldersok = true;
@@ -357,9 +357,7 @@ public static class AutoImport
         {
             if (!Directory.Exists(folder.folderpath))
             {
-                Logger.LogVerbose(
-                    $"Directory does not exist for the folder {folder.name}: {folder.folderpath}. Cannot write scripts!",
-                    Logger.Verbosity.Error);
+                Log.Error("Directory does not exist for the folder {FolderName}: {FolderPath}. Cannot write scripts!", folder.name, folder.folderpath);
                 foldersok = false;
             }
         }
@@ -396,9 +394,9 @@ public static class AutoImport
             string scriptContent = scriptContentFactory(ytdlp_path, txtFilePath);
     
             File.WriteAllText(scriptPath, scriptContent);
-            Logger.LogVerbose($"{folder.id}/{folders.Count} folder script writing finished.", Logger.Verbosity.Trace);
+            Log.Verbose("{FolderId}/{FolderCount} folder script writing finished.", folder.id, folders.Count);
         }
-        Logger.LogVerbose($"{folders.Count} folder script file writing finished.");
+        Log.Information("{FolderCount} folder script file writing finished.", folders.Count);
     }
 
     /// <summary>
@@ -416,9 +414,9 @@ public static class AutoImport
     /// </param>
     public static void Runningthescripts(List<Folderclass> folders)
     {
-        if (Logger.verbosity >= Logger.Verbosity.Info)
+        if (true) //TODO: check for interactivity in CLI mode here
         {
-            Logger.LogVerbose("Running the scripts, press enter to confirm.");
+            Log.Information("Running the scripts, press enter to confirm.");
             Console.Read();
         }
 
@@ -448,7 +446,7 @@ public static class AutoImport
                             RedirectStandardOutput = true
                         }
                     };
-                    Logger.LogVerbose($"cmd.exe /c {command}", Logger.Verbosity.Debug);
+                    Log.Debug("Executing: cmd.exe /c {Command}", command);
                 }
                 else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                 {
@@ -486,7 +484,7 @@ public static class AutoImport
                     {
                         StartInfo = new ProcessStartInfo()
                     };
-                    Logger.LogVerbose("Error", Logger.Verbosity.Error);
+                    Log.Error("Platform not supported for script execution.");
                     Environment.Exit(1);
                 }
 

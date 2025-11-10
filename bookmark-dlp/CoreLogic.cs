@@ -1,7 +1,7 @@
 ﻿using System.Text;
 using CommandLine;
 using Nfbookmark;
-using NfLogger;
+using Serilog;
 
 namespace bookmark_dlp;
 
@@ -10,10 +10,12 @@ namespace bookmark_dlp;
 /// </summary>
 public class CoreLogic
 {
+    private static readonly ILogger Log = Serilog.Log.ForContext<CoreLogic>();
+
     public static void CoreLogicMain(string[] args)
     {
 #if DEBUG
-        Logger.verbosity = Logger.Verbosity.Debug;
+        Log.Debug("CoreLogicMain starting in DEBUG mode.");
         // Functions.PrintToConsole(Import.SmartImport(Import.GetBrowserBookmarkFilesPaths()[0].foundProfiles[0]));
         Console.WriteLine("starting");
         Legacy.PrintToStream(BookmarkImporterFactory.SmartImport("test1.html"));
@@ -39,31 +41,32 @@ public class CoreLogic
         {
             #region Interactive
 
-            Logger.verbosity = Logger.Verbosity.Debug;
+            Log.Debug("Interactive CLI session is operating with Debug verbosity.");
+
             bool downloadPlaylists = false;
             bool downloadShorts = false;
             bool downloadChannels = false;
             // bool _concurrentDownloads = false;
             // bool _cookiesAutoextract = false;
 
-            Logger.LogVerbose("Interactive CLI session");
+            Log.Information("Interactive CLI session");
             if (setOptions.HtmlFileLocation != null) localhtml = setOptions.HtmlFileLocation;
 
             if (File.Exists(localhtml))
             {
-                Logger.LogVerbose($"{localhtml} is the html import file");
+                Log.Information("{LocalHtml} is the html import file", localhtml);
                 importSourceFound = true;
                 ishtml = true;
             }
             else
-                Logger.LogVerbose($"{localhtml} not found.");
+                Log.Information("{LocalHtml} not found.", localhtml);
 
             if (!importSourceFound)
             {
-                Logger.LogVerbose("Choose import location.");
+                Log.Information("Choose import location.");
                 while (true)
                 {
-                    Logger.LogVerbose("HTML file? Y/N");
+                    Log.Information("HTML file? Y/N");
                     string yn = Console.ReadLine();
                     yn = yn.Trim();
                     if (yn.ToLower() == "y" || yn.ToLower() == "n")
@@ -77,21 +80,21 @@ public class CoreLogic
                 {
                     while (true)
                     {
-                        Logger.LogVerbose("Source of html file? (path) eg.: /home/user/Desktop/mybookmarks.html");
+                        Log.Information("Source of html file? (path) eg.: /home/user/Desktop/mybookmarks.html");
                         localhtml = Console.ReadLine();
                         if (File.Exists(localhtml))
                         {
-                            Logger.LogVerbose($"{localhtml} is the html import file");
+                            Log.Information("{LocalHtml} is the html import file", localhtml);
                             break;
                         }
 
-                        Logger.LogVerbose($"{localhtml} not found.");
+                        Log.Information("{LocalHtml} not found.", localhtml);
                     }
                 }
                 else
                 {
                     //not html
-                    Logger.LogVerbose(
+                    Log.Information(
                         "No html set, proceeding with search in installed browser default locations"); //goig to autoimport, as no .html present
                     filePath = BrowserLocations.QueryChosenBookmarksFile(
                         BrowserLocations.GetBrowserBookmarkFilesPaths());
@@ -103,15 +106,15 @@ public class CoreLogic
 
             (downloadPlaylists, downloadShorts, downloadChannels) = AppMethods.PromptForAdvancedDownloadOptions();
 
-            Logger.LogVerbose("Concurrent downloads? Y/N");
+            Log.Information("Concurrent downloads? Y/N");
             // if (Console.ReadKey().ToString().ToLower().Equals("y")) { _concurrentDownloads = true; }
-            Logger.LogVerbose("Cookies autoextract? Y/N");
+            Log.Information("Cookies autoextract? Y/N");
             // if (Console.ReadKey().ToString().ToLower().Equals("y")) { _cookiesAutoextract = true; }
             if (setOptions.Outputfolder == null)
             {
                 while (true)
                 {
-                    Logger.LogVerbose($"Output folder? default: current directory {rootdir}");
+                    Log.Information("Output folder? default: current directory {Rootdir}", rootdir);
                     string? readOutputFolder = Console.ReadLine();
                     if (string.IsNullOrEmpty(readOutputFolder))
                     {
@@ -131,7 +134,7 @@ public class CoreLogic
                     }
                     catch
                     {
-                        Logger.LogVerbose($"Could not create directory {readOutputFolder}.", Logger.Verbosity.Error);
+                        Log.Error("Could not create directory {ReadOutputFolder}.", readOutputFolder);
                     }
                 }
             }
@@ -143,11 +146,11 @@ public class CoreLogic
             {
                 while (true)
                 {
-                    Logger.LogVerbose("yt-dlp not found, add path now? Y/N");
+                    Log.Warning("yt-dlp not found, add path now? Y/N");
                     if (string.Equals(Console.ReadKey().ToString() ?? "", "n", StringComparison.OrdinalIgnoreCase))
-                        Logger.LogVerbose("Cannnot continue", Logger.Verbosity.Error);
+                        Log.Error("Cannnot continue");
                     Environment.Exit(2);
-                    Logger.LogVerbose("Choose path. e.g.: /usr/bin/yt-dlp");
+                    Log.Information("Choose path. e.g.: /usr/bin/yt-dlp");
                     string readYtdlpPath = Console.ReadLine();
                     if (Directory.Exists(readYtdlpPath)) ytdlp_path = readYtdlpPath;
                 }
@@ -162,12 +165,12 @@ public class CoreLogic
             }
             else
             {
-                Logger.LogVerbose("No source file!", Logger.Verbosity.Error);
+                Log.Error("No source file!");
                 Environment.Exit(1);
             }
 
             //now import is finished
-            Logger.LogVerbose("Import finished");
+            Log.Information("Import finished");
 
             int deepestdepth = 0; //Finding the deepest folder depth
             for (int q = 0; q < folders.Count; q++)
@@ -197,8 +200,7 @@ public class CoreLogic
         {
             #region Non-Interactive
 
-            Logger.LogVerbose("Non-Interactive CLI session");
-            Logger.verbosity = Logger.Verbosity.Warning;
+            Log.Information("Non-Interactive CLI session");
 
             bool downloadPlaylists = setOptions.DownloadPlaylists;
             bool downloadShorts = setOptions.DownloadShorts;
@@ -213,13 +215,13 @@ public class CoreLogic
                 ytdlp_path = YtdlpInterfacing.Yt_dlp_pathfinder(setOptions.Outputfolder);
             if (string.IsNullOrEmpty(ytdlp_path))
             {
-                Logger.LogVerbose("yt-dlp not found", Logger.Verbosity.Error);
+                Log.Error("yt-dlp not found");
                 Environment.Exit(1);
             }
 
             if (File.Exists(localhtml))
             {
-                Logger.LogVerbose($"{localhtml} is the html import file");
+                Log.Information("{LocalHtml} is the html import file", localhtml);
                 importSourceFound = true;
                 ishtml = true;
                 filePath = localhtml;
@@ -228,13 +230,13 @@ public class CoreLogic
             {
                 // import from browser
                 // not html
-                Logger.LogVerbose("No html set! Non-interactive version requires html to be set!"); //goig to autoimport, as no .html present
+                Log.Error("No html set! Non-interactive version requires html to be set!"); //goig to autoimport, as no .html present
                 Environment.Exit(1);
             }
             folders = BookmarkImporterFactory.SmartImport(filePath);
             
             //now import is finished
-            Logger.LogVerbose("Import finished", Logger.Verbosity.Debug);
+            Log.Debug("Import finished");
             FolderManager.CreateFolderStructure(folders, rootdir);
             AutoImport.WriteLinksToTextFiles(folders, downloadPlaylists, downloadChannels, downloadShorts, rootdir);
 
@@ -280,7 +282,7 @@ public class CoreLogic
                 }
                 catch (Exception)
                 {
-                    Logger.LogVerbose("Could not create directory: " + options.Outputfolder, Logger.Verbosity.Error);
+                    Log.Error("Could not create directory: {OutputFolder}", options.Outputfolder);
                     return 1;
                 }
             }

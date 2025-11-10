@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Nfbookmark.Importers;
-using NfLogger;
+using Serilog;
 
 namespace Nfbookmark
 {
@@ -11,33 +11,38 @@ namespace Nfbookmark
     /// </summary>
     public static class BookmarkImporterFactory
     {
+        private static readonly ILogger Log = Serilog.Log.ForContext(typeof(BookmarkImporterFactory));
+
         /// <summary>
         /// Smart import, gives file path and will automatically select import function.
         /// </summary>
         /// <param name="filePath">Path to the html/json/sqlite file containing the bookmarks.</param>
-        /// <returns>A list of Folderclass objects, or null if import fails.</returns>
+        /// <returns>A list of Folderclass objects, with 0 elements if import fails.</returns>
         public static List<Folderclass> SmartImport(string filePath)
         {
             if (!File.Exists(filePath))
             {
-                Logger.LogVerbose($"File not found: {filePath}", Logger.Verbosity.Error);
-                return null;
+                Log.Error("File not found: {FilePath}", filePath);
+                return new List<Folderclass>();
             }
-            Logger.LogVerbose("Starting SmartImport for: " + filePath);
+
+            Log.Information("Starting SmartImport for: {FilePath}", filePath);
+
             try
             {
-                StreamReader sr = new StreamReader(filePath);
-                string tryread = sr.ReadLine();
-                sr.Close();
-                Logger.LogVerbose("Parsing SmartImport: " + filePath);
-            }
-            catch (Exception e)
-            {
-                if (e is FileNotFoundException || e is IOException || e is UnauthorizedAccessException)
+                // A quick check to see if the file is readable.
+                using (var stream = File.OpenRead(filePath))
                 {
-                    Logger.LogVerbose(e + " File:" + filePath + "could not be read.");
+                    if (stream.Length == 0)
+                    {
+                        Log.Warning("Bookmark file is empty: {FilePath}", filePath);
+                    }
                 }
-                throw;
+            }
+            catch (Exception e) when (e is IOException || e is UnauthorizedAccessException)
+            {
+                Log.Error(e, "Could not read file for import: {FilePath}", filePath);
+                return new List<Folderclass>();
             }
 
             IBookmarkImporter importer;
@@ -45,10 +50,12 @@ namespace Nfbookmark
             switch (Path.GetExtension(filePath).ToLower())
             {
                 case ".json":
+                    Log.Debug("Selected JsonImporter for {FilePath}", filePath);
                     importer = new JsonImporter();
                     break;
                 
                 case ".sqlite":
+                    Log.Debug("Selected SqliteImporter for {FilePath}", filePath);
                     importer = new SqliteImporter();
                     break;
                 
@@ -60,17 +67,19 @@ namespace Nfbookmark
                         // The original logic to differentiate based on indentation of the third line
                         if (lines.Length > 2 && lines[2].StartsWith("   "))
                         {
+                            Log.Debug("Detected browser-exported HTML format for {FilePath}", filePath);
                             importer = new HtmlExportImporter();
                         }
                         else
                         {
+                            Log.Debug("Detected Google Takeout HTML format for {FilePath}", filePath);
                             importer = new HtmlTakeoutImporter();
                         }
                     }
                     catch (Exception e)
                     {
-                        Logger.LogVerbose($"Could not read HTML file to determine format: {e.Message}", Logger.Verbosity.Error);
-                        return null;
+                        Log.Error(e, "Could not read HTML file {FilePath} to determine format.", filePath);
+                        return new List<Folderclass>();
                     }
                     break;
                 
@@ -78,11 +87,12 @@ namespace Nfbookmark
                     // Handle files with no extension, like Chrome's "Bookmarks" file
                     if (Path.GetFileName(filePath) == "Bookmarks")
                     {
+                        Log.Debug("Selected JsonImporter for Chrome's 'Bookmarks' file at {FilePath}", filePath);
                         importer = new JsonImporter();
                         break;
                     }
-                    Logger.LogVerbose($"Unsupported file type for: {filePath}", Logger.Verbosity.Warning);
-                    return null;
+                    Log.Warning("Unsupported file type for import: {FilePath}", filePath);
+                    return new List<Folderclass>();
             }
 
             try
@@ -91,8 +101,8 @@ namespace Nfbookmark
             }
             catch (Exception e)
             {
-                Logger.LogVerbose($"An unexpected error occurred during import of {filePath}: {e.Message}", Logger.Verbosity.Critical);
-                return null;
+                Log.Fatal(e, "An unexpected error occurred during import of {FilePath}", filePath);
+                return new List<Folderclass>();
             }
         }
     }

@@ -2,13 +2,14 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using bookmark_dlp.Models;
-using NfLogger;
 using Nfbookmark;
+using Serilog;
 
 namespace bookmark_dlp;
 
 public static class AppMethods
 {
+    private static readonly ILogger Log = Serilog.Log.ForContext(typeof(AppMethods));
     public enum ProgramUI { GUI, CLI }
 
     public static ProgramUI programUI;
@@ -19,27 +20,26 @@ public static class AppMethods
     /// <returns>Want (_downloadPlaylists, _downloadShorts, _downloadChannels) in this order.</returns>
     public static (bool, bool, bool) PromptForAdvancedDownloadOptions()
     {
-        Logger.LogVerbose("Do you want to write and download not video links? (eg. playlists and channels. by default: no)");
-        Logger.LogVerbose("Depending on the yt-dlp conf settings this can result in very large downloads, a single bookmark can lead to hundreds of videos being downloaded.");
-        Logger.LogVerbose("Y/N");
+        Log.Information("Do you want to write and download not video links? (eg. playlists and channels. by default: no)");
+        Log.Information("Depending on the yt-dlp conf settings this can result in very large downloads, a single bookmark can lead to hundreds of videos being downloaded.");
+        Log.Information("Y/N");
         bool downloadPlaylists = false;
         bool downloadShorts = false;
         bool downloadChannels = false;
-        if (Logger.verbosity >= Logger.Verbosity.Info)
+        //TODO: only if interactive:
+        if (string.Equals(Console.ReadKey().ToString() ?? "", "y", StringComparison.OrdinalIgnoreCase))
         {
+            Log.Information("Playlists? Y/N");
             if (string.Equals(Console.ReadKey().ToString() ?? "", "y", StringComparison.OrdinalIgnoreCase))
-            {
-                Logger.LogVerbose("Playlists? Y/N");
-                if (string.Equals(Console.ReadKey().ToString() ?? "", "y", StringComparison.OrdinalIgnoreCase))
-                    downloadPlaylists = true;
-                Logger.LogVerbose("Shorts? Y/N");
-                if (string.Equals(Console.ReadKey().ToString() ?? "", "y", StringComparison.OrdinalIgnoreCase))
-                    downloadShorts = true; 
-                Logger.LogVerbose("Channels? Y/N");
-                if (string.Equals(Console.ReadKey().ToString() ?? "", "y", StringComparison.OrdinalIgnoreCase))
-                    downloadChannels = true;
-            }
+                downloadPlaylists = true;
+            Log.Information("Shorts? Y/N");
+            if (string.Equals(Console.ReadKey().ToString() ?? "", "y", StringComparison.OrdinalIgnoreCase))
+                downloadShorts = true; 
+            Log.Information("Channels? Y/N");
+            if (string.Equals(Console.ReadKey().ToString() ?? "", "y", StringComparison.OrdinalIgnoreCase))
+                downloadChannels = true;
         }
+        
         return (downloadPlaylists, downloadShorts, downloadChannels);
     }
 
@@ -104,7 +104,7 @@ public static class AppMethods
                 folder.IsExpanded = true;
                 rootFolders.Add(folder);
                 if (folder.ParentId != 0)
-                    Logger.LogVerbose("The following folder has no parent despite depth != 0: " + folder.Name, Logger.Verbosity.Error);
+                    Log.Error("The following folder has no parent despite depth != 0: {FolderName}", folder.Name);
             }
         }
     
@@ -263,19 +263,19 @@ public static class AppMethods
                             if (ytIdsFoundInArchive.Contains(link.yt_id)) // in archive.txt
                             {
                                 folder.downloadStatus.LinksWithNoMissingVideos.Add(link);
-                                Logger.LogVerbose($"In folder {folder.folderpath} video {link.url} found in archive.txt", Logger.Verbosity.Trace);
+                                Log.Verbose("In folder {FolderPath} video {VideoUrl} found in archive.txt", folder.folderpath, link.url);
                                 continue;
                             }
                         }
                         if (files.Any(s => s.Contains(link.yt_id)))
                         {
                             folder.downloadStatus.LinksWithNoMissingVideos.Add(link);
-                            Logger.LogVerbose($"In folder {folder.folderpath} video {link.url} found in files list", Logger.Verbosity.Trace);
+                            Log.Verbose("In folder {FolderPath} video {VideoUrl} found in files list", folder.folderpath, link.url);
                         }
                         else
                         {
                             folder.downloadStatus.LinksWithMissingVideos.Add(link);
-                            Logger.LogVerbose($"In folder {folder.folderpath} video {link.url} not found", Logger.Verbosity.Trace);
+                            Log.Verbose("In folder {FolderPath} video {VideoUrl} not found", folder.folderpath, link.url);
                         }
                         continue;
                     }
@@ -293,7 +293,7 @@ public static class AppMethods
                     }
                     if (idsToCheck == null)
                     {
-                        Logger.LogVerbose($"Could not ascertain which videos are wanted by link {link}. May be a network error", Logger.Verbosity.Error);
+                        Log.Error("Could not ascertain which videos are wanted by link {Link}. May be a network error", link);
                         found = false;
                         folder.downloadStatus.LinksWithMissingVideos.Add(link);
                         continue;
@@ -305,7 +305,7 @@ public static class AppMethods
                             if (ytIdsFoundInArchive.Contains(id)) // in archive.txt
                             {
                                 link.member_ids_found.Add(id);
-                                Logger.LogVerbose($"In folder {folder.folderpath} member id {id} for link {link.url} found in archive.txt", Logger.Verbosity.Trace);
+                                Log.Verbose("In folder {FolderPath} member id {MemberId} for link {LinkUrl} found in archive.txt", folder.folderpath, id, link.url);
                                 continue;
                             }
                         }
@@ -313,24 +313,24 @@ public static class AppMethods
                         if (files.Any(s => s.Contains(id)))
                         {
                             link.member_ids_found.Add(id);
-                            Logger.LogVerbose($"In folder {folder.folderpath} member id {id} for link {link.url} found in files list", Logger.Verbosity.Trace);
+                            Log.Verbose("In folder {FolderPath} member id {MemberId} for link {LinkUrl} found in files list", folder.folderpath, id, link.url);
                         }
                         else
                         {
                             link.member_ids_not_found.Add(id);
-                            Logger.LogVerbose($"In folder {folder.folderpath} member id {id} for link {link.url} not found", Logger.Verbosity.Trace);
+                            Log.Verbose("In folder {FolderPath} member id {MemberId} for link {LinkUrl} not found", folder.folderpath, id, link.url);
                             found = false;
                         }
                     }
                     if (found)
                     {
                         folder.downloadStatus.LinksWithNoMissingVideos.Add(link);
-                        Logger.LogVerbose($"All members were found for {link.url} in folder {folder.folderpath}", Logger.Verbosity.Trace);
+                        Log.Verbose("All members were found for {LinkUrl} in folder {FolderPath}", link.url, folder.folderpath);
                     }
                     else
                     {
                         folder.downloadStatus.LinksWithMissingVideos.Add(link);
-                        Logger.LogVerbose($"Not all members were found for {link.url} in folder {folder.folderpath}", Logger.Verbosity.Trace);
+                        Log.Verbose("Not all members were found for {LinkUrl} in folder {FolderPath}", link.url, folder.folderpath);
                     }
                 }
             }
