@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using Serilog;
 using NfLogger;
 
 namespace Nfbookmark
@@ -18,6 +19,8 @@ namespace Nfbookmark
     /// </summary>
     public class BrowserLocations
     {
+        private readonly ILogger Log = Serilog.Log.ForContext(typeof(BrowserLocations));
+        
         public string BrowserName { get; set; } = "";
         public string WindowsProfilesPath { get; set; } = "";
         public List<string> LinuxProfilesPaths { get; set; } = new List<string>();
@@ -36,7 +39,7 @@ namespace Nfbookmark
 
         public override string ToString()
         {
-            return $"Name:{BrowserName}, found profiles:{FoundBookmarkFilePaths.ToString()}";
+            return $"Name:{BrowserName}, found profiles:{string.Join(", ", FoundBookmarkFilePaths)}";
         }
         
         /// <summary>
@@ -45,7 +48,7 @@ namespace Nfbookmark
         /// <returns>List of folder paths where profile folders may be located (not just for installed browsers)</returns>
         public static List<BrowserLocations> GetDefaultBrowserConfigurations()
         {
-            BrowserLocations Chrome = new BrowserLocations
+            var chrome = new BrowserLocations
             {
                 BrowserName = "Chrome",
                 BrowserType = BrowserType.chromiumbased,
@@ -53,7 +56,7 @@ namespace Nfbookmark
                 LinuxProfilesPaths = new List<string> { Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "google-chrome") },
                 OsxProfilesPaths = new List<string> { Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.Personal), "Library", "Application Support", "Google", "Chrome") },
             };
-            BrowserLocations Chrome_beta = new BrowserLocations
+            var chromeBeta = new BrowserLocations
             {
                 BrowserName = "Chrome-beta",
                 BrowserType = BrowserType.chromiumbased,
@@ -61,7 +64,7 @@ namespace Nfbookmark
                 LinuxProfilesPaths = new List<string> { Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "google-chrome-beta") },
                 OsxProfilesPaths = new List<string> { Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.Personal), "Library", "Application Support", "Google", "Chrome Beta") }
             };
-            BrowserLocations Chrome_canary = new BrowserLocations
+            var chromeCanary = new BrowserLocations
             {
                 BrowserName = "Chrome-canary",
                 BrowserType = BrowserType.chromiumbased,
@@ -69,7 +72,7 @@ namespace Nfbookmark
                 LinuxProfilesPaths = new List<string> { Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "google-chrome-unstable") }, //technically its called chrome unstable on linux, but its the same thing
                 OsxProfilesPaths = new List<string> { Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.Personal), "Library", "Application Support", "Google", "Chrome Canary") }
             };
-            BrowserLocations Brave = new BrowserLocations
+            var brave = new BrowserLocations
             {
                 BrowserName = "Brave-browser",
                 BrowserType = BrowserType.chromiumbased,
@@ -77,7 +80,7 @@ namespace Nfbookmark
                 LinuxProfilesPaths = new List<string> { Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "BraveSoftware", "Brave-Browser") },
                 OsxProfilesPaths = new List<string> { Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.Personal), "Library", "Application Support", "BraveSoftware", "Brave-Browser") }
             };
-            BrowserLocations Chromium = new BrowserLocations
+            var chromium = new BrowserLocations
             {
                 //great docs: https://chromium.googlesource.com/chromium/src/+/master/docs/user_data_dir.md
                 BrowserName = "chromium",
@@ -86,7 +89,7 @@ namespace Nfbookmark
                 LinuxProfilesPaths = new List<string> { Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "chromium") },
                 OsxProfilesPaths = new List<string> { Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.Personal), "Library", "Application Support", "Chromium") }
             };
-            BrowserLocations Vivaldi = new BrowserLocations()
+            var vivaldi = new BrowserLocations()
             {
                 BrowserName = "Vivaldi",
                 BrowserType = BrowserType.chromiumbased,
@@ -94,7 +97,7 @@ namespace Nfbookmark
                 LinuxProfilesPaths = new List<string> { Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "vivaldi") },
                 OsxProfilesPaths = new List<string> { Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.Personal), "Library", "Application Support", "Vivaldi") }
             };
-            BrowserLocations Edge = new BrowserLocations()
+            var edge = new BrowserLocations()
             {
                 BrowserName = "Microsoft Edge",
                 BrowserType = BrowserType.chromiumbased,
@@ -105,7 +108,7 @@ namespace Nfbookmark
                 // OSX:  /Users/username/Library/Application Support/Microsoft Edge/profilefolder/
                 // C:\Users\<Current-user>\AppData\Local\Microsoft\Edge\User Data\Default.
             };
-            BrowserLocations Opera = new BrowserLocations()
+            var opera = new BrowserLocations()
             {
                 BrowserName = "Opera",
                 BrowserType = BrowserType.chromiumbased,
@@ -118,7 +121,7 @@ namespace Nfbookmark
                     Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "opera", "Bookmarks"),
                 }
             };
-            BrowserLocations Firefox = new BrowserLocations
+            var firefox = new BrowserLocations
             {
                 BrowserName = "Firefox",
                 BrowserType = BrowserType.firefoxbased,
@@ -129,19 +132,11 @@ namespace Nfbookmark
                 },
                 OsxProfilesPaths = new List<string> { Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.Personal), "Library", "Application Support", "Firefox", "Profiles") },
             };
-            List<BrowserLocations> browserLocations = new List<BrowserLocations>
-                {
-                    Chrome,
-                    Chrome_beta,
-                    Chrome_canary,
-                    Brave,
-                    Chromium,
-                    Vivaldi,
-                    Edge,
-                    Opera,
-                    Firefox,
-                };
-            return browserLocations;
+            
+            return new List<BrowserLocations>
+            {
+                chrome, chromeBeta, chromeCanary, brave, chromium, vivaldi, edge, opera, firefox
+            };
         }
 
         /// <summary>
@@ -153,6 +148,7 @@ namespace Nfbookmark
         {
             if (browserLocations == null || !browserLocations.Any())
             {
+                Log.Warning("QueryChosenBookmarksFile called with no browser locations.");
                 return null;
             }
 
@@ -162,43 +158,46 @@ namespace Nfbookmark
 
             if (!possibleFilePaths.Any())
             {
+                Log.Warning("No bookmark files found to choose from.");
                 return null;
             }
 
-            Logger.LogVerbose("Which browser bookmarks would you like to use?\nWrite the number");
+            Console.WriteLine("Which browser bookmarks would you like to use? Please enter the number:");
             for (int i = 0; i < possibleFilePaths.Count; i++)
             {
-                Logger.LogVerbose($"{i + 1}. path: {possibleFilePaths[i]}");
+                Console.WriteLine($"{i + 1}. path: {possibleFilePaths[i]}");
             }
-            string chosenFilePath;
-            int chosenindexInt;
+            
             while (true)
             {
-                string chosenindex = Console.ReadLine();
-                try
+                string chosenIndex = Console.ReadLine();
+                if (int.TryParse(chosenIndex, out int chosenIndexInt) && chosenIndexInt >= 1 && chosenIndexInt <= possibleFilePaths.Count)
                 {
-                    chosenindexInt = int.Parse(chosenindex ?? throw new InvalidOperationException());
-                    if (chosenindexInt < 1 || chosenindexInt > possibleFilePaths.Count) { throw new IndexOutOfRangeException(); }
-                    else { break; }
+                    string chosenFilePath = possibleFilePaths.ElementAt(chosenIndexInt - 1);
+                    Log.Information("User chose bookmark file: {FilePath}", chosenFilePath);
+                    return chosenFilePath;
                 }
-                catch (Exception)
+                else
                 {
-                    Logger.LogVerbose("Wrong input", Logger.Verbosity.Error);
-                    continue;
+                    Console.WriteLine("Invalid input. Please enter a number from the list.");
                 }
             }
-            chosenFilePath = possibleFilePaths.ElementAt(chosenindexInt - 1);
-            Logger.LogVerbose("Chosen path: " + chosenFilePath);
-            return chosenFilePath;
         }
 
         private static BrowserLocations FindBookmarkFiles(BrowserLocations browser)
         {
-            Logger.LogVerbose("Checking browser locations for " + browser.BrowserName, Logger.Verbosity.Debug);
-            if (browser.BrowserType != BrowserType.chromiumbased) { return CheckFirefoxLocations(browser); }
-            if (browser.BrowserType == BrowserType.chromiumbased) { return CheckChromiumBasedLocations(browser); }
-            Logger.LogVerbose("Invalid browser type", Logger.Verbosity.Error);
-            return null;
+            Log.Debug("Checking for {BrowserName} bookmark files.", browser.BrowserName);
+            
+            switch (browser.BrowserType)
+            {
+                case BrowserType.chromiumbased:
+                    return CheckChromiumBasedLocations(browser);
+                case BrowserType.firefoxbased:
+                    return CheckFirefoxLocations(browser);
+                default:
+                    Log.Error("Invalid browser type '{BrowserType}' for {BrowserName}", browser.BrowserType, browser.BrowserName);
+                    return null;
+            }
         }
 
         /// <summary>
@@ -312,73 +311,52 @@ namespace Nfbookmark
         /// <returns>Firefox BrowserLocations object that has FoundBookmarkFilePaths filled</returns>
         private static BrowserLocations CheckFirefoxLocations(BrowserLocations browser)
         {
-            if (browser.BrowserType != BrowserType.firefoxbased) { return  browser; }
+            //Paths:
+            //windows
+            // C:\Windows.old\Users\<UserName>\AppData\Roaming\Mozilla\Firefox\Profiles\<filename.default>\places.sqlite
+            // filePath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Mozilla\\Firefox\\Profiles\\<filename.default>\\places.sqlite");
+            // profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Mozilla\\Firefox\\Profiles\\");
+            //linux
+            // /home/$User/snap/firefox/common/.mozilla/firefox/aaaa.default/places.sqlite/
+            // /home/$User/.mozilla/firefox/aaaa.default/places.sqlite
+            // string profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.Personal), "snap/firefox/common/.mozilla/firefox/");
+            //OSX
+            // /Users/<username>/Library/Application Support/Firefox/Profiles/<profile folder>
+            // profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.Personal), "Library/Application Support/Firefox/Profiles");
+
+            
+            
+            if (browser.BrowserType != BrowserType.firefoxbased) return browser;
             //Finding the sqlite databases
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            var platformPaths = new List<string>();
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) platformPaths.Add(browser.WindowsProfilesPath);
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux)) platformPaths.AddRange(browser.LinuxProfilesPaths);
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) platformPaths.AddRange(browser.OsxProfilesPaths);
+
+            foreach (var path in platformPaths)
             {
-                // C:\Windows.old\Users\<UserName>\AppData\Roaming\Mozilla\Firefox\Profiles\<filename.default>\places.sqlite
-                // filePath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Mozilla\\Firefox\\Profiles\\<filename.default>\\places.sqlite");
-                // profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Mozilla\\Firefox\\Profiles\\");
-                // Console.WriteLine("profilespath " + profilespath);
-                if (Directory.Exists(browser.WindowsProfilesPath))
+                if (Directory.Exists(path))
                 {
-                    foreach (string profile in Directory.GetDirectories(browser.WindowsProfilesPath))
+                    foreach (string profile in Directory.GetDirectories(path))
                     {
-                        if (File.Exists(Path.Combine(profile, "places.sqlite")))
+                        string bookmarkFile = Path.Combine(profile, "places.sqlite");
+                        if (File.Exists(bookmarkFile))
                         {
-                            //For every firefox profile that has bookmarks
-                            browser.FoundBookmarkFilePaths.Add(Convert.ToString(Path.Combine(profile, "places.sqlite")));
-                            Logger.LogVerbose("File found! " + "Filepath in Firefox: " + Convert.ToString(Path.Combine(profile, "places.sqlite")));
+                            browser.FoundBookmarkFilePaths.Add(bookmarkFile);
+                            Log.Information("Found {BrowserName} bookmark file: {BookmarkPath}", browser.BrowserName, bookmarkFile);
                         }
                     }
                 }
-                else { Logger.LogVerbose($"{browser.BrowserName} install folder not found"); }
-            }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-            {
-                // /home/$User/snap/firefox/common/.mozilla/firefox/aaaa.default/places.sqlite/
-                // /home/$User/.mozilla/firefox/aaaa.default/places.sqlite
-                // string profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.Personal), "snap/firefox/common/.mozilla/firefox/");
-                foreach(string profilespath in browser.LinuxProfilesPaths)
+                else
                 {
-                    // for every firefox install present (eg. snap, flatpak, system package)
-                    if (Directory.Exists(profilespath))
-                    {
-                        foreach (string profile in Directory.GetDirectories(profilespath))
-                        {
-                            if (File.Exists(Path.Combine(profile, "places.sqlite")))
-                            {
-                                //For every firefox profile that has bookmarks
-                                browser.FoundBookmarkFilePaths.Add(Convert.ToString(Path.Combine(profile, "places.sqlite")));
-                                Logger.LogVerbose("File found! " + "Filepath in " + browser.BrowserName + ": " + Convert.ToString(Path.Combine(profile, "places.sqlite")));
-                            }
-                        }
-                    }
-                    else { Logger.LogVerbose($"{browser.BrowserName} at {profilespath} not found"); }
+                    Log.Debug("{BrowserName} profile directory not found at {ProfilePath}", browser.BrowserName, path);
                 }
             }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            
+            if (browser.FoundBookmarkFilePaths.Count == 0)
             {
-                // /Users/<username>/Library/Application Support/Firefox/Profiles/<profile folder>
-                // profilespath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.Personal), "Library/Application Support/Firefox/Profiles");
-                foreach (string installlocation in browser.OsxProfilesPaths)
-                {
-                    if (Directory.Exists(installlocation))
-                    {
-                        foreach (string profile in Directory.GetDirectories(installlocation))
-                        {
-                            if (File.Exists(Path.Combine(profile, "places.sqlite")))
-                            {
-                                //For every firefox profile that has bookmarks
-                                browser.FoundBookmarkFilePaths.Add(Convert.ToString(Path.Combine(profile, "places.sqlite")));
-                                Logger.LogVerbose("File found! " + "Filepath in Firefox: " + Convert.ToString(Path.Combine(profile, "places.sqlite")));
-                            }
-                        }
-                    }
-                    else { Logger.LogVerbose("Firefox install folder not found."); }
-                }
+                Log.Debug("No bookmark files found for {BrowserName}", browser.BrowserName);
             }
-            if (browser.FoundBookmarkFilePaths.Count == 0) { Logger.LogVerbose($"Bookmarks file not found in {browser.BrowserName}"); }
             return browser;
         }
 
@@ -388,10 +366,10 @@ namespace Nfbookmark
         /// <returns>List with all browser and their paths that have any browser profiles</returns>
         public static List<BrowserLocations> GetBrowserBookmarkFilesPaths()
         {
-            List<BrowserLocations> browserLocations = GetDefaultBrowserConfigurations(); //gets list of supported browsers
+            List<BrowserLocations> browserLocations = GetDefaultBrowserConfigurations();
             return browserLocations
-                .Select(browser => FindBookmarkFiles(browser)) // Check each browser
-                .Where(browser => browser.FoundBookmarkFilePaths.Count != 0) // Filter browsers with profiles
+                .Select(FindBookmarkFiles)
+                .Where(browser => browser != null && browser.FoundBookmarkFilePaths.Any())
                 .ToList();
         }
     }
