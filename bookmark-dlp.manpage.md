@@ -1,6 +1,6 @@
-% bookmark-dlp(1) v0.4.2
+% bookmark-dlp(1) v0.4.3
 
-2025. 02. 19
+2025. 11. 13
 
 # NAME
 **bookmark-dlp** - Program for downloading bookmarked YouTube videos.

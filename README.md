@@ -58,19 +58,19 @@ yay bookmark-dlp
 ### Standalone releases <a name="standalone-releases"/>
 | Windows                                                                                                          | Linux                                                                                                          | OSX (semi-supported)                                                                                         |
 |------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------|
-| [x64](https://github.com/Neurofibromin/bookmark-dlp/releases/download/latest/bookmark-dlp-0.4.2.exe)             | [x64](https://github.com/Neurofibromin/bookmark-dlp/releases/download/latest/bookmark-dlp-linux-x64-0.4.2)     | [x64](https://github.com/Neurofibromin/bookmark-dlp/releases/download/latest/bookmark-dlp-osx-x64-0.4.2)     |
-| [x32](https://github.com/Neurofibromin/bookmark-dlp/releases/download/latest/bookmark-dlp-win-x86-0.4.2.exe)     | N/A                                                                                                            | N/A                                                                                                          |
-| [arm64](https://github.com/Neurofibromin/bookmark-dlp/releases/download/latest/bookmark-dlp-win-arm64-0.4.2.exe) | [arm64](https://github.com/Neurofibromin/bookmark-dlp/releases/download/latest/bookmark-dlp-linux-arm64-0.4.2) | [arm64](https://github.com/Neurofibromin/bookmark-dlp/releases/download/latest/bookmark-dlp-osx-arm64-0.4.2) |
+| [x64](https://github.com/Neurofibromin/bookmark-dlp/releases/download/latest/bookmark-dlp-0.4.3.exe)             | [x64](https://github.com/Neurofibromin/bookmark-dlp/releases/download/latest/bookmark-dlp-linux-x64-0.4.3)     | [x64](https://github.com/Neurofibromin/bookmark-dlp/releases/download/latest/bookmark-dlp-osx-x64-0.4.3)     |
+| [x32](https://github.com/Neurofibromin/bookmark-dlp/releases/download/latest/bookmark-dlp-win-x86-0.4.3.exe)     | N/A                                                                                                            | N/A                                                                                                          |
+| [arm64](https://github.com/Neurofibromin/bookmark-dlp/releases/download/latest/bookmark-dlp-win-arm64-0.4.3.exe) | [arm64](https://github.com/Neurofibromin/bookmark-dlp/releases/download/latest/bookmark-dlp-linux-arm64-0.4.3) | [arm64](https://github.com/Neurofibromin/bookmark-dlp/releases/download/latest/bookmark-dlp-osx-arm64-0.4.3) |
 
 ### Additional releases <a name="additional-releases"/>
 Linux Installers: <br/>
 
 | package      | x64                                                                                                                                                   | arm64                                                                                                                                                   |
 |--------------|-------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Flatpak	     | 		[bookmark-dlp-0.4.2.x86_64.flatpak](https://github.com/Neurofibromin/bookmark-dlp/releases/download/latest/bookmark-dlp-0.4.2-1.x86_64.flatpak)		   | 	[bookmark-dlp-0.4.2.aarch64.flatpak](https://github.com/Neurofibromin/bookmark-dlp/releases/download/latest/bookmark-dlp-0.4.2-1.aarch64.flatpak)			   |
-| RPM	         | 		[bookmark-dlp-0.4.2.x86_64.rpm](https://github.com/Neurofibromin/bookmark-dlp/releases/download/latest/bookmark-dlp_0.4.2-1.x86_64.rpm)		           | 	N/A			                                                                                                                                                 |
-| DEB	         | 		[bookmark-dlp-0.4.2.amd64.deb](https://github.com/Neurofibromin/bookmark-dlp/releases/download/latest/bookmark-dlp_0.4.2-1_amd64.deb)		             | 	[bookmark-dlp-0.4.2.arm64.deb](https://github.com/Neurofibromin/bookmark-dlp/releases/download/latest/bookmark-dlp_0.4.2-1_arm64.deb)			               |
-| AppImage	    | 		[bookmark-dlp-0.4.2.x86_64.AppImage](https://github.com/Neurofibromin/bookmark-dlp/releases/download/latest/bookmark-dlp-0.4.2-1.x86_64.AppImage)		 | 	[bookmark-dlp-0.4.2.aarch64.AppImage](https://github.com/Neurofibromin/bookmark-dlp/releases/download/latest/bookmark-dlp-0.4.2-1.aarch64.AppImage)			 |
+| Flatpak	     | 		[bookmark-dlp-0.4.3.x86_64.flatpak](https://github.com/Neurofibromin/bookmark-dlp/releases/download/latest/bookmark-dlp-0.4.3-1.x86_64.flatpak)		   | 	[bookmark-dlp-0.4.3.aarch64.flatpak](https://github.com/Neurofibromin/bookmark-dlp/releases/download/latest/bookmark-dlp-0.4.3-1.aarch64.flatpak)			   |
+| RPM	         | 		[bookmark-dlp-0.4.3.x86_64.rpm](https://github.com/Neurofibromin/bookmark-dlp/releases/download/latest/bookmark-dlp_0.4.3-1.x86_64.rpm)		           | 	N/A			                                                                                                                                                 |
+| DEB	         | 		[bookmark-dlp-0.4.3.amd64.deb](https://github.com/Neurofibromin/bookmark-dlp/releases/download/latest/bookmark-dlp_0.4.3-1_amd64.deb)		             | 	[bookmark-dlp-0.4.3.arm64.deb](https://github.com/Neurofibromin/bookmark-dlp/releases/download/latest/bookmark-dlp_0.4.3-1_arm64.deb)			               |
+| AppImage	    | 		[bookmark-dlp-0.4.3.x86_64.AppImage](https://github.com/Neurofibromin/bookmark-dlp/releases/download/latest/bookmark-dlp-0.4.3-1.x86_64.AppImage)		 | 	[bookmark-dlp-0.4.3.aarch64.AppImage](https://github.com/Neurofibromin/bookmark-dlp/releases/download/latest/bookmark-dlp-0.4.3-1.aarch64.AppImage)			 |
 
 
 ## Limitations <a name="limitations"/>
@@ -81,8 +81,8 @@ Linux Installers: <br/>
 Put the Bookmarks.html and the **yt-dlp(.exe) into the same directory as the executable**. Get the Bookmarks.html from a Google takeout.<br/>
 
 Run the executable: <br/>
-Windows: in CMD or PowerShell: `bookmark-dlp-0.4.2.exe --interactive` <br/>
-Linux: in terminal in the directory: `./bookmark-dlp-linux-x64-0.4.2 --interactive`
+Windows: in CMD or PowerShell: `bookmark-dlp-0.4.3.exe --interactive` <br/>
+Linux: in terminal in the directory: `./bookmark-dlp-linux-x64-0.4.3 --interactive`
 More flags/usage info: `./bookmark-dlp --help`
 
 ## How it works <a name="how-it-works"/>

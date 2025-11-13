@@ -8,7 +8,7 @@ on:
     workflow_dispatch:
 
 env:
-  VERSION: "0.4.2"
+  VERSION: "0.4.3"
   DOTNETVERSION: "net9.0"
   RUNNER_TOOL_CACHE: /toolcache
   ACTIONS_STEP_DEBUG: true
