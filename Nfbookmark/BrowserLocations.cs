@@ -19,7 +19,7 @@ namespace Nfbookmark
     /// </summary>
     public class BrowserLocations
     {
-        private readonly ILogger Log = Serilog.Log.ForContext(typeof(BrowserLocations));
+        private static readonly ILogger Log = Serilog.Log.ForContext(typeof(BrowserLocations));
         
         public string BrowserName { get; set; } = "";
         public string WindowsProfilesPath { get; set; } = "";
@@ -207,99 +207,43 @@ namespace Nfbookmark
         /// <returns>Browserlocations object that has foundfiles and linksfound filled. If no profiles are found then the BrowserLocations object is returned as it was.</returns>
         private static BrowserLocations CheckChromiumBasedLocations(BrowserLocations browser)
         {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                if (Directory.Exists(browser.WindowsProfilesPath))
-                {
-                    foreach (string profile in Directory.GetDirectories(browser.WindowsProfilesPath))
-                    {
-                        if (File.Exists(Path.Combine(profile, "Bookmarks")))
-                        {
-                            browser.FoundBookmarkFilePaths.Add(Convert.ToString(Path.Combine(profile, "Bookmarks")));
-                            Logger.LogVerbose("File found! Filepath in " + browser.BrowserName + ": " + Convert.ToString(Path.Combine(profile, "Bookmarks")));
-                        }
-                    }
-                    if (browser.FoundBookmarkFilePaths.Count == 0) { Logger.LogVerbose(($"No Bookmarks file found in " + browser.BrowserName)); }
-                }
-                else if (browser.HardcodedPaths.Count != 0)
-                {
-                    foreach (string hardpath in browser.HardcodedPaths)
-                    {
-                        if (File.Exists(hardpath))
-                        {
-                            browser.FoundBookmarkFilePaths.Add(hardpath);
-                            Logger.LogVerbose("File found! Filepath in " + browser.BrowserName + ": " + hardpath);
-                        }
+            var platformPaths = new List<string>();
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) platformPaths.Add(browser.WindowsProfilesPath);
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux)) platformPaths.AddRange(browser.LinuxProfilesPaths);
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) platformPaths.AddRange(browser.OsxProfilesPaths);
 
+            foreach (var path in platformPaths)
+            {
+                if (Directory.Exists(path))
+                {
+                    foreach (string profile in Directory.GetDirectories(path))
+                    {
+                        string bookmarkFile = Path.Combine(profile, "Bookmarks");
+                        if (File.Exists(bookmarkFile))
+                        {
+                            browser.FoundBookmarkFilePaths.Add(bookmarkFile);
+                            Log.Information("Found {BrowserName} bookmark file: {BookmarkPath}", browser.BrowserName, bookmarkFile);
+                        }
                     }
-                    if (browser.FoundBookmarkFilePaths.Count == 0) { Logger.LogVerbose(($"No Bookmarks file found in " + browser.BrowserName)); }
                 }
-                else { Logger.LogVerbose(browser.BrowserName + " install folder not found"); }
+                else
+                {
+                    Log.Debug("{BrowserName} profile directory not found at {ProfilePath}", browser.BrowserName, path);
+                }
             }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-            {
-                foreach (string installlocation in browser.LinuxProfilesPaths)
-                {
-                    if (Directory.Exists(installlocation))
-                    {
-                        foreach (string profile in Directory.GetDirectories(installlocation))
-                        {
-                            if (File.Exists(Path.Combine(profile, "Bookmarks")))
-                            {
-                                //For every chrome profile that has bookmarks
-                                browser.FoundBookmarkFilePaths.Add(Convert.ToString(Path.Combine(profile, "Bookmarks")));
-                                Logger.LogVerbose("File found! Filepath in " + browser.BrowserName + ": " + Convert.ToString(Path.Combine(profile, "Bookmarks")));
-                            }
-                        }
-                        if (browser.FoundBookmarkFilePaths.Count == 0) { Logger.LogVerbose(($"Bookmarks file not found in " + browser.BrowserName)); }
-                    }
-                }
-                if (browser.HardcodedPaths.Count != 0)
-                {
-                    foreach (string hardpath in browser.HardcodedPaths)
-                    {
-                        if (File.Exists(hardpath))
-                        {
-                            browser.FoundBookmarkFilePaths.Add(hardpath);
-                            Logger.LogVerbose("File found! Filepath in " + browser.BrowserName + ": " + hardpath);
-                        }
 
-                    }
-                    if (browser.FoundBookmarkFilePaths.Count == 0) { Logger.LogVerbose(($"No Bookmarks file found in " + browser.BrowserName)); }
+            foreach (string hardpath in browser.HardcodedPaths)
+            {
+                if (File.Exists(hardpath))
+                {
+                    browser.FoundBookmarkFilePaths.Add(hardpath);
+                    Log.Information("Found {BrowserName} bookmark file at hardcoded path: {BookmarkPath}", browser.BrowserName, hardpath);
                 }
-                else { Logger.LogVerbose(browser.BrowserName + " install folder not found"); }
             }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-            {
-                foreach (string  installlocation in browser.OsxProfilesPaths)
-                {
-                    if (Directory.Exists(installlocation))
-                    {
-                        foreach (string profile in Directory.GetDirectories(installlocation))
-                        {
-                            if (File.Exists(Path.Combine(profile, "Bookmarks")))
-                            {
-                                browser.FoundBookmarkFilePaths.Add(Convert.ToString(Path.Combine(profile, "Bookmarks")));
-                                Logger.LogVerbose("File found! Filepath in " + browser.BrowserName + ": " + Convert.ToString(Path.Combine(profile, "Bookmarks")));
-                            }
-                        }
-                        if (browser.FoundBookmarkFilePaths.Count == 0) { Logger.LogVerbose(($"Bookmarks file not found in " + browser.BrowserName)); }
-                    }
-                }
-                if (browser.HardcodedPaths.Count != 0)
-                {
-                    foreach (string hardpath in browser.HardcodedPaths)
-                    {
-                        if (File.Exists(hardpath))
-                        {
-                            browser.FoundBookmarkFilePaths.Add(hardpath);
-                            Logger.LogVerbose("File found! Filepath in " + browser.BrowserName + ": " + hardpath);
-                        }
 
-                    }
-                    if (browser.FoundBookmarkFilePaths.Count == 0) { Logger.LogVerbose(($"No Bookmarks file found in " + browser.BrowserName)); }
-                }
-                else { Logger.LogVerbose(browser.BrowserName + " install folder not found"); }
+            if (browser.FoundBookmarkFilePaths.Count == 0)
+            {
+                Log.Debug("No bookmark files found for {BrowserName}", browser.BrowserName);
             }
             return browser;
         }
