@@ -28,12 +28,12 @@ public class CommandLineInterfaceMain
         
         
 #if DEBUG
-        Log.Information("Application started in DEBUG mode");
+        Log.Debug("Application started in DEBUG mode");
 #else
             Logger.verbosity = Logger.Verbosity.Warning;
 #endif
         AppMethods.programUI = AppMethods.ProgramUI.CLI;
-        Log.Information("Application started in CLI mode");
+        Log.Debug("Application started in CLI mode");
         CoreLogic.CoreLogicMain(args);
         System.Environment.Exit(0);
     }

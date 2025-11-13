@@ -1,6 +1,5 @@
 using System.Text;
 using CommunityToolkit.Mvvm.ComponentModel;
-using NfLogger;
 
 namespace bookmark_dlp.ViewModels;
 
@@ -13,8 +12,6 @@ public partial class LogViewModel : ViewModelBase
         _logs = "";
         _logStream = App.UiLogStream; 
         _logStream.DataWritten += OnDataWritten;
- 
-        Logger.AddStream(_logStream);
     }
  
     private void OnDataWritten(object sender, string newData)

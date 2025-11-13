@@ -2,9 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using Microsoft.Data.Sqlite;
-using NfLogger;
+using Serilog;
 
 namespace Nfbookmark.Importers
 {
@@ -13,7 +12,8 @@ namespace Nfbookmark.Importers
     /// </summary>
     public class SqliteImporter : IBookmarkImporter
     {
-        
+        private readonly ILogger Log = Serilog.Log.ForContext<SqliteImporter>();
+
         /// <summary>
         /// Takes all bookmarks and folders from an sql file and creates a list to hold them <br/>
         /// Fills:
@@ -30,20 +30,42 @@ namespace Nfbookmark.Importers
         /// <returns>List of bookmark folders that have their children in them or null</returns>
         public List<Folderclass> Import(string filePath)
         {
-            if (!File.Exists(filePath)) { return null; }
-            // Create a temporary copy of the database
-            string tempFilePath = Path.GetTempFileName();
+            if (!File.Exists(filePath))
+            {
+                Log.Error("SQLite file not found at: {FilePath}", filePath);
+                return null;
+            }
 
-            File.Copy(filePath, tempFilePath, overwrite: true);
-            filePath = tempFilePath;
+            // Create a temporary copy of the database to avoid file locking issues
+            string tempFilePath = Path.GetTempFileName();
+            try
+            {
+                File.Copy(filePath, tempFilePath, overwrite: true);
+                filePath = tempFilePath;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Failed to create a temporary copy of the SQLite database.");
+                return null;
+            }
+            
             // docs: https://kb.mozillazine.org/Places.sqlite
             // https://stackoverflow.com/questions/11769524/how-can-i-restore-firefox-bookmark-files-from-sqlite-files
             Dictionary<int, int> parentid = new Dictionary<int, int>(); //parentid[i] = the id of the parent folder of the bookmark with the id i
             List<Bookmark> bookmarks = new List<Bookmark>();
             using (var connection = new SqliteConnection("Data Source=" + filePath + ";mode=ReadOnly"))
             {
-                connection.Open();
-                Logger.LogVerbose("SQL database opened", Logger.Verbosity.Trace);
+                try
+                {
+                    connection.Open();
+                    Log.Verbose("SQL database opened: {FilePath}", filePath);
+                }
+                catch (SqliteException ex)
+                {
+                    Log.Error(ex, "Failed to open SQLite database: {FilePath}", filePath);
+                    return null;
+                }
+                
                 var command = connection.CreateCommand();
                 command.CommandText =
                 @"
@@ -97,13 +119,13 @@ namespace Nfbookmark.Importers
                         }
                         else
                         {
-                            Logger.LogVerbose("This bookmark is not of type folder or url - undefined", Logger.Verbosity.Error);
+                            Log.Error("Bookmark '{BookmarkName}' is not of type folder or url - undefined.", thisone.name);
                         }
                         bookmarks.Add(thisone);
                     }
                 }
             }
-            Logger.LogVerbose("SQL Read finished", Logger.Verbosity.Trace);
+            Log.Verbose("SQL Read finished");
             //sqlite3 places.sqlite "select '<a href=''' || url || '''>' || moz_bookmarks.title || '</a><br/>' as ahref from moz_bookmarks left join moz_places on fk=moz_places.id where url<>'' and moz_bookmarks.title<>''" > t1.html
             //trying to place the data from the Bookmark object into a Folderclass[] object
             //in the sql only parent ids are given, not children, so the process has to be reversed compared to the json
@@ -141,6 +163,7 @@ namespace Nfbookmark.Importers
             // only folders remain in the sql_list
             if (bookmarks.Count == 0)
             {
+                Log.Warning("No bookmark folders found after processing the SQLite database.");
                 return null;
             }
 
@@ -191,7 +214,10 @@ namespace Nfbookmark.Importers
                 folderid++;
                 folders.Add(currentfolder);
             }
-            folders[0].name = "root";
+            if (folders.Any())
+            {
+                folders[0].name = "root";
+            }
             return folders;
         }
     }

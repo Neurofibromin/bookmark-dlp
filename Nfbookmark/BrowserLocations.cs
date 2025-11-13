@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using Serilog;
-using NfLogger;
 
 namespace Nfbookmark
 {

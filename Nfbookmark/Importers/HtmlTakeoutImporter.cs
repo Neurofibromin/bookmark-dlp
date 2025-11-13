@@ -2,11 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text.Json;
-using System.Text.Json.Serialization;
-using Microsoft.Data.Sqlite;
-using NfLogger;
+using Serilog;
 
 namespace Nfbookmark.Importers
 {
@@ -15,6 +11,8 @@ namespace Nfbookmark.Importers
     /// </summary>
     public class HtmlTakeoutImporter : IBookmarkImporter
     {
+        private readonly ILogger Log = Serilog.Log.ForContext<HtmlTakeoutImporter>();
+
         /// <summary>
         ///     Intake of bookmarks and bookmarkfolders from a Google Takeout Html file <br />
         ///     Fills:
@@ -40,14 +38,13 @@ namespace Nfbookmark.Importers
                 lineCount = File.ReadLines(filePath).Count(); //how many lines are there in the file - max number of bookmarks
                 inputarray = File.ReadAllLines(filePath); //read whole file into inputarray[] array
             }
-            catch (FileLoadException ex) { Logger.LogVerbose($"Html file could not be accessed: {ex.Message}", Logger.Verbosity.Error); return null; }
-            catch (FileNotFoundException ex) { Logger.LogVerbose($"Html file could not found: {ex.Message}", Logger.Verbosity.Error); return null; }
-            catch (IOException ex) { Logger.LogVerbose($"Html file IOException: {ex.Message}", Logger.Verbosity.Error); return null; }
+            catch (FileLoadException ex) { Log.Error(ex, "Html file could not be accessed: {FilePath}", filePath); return null; }
+            catch (FileNotFoundException ex) { Log.Error(ex, "Html file not found: {FilePath}", filePath); return null; }
+            catch (IOException ex) { Log.Error(ex, "An IO exception occurred while reading the HTML file: {FilePath}", filePath); return null; }
 
-            Logger.LogVerbose($"The html file {filePath} is treated as a takeout one", Logger.Verbosity.Info);
-
-            Logger.LogVerbose(inputarray.Length + "/" + lineCount + " lines were read.", Logger.Verbosity.Debug);
-            Logger.LogVerbose("The html intake has finished!", Logger.Verbosity.Debug);
+            Log.Information("The html file {FilePath} is being treated as a Google Takeout file", filePath);
+            Log.Debug("{ReadLines}/{TotalLines} lines were read", inputarray.Length, lineCount);
+            Log.Debug("HTML intake has finished!");
 
             /*//Creating the folders[] object array and initialize all its elements, notice that the max number of folders equals the number of lines
             Folderclass[] folders = new Folderclass[lineCount];
@@ -77,7 +74,7 @@ namespace Nfbookmark.Importers
                     }
                 }
             }
-            Logger.LogVerbose(folders.Count + " folders were found in the bookmarks", Logger.Verbosity.Debug);
+            Log.Debug("{FolderCount} folders were found in the bookmarks", folders.Count);
 
             // Finding the end of the folders (</DL><p>) and adding the line number to the object array (folders[].endingline)
             // Counting the lines from the start while the folders from the back, so even in folders embedded into folders the endingline will be correct
@@ -141,7 +138,7 @@ namespace Nfbookmark.Importers
                 }
                 else
                 {
-                    Logger.LogVerbose($"Folder {folders[k].name} with id {folders[k].id} has less than 2 lines. Start {folders[k].startline} end {folders[k].endingline}", Logger.Verbosity.Warning);
+                    Log.Warning("Folder {FolderName} with id {FolderId} has less than 2 lines. Start: {StartLine}, End: {EndLine}", folders[k].name, folders[k].id, folders[k].startline, folders[k].endingline);
                 }
             }
             return folders;

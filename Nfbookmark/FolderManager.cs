@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Serilog;
-using NfLogger;
 
 namespace Nfbookmark
 {

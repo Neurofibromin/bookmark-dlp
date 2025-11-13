@@ -2,11 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Nfbookmark.Importers;
-using NfLogger;
+using Serilog;
 
 namespace Nfbookmark.Importers
 {
@@ -15,7 +14,8 @@ namespace Nfbookmark.Importers
     /// </summary>
     public class JsonImporter : IBookmarkImporter
     {
-        
+        private readonly ILogger Log = Serilog.Log.ForContext<JsonImporter>();
+
         /// <summary>
         /// Imports bookmarks from a json file. Used for chromium based browsers <br/>
         /// Fills:
@@ -36,11 +36,11 @@ namespace Nfbookmark.Importers
             Bookmark bookmark_bar;
             Bookmark other;
             Bookmark synced;
-            Logger.LogVerbose("JSON intake start", Logger.Verbosity.Debug);
+            Log.Debug("JSON intake start");
             try { text = File.ReadAllText(filePath); }
             catch (Exception ex) when (ex is FileLoadException || ex is FileNotFoundException || ex is IOException)
             {
-                Logger.LogVerbose($"JSON file could not be read: {ex.Message}", Logger.Verbosity.Error);
+                Log.Error(ex, "JSON file could not be read: {FilePath}", filePath);
                 return null;
             }
 
@@ -51,7 +51,7 @@ namespace Nfbookmark.Importers
 
                 if (!doc.RootElement.TryGetProperty("roots", out roots_Element))
                 {
-                    Logger.LogVerbose("Invalid JSON: 'roots' property missing.", Logger.Verbosity.Error);
+                    Log.Error("Invalid JSON: 'roots' property missing.");
                     return null;
                 }
 
@@ -62,7 +62,7 @@ namespace Nfbookmark.Importers
                     !roots_Element.TryGetProperty("other", out other_Element) ||
                     !roots_Element.TryGetProperty("synced", out synced_Element))
                 {
-                    Logger.LogVerbose("Invalid JSON: Required bookmark properties are missing.", Logger.Verbosity.Error);
+                    Log.Error("Invalid JSON: Required bookmark properties are missing.");
                     return null;
                 }
                 var options = new JsonSerializerOptions { IncludeFields = true, NumberHandling = JsonNumberHandling.AllowReadingFromString }; //by default no fields only properties, by default no num from string conversion
@@ -72,7 +72,7 @@ namespace Nfbookmark.Importers
             }
             catch (Exception ex)
             {
-                Logger.LogVerbose($"Parsing the Json failed: {ex.Message}", Logger.Verbosity.Error);
+                Log.Error(ex, "Parsing the Json failed");
                 return null;
             }
 /*
