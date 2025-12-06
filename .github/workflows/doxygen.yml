@@ -17,7 +17,7 @@ concurrency:
   cancel-in-progress: false
   
 env:
-  dotnet-version: "9.0.x"
+  dotnet-version: "10.0.x"
 
 jobs:
   # Single deploy job since we're just deploying

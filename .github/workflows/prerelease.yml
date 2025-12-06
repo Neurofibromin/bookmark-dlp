@@ -12,10 +12,10 @@ on:
 
 env:
   VERSION: "0.4.3"
-  DOTNETVERSION: "net9.0"
+  DOTNETVERSION: "net10.0"
   RUNNER_TOOL_CACHE: /toolcache
   ACTIONS_STEP_DEBUG: true
-  dotnet-version: "9.0.x"
+  dotnet-version: "10.0.x"
 
 jobs:
   detect-platform:

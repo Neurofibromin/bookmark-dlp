@@ -12,7 +12,7 @@ on:
 
 env:
   VERSION: "0.4.3"
-  DOTNETVERSION: "net8.0"
+  DOTNETVERSION: "net10.0"
   RUNNER_TOOL_CACHE: /toolcache
   ACTIONS_STEP_DEBUG: true
 
@@ -29,18 +29,6 @@ jobs:
         if: ${{ !contains(github.server_url, 'github.com') }}
         run: |
           echo "Running on Gitea Actions"
-          # if [[ "${{ github.server_url }}" == *"github"* ]]; then
-          # if [[ "${{ github.server_url }}" == *"uva"* ]]; then
-          # echo "Running on Gitea Actions"
-          #      VERSION="${{ env.VERSION }}"
-          #      echo $VERSION
-          #      mkdir releases
-          #      echo "test3" > releases/a.txt
-          #      wget -q https://dl.gitea.com/tea/main/tea-main-linux-amd64
-          #      chmod a+x ./tea-main-linux-amd64
-          #      mv ./tea-main-linux-amd64 tea
-          #      ./tea login add --url ${{ github.server_url }} --token ${{ secrets.MY_GITEA_TOKEN }}
-          #      ./tea releases create --title "Autogen" --tag $VERSION --target "feature" --prerelease --repo ${{ github.repository }} --asset ./releases/**
       - name: Detect if running on GitHub
         if: ${{ contains(github.server_url, 'github.com') }}
         run: echo "Running on GitHub Actions"

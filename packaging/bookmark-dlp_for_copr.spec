@@ -15,7 +15,7 @@ Source:         https://github.com/Neurofibromin/bookmark-dlp/archive/refs/tags/
 BuildRequires:  gcc
 BuildRequires:  glibc
 BuildRequires:  git
-BuildRequires:  dotnet-sdk-9.0
+BuildRequires:  dotnet-sdk-10.0
 # BuildRequires:  gnupg2
 BuildRequires:  desktop-file-utils
 Requires:       yt-dlp
@@ -38,14 +38,14 @@ export MSBUILDDISABLENODEREUSE=1
 dotnet publish bookmark-dlp/bookmark-dlp.csproj \
     --configuration Release \
     --runtime linux-x64 \
-    --framework net9.0 \
+    --framework net10.0 \
     -o %{_builddir}/%{name}-%{version}/publish \
     --verbosity quiet
 
 %check
 dotnet test ./Tests/bookmark-dlp.Tests/ \
     --no-restore \
-    --framework net9.0 \
+    --framework net10.0 \
     --verbosity quiet
 
 %install

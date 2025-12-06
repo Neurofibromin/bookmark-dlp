@@ -100,7 +100,7 @@ Source85: https://www.nuget.org/api/v2/package/xunit.runner.visualstudio/3.0.1#x
 BuildRequires:  gcc
 BuildRequires:  glibc
 BuildRequires:  git
-BuildRequires:  dotnet-sdk-9.0
+BuildRequires:  dotnet-sdk-10.0
 BuildRequires:  wget
 BuildRequires:  unzip
 # BuildRequires:  gnupg2
@@ -131,7 +131,7 @@ export MSBUILDDISABLENODEREUSE=1
 dotnet publish bookmark-dlp/bookmark-dlp.csproj \
     --configuration Release \
     --runtime linux-x64 \
-    --framework net9.0 \
+    --framework net10.0 \
     -o %{_builddir}/%{name}-%{version}/publish \
     --verbosity quiet
 
@@ -139,7 +139,7 @@ dotnet publish bookmark-dlp/bookmark-dlp.csproj \
 cd %{_builddir}/%{name}-%{version}
 dotnet test ./Tests/bookmark-dlp.Tests/ \
     --no-restore \
-    --framework net9.0 \
+    --framework net10.0 \
     --verbosity quiet
 
 %install

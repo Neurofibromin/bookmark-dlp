@@ -59,7 +59,7 @@ WIP
 $XDG_CONFIG_HOME/bookmark-dlp/bookmark-dlp.conf
 
 # DEPENDENCIES AND CAVEATS
-yt-dlp, .net9.0
+yt-dlp, .net10.0
 
 # HISTORY
 WIP
