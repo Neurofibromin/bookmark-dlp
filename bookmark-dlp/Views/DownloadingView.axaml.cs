@@ -1,0 +1,106 @@
+using Avalonia.Controls;
+using System.Globalization;
+using Avalonia;
+using Avalonia.Data.Converters;
+using Avalonia.Media;
+using Serilog;
+
+namespace bookmark_dlp.Views;
+
+public partial class DownloadingView : UserControl
+{
+    private static readonly ILogger Log = Serilog.Log.ForContext<DownloadingView>();
+    private static IconConverter? _iconConverter;
+    
+    public DownloadingView()
+    {
+        InitializeComponent();
+    }
+    
+    #region IconConverter
+
+    private class IconConverter : IMultiValueConverter
+    {
+        private readonly StreamGeometry _folderCollapsed;
+        private readonly StreamGeometry _folderExpanded;
+
+        public IconConverter(StreamGeometry folderExpanded, StreamGeometry folderCollapsed)
+        {
+            _folderExpanded = folderExpanded;
+            _folderCollapsed = folderCollapsed;
+        }
+
+        public object? Convert(IList<object?>? values, Type targetType, object? parameter, CultureInfo culture)
+        {
+            if (values is null || values.Count < 1)
+                return null;
+            if (values[0] is bool isExpanded) return isExpanded ? _folderExpanded : _folderCollapsed;
+            return null;
+        }
+    }
+
+    /// <summary>
+    ///     Implements IconConverter for folder icons of folderIconopen and folderIconopen
+    /// </summary>
+    public static IMultiValueConverter FileIconConverter
+    {
+        get
+        {
+            if (_iconConverter is null)
+            {
+                Log.Verbose("FileIconConverter is NULL");
+                bool a = Application.Current!.Styles.TryGetResource("folder_regular",
+                    Application.Current.ActualThemeVariant, out object? folderIconregular);
+                bool b = Application.Current.Styles.TryGetResource("folder_open_regular",
+                    Application.Current.ActualThemeVariant, out object? folderIconopen);
+
+                if (a && b && folderIconopen is StreamGeometry openFolderGeometry &&
+                    folderIconregular is StreamGeometry regularFolderGeometry)
+                {
+                    Log.Verbose("FileIconConverter found");
+                    _iconConverter = new IconConverter(openFolderGeometry, regularFolderGeometry);
+                }
+                else
+                {
+                    if (a || b)
+                    {
+                        if (folderIconopen is StreamGeometry openFolderGeometry2)
+                        {
+                            Log.Error("Only folderIconopen found");
+                            _iconConverter = new IconConverter(openFolderGeometry2, new StreamGeometry());
+                        }
+                        else if (folderIconregular is StreamGeometry regularFolderGeometry2)
+                        {
+                            Log.Error("Only folderIconregular found");
+                            _iconConverter = new IconConverter(new StreamGeometry(), regularFolderGeometry2);
+                        }
+                        else
+                        {
+                            Log.Error("Failed to load folder icons. Using default values.");
+                            _iconConverter =
+                                new IconConverter(new StreamGeometry(), new StreamGeometry()); // Provide default values
+                        }
+                    }
+                    else
+                    {
+                        Log.Error("Failed to load folder icons. Using default values.");
+                        _iconConverter =
+                            new IconConverter(new StreamGeometry(), new StreamGeometry()); // Provide default values
+                    }
+                }
+
+
+                /*if (a && b)
+                    Logger.LogVerbose("FileIconConverter found", Logger.Verbosity.Trace);
+                else
+                    Logger.LogVerbose("FileIconConverter not found", Logger.Verbosity.Error);
+                Logger.LogVerbose("Found folder icon resources.", Logger.Verbosity.Trace);
+                _iconConverter = new IconConverter((StreamGeometry) folderIconopen, (StreamGeometry) folderIconregular);*/
+            }
+
+            return _iconConverter;
+        }
+    }
+
+    #endregion
+}

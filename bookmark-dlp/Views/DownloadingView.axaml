@@ -1,0 +1,151 @@
+<UserControl
+    x:Class="bookmark_dlp.Views.DownloadingView"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="using:bookmark_dlp.ViewModels"
+    xmlns:models="clr-namespace:bookmark_dlp.Models"
+    xmlns:views="clr-namespace:bookmark_dlp.Views"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    x:DataType="vm:DownloadingViewModel"
+    mc:Ignorable="d">
+    <Grid Margin="5" RowDefinitions="Auto,*">
+
+        <Grid ColumnDefinitions="Auto, *, Auto">
+            <Button Grid.Column="0" Command="{ReflectionBinding $parent[Window].DataContext.BackToStartPage}">
+                <StackPanel Orientation="Horizontal">
+                    <PathIcon Data="{StaticResource arrow_reply_regular}" />
+                    <TextBlock>Back</TextBlock>
+                </StackPanel>
+            </Button>
+            <Label Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center">Bookmarks</Label>
+            <Button Grid.Column="2"
+                    Margin="4"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Center"
+                    Command="{ReflectionBinding $parent[Window].DataContext.SettingsCommand}">
+                <StackPanel Orientation="Horizontal">
+                    <PathIcon Data="{StaticResource settings_regular}" />
+                    <TextBlock>Settings</TextBlock>
+                </StackPanel>
+            </Button>
+        </Grid>
+
+        <Grid Grid.Row="1" ColumnDefinitions="*, 4*, *">
+
+            <!--  tree of folders  -->
+            <Grid Grid.Column="0" RowDefinitions="*,Auto, Auto">
+                <Rectangle Grid.Row="0" Fill="Aquamarine" />
+                <StackPanel Grid.Row="1">
+                    <Button
+                        Margin="5"
+                        Command="{Binding FirstCommand}"
+                        VerticalAlignment="Bottom">
+                        <StackPanel Orientation="Horizontal">
+                            <PathIcon Data="{StaticResource apps_list_regular}" />
+                            <TextBlock>LinksFromUrls</TextBlock>
+                        </StackPanel>
+                    </Button>
+                    <Button
+                        Margin="5"
+                        VerticalAlignment="Bottom"
+                        Command="{Binding SecondCommand}">
+                        <StackPanel Orientation="Horizontal">
+                            <PathIcon Data="{StaticResource apps_list_regular}" />
+                            <TextBlock>CreateFolderStructure</TextBlock>
+                        </StackPanel>
+                    </Button>
+                    <Button
+                        Margin="5"
+                        VerticalAlignment="Bottom"
+                        Command="{Binding ThirdCommand}">
+                        <StackPanel Orientation="Horizontal">
+                            <PathIcon Data="{StaticResource apps_list_regular}" />
+                            <TextBlock>CountWantedVideos</TextBlock>
+                        </StackPanel>
+                    </Button>
+                    <Button
+                        Margin="5"
+                        VerticalAlignment="Bottom"
+                        Command="{Binding FourthCommand}">
+                        <StackPanel Orientation="Horizontal">
+                            <PathIcon Data="{StaticResource apps_list_regular}" />
+                            <TextBlock>CheckCurrentFilesystemState</TextBlock>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+                <StackPanel
+                    Grid.Row="2"
+                    Height="30"
+                    DockPanel.Dock="Bottom"
+                    Orientation="Horizontal">
+                    <TextBlock
+                        FontSize="12"
+                        TextWrapping="WrapWithOverflow">
+                        Source:
+                    </TextBlock>
+                    <TextBlock
+                        FontSize="8"
+                        Text="{Binding FileSource}"
+                        ToolTip.Tip="{Binding FileSource}"
+                        TextWrapping="NoWrap" />
+                </StackPanel>
+            </Grid>
+
+            <!-- TreeDataGrid for folder representation hierarchically -->
+            <TreeDataGrid Grid.Column="1" Name="HierarchicalViewer" Source="{Binding TreeSource}">
+                <TreeDataGrid.Resources>
+                    <!-- Template for Name column cells -->
+                    <DataTemplate x:Key="FileNameCell" DataType="models:HierarchicalFolderclass">
+                        <StackPanel Orientation="Horizontal">
+                            <PathIcon>
+                                <PathIcon.Data>
+                                    <MultiBinding Converter="{x:Static views:DownloadingView.FileIconConverter}">
+                                        <Binding Path="IsExpanded" />
+                                    </MultiBinding>
+                                </PathIcon.Data>
+                            </PathIcon>
+                            <TextBlock Text="{Binding Name}" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </DataTemplate>
+                </TreeDataGrid.Resources>
+                <TreeDataGrid.Styles>
+                    <Style Selector="TreeDataGrid TreeDataGridRow:nth-child(2n)">
+                        <Setter Property="Background" Value="#20808080" />
+                    </Style>
+                </TreeDataGrid.Styles>
+            </TreeDataGrid>
+
+            <!--  stats  -->
+            <Grid Grid.Column="2" RowDefinitions="*,Auto">
+                <Grid Grid.Row="0" Background="DarkCyan" RowDefinitions="*,Auto">
+                    <DockPanel Grid.Row="0">
+                        <Label>Stats</Label>
+                        <Button
+                            Width="20"
+                            Height="20"
+                            DockPanel.Dock="Right"
+                            Margin="3"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Top"
+                            IsEnabled="False"
+                            Command="{Binding GetCurrentStatusWithQueryYTCommand}">
+                            <PathIcon Data="{StaticResource arrow_sync_circle_regular}" />
+                        </Button>
+                    </DockPanel>
+                </Grid>
+                <Button
+                    Grid.Row="1"
+                    Margin="5"
+                    VerticalAlignment="Bottom">
+                    <StackPanel Orientation="Horizontal">
+                        <PathIcon Data="{StaticResource arrow_download_regular}" />
+                        <TextBlock>Start download</TextBlock>
+                    </StackPanel>
+                </Button>
+            </Grid>
+        </Grid>
+    </Grid>
+</UserControl>

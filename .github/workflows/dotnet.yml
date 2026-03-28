@@ -1,102 +1,305 @@
-# This workflow will build a .NET project
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
-
-name: .NET
+name: Build and release
 
 on:
   push:
-    branches: [ "master" ]
   pull_request:
-    branches: [ "master" ]
+
+env:
+  DOTNETVERSION: "net10.0"
+  RUNNER_TOOL_CACHE: /toolcache
+  ACTIONS_STEP_DEBUG: true
+  dotnet-version: "10.0.x"
 
 jobs:
-  build:
+  detect-platform:
     runs-on: ubuntu-latest
+    if: false # ${{ contains(github.server_url, 'github.com') }}
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+      - name: List all environment variables
+        run: printenv | sort
+      - name: Detect if running on GitHub
+        if: ${{ contains(github.server_url, 'github.com') }}
+        run: echo "Running on GitHub Actions"
+  
+  get-version:
+    runs-on: ubuntu-latest
+    outputs:
+      VERSION: ${{ steps.version.outputs.VERSION }}
+      IS_PRERELEASE: ${{ steps.version.outputs.IS_PRERELEASE }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Determine version
+        id: version
+        run: |
+          TAG=$(git tag --points-at HEAD | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -n1)
+          if [ -n "$TAG" ]; then
+            VERSION="${TAG#v}"
+            IS_PRERELEASE="false"
+          else
+            VERSION="nightly-$(date -u +'%Y%m%d-%H%M')"
+            IS_PRERELEASE="true"
+          fi
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          echo "IS_PRERELEASE=$IS_PRERELEASE" >> $GITHUB_OUTPUT
+          echo "Resolved version: $VERSION (prerelease: $IS_PRERELEASE)"
+
+  build:
+    needs: [get-version]
+    env:
+      RUNNER_TOOL_CACHE: /toolcache
+      VERSION: ${{ needs.get-version.outputs.VERSION }}
+      IS_PRERELEASE: ${{ needs.get-version.outputs.IS_PRERELEASE }}
     strategy:
       matrix:
-        dotnet-version: [ '6.0.x' ]
+        os: [ubuntu-latest]
+    runs-on: ${{ matrix.os }}
     steps:
-    - uses: actions/checkout@v3
-    - name: Setup .NET Core SDK ${{ matrix.dotnet-version }}
-      uses: actions/setup-dotnet@v3
-      with:
-        dotnet-version: ${{ matrix.dotnet-version }}  
-    - name: Install Newtonsoft
-      run: dotnet add package Newtonsoft.Json --version 13.0.3
-    - name: Install SQlite
-      run: dotnet add package Microsoft.Data.Sqlite --version 7.0.10
-    - name: Restore dependencies
-      run: dotnet restore
-    - name: Build
-      run: dotnet build --configuration Release --no-restore
-    - name: Test
-      run: dotnet test --no-build --verbosity normal
-    - name: Display dotnet version
-      run: dotnet --version
-    - name: "List all files"
-      run: ls -R
-  
-    
-  release:
-      strategy:
-        matrix:
-          os: [ ubuntu-latest ]
-          dotnet-version: [ '6.0.x' ]
-          tag: [ '0.2.5' ]
-        fail-fast: false
-      runs-on: ${{ matrix.os }}
-      steps:
-      - uses: actions/checkout@v3
-      - name: Setup dotnet
-        uses: actions/setup-dotnet@v3
+      - name: bash-logs
+        run: set -x
+      - uses: actions/checkout@v4
+      - name: Setup .NET Core SDK ${{ env.dotnet-version }}
+        uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: ${{ matrix.dotnet-version }}  
-      - name: Publish
-        run: |
-          dotnet publish bookmark-dlp.sln --configuration Release --runtime win-x64 -p:PublishSingleFile=true
-          dotnet publish bookmark-dlp.sln --configuration Release --runtime win-x86 -p:PublishSingleFile=true
-          dotnet publish bookmark-dlp.sln --configuration Release --runtime win-arm64 -p:PublishSingleFile=true
-          dotnet publish bookmark-dlp.sln --configuration Release --runtime linux-x64 -p:PublishSingleFile=true
-          dotnet publish bookmark-dlp.sln --configuration Release --runtime osx-x64 -p:PublishSingleFile=true
-          dotnet publish bookmark-dlp.sln --configuration Release --runtime linux-arm64 -p:PublishSingleFile=true
-      - name: "List all files"
+          dotnet-version: ${{ env.dotnet-version }}
+      - name: Restore dependencies
+        run: dotnet restore
+      - name: Build release
+        run: dotnet build --configuration Release --no-restore --verbosity quiet
+      - name: Build debug
+        run: dotnet build --configuration Debug --no-restore --verbosity quiet
+      - name: List all files
         run: |
           ls -R
-      - name: "Rename based on architecture"
+          dotnet --info
+      - name: Test
+        run: dotnet test --no-build --verbosity quiet --framework ${{ env.DOTNETVERSION }}
+        continue-on-error: true
+      - name: Display dotnet version
+        run: dotnet --version
+      - name: List all files
+        run: ls -R
+
+  release:
+    needs: [get-version, build]
+    env:
+      RUNNER_TOOL_CACHE: /toolcache
+      VERSION: ${{ needs.get-version.outputs.VERSION }}
+      IS_PRERELEASE: ${{ needs.get-version.outputs.IS_PRERELEASE }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+      fail-fast: false
+    runs-on: ${{ matrix.os }}
+    if: ${{ needs.build.result == 'success' }}
+    steps:
+      - name: bash-logs
+        run: set -x
+      - uses: actions/checkout@v4
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.dotnet-version }}
+      - name: Restore dependencies
+        run: dotnet restore
+      - name: Publish
         run: |
-          mv "/home/runner/work/bookmark-dlp/bookmark-dlp/bin/Release/netcoreapp6.0/win-x64/publish/bookmark-dlp.exe" "/home/runner/work/bookmark-dlp/bookmark-dlp/bin/Release/netcoreapp6.0/win-x64/publish/bookmark-dlp-win-x64.exe"
-          mv "/home/runner/work/bookmark-dlp/bookmark-dlp/bin/Release/netcoreapp6.0/win-x86/publish/bookmark-dlp.exe" "/home/runner/work/bookmark-dlp/bookmark-dlp/bin/Release/netcoreapp6.0/win-x86/publish/bookmark-dlp-win-x86.exe"
-          mv "/home/runner/work/bookmark-dlp/bookmark-dlp/bin/Release/netcoreapp6.0/linux-arm64/publish/bookmark-dlp" "/home/runner/work/bookmark-dlp/bookmark-dlp/bin/Release/netcoreapp6.0/linux-arm64/publish/bookmark-dlp-linux-arm64"
-          mv "/home/runner/work/bookmark-dlp/bookmark-dlp/bin/Release/netcoreapp6.0/linux-x64/publish/bookmark-dlp" "/home/runner/work/bookmark-dlp/bookmark-dlp/bin/Release/netcoreapp6.0/linux-x64/publish/bookmark-dlp-linux-x64"
-          mv "/home/runner/work/bookmark-dlp/bookmark-dlp/bin/Release/netcoreapp6.0/osx-x64/publish/bookmark-dlp" "/home/runner/work/bookmark-dlp/bookmark-dlp/bin/Release/netcoreapp6.0/osx-x64/publish/bookmark-dlp-osx-x64"
-          mv "/home/runner/work/bookmark-dlp/bookmark-dlp/bin/Release/netcoreapp6.0/win-arm64/publish/bookmark-dlp.exe" "/home/runner/work/bookmark-dlp/bookmark-dlp/bin/Release/netcoreapp6.0/win-arm64/publish/bookmark-dlp-win-arm64.exe"
-      - name: "Delete old release"
+          dotnet publish bookmark-dlp/bookmark-dlp.csproj --configuration Release --runtime win-x64   --self-contained --framework ${{ env.DOTNETVERSION }}
+          dotnet publish bookmark-dlp/bookmark-dlp.csproj --configuration Release --runtime win-x86   --self-contained --framework ${{ env.DOTNETVERSION }}
+          dotnet publish bookmark-dlp/bookmark-dlp.csproj --configuration Release --runtime win-arm64 --self-contained --framework ${{ env.DOTNETVERSION }}
+          dotnet publish bookmark-dlp/bookmark-dlp.csproj --configuration Release --runtime linux-x64  --self-contained --framework ${{ env.DOTNETVERSION }}
+          dotnet publish bookmark-dlp/bookmark-dlp.csproj --configuration Release --runtime linux-arm64 --self-contained --framework ${{ env.DOTNETVERSION }}
+          dotnet publish bookmark-dlp/bookmark-dlp.csproj --configuration Release --runtime osx-x64   --self-contained --framework ${{ env.DOTNETVERSION }}
+          dotnet publish bookmark-dlp/bookmark-dlp.csproj --configuration Release --runtime osx-arm64 --self-contained --framework ${{ env.DOTNETVERSION }}
+      - name: List all files
+        run: |
+          echo $PWD
+          ls -R
+      - name: Rename based on architecture
+        run: |
+          cd /home/runner/work/bookmark-dlp/bookmark-dlp
+          mkdir releases
+          mv "./bookmark-dlp/bin/Release/${{ env.DOTNETVERSION }}/win-x64/publish/bookmark-dlp.exe"    "./releases/bookmark-dlp-win-x64-${{ env.VERSION }}.exe"
+          mv "./bookmark-dlp/bin/Release/${{ env.DOTNETVERSION }}/win-x86/publish/bookmark-dlp.exe"    "./releases/bookmark-dlp-win-x86-${{ env.VERSION }}.exe"
+          mv "./bookmark-dlp/bin/Release/${{ env.DOTNETVERSION }}/win-arm64/publish/bookmark-dlp.exe"  "./releases/bookmark-dlp-win-arm64-${{ env.VERSION }}.exe"
+          mv "./bookmark-dlp/bin/Release/${{ env.DOTNETVERSION }}/linux-x64/publish/bookmark-dlp"      "./releases/bookmark-dlp-linux-x64-${{ env.VERSION }}"
+          mv "./bookmark-dlp/bin/Release/${{ env.DOTNETVERSION }}/linux-arm64/publish/bookmark-dlp"    "./releases/bookmark-dlp-linux-arm64-${{ env.VERSION }}"
+          mv "./bookmark-dlp/bin/Release/${{ env.DOTNETVERSION }}/osx-x64/publish/bookmark-dlp"        "./releases/bookmark-dlp-osx-x64-${{ env.VERSION }}"
+          mv "./bookmark-dlp/bin/Release/${{ env.DOTNETVERSION }}/osx-arm64/publish/bookmark-dlp"      "./releases/bookmark-dlp-osx-arm64-${{ env.VERSION }}"
+          cd releases
+          ls -lah
+      - name: Delete old release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release delete ${{ matrix.tag }}
-      - name: "Create new release"
+          gh release list > releases.txt
+          cat releases.txt
+          echo "Version to delete: ${{ env.VERSION }}"
+          if grep -w "${{ env.VERSION }}" releases.txt; then
+            echo "Release ${{ env.VERSION }} found. Deleting..."
+            gh release delete "${{ env.VERSION }}" --yes
+          else
+            echo "Release ${{ env.VERSION }} not found. Skipping deletion."
+          fi
+      - name: Create release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create ${{ matrix.tag }} --latest --target master --title "${{ github.event.head_commit.message }}" --generate-notes
+          set -x
+          echo "Creating release for version: ${{ env.VERSION }} (prerelease: ${{ env.IS_PRERELEASE }})"
+          if [ "${{ env.IS_PRERELEASE }}" = "true" ]; then
+            gh release create "${{ env.VERSION }}" \
+              --target unstable \
+              --prerelease \
+              --title "Nightly build ${{ env.VERSION }}" \
+              --generate-notes
+          else
+            gh release create "${{ env.VERSION }}" \
+              --title "Release ${{ env.VERSION }}" \
+              --generate-notes
+          fi
       - name: Upload
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release upload ${{ matrix.tag }} "./bin/Release/netcoreapp6.0/win-x64/publish/bookmark-dlp-win-x64.exe" --clobber
-          gh release upload ${{ matrix.tag }} "./bin/Release/netcoreapp6.0/win-x86/publish/bookmark-dlp-win-x86.exe" --clobber
-          gh release upload ${{ matrix.tag }} "./bin/Release/netcoreapp6.0/linux-arm64/publish/bookmark-dlp-linux-arm64" --clobber
-          gh release upload ${{ matrix.tag }} "./bin/Release/netcoreapp6.0/linux-x64/publish/bookmark-dlp-linux-x64" --clobber
-          gh release upload ${{ matrix.tag }} "./bin/Release/netcoreapp6.0/osx-x64/publish/bookmark-dlp-osx-x64" --clobber
-          gh release upload ${{ matrix.tag }} "./bin/Release/netcoreapp6.0/win-arm64/publish/bookmark-dlp-win-arm64.exe" --clobber
-            
-  
-    
-    #comments  https://github.com/seerge/g-helper/blob/main/.github/workflows/release.yml
-    # Optional global.json location, if your global.json isn't located in the root of the repo.
-    #global-json-file:
-    # Optional package source for which to set up authentication. Will consult any existing NuGet.config in the root of the repo and provide a temporary NuGet.config using the NUGET_AUTH_TOKEN environment variable as a ClearTextPassword
-    #source-url:
-    # Optional NuGet.config location, if your NuGet.config isn't located in the root of the repo.
-    #config-file: # optional
+          ls -lah ./releases/
+          gh release upload "${{ env.VERSION }}" "./releases/bookmark-dlp-win-x64-${{ env.VERSION }}.exe"    --clobber
+          gh release upload "${{ env.VERSION }}" "./releases/bookmark-dlp-win-x86-${{ env.VERSION }}.exe"    --clobber
+          gh release upload "${{ env.VERSION }}" "./releases/bookmark-dlp-win-arm64-${{ env.VERSION }}.exe"  --clobber
+          gh release upload "${{ env.VERSION }}" "./releases/bookmark-dlp-linux-x64-${{ env.VERSION }}"      --clobber
+          gh release upload "${{ env.VERSION }}" "./releases/bookmark-dlp-linux-arm64-${{ env.VERSION }}"    --clobber
+          gh release upload "${{ env.VERSION }}" "./releases/bookmark-dlp-osx-x64-${{ env.VERSION }}"        --clobber
+          gh release upload "${{ env.VERSION }}" "./releases/bookmark-dlp-osx-arm64-${{ env.VERSION }}"      --clobber
+
+  pupnet:
+    needs: [get-version, release]
+    env:
+      RUNNER_TOOL_CACHE: /toolcache
+      VERSION: ${{ needs.get-version.outputs.VERSION }}
+      IS_PRERELEASE: ${{ needs.get-version.outputs.IS_PRERELEASE }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+      fail-fast: false
+    runs-on: ${{ matrix.os }}
+    if: ${{ needs.release.result == 'success' }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            ${{ env.dotnet-version }}
+            8.0.x
+      - name: Setup dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get -y install dpkg rpm flatpak flatpak-builder pandoc libfuse2
+          sudo flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+          sudo flatpak install -y flathub org.freedesktop.Platform//24.08 org.freedesktop.Sdk//24.08
+          dotnet tool install -g Neurofibromin.PupNet
+      - name: Restore dependencies
+        run: dotnet restore
+      - name: Publish
+        run: |
+          pupnet --runtime linux-x64   --kind appimage --build Release --app-version ${{ env.VERSION }} --verbose
+          pupnet --runtime linux-x64   --kind deb      --build Release --app-version ${{ env.VERSION }} --verbose
+          pupnet --runtime linux-x64   --kind rpm      --build Release --app-version ${{ env.VERSION }} --verbose
+          pupnet --runtime linux-x64   --kind flatpak  --build Release --app-version ${{ env.VERSION }} --verbose
+          pupnet --runtime linux-arm64 --kind appimage --build Release --app-version ${{ env.VERSION }} --verbose
+          pupnet --runtime linux-arm64 --kind deb      --build Release --app-version ${{ env.VERSION }} --verbose
+          pupnet --runtime linux-arm64 --kind flatpak  --build Release --app-version ${{ env.VERSION }} --verbose
+      - name: List all files
+        run: |
+          echo $PWD
+          ls -R
+      - name: Sign rpm
+        run: |
+          mkdir -p ~/.gnupg
+          chmod 700 ~/.gnupg
+          cd ~
+          cat <<EOF > ~/.rpmmacros
+          %_signature gpg
+          %_gpg_path ${PWD}/.gnupg
+          %_gpg_name Neurofibromin-CICD-Autosign
+          %_gpgbin /usr/bin/gpg
+          EOF
+          gpgconf --launch gpg-agent
+          echo "${{ secrets.GPG_KEY_AUTOSIGN_PRIVATE }}" | gpg --import
+          gpg --export -a '5C85EF4F34E089A04B2063A5833E01FC62E56779' > RPM-GPG-KEY
+          rpm --import RPM-GPG-KEY
+          rpm -q gpg-pubkey --qf '%{name}-%{version}-%{release} --> %{summary}\n'
+          cd /home/runner/work/bookmark-dlp/bookmark-dlp
+          rpm --addsign ./pupnet/out/bookmark-dlp_${{ env.VERSION }}-1.x86_64.rpm
+      - name: Upload
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release upload "${{ env.VERSION }}" ./pupnet/out/bookmark-dlp-${{ env.VERSION }}-1.aarch64.flatpak  --clobber
+          gh release upload "${{ env.VERSION }}" ./pupnet/out/bookmark-dlp-${{ env.VERSION }}-1.x86_64.flatpak   --clobber
+          gh release upload "${{ env.VERSION }}" ./pupnet/out/bookmark-dlp-${{ env.VERSION }}-1.x86_64.AppImage  --clobber
+          gh release upload "${{ env.VERSION }}" ./pupnet/out/bookmark-dlp_${{ env.VERSION }}-1.x86_64.rpm       --clobber
+          gh release upload "${{ env.VERSION }}" ./pupnet/out/bookmark-dlp_${{ env.VERSION }}-1_amd64.deb        --clobber
+          gh release upload "${{ env.VERSION }}" ./pupnet/out/bookmark-dlp_${{ env.VERSION }}-1_arm64.deb        --clobber
+
+  pupnet-innosetup:
+    needs: [get-version, pupnet]
+    env:
+      RUNNER_TOOL_CACHE: /toolcache
+      VERSION: ${{ needs.get-version.outputs.VERSION }}
+      IS_PRERELEASE: ${{ needs.get-version.outputs.IS_PRERELEASE }}
+    strategy:
+      matrix:
+        os: [windows-latest]
+      fail-fast: false
+    runs-on: ${{ matrix.os }}
+    if: ${{ needs.pupnet.result == 'success' }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            ${{ env.dotnet-version }}
+            8.0.x
+      - name: Setup PupNet
+        run: dotnet tool install -g Neurofibromin.PupNet
+      - name: Restore dependencies
+        run: dotnet restore
+      - name: Publish
+        run: |
+          pupnet --runtime win-x64 --kind setup --build Release --app-version ${{ env.VERSION }} --verbose
+          pupnet --runtime win-x86 --kind setup --build Release --app-version ${{ env.VERSION }} --verbose
+      - name: List all files
+        run: |
+          echo $PWD
+          ls -R
+      - name: Upload
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release upload "${{ env.VERSION }}" ./pupnet/out/bookmark-dlpSetup-${{ env.VERSION }}-1.x64.exe --clobber
+          gh release upload "${{ env.VERSION }}" ./pupnet/out/bookmark-dlpSetup-${{ env.VERSION }}-1.x86.exe --clobber
+
+  calculate-hash:
+    needs: [get-version, pupnet-innosetup]
+    env:
+      VERSION: ${{ needs.get-version.outputs.VERSION }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+      fail-fast: false
+    runs-on: ${{ matrix.os }}
+    if: ${{ needs.pupnet-innosetup.result == 'success' }}
+    steps:
+      - name: Calculate hash
+        uses: thewh1teagle/checksum@v1
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          algorithm: sha256
+          tag: ${{ env.VERSION }}
+          pre-release: ${{ needs.get-version.outputs.IS_PRERELEASE }}

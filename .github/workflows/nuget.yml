@@ -1,0 +1,81 @@
+name: Nuget
+
+on:
+  workflow_dispatch:
+
+env:
+  DOTNETVERSION: "net10.0"
+  RUNNER_TOOL_CACHE: /toolcache
+  ACTIONS_STEP_DEBUG: true
+  dotnet-version: "10.0.x"
+
+jobs:
+  get-version:
+    runs-on: ubuntu-latest
+    outputs:
+      VERSION: ${{ steps.version.outputs.VERSION }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup .NET Core SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.dotnet-version }}
+      - name: Read version from Directory.Build.props
+        id: version
+        run: |
+          VERSION=$(dotnet build --getProperty:Version --nologo -q Nfbookmark/Nfbookmark.csproj 2>/dev/null | tr -d '[:space:]')
+          echo "Resolved version: $VERSION"
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+
+  pack:
+    needs: [get-version]
+    env:
+      VERSION: ${{ needs.get-version.outputs.VERSION }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup .NET Core SDK ${{ env.dotnet-version }}
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.dotnet-version }}
+      - name: Restore dependencies
+        run: dotnet restore
+      - name: Pack
+        run: dotnet pack Nfbookmark/Nfbookmark.csproj
+      - name: Display dotnet version
+        run: dotnet --version
+      - name: List all files
+        run: ls -R
+
+  release:
+    needs: [get-version, pack]
+    env:
+      VERSION: ${{ needs.get-version.outputs.VERSION }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    if: ${{ needs.pack.result == 'success' }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.dotnet-version }}
+      - name: Restore dependencies
+        run: dotnet restore
+      - name: Pack
+        run: dotnet pack /p:ContinuousIntegrationBuild=true Nfbookmark/Nfbookmark.csproj
+      - name: List all files
+        run: |
+          echo $PWD
+          ls -R
+      - name: Upload to NuGet.org
+        run: |
+          echo "Pushing version: ${{ env.VERSION }}"
+          dotnet nuget push Nfbookmark/bin/Release/Nfbookmark.${{ env.VERSION }}.nupkg \
+            --api-key ${{ secrets.NUGET_API_KEY }} \
+            --source https://api.nuget.org/v3/index.json

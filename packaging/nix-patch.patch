@@ -1,0 +1,14 @@
+--- bookmark-dlp.csproj	2025-02-04 09:35:49.719962055 +0100
++++ bookmark-dlp-nix.csproj	2025-02-04 15:23:04.414379841 +0100
+@@ -49,10 +49,7 @@
+     <PackageReference Include="CommandLineParser" Version="2.9.1" />
+     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+     <PackageReference Include="Microsoft.Data.Sqlite" Version="9.0.1" />
+-  </ItemGroup>
+-
+-  <ItemGroup>
+-    <ProjectReference Include="..\Nfbookmark\Nfbookmark.csproj" />
++    <PackageReference Include="Nfbookmark" Version="0.5.0" />
+   </ItemGroup>
+ 
+ 

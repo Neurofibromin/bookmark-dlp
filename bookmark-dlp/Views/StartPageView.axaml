@@ -1,0 +1,154 @@
+<UserControl
+    x:Class="bookmark_dlp.Views.StartPageView"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="using:bookmark_dlp.ViewModels"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    x:DataType="vm:StartPageViewModel"
+    mc:Ignorable="d">
+
+
+    <Grid RowDefinitions="Auto, 5*,*,2*,Auto">
+        <!--  Title  -->
+        <Label
+            Grid.Row="0"
+            HorizontalAlignment="Center"
+            Background="AliceBlue">
+            Bookmarks
+        </Label>
+
+
+        <!--  ChooseFrom  -->
+        <Grid
+            Grid.Row="1"
+            Height="100"
+            Margin="20,0,10,0"
+            ColumnDefinitions="*, 5*">
+            <TextBlock
+                Grid.Column="0"
+                Background="AliceBlue"
+                TextWrapping="Wrap">
+                Import from browser: Choose source (and profile)
+            </TextBlock>
+            <ListBox
+                Name="Browsers"
+                Grid.Column="1"
+                Margin="0"
+                Background="LightGoldenrodYellow"
+                ItemsSource="{Binding AvailableBrowserBookmarkPaths, Mode=OneWay, TargetNullValue=ErrorMessage}"
+                SelectedItem="{Binding ChosenBrowser}"
+                SelectionMode="Single,Toggle"
+                IsEnabled="{Binding ActiveSettings.CanChangeSettings}" />
+        </Grid>
+
+
+        <!--  Manual file choosing  -->
+        <Grid
+            Grid.Row="2"
+            Margin="20,0,20,0"
+            ColumnDefinitions="*, 5*, *">
+            <StackPanel Orientation="Vertical" Margin="0,20,0,0">
+                <TextBlock TextWrapping="Wrap">Or choose file manually.</TextBlock>
+                <TextBlock TextWrapping="Wrap" FontSize="8">Supported file types: json, mysql, html</TextBlock>
+            </StackPanel>
+            <StackPanel Grid.Column="1" Margin="0,0,0,0"
+                        IsVisible="{Binding ActiveSettings.ManualImportUsed}">
+                <Label Name="ChosenfileLabel" Margin="0">
+                    Chosen file:
+                </Label>
+                <TextBox Text="{Binding ActiveSettings.ManualImportFileLocation, Mode=TwoWay}" />
+            </StackPanel>
+            <Button Grid.Column="2"
+                    Name="OpenFileButton"
+                    HorizontalAlignment="Left"
+                    Margin="0,10,0,0"
+                    Command="{Binding OpenFileCommand}"
+                    IsEnabled="{Binding ActiveSettings.CanChangeSettings}">
+                <StackPanel Orientation="Horizontal">
+                    <PathIcon Data="{StaticResource copy_add_regular}" />
+                    <Label>Select file</Label>
+                </StackPanel>
+            </Button>
+        </Grid>
+
+        <!-- Output Folder  -->
+        <Grid
+            Grid.Row="3"
+            Margin="20,20,20,0"
+            ColumnDefinitions="2*, 4*,2*">
+            <Label
+                Grid.Column="0"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Center">
+                Output folder:
+            </Label>
+            <TextBox
+                Grid.Column="1"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Text="{Binding ActiveSettings.OutputFolder}" />
+            <Button
+                Grid.Column="2"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                IsEnabled="{Binding ActiveSettings.CanChangeSettings}"
+                Command="{Binding OpenFolderCommand}">
+                <StackPanel Orientation="Horizontal">
+                    <PathIcon Data="{StaticResource folder_open_regular}" />
+                    <Label>Change folder</Label>
+                </StackPanel>
+            </Button>
+        </Grid>
+
+        <!--  Buttons at the bottom  -->
+        <Grid Grid.Row="4" ColumnDefinitions="Auto, *, Auto">
+            <Button
+                Grid.Column="0"
+                Margin="4"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Center"
+                Command="{ReflectionBinding $parent[Window].DataContext.SettingsCommand}">
+                Settings
+            </Button>
+            <StackPanel Grid.Column="1">
+                <Label Content="{Binding ActiveSettings.YtDlpBinaryPath}" />
+                <Label Content="{Binding ActiveSettings.ManualImportFileLocation}" />
+                <TextBlock
+                    Margin="4"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Background="Red"
+                    IsEnabled="False"
+                    IsVisible="{Binding ActiveSettings.YtDlpExecutableNotFound}">
+                    No yt-dlp executable found
+                </TextBlock>
+            </StackPanel>
+            <StackPanel
+                Grid.Column="2"
+                Orientation="Vertical"
+                Margin="10"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Bottom">
+                <Button
+                    Margin="10"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Bottom"
+                    Background="Aqua"
+                    x:Name="ImportButton"
+                    IsEnabled="{Binding EnableImportButton}"
+                    ToolTip.Tip="{Binding ImportButtonToolTip}"
+                    Command="{ReflectionBinding $parent[Window].DataContext.GoForward}">
+                    Next
+                </Button>
+                <TextBlock Name="warningfornoimportsource" Foreground="OrangeRed"
+                           IsVisible="{Binding !EnableImportButton}" Text="{Binding ImportButtonToolTip}" />
+            </StackPanel>
+        </Grid>
+
+    </Grid>
+
+
+</UserControl>

@@ -1,0 +1,54 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Library</OutputType>
+        <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+        <RootNamespace>Nfbookmark</RootNamespace>
+        <CopyDebugSymbolFilesFromPackages>true</CopyDebugSymbolFilesFromPackages>
+        <CopyDocumentationFilesFromPackages>true</CopyDocumentationFilesFromPackages>
+        <IncludeSymbols>true</IncludeSymbols>
+        <IncludeSource>true</IncludeSource>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+        <EmbedAllSources>true</EmbedAllSources>
+        <GenerateDocumentationFile>True</GenerateDocumentationFile>
+        <DebugType>Portable</DebugType>
+
+        <PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <!-- <PackageId>Nfbookmark</PackageId> -->
+        
+        <Description>Provides general functions for importing bookmarks from different browsers across platforms.</Description>
+        <PackageTags>bookmarks;browsers;YouTube;yt-dlp;</PackageTags>
+
+        <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
+
+        <IsPackable>true</IsPackable>
+        <PackageDescription>
+            Provides general functions for importing bookmarks from different browsers across platforms.
+        </PackageDescription>
+
+        <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+
+        <!--	  <PublishTrimmed>true</PublishTrimmed> trimming is currently problematic with Avalonia -->
+        <!-- Without native library self extraction the published file will not be singular.-->
+        <!-- <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract> -->
+        <!-- <SelfContained>true</SelfContained> -->
+        <!-- 	<PublishSingleFile>false</PublishSingleFile> -->
+    </PropertyGroup>
+
+
+    <ItemGroup>
+        <!-- HashCode is included in later frameworks -->
+        <PackageReference Include="HtmlAgilityPack" Version="1.12.4" />
+        <PackageReference Include="Microsoft.Bcl.HashCode" Version="6.0.0" Condition="'$(Targetframework)' == 'netstandard2.0'"/>
+        <PackageReference Include="Microsoft.Bcl.HashCode" Version="6.0.0" Condition="'$(Targetframework)' == 'NET481'"/>
+        <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.5" />
+        <PackageReference Include="Serilog" Version="4.3.1" />
+        <PackageReference Include="Serilog.Sinks.Console" Version="6.1.1" />
+        <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
+        <PackageReference Include="System.Text.Json" Version="10.0.5" />
+        <None Include="README.nuget.md" Pack="true" PackagePath="\README.md"/>
+    </ItemGroup>
+
+</Project>
+

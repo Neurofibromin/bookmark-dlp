@@ -1,0 +1,15 @@
+<Project>
+<PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    
+    <Version>0.5.0</Version>
+    <Copyright>Copyright (C) 2023-2026 Neurofibromin</Copyright>
+    <Authors>Neurofibromin</Authors>
+    <NoWarn>1591</NoWarn>
+
+    <PackageProjectUrl>https://github.com/Neurofibromin/bookmark-dlp</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/Neurofibromin/bookmark-dlp</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+</PropertyGroup>
+</Project>

@@ -1,0 +1,57 @@
+<Window
+    x:Class="bookmark_dlp.Views.MainWindow"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="using:bookmark_dlp.ViewModels"
+    xmlns:views="using:bookmark_dlp.Views"
+    Title="bookmark_dlp"
+    Width="1000"
+    Height="640"
+    d:DesignHeight="640"
+    d:DesignWidth="1000"
+    x:DataType="vm:MainWindowViewModel"
+    Icon="/Assets/bookmark-dlp.ico"
+    mc:Ignorable="d">
+    <!--
+    <TabControl Margin="5">
+        <TabItem Header="Sources">
+            <views:StartPageView/>
+        </TabItem>
+        <TabItem Header="Imported">
+            <views:DownloadingView/>
+        </TabItem>
+        <TabItem Header="Progress">
+            <TextBlock Margin="5"></TextBlock>
+        </TabItem>
+        <TabItem Header="Log">
+            <views:LogView/>
+        </TabItem>
+        <TabItem Header="Settings"
+                 HorizontalAlignment="Right">
+            <views:SettingsView/>
+        </TabItem>
+    </TabControl>
+    -->
+    <TabControl
+        SelectedItem="{Binding SelectedTab}"
+        Name="myTabControl"
+        Margin="5" ItemsSource="{Binding TabItems}">
+        <TabControl.DataTemplates>
+            <DataTemplate DataType="vm:StartPageViewModel">
+                <views:StartPageView />
+            </DataTemplate>
+            <DataTemplate DataType="vm:DownloadingViewModel">
+                <views:DownloadingView />
+            </DataTemplate>
+            <DataTemplate DataType="vm:LogViewModel">
+                <views:LogView />
+            </DataTemplate>
+            <DataTemplate DataType="vm:SettingsViewModel">
+                <views:SettingsView />
+            </DataTemplate>
+        </TabControl.DataTemplates>
+    </TabControl>
+
+</Window>

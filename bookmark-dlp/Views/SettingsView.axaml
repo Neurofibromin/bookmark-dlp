@@ -1,0 +1,83 @@
+<UserControl
+    x:Class="bookmark_dlp.Views.SettingsView"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="using:bookmark_dlp.ViewModels"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    x:DataType="vm:SettingsViewModel"
+    mc:Ignorable="d">
+    <StackPanel IsEnabled="{Binding ActiveSettings.CanChangeSettings}">
+        <TextBox
+            HorizontalAlignment="Center"
+            VerticalAlignment="Top"
+            FontWeight="Bold">
+            Settings
+        </TextBox>
+        <CheckBox Margin="4" IsChecked="{Binding ActiveSettings.DownloadPlaylists}">
+            Playlists
+        </CheckBox>
+        <CheckBox Margin="4" IsChecked="{Binding ActiveSettings.DownloadShorts}">
+            Shorts
+        </CheckBox>
+        <CheckBox Margin="4" IsChecked="{Binding ActiveSettings.DownloadChannels}">
+            Channels
+        </CheckBox>
+        <CheckBox Margin="4" IsChecked="{Binding ActiveSettings.ConcurrentDownloads}">
+            Concurrent downloads
+        </CheckBox>
+        <CheckBox Margin="4" IsChecked="{Binding ActiveSettings.CookiesAutoextract}">
+            Cookies autoextract
+        </CheckBox>
+        <Grid Margin="4" ColumnDefinitions="Auto,*,Auto,Auto">
+            <Label Grid.Column="0" FontSize="9">Current yt-dlp execuatble path:</Label>
+            <Label
+                Grid.Column="1"
+                Background="Red"
+                Content="{Binding ActiveSettings.YtDlpBinaryPath, TargetNullValue='not found'}" />
+            <Button
+                Grid.Column="2"
+                VerticalAlignment="Top"
+                Command="{Binding ChooseYtdlpBinaryCommand}"
+                FontSize="9">
+                Select executable file
+            </Button>
+        </Grid>
+        <DockPanel Margin="4">
+            <Label FontSize="9">Current output folder:</Label>
+            <Label Background="YellowGreen"
+                   Content="{Binding ActiveSettings.OutputFolder, TargetNullValue='not found'}" />
+            <Button
+                HorizontalAlignment="Right"
+                Command="{Binding ChooseOutputFolderCommand}"
+                DockPanel.Dock="Right"
+                FontSize="9">
+                Select output folder
+            </Button>
+        </DockPanel>
+        <Button
+            Margin="4"
+            Command="{Binding RestoreDefaultSettingsCommand}"
+            FontSize="9">
+            Restore Defaults
+        </Button>
+        <StackPanel Orientation="Horizontal">
+            <TextBlock FontSize="9">yt-dlp config source</TextBlock>
+            <ListBox SelectionMode="AlwaysSelected"
+                     Background="Chartreuse"
+                     SelectedItem="{Binding ActiveSettings.SelectedYtDlpConfigFile}"
+                     ItemsSource="{Binding ActiveSettings.YtDlpConfigFiles}" />
+            <Button Command="{Binding ChooseConfFileCommand}">
+                <TextBlock FontSize="9">Add new config</TextBlock>
+            </Button>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal">
+            <TextBlock FontSize="9">Theme</TextBlock>
+            <Button Command="{Binding ChangeThemeToClassicCommand}"><TextBlock FontSize="9">Classic</TextBlock></Button>
+            <Button Command="{Binding ChangeThemeToFluentCommand}"><TextBlock FontSize="9">Fluent</TextBlock></Button>
+            <Button Command="{Binding ChangeThemeToSimpleCommand}"><TextBlock FontSize="9">Simple</TextBlock></Button>
+        </StackPanel>
+    </StackPanel>
+</UserControl>
